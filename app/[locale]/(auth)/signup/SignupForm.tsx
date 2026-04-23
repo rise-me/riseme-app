@@ -3,7 +3,6 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -37,14 +36,6 @@ export function SignupForm({ locale }: { locale: string }) {
     } else {
       router.push(`/${locale}/home`)
     }
-  }
-
-  async function handleGoogleSignup() {
-    const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/${locale}/home` },
-    })
   }
 
   return (
@@ -112,21 +103,6 @@ export function SignupForm({ locale }: { locale: string }) {
           {loading ? '...' : 'CRIAR CONTA'}
         </Button>
       </form>
-
-      <div className="flex items-center gap-3">
-        <Separator className="flex-1" />
-        <span className="text-xs text-muted-foreground">ou</span>
-        <Separator className="flex-1" />
-      </div>
-
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleGoogleSignup}
-        className="w-full h-12 rounded-xl font-semibold text-sm border-border"
-      >
-        Continuar com Google
-      </Button>
     </div>
   )
 }

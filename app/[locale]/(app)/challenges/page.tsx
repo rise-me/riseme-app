@@ -1,61 +1,36 @@
-'use client'
-
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { useParams } from 'next/navigation'
-import { ChallengeCard } from '@/components/challenges/ChallengeCard'
-import { PaywallModal } from '@/components/subscription/PaywallModal'
 import { mockChallenges, type MockChallenge } from '@/lib/mock-challenges'
-import { Heart, Download } from 'lucide-react'
+import { getProgressSummary } from '@/lib/progress-server'
+import { getUserAccess, canAccessChallenge } from '@/lib/user-access-server'
+import { ChallengesList } from './ChallengesList'
 
-export default function ChallengesPage() {
-  const t = useTranslations('challenges')
-  const params = useParams()
-  const locale = params.locale as string
+export default async function ChallengesPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  const [access, { progressByChallenge, activeChallengeId }] = await Promise.all([
+    getUserAccess(),
+    getProgressSummary(),
+  ])
 
-  const [paywallOpen, setPaywallOpen] = useState(false)
-  const [selectedChallenge, setSelectedChallenge] = useState<MockChallenge | null>(null)
+  const challenges: MockChallenge[] = mockChallenges.map((c) => {
+    const unlocked = canAccessChallenge(c.id, access)
+    const completed = progressByChallenge.get(c.id) ?? 0
 
-  function handleLockedClick(challenge: MockChallenge) {
-    setSelectedChallenge(challenge)
-    setPaywallOpen(true)
-  }
+    let status: MockChallenge['status']
+    if (!unlocked) status = 'locked'
+    else if (completed >= c.days_count) status = 'completed'
+    else if (c.id === activeChallengeId || completed > 0) status = 'active'
+    else if (c.is_free) status = 'free'
+    else status = 'active'
 
-  return (
-    <>
-      <div className="px-4 pt-12 pb-6 space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-          <div className="flex items-center gap-3">
-            <button className="text-muted-foreground hover:text-foreground">
-              <Heart size={22} strokeWidth={1.8} />
-            </button>
-            <button className="text-muted-foreground hover:text-foreground">
-              <Download size={22} strokeWidth={1.8} />
-            </button>
-          </div>
-        </div>
+    return {
+      ...c,
+      status,
+      current_day: completed > 0 ? completed : undefined,
+    }
+  })
 
-        {/* Challenge list */}
-        <div className="space-y-2.5">
-          {mockChallenges.map((challenge) => (
-            <ChallengeCard
-              key={challenge.id}
-              challenge={challenge}
-              locale={locale}
-              onLockedClick={handleLockedClick}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Paywall Modal */}
-      <PaywallModal
-        open={paywallOpen}
-        onClose={() => setPaywallOpen(false)}
-        challengeTitle={selectedChallenge?.title}
-      />
-    </>
-  )
+  return <ChallengesList challenges={challenges} locale={locale} />
 }

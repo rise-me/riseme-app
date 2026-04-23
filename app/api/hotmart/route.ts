@@ -1,14 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Hotmart sends a `hottok` query param for verification
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
 
-// Hotmart product IDs → mapped to subscription type or challenge slug
-const SUBSCRIPTION_PRODUCT_IDS = new Set([
-  process.env.HOTMART_SUBSCRIPTION_MONTHLY_ID,
-  process.env.HOTMART_SUBSCRIPTION_ANNUAL_ID,
-].filter(Boolean))
+// Offer codes (parâmetro ?off=) — a Hotmart envia em data.purchase.offer.code
+const OFFER_MONTHLY = process.env.HOTMART_OFFER_MONTHLY
+const OFFER_ANNUAL = process.env.HOTMART_OFFER_ANNUAL
+const SUBSCRIPTION_OFFERS = new Set([OFFER_MONTHLY, OFFER_ANNUAL].filter(Boolean))
 
 type HotmartEvent =
   | 'PURCHASE_APPROVED'
@@ -25,6 +23,8 @@ interface HotmartPayload {
     purchase: {
       transaction: string
       status: string
+      offer?: { code: string }
+      recurrence_number?: number
     }
     subscription?: {
       subscriber: { code: string }
@@ -43,7 +43,7 @@ function createAdminClient() {
 }
 
 export async function POST(request: NextRequest) {
-  // Verify token
+  // Verify hottok
   const token = request.nextUrl.searchParams.get('hottok')
   if (HOTMART_TOKEN && token !== HOTMART_TOKEN) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -59,17 +59,17 @@ export async function POST(request: NextRequest) {
   const { event, data } = payload
   const supabase = createAdminClient()
 
-  // Only handle purchase/subscription events
   if (!['PURCHASE_APPROVED', 'PURCHASE_COMPLETE', 'SUBSCRIPTION_CANCELLATION', 'PURCHASE_REFUNDED'].includes(event)) {
     return NextResponse.json({ ok: true, skipped: true })
   }
 
   const buyerEmail = data.buyer.email.toLowerCase()
+  const offerCode = data.purchase.offer?.code
   const productId = String(data.product.id)
-  const isSubscription = SUBSCRIPTION_PRODUCT_IDS.has(productId)
+  const isSubscription = offerCode ? SUBSCRIPTION_OFFERS.has(offerCode) : false
 
   if (event === 'PURCHASE_APPROVED' || event === 'PURCHASE_COMPLETE') {
-    // Find or create the auth user
+    // Find or create auth user
     const { data: existingUsers } = await supabase
       .from('users')
       .select('id')
@@ -77,30 +77,25 @@ export async function POST(request: NextRequest) {
       .limit(1)
 
     let userId: string
-
     if (existingUsers && existingUsers.length > 0) {
       userId = existingUsers[0].id
     } else {
-      // Create a new auth user — they'll set password via email link
-      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-        email: buyerEmail,
-        email_confirm: true,
-        user_metadata: { name: data.buyer.name },
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+      const { data: invited, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(buyerEmail, {
+        data: { name: data.buyer.name },
+        redirectTo: `${appUrl}/pt-BR/set-password`,
       })
-      if (createError || !newUser.user) {
-        console.error('[hotmart] Failed to create user:', createError)
-        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
+      if (inviteError || !invited.user) {
+        console.error('[hotmart] Failed to invite user:', inviteError)
+        return NextResponse.json({ error: 'Failed to invite user' }, { status: 500 })
       }
-      userId = newUser.user.id
+      userId = invited.user.id
     }
 
     if (isSubscription) {
-      // Determine plan type
-      const planName = data.subscription?.plan?.name?.toLowerCase() ?? ''
-      const planType = planName.includes('anual') || planName.includes('annual') ? 'annual' : 'monthly'
+      const planType = offerCode === OFFER_ANNUAL ? 'annual' : 'monthly'
       const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
 
-      // Upsert subscription record (using transaction/sub code in stripe_sub_id field)
       await supabase.from('subscriptions').upsert({
         user_id: userId,
         stripe_sub_id: subCode,
@@ -109,25 +104,19 @@ export async function POST(request: NextRequest) {
         current_period_end: new Date(Date.now() + (planType === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
       }, { onConflict: 'stripe_sub_id' })
 
-      // Grant access to all non-free challenges
-      const { data: challenges } = await supabase
-        .from('challenges')
-        .select('id')
-        .eq('is_free', false)
-
-      if (challenges) {
-        await supabase.from('user_challenges').upsert(
-          challenges.map((c) => ({
-            user_id: userId,
-            challenge_id: c.id,
-            access_type: 'subscription' as const,
-          })),
-          { onConflict: 'user_id,challenge_id', ignoreDuplicates: true }
-        )
-      }
+      // Grant access to all non-free mock challenges (IDs from lib/mock-challenges.ts).
+      // Quando migrar pra UUIDs reais, trocar por query à tabela challenges.
+      const NON_FREE_CHALLENGE_IDS = ['2', '3', '4', '5']
+      await supabase.from('user_challenges').upsert(
+        NON_FREE_CHALLENGE_IDS.map((cid) => ({
+          user_id: userId,
+          challenge_id: cid,
+          access_type: 'subscription' as const,
+        })),
+        { onConflict: 'user_id,challenge_id', ignoreDuplicates: true }
+      )
     } else {
       // Lifetime purchase — map Hotmart product ID to challenge via env var
-      // Format: HOTMART_CHALLENGE_MAP=hotmartProductId:challengeSupabaseId,...
       const challengeId = getChallengeIdForProduct(productId)
       if (challengeId) {
         await supabase.from('user_challenges').upsert({
@@ -151,7 +140,6 @@ export async function POST(request: NextRequest) {
 }
 
 function getChallengeIdForProduct(productId: string): string | null {
-  // HOTMART_CHALLENGE_MAP="12345:uuid-here,67890:uuid-there"
   const map = process.env.HOTMART_CHALLENGE_MAP ?? ''
   for (const entry of map.split(',')) {
     const [pid, cid] = entry.split(':')

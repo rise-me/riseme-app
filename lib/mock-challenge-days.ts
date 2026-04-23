@@ -3,8 +3,18 @@ export interface MockDay {
   title: string
   duration_minutes: number
   level: 'Iniciante' | 'Intermediário' | 'Avançado'
+  youtube_id?: string
   completed?: boolean
 }
+
+const CALISTENIA_VIDEOS: string[] = [
+  '9MOWGVPUJSU', 'tzhajbcmXo0', 'B5zFShBvR3E', '-yDswsRCtAY', 'btL5hjOMqvA',
+  'HIx7RwKn7Ho', '_yJqpWhSJ_o', 'blrg1GihFsM', 'oLh64RTwLJ8', '3HrvYNw2zfE',
+  'g2-eIZEYUmM', 'onfnrSxGH1s', 'S8m5OUFS1p8', 'wZjRnJgqO1A', '4jmcko6l2pg',
+  '7XRcR6FLXuo', 'G3bgT83lWns', 'vWGKkeU_daw', 'OLlLHvZJQ_8', 'S8m5OUFS1p8',
+  'YxP7prefrLc', 'o80JwtFZLrU', '2UIqNP_xQpQ', 'klZMaePTkE8', 'mgnia_ou09M',
+  'JZHCjx50VTI', 'zzaWk-vESIw', 'BiCLBJRDxUI',
+]
 
 export function getMockDays(challengeId: string): MockDay[] {
   const titles = [
@@ -43,6 +53,6 @@ export function getMockDays(challengeId: string): MockDay[] {
     title,
     duration_minutes: [15, 20, 25, 30][i % 4],
     level: (['Iniciante', 'Iniciante', 'Intermediário', 'Avançado'] as const)[i % 4],
-    completed: challengeId === '1' && i < 3, // mock: challenge 1 has 3 days done
+    youtube_id: challengeId === '1' ? CALISTENIA_VIDEOS[i] : undefined,
   }))
 }

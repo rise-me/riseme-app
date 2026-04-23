@@ -4,10 +4,10 @@ import { useTranslations } from 'next-intl'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export function LoginForm({ locale }: { locale: string }) {
   const t = useTranslations('auth')
@@ -29,14 +29,6 @@ export function LoginForm({ locale }: { locale: string }) {
     } else {
       router.push(`/${locale}/home`)
     }
-  }
-
-  async function handleGoogleLogin() {
-    const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/${locale}/home` },
-    })
   }
 
   return (
@@ -63,9 +55,12 @@ export function LoginForm({ locale }: { locale: string }) {
             required
             className="h-12 rounded-xl bg-card border-border"
           />
-          <button type="button" className="text-xs text-muted-foreground w-full text-center mt-1">
+          <Link
+            href={`/${locale}/forgot-password`}
+            className="text-xs text-muted-foreground w-full block text-center mt-1"
+          >
             {t('forgotPassword')}
-          </button>
+          </Link>
         </div>
 
         {error && (
@@ -80,21 +75,6 @@ export function LoginForm({ locale }: { locale: string }) {
           {loading ? '...' : t('login').toUpperCase()}
         </Button>
       </form>
-
-      <div className="flex items-center gap-3">
-        <Separator className="flex-1" />
-        <span className="text-xs text-muted-foreground">ou</span>
-        <Separator className="flex-1" />
-      </div>
-
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleGoogleLogin}
-        className="w-full h-12 rounded-xl font-semibold text-sm border-border"
-      >
-        {t('continueWithGoogle')}
-      </Button>
     </div>
   )
 }
