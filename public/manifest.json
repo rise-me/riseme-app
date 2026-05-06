@@ -1,10 +1,10 @@
 {
   "name": "RiseMe",
   "short_name": "RiseMe",
-  "description": "Desafios fitness de 28 dias para transformar seu corpo e sua vida.",
+  "description": "Desafíos fitness de 28 días para transformar tu cuerpo y tu vida.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5F0E8",
+  "background_color": "#000000",
   "theme_color": "#F5F0E8",
   "orientation": "portrait-primary",
   "icons": [
@@ -12,13 +12,13 @@
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "screenshots": [
@@ -30,5 +30,5 @@
     }
   ],
   "categories": ["health", "fitness", "lifestyle"],
-  "lang": "pt-BR"
+  "lang": "es"
 }
