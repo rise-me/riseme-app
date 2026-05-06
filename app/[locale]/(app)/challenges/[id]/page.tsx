@@ -1,6 +1,7 @@
 import { mockChallenges, type MockChallenge } from '@/lib/mock-challenges'
 import { getMockDays } from '@/lib/mock-challenge-days'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { getProgressForChallenge } from '@/lib/progress-server'
 import { getUserAccess, canAccessChallenge } from '@/lib/user-access-server'
 import { ChallengeDetailClient } from './ChallengeDetailClient'
@@ -19,8 +20,11 @@ export default async function ChallengeDetailPage({
     getProgressForChallenge(id),
   ])
 
+  const tDays = await getTranslations('challengeDays')
+  const dayTitles = (tDays.raw(id) as string[] | undefined) ?? []
+
   const completedDayNumbers = new Set(progress.map((p) => p.day_number))
-  const rawDays = getMockDays(id)
+  const rawDays = getMockDays(id, dayTitles)
   const days = rawDays.map((d) => ({
     ...d,
     completed: completedDayNumbers.has(d.day_number),

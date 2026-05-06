@@ -14,6 +14,7 @@ interface Props {
 
 export function ChallengesList({ challenges, locale }: Props) {
   const t = useTranslations('challenges')
+  const tData = useTranslations('challengeData')
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [selectedChallenge, setSelectedChallenge] = useState<MockChallenge | null>(null)
 
@@ -52,7 +53,7 @@ export function ChallengesList({ challenges, locale }: Props) {
       <PaywallModal
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
-        challengeTitle={selectedChallenge?.title}
+        challengeTitle={selectedChallenge ? tData(`${selectedChallenge.id}.title`) : undefined}
       />
     </>
   )

@@ -1,25 +1,26 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import { Clock, ChevronRight, Play } from 'lucide-react'
 import Link from 'next/link'
 import { mockWorkouts } from '@/lib/mock-workouts'
 
 export default function WorkoutsPage() {
+  const t = useTranslations('workoutsPage')
+  const tWorkouts = useTranslations('workoutData')
+  const tChallenges = useTranslations('challenges')
   const params = useParams()
   const locale = params.locale as string
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-4">
-      {/* Header */}
-      <h1 className="text-2xl font-bold tracking-tight">Treinos</h1>
+      <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
 
-      {/* Free workouts label */}
       <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
-        Treinos gratuitos
+        {t('free')}
       </p>
 
-      {/* Free workouts list */}
       <div className="space-y-2.5">
         {mockWorkouts.map((workout) => (
           <Link
@@ -31,11 +32,11 @@ export default function WorkoutsPage() {
               {workout.emoji}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] text-muted-foreground font-medium mb-0.5">{workout.level}</p>
-              <p className="font-bold text-sm leading-tight">{workout.title}</p>
+              <p className="text-[11px] text-muted-foreground font-medium mb-0.5">{tChallenges(workout.level)}</p>
+              <p className="font-bold text-sm leading-tight">{tWorkouts(`${workout.id}.title`)}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <Clock size={11} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{workout.lessons_count} aulas</span>
+                <span className="text-xs text-muted-foreground">{t('lessonsCount', { count: workout.lessons_count })}</span>
               </div>
             </div>
             <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
@@ -45,17 +46,16 @@ export default function WorkoutsPage() {
         ))}
       </div>
 
-      {/* Divider */}
       <div className="pt-2">
         <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide mb-3">
-          Quer mais treinos?
+          {t('wantMore')}
         </p>
         <Link href={`/${locale}/challenges`}>
           <div className="bg-foreground text-background rounded-2xl p-4 flex items-center gap-3">
             <div className="text-2xl">🏆</div>
             <div className="flex-1">
-              <p className="font-bold text-sm">Desbloqueie os desafios</p>
-              <p className="text-xs text-background/60 mt-0.5">28 dias de treinos guiados</p>
+              <p className="font-bold text-sm">{t('unlockChallenges')}</p>
+              <p className="text-xs text-background/60 mt-0.5">{t('guidedDays')}</p>
             </div>
             <ChevronRight size={16} className="text-background/60" />
           </div>

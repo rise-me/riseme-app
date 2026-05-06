@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { X, SkipBack, SkipForward } from 'lucide-react'
@@ -52,6 +53,7 @@ function loadYouTubeAPI(): Promise<void> {
 
 export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props) {
   const router = useRouter()
+  const t = useTranslations('challenges')
   const currentDay = days.find((d) => d.day_number === currentDayNumber)!
   const nextDay = days.find((d) => d.day_number === currentDayNumber + 1)
   const prevDay = days.find((d) => d.day_number === currentDayNumber - 1)
@@ -133,7 +135,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
 
   const SEGMENTS = 20
   const filledSegments = Math.round(progressPct * SEGMENTS)
-  const label = elapsed < duration * 0.15 ? 'AQUECIMENTO' : elapsed < duration * 0.85 ? 'TREINO' : 'FINALIZAÇÃO'
+  const label = elapsed < duration * 0.15 ? t('warmup') : elapsed < duration * 0.85 ? t('training') : t('cooldown')
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
@@ -145,7 +147,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
             <div className="absolute inset-0 bg-gradient-to-b from-zinc-800 to-zinc-950" />
             <div className="relative z-10 text-center px-6">
               <span className="text-6xl opacity-40 select-none block mb-3">{challenge.thumbnail_emoji}</span>
-              <p className="text-white/60 text-sm">Vídeo em breve</p>
+              <p className="text-white/60 text-sm">{t('videoSoon')}</p>
             </div>
           </>
         )}
@@ -178,7 +180,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
           </div>
           <div className="text-right">
             <p className="text-white text-sm tabular-nums">{formatTime(Math.max(0, duration - elapsed))}</p>
-            <p>RESTANTE</p>
+            <p>{t('remaining')}</p>
           </div>
         </div>
 
@@ -194,7 +196,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
             )}
           >
             <SkipBack size={16} />
-            ANTERIOR
+            {t('previous')}
           </button>
           <button
             onClick={() => navigate(nextDay)}
@@ -206,7 +208,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
                 : 'bg-white/20 text-white/30'
             )}
           >
-            PRÓXIMO
+            {t('next')}
             <SkipForward size={16} />
           </button>
         </div>
@@ -217,7 +219,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
               <span className="text-lg">{challenge.thumbnail_emoji}</span>
             </div>
             <div className="min-w-0">
-              <p className="text-white/40 text-[10px] font-semibold">A SEGUIR</p>
+              <p className="text-white/40 text-[10px] font-semibold">{t('upNext')}</p>
               <p className="text-white text-xs font-bold truncate">{nextDay.title}</p>
               <p className="text-white/40 text-[10px]">{nextDay.duration_minutes} min</p>
             </div>

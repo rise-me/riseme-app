@@ -1,10 +1,10 @@
+import { getTranslations } from 'next-intl/server'
 import { Flame, Clock, Trophy, Zap, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { getAllProgressForUser } from '@/lib/progress-server'
 import { mockChallenges } from '@/lib/mock-challenges'
 
-const WEEK_DAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 const MINUTES_PER_DAY_AVG = 20
 
 function startOfLocalDay(date: Date) {
@@ -49,13 +49,16 @@ export default async function ProgressPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations('progress')
+  const tData = await getTranslations('challengeData')
   const progress = await getAllProgressForUser()
+
+  const WEEK_DAYS = t('weekDays').split(',')
 
   const completedDates = progress.map((p) => new Date(p.completed_at))
   const totalCompleted = progress.length
   const streak = computeStreak(completedDates)
 
-  // week activity (últimos 7 dias, índice 0=Dom até 6=Sáb)
   const today = startOfLocalDay(new Date())
   const todayIndex = today.getDay()
   const thisWeekStart = new Date(today.getTime() - todayIndex * 86400000)
@@ -73,7 +76,6 @@ export default async function ProgressPage({
     return 'upcoming'
   })
 
-  // dias ativos no mês
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
   const monthDays = new Set(
     progress
@@ -81,7 +83,6 @@ export default async function ProgressPage({
       .map((p) => startOfLocalDay(new Date(p.completed_at)).toISOString())
   )
 
-  // desafio ativo = aquele com progresso mais recente
   const progressByChallenge = new Map<string, number>()
   for (const p of progress) {
     progressByChallenge.set(p.challenge_id, (progressByChallenge.get(p.challenge_id) ?? 0) + 1)
@@ -97,7 +98,6 @@ export default async function ProgressPage({
     ? Math.round((activeChallengeDone / activeChallenge.days_count) * 100)
     : 0
 
-  // desafios concluídos (todos os dias feitos)
   let completedChallenges = 0
   for (const [cid, done] of progressByChallenge) {
     const ch = mockChallenges.find((c) => c.id === cid)
@@ -105,17 +105,17 @@ export default async function ProgressPage({
   }
 
   const STATS = [
-    { label: 'Treinos\nesta semana', value: String(weekCompleted.size), icon: <Zap size={16} className="text-yellow-500" /> },
-    { label: 'Minutos\ntotais', value: String(totalCompleted * MINUTES_PER_DAY_AVG), icon: <Clock size={16} className="text-blue-500" /> },
-    { label: 'Desafios\nconcluídos', value: String(completedChallenges), icon: <Trophy size={16} className="text-amber-500" /> },
-    { label: 'Dias ativos\nno mês', value: String(monthDays.size), icon: <Calendar size={16} className="text-green-600" /> },
+    { label: t('statTrainingsThisWeek'), value: String(weekCompleted.size), icon: <Zap size={16} className="text-yellow-500" /> },
+    { label: t('statTotalMinutes'), value: String(totalCompleted * MINUTES_PER_DAY_AVG), icon: <Clock size={16} className="text-blue-500" /> },
+    { label: t('statCompletedChallenges'), value: String(completedChallenges), icon: <Trophy size={16} className="text-amber-500" /> },
+    { label: t('statActiveDaysMonth'), value: String(monthDays.size), icon: <Calendar size={16} className="text-green-600" /> },
   ]
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Progresso</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
         <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
           B
         </div>
@@ -128,10 +128,10 @@ export default async function ProgressPage({
         </div>
         <div>
           <p className="text-4xl font-black leading-none">{streak}</p>
-          <p className="text-sm text-muted-foreground mt-0.5">dias seguidos</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{t('daysSequence')}</p>
         </div>
         <div className="ml-auto text-right">
-          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-semibold">Total</p>
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-semibold">{t('totalLabel')}</p>
           <p className="text-lg font-black">{totalCompleted}</p>
         </div>
       </div>
@@ -140,18 +140,15 @@ export default async function ProgressPage({
       <div className="bg-card border border-border rounded-2xl p-4 space-y-4">
         <div className="flex items-baseline justify-between">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Atividade semanal
+            {t('weeklyActivity')}
           </p>
-          <p className="text-xs font-bold">
-            <span className="text-foreground">{weekCompleted.size}</span>
-            <span className="text-muted-foreground">/7 dias</span>
+          <p className="text-xs font-bold text-foreground">
+            {t('ofDays', { done: weekCompleted.size })}
           </p>
         </div>
 
         <div className="relative">
-          {/* linha conectora de fundo */}
           <div className="absolute top-5 left-5 right-5 h-0.5 bg-secondary" />
-          {/* linha conectora preenchida até o último dia concluído */}
           {weekCompleted.size > 0 && (() => {
             const lastDone = Math.max(...Array.from(weekCompleted))
             const total = WEEK_DAYS.length - 1
@@ -197,7 +194,7 @@ export default async function ProgressPage({
                   </span>
                   {(status === 'today' || status === 'today-done') && (
                     <span className="text-[9px] font-black tracking-widest text-foreground -mt-1">
-                      HOJE
+                      {t('today')}
                     </span>
                   )}
                 </div>
@@ -212,22 +209,22 @@ export default async function ProgressPage({
         <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Desafio ativo
+              {t('activeChallenge')}
             </p>
             <Link
               href={`/${locale}/challenges/${activeChallenge.id}`}
               className="text-xs font-semibold text-foreground"
             >
-              Ver →
+              {t('viewArrow')}
             </Link>
           </div>
 
           <div className="flex items-center gap-3">
             <span className="text-3xl">{activeChallenge.thumbnail_emoji}</span>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-sm leading-tight">{activeChallenge.title}</p>
+              <p className="font-bold text-sm leading-tight">{tData(`${activeChallenge.id}.title`)}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {activeChallengeDone} de {activeChallenge.days_count} concluídos
+                {t('completedOf', { done: activeChallengeDone, total: activeChallenge.days_count })}
               </p>
             </div>
             <span className="text-sm font-black text-foreground flex-shrink-0">
@@ -247,23 +244,23 @@ export default async function ProgressPage({
       {!activeChallenge && (
         <div className="bg-card border border-border rounded-2xl p-6 text-center">
           <p className="text-3xl mb-2">🎯</p>
-          <p className="text-sm font-semibold">Nenhum desafio em andamento</p>
+          <p className="text-sm font-semibold">{t('noActiveChallenge')}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            Comece um desafio para ver seu progresso aqui.
+            {t('noActiveChallengeDesc')}
           </p>
           <Link
             href={`/${locale}/challenges`}
             className="inline-block mt-4 px-5 py-2.5 bg-foreground text-background rounded-2xl text-xs font-bold"
           >
-            Explorar desafios
+            {t('exploreChallenges')}
           </Link>
         </div>
       )}
 
       {/* Mini-stats 2x2 */}
       <div className="grid grid-cols-2 gap-3">
-        {STATS.map((stat) => (
-          <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 space-y-3">
+        {STATS.map((stat, i) => (
+          <div key={i} className="bg-card border border-border rounded-2xl p-4 space-y-3">
             <div className="flex items-start justify-between gap-1">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground leading-tight whitespace-pre-line">
                 {stat.label}

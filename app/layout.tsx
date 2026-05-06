@@ -9,7 +9,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'RiseMe',
-  description: 'Desafios fitness de 28 dias para transformar seu corpo e sua vida.',
+  description: 'Desafíos fitness de 28 días para transformar tu cuerpo y tu vida.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

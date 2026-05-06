@@ -1,6 +1,7 @@
 import { mockChallenges } from '@/lib/mock-challenges'
 import { getMockDays } from '@/lib/mock-challenge-days'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { VideoPlayer } from './VideoPlayer'
 
 export default async function PlayerPage({
@@ -12,7 +13,10 @@ export default async function PlayerPage({
   const challenge = mockChallenges.find((c) => c.id === id)
   if (!challenge) notFound()
 
-  const days = getMockDays(id)
+  const tDays = await getTranslations('challengeDays')
+  const dayTitles = (tDays.raw(id) as string[] | undefined) ?? []
+
+  const days = getMockDays(id, dayTitles)
   const dayNumber = parseInt(day)
   const currentDay = days.find((d) => d.day_number === dayNumber)
   if (!currentDay) notFound()

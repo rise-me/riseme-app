@@ -1,29 +1,29 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { ArrowLeft, Check } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
-const LANGUAGES = [
-  { code: 'pt-BR', label: 'Português', region: 'Brasil' },
-  { code: 'es', label: 'Español', region: 'Neutro (América Latina)' },
-  { code: 'en', label: 'English', region: 'United States' },
-]
-
 export default function LanguagePage() {
+  const t = useTranslations('languagePage')
   const params = useParams()
   const router = useRouter()
   const locale = params.locale as string
 
+  const LANGUAGES = [
+    { code: 'pt-BR', label: t('ptBRLabel'), region: t('ptBRRegion') },
+    { code: 'es', label: t('esLabel'), region: t('esRegion') },
+    { code: 'en', label: t('enLabel'), region: t('enRegion') },
+  ]
+
   function selectLanguage(code: string) {
-    // Navigate to the same page with the new locale
     router.push(`/${code}/more`)
   }
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Link
           href={`/${locale}/more`}
@@ -31,7 +31,7 @@ export default function LanguagePage() {
         >
           <ArrowLeft size={18} />
         </Link>
-        <h1 className="text-xl font-bold">Idioma</h1>
+        <h1 className="text-xl font-bold">{t('title')}</h1>
       </div>
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
@@ -58,7 +58,7 @@ export default function LanguagePage() {
       </div>
 
       <p className="text-xs text-muted-foreground text-center px-4">
-        O idioma será aplicado em todo o aplicativo.
+        {t('applyDescription')}
       </p>
     </div>
   )

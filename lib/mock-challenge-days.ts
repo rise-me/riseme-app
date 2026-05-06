@@ -1,10 +1,12 @@
 import { mockChallenges } from './mock-challenges'
 
+export type LevelKey = 'beginner' | 'intermediate' | 'advanced'
+
 export interface MockDay {
   day_number: number
   title: string
   duration_minutes: number
-  level: 'Iniciante' | 'Intermediário' | 'Avançado'
+  level: LevelKey
   youtube_id?: string
   completed?: boolean
 }
@@ -48,61 +50,18 @@ const VIDEOS_BY_CHALLENGE: Record<string, string[]> = {
   ],
 }
 
-const TITLES_BY_CHALLENGE: Record<string, string[]> = {
-  '1': [
-    'Aquecimento e Mobilidade', 'Força de Braços', 'Core e Abdômen', 'Agachamento e Glúteos',
-    'Empurrada e Puxada', 'Cardio Ativo', 'Recuperação Ativa', 'Resistência Muscular',
-    'Explosão e Potência', 'Equilíbrio e Estabilidade', 'Força Total', 'Intervalado Curto',
-    'Pernas e Posterior', 'Ombros e Trapézio', 'Core Profundo', 'Descanso Ativo',
-    'Força de Braços II', 'Glúteos e Posterior', 'Cardio e Core', 'Flexibilidade',
-    'Força Total II', 'Potência Muscular', 'Mobilidade Avançada', 'Resistência Cardio',
-    'Força e Controle', 'Treino Completo', 'Desafio Final', 'Celebração e Recuperação',
-  ],
-  '2': [
-    'Introdução à Parede', 'Postura e Alinhamento', 'Glúteos na Parede', 'Pernas e Quadril',
-    'Core e Estabilidade', 'Mobilidade da Coluna', 'Alongamento Profundo', 'Força nas Pernas',
-    'Equilíbrio na Parede', 'Glúteos Avançado', 'Coxa Interna', 'Postura Total',
-    'Pilates Cardio', 'Abdômen Profundo', 'Quadril e Coluna', 'Recuperação',
-    'Pernas Definidas', 'Glúteos Firmes', 'Core Avançado', 'Mobilidade Total',
-    'Força e Flexibilidade', 'Pilates Intenso', 'Postura Premium', 'Equilíbrio Total',
-    'Corpo Conectado', 'Pilates Completo', 'Desafio Final', 'Conquista e Celebração',
-  ],
-  '3': [
-    'Despertar dos Músculos do Rosto', 'Tonificação da Bochecha', 'Linha do Maxilar',
-    'Olhos e Pálpebras', 'Pescoço e Papada', 'Testa e Sobrancelhas', 'Lábios e Sorriso',
-    'Drenagem Linfática Facial', 'Rejuvenescimento Total', 'Brilho e Firmeza',
-  ],
-  '4': [
-    'Aquecimento na Cadeira', 'Pescoço e Ombros', 'Coluna e Postura', 'Quadril e Pelve',
-    'Pernas e Pés', 'Core Sentado', 'Respiração e Calma', 'Mobilidade dos Braços',
-    'Alongamento Lateral', 'Equilíbrio Sentado', 'Flexibilidade da Coluna', 'Liberação de Tensões',
-    'Energia e Vitalidade', 'Postura Real', 'Coluna Saudável', 'Recuperação Ativa',
-    'Mobilidade Total', 'Articulações Livres', 'Pés e Tornozelos', 'Quadril Aberto',
-    'Costas Fortes', 'Core e Equilíbrio', 'Yoga Suave', 'Respiração Profunda',
-    'Conexão Mente-Corpo', 'Yoga Energético', 'Desafio Final', 'Celebração e Gratidão',
-  ],
-  '5': [
-    'Ativação do Corpo', 'Glúteos de Verão', 'Cintura Definida', 'Pernas Tonificadas',
-    'Abdômen Sequinho', 'Cardio Queimador', 'Braços Definidos', 'Glúteos Avançado',
-    'Coxa Interna', 'HIIT de Verão', 'Postura Sexy', 'Cintura Fina',
-    'Pernas e Glúteos', 'Cardio Intenso', 'Core Total', 'Recuperação Ativa',
-    'Glúteos Firmes', 'Abdômen Definido', 'Cardio Acelerado', 'Pernas Torneadas',
-    'Corpo Conectado', 'Treino Completo', 'Cintura e Quadril', 'HIIT Avançado',
-    'Resistência Total', 'Corpo Esculpido', 'Desafio Final', 'Celebração de Verão',
-  ],
-}
+const LEVEL_ROTATION: LevelKey[] = ['beginner', 'beginner', 'intermediate', 'advanced']
 
-export function getMockDays(challengeId: string): MockDay[] {
+export function getMockDays(challengeId: string, dayTitles: string[]): MockDay[] {
   const videos = VIDEOS_BY_CHALLENGE[challengeId] ?? []
-  const titles = TITLES_BY_CHALLENGE[challengeId] ?? []
   const challenge = mockChallenges.find((c) => c.id === challengeId)
   const daysCount = challenge?.days_count ?? 28
 
   return Array.from({ length: daysCount }, (_, i) => ({
     day_number: i + 1,
-    title: titles[i] ?? `Dia ${i + 1}`,
+    title: dayTitles[i] ?? `Day ${i + 1}`,
     duration_minutes: [15, 20, 25, 30][i % 4],
-    level: (['Iniciante', 'Iniciante', 'Intermediário', 'Avançado'] as const)[i % 4],
+    level: LEVEL_ROTATION[i % 4],
     youtube_id: videos[i],
   }))
 }

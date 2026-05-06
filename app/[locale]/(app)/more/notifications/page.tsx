@@ -1,43 +1,38 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
-const NOTIFICATIONS = [
-  {
-    id: 'daily',
-    title: 'Lembrete diário de treino',
-    description: 'Receba um lembrete para não perder seu streak',
-    defaultOn: true,
-  },
-  {
-    id: 'achievements',
-    title: 'Conquistas',
-    description: 'Notificações quando desbloquear badges',
-    defaultOn: true,
-  },
-  {
-    id: 'new_challenges',
-    title: 'Novos desafios',
-    description: 'Aviso quando novos desafios forem adicionados',
-    defaultOn: false,
-  },
-  {
-    id: 'tips',
-    title: 'Dicas de bem-estar',
-    description: 'Dicas semanais para potencializar seus resultados',
-    defaultOn: false,
-  },
-]
+const NOTIFICATION_KEYS = [
+  { id: 'daily', defaultOn: true },
+  { id: 'achievements', defaultOn: true },
+  { id: 'new_challenges', defaultOn: false },
+  { id: 'tips', defaultOn: false },
+] as const
+
+const TITLE_KEYS: Record<string, string> = {
+  daily: 'dailyTitle',
+  achievements: 'achievementsTitle',
+  new_challenges: 'newChallengesTitle',
+  tips: 'tipsTitle',
+}
+const DESC_KEYS: Record<string, string> = {
+  daily: 'dailyDesc',
+  achievements: 'achievementsDesc',
+  new_challenges: 'newChallengesDesc',
+  tips: 'tipsDesc',
+}
 
 export default function NotificationsPage() {
+  const t = useTranslations('notifications')
   const params = useParams()
   const locale = params.locale as string
   const [states, setStates] = useState<Record<string, boolean>>(
-    Object.fromEntries(NOTIFICATIONS.map((n) => [n.id, n.defaultOn]))
+    Object.fromEntries(NOTIFICATION_KEYS.map((n) => [n.id, n.defaultOn]))
   )
 
   function toggle(id: string) {
@@ -46,7 +41,6 @@ export default function NotificationsPage() {
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Link
           href={`/${locale}/more`}
@@ -54,15 +48,15 @@ export default function NotificationsPage() {
         >
           <ArrowLeft size={18} />
         </Link>
-        <h1 className="text-xl font-bold">Notificações</h1>
+        <h1 className="text-xl font-bold">{t('title')}</h1>
       </div>
 
       <div className="bg-card border border-border rounded-2xl divide-y divide-border">
-        {NOTIFICATIONS.map((item) => (
+        {NOTIFICATION_KEYS.map((item) => (
           <div key={item.id} className="flex items-center gap-4 px-4 py-4 pr-5">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold">{item.title}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+              <p className="text-sm font-semibold">{t(TITLE_KEYS[item.id])}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t(DESC_KEYS[item.id])}</p>
             </div>
             <button
               onClick={() => toggle(item.id)}
@@ -83,7 +77,7 @@ export default function NotificationsPage() {
       </div>
 
       <p className="text-xs text-muted-foreground text-center px-4">
-        As preferências de notificação serão salvas automaticamente.
+        {t('autoSaved')}
       </p>
     </div>
   )

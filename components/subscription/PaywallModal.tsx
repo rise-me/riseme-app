@@ -66,7 +66,7 @@ export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProp
             <h2 className="text-xl font-bold leading-tight">{t('exclusiveOffer')}</h2>
             {challengeTitle && (
               <p className="text-sm text-muted-foreground mt-1">
-                Desbloqueie <span className="font-semibold text-foreground">{challengeTitle}</span> e todos os outros desafios
+                {t('unlockBlock', { title: challengeTitle })}
               </p>
             )}
           </div>
@@ -138,7 +138,7 @@ export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProp
             }}
             className="w-full py-4 bg-foreground text-background rounded-2xl text-sm font-bold tracking-wide"
           >
-            Desbloquear meu acesso
+            {t('unlockAccess')}
           </button>
 
           {/* Footer */}

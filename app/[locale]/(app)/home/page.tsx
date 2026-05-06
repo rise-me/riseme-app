@@ -11,6 +11,7 @@ export default async function HomePage({
 }) {
   const { locale } = await params
   const t = await getTranslations('home')
+  const tData = await getTranslations('challengeData')
 
   const { streak, progressByChallenge, activeChallengeId } = await getProgressSummary()
 
@@ -48,13 +49,13 @@ export default async function HomePage({
             <div className="flex items-center gap-2">
               <Flame size={18} className="text-orange-400" />
               <span className="text-sm font-medium text-background/70">
-                {completedCount > 0 ? 'Em andamento' : 'Comece agora'}
+                {completedCount > 0 ? t('inProgressLabel') : t('startNowLabel')}
               </span>
             </div>
             <div>
-              <h2 className="text-lg font-bold">{activeChallenge.title}</h2>
+              <h2 className="text-lg font-bold">{tData(`${activeChallenge.id}.title`)}</h2>
               <p className="text-sm text-background/60 mt-0.5">
-                {completedCount} de {activeChallenge.days_count} concluídos
+                {t('completedOf', { completed: completedCount, total: activeChallenge.days_count })}
               </p>
             </div>
             <div className="h-1.5 bg-background/20 rounded-full overflow-hidden">
@@ -64,7 +65,7 @@ export default async function HomePage({
               />
             </div>
             <div className="w-full py-3 bg-background text-foreground rounded-xl text-sm font-bold tracking-wide text-center">
-              {completedCount > 0 ? `Continuar — Dia ${nextDay}` : `Começar — Dia 1`}
+              {completedCount > 0 ? t('continueDay', { day: nextDay }) : t('startDay')}
             </div>
           </div>
         </Link>
@@ -77,10 +78,10 @@ export default async function HomePage({
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold">
-            {streak > 0 ? `${streak} ${streak === 1 ? 'dia' : 'dias'} seguidos 🔥` : 'Comece sua sequência hoje'}
+            {streak > 0 ? t('streakDays', { count: streak }) : t('startStreak')}
           </p>
           <p className="text-xs text-muted-foreground">
-            {streak > 0 ? 'Continue assim!' : 'Complete um treino pra começar'}
+            {streak > 0 ? t('keepGoing') : t('completeToStart')}
           </p>
         </div>
       </div>
@@ -91,8 +92,8 @@ export default async function HomePage({
           💧
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold">Beber água</p>
-          <p className="text-xs text-muted-foreground">0 de 2.000 ml</p>
+          <p className="text-sm font-semibold">{t('drinkWater')}</p>
+          <p className="text-xs text-muted-foreground">{t('waterAmount')}</p>
         </div>
         <ChevronRight size={16} className="text-muted-foreground" />
       </div>
@@ -104,9 +105,9 @@ export default async function HomePage({
             🏆
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold">Explorar desafios</p>
+            <p className="text-sm font-semibold">{t('exploreChallenges')}</p>
             <p className="text-xs text-muted-foreground">
-              {mockChallenges.length} desafios disponíveis
+              {t('challengesAvailable', { count: mockChallenges.length })}
             </p>
           </div>
           <ChevronRight size={16} className="text-muted-foreground" />

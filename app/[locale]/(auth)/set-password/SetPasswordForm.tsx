@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -8,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export function SetPasswordForm({ locale }: { locale: string }) {
+  const t = useTranslations('auth')
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -25,7 +27,7 @@ export function SetPasswordForm({ locale }: { locale: string }) {
     if (access_token && refresh_token) {
       supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
         if (error) {
-          setError('Link inválido ou expirado. Solicite um novo convite.')
+          setError(t('inviteLinkExpired'))
         } else {
           setSessionReady(true)
           window.history.replaceState(null, '', window.location.pathname)
@@ -36,14 +38,15 @@ export function SetPasswordForm({ locale }: { locale: string }) {
 
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) setSessionReady(true)
-      else setError('Link inválido ou expirado. Solicite um novo convite.')
+      else setError(t('inviteLinkExpired'))
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (password !== confirm) {
-      setError('As senhas não coincidem.')
+      setError(t('passwordsDontMatch'))
       return
     }
     setLoading(true)
@@ -61,7 +64,7 @@ export function SetPasswordForm({ locale }: { locale: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="password">Nova senha</Label>
+        <Label htmlFor="password">{t('newPassword')}</Label>
         <Input
           id="password"
           type="password"
@@ -69,20 +72,20 @@ export function SetPasswordForm({ locale }: { locale: string }) {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          placeholder="Mínimo 6 caracteres"
+          placeholder={t('passwordPlaceholder')}
           disabled={!sessionReady}
           className="h-12 rounded-xl bg-card border-border"
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="confirm">Confirmar senha</Label>
+        <Label htmlFor="confirm">{t('confirmPassword')}</Label>
         <Input
           id="confirm"
           type="password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           required
-          placeholder="Repita a senha"
+          placeholder={t('passwordRepeatPlaceholder')}
           disabled={!sessionReady}
           className="h-12 rounded-xl bg-card border-border"
         />
@@ -95,7 +98,7 @@ export function SetPasswordForm({ locale }: { locale: string }) {
         disabled={loading || !sessionReady}
         className="w-full h-12 rounded-xl font-bold tracking-wide text-sm bg-foreground text-background hover:bg-foreground/90"
       >
-        {loading ? '...' : 'DEFINIR SENHA'}
+        {loading ? '...' : t('definePasswordUpper')}
       </Button>
     </form>
   )

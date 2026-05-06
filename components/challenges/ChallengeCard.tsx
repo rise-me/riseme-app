@@ -14,6 +14,7 @@ interface ChallengeCardProps {
 
 export function ChallengeCard({ challenge, locale, onLockedClick }: ChallengeCardProps) {
   const t = useTranslations('challenges')
+  const tData = useTranslations('challengeData')
   const isLocked = challenge.status === 'locked'
   const isActive = challenge.status === 'active'
   const isCompleted = challenge.status === 'completed'
@@ -24,7 +25,6 @@ export function ChallengeCard({ challenge, locale, onLockedClick }: ChallengeCar
       'transition-all active:scale-[0.98]',
       isLocked && 'opacity-75'
     )}>
-      {/* Thumbnail */}
       <div className={cn(
         'w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0',
         'bg-secondary',
@@ -33,18 +33,16 @@ export function ChallengeCard({ challenge, locale, onLockedClick }: ChallengeCar
         {challenge.thumbnail_emoji}
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="text-xs text-muted-foreground font-medium">{challenge.category}</span>
+          <span className="text-xs text-muted-foreground font-medium">{tData(`${challenge.id}.category`)}</span>
           {isCompleted && <CheckCircle2 size={12} className="text-green-600" />}
         </div>
-        <p className="font-bold text-sm leading-tight">{challenge.title}</p>
+        <p className="font-bold text-sm leading-tight">{tData(`${challenge.id}.title`)}</p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {challenge.days_count} {t('workouts')}
         </p>
 
-        {/* Progress bar for active */}
         {isActive && challenge.current_day && (
           <div className="mt-2 h-1 bg-secondary rounded-full">
             <div
@@ -55,7 +53,6 @@ export function ChallengeCard({ challenge, locale, onLockedClick }: ChallengeCar
         )}
       </div>
 
-      {/* Right icon */}
       <div className="flex-shrink-0">
         {isLocked ? (
           <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">

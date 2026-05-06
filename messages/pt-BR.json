@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "RiseMe",
+    "appDescription": "Desafios fitness de 28 dias para transformar seu corpo e sua vida.",
     "loading": "Carregando...",
     "error": "Algo deu errado",
     "retry": "Tentar novamente",
@@ -27,7 +28,17 @@
     "logout": "Sair",
     "email": "E-mail",
     "password": "Senha",
+    "name": "Nome",
+    "namePlaceholder": "Seu nome",
+    "emailPlaceholder": "seu@email.com",
+    "passwordPlaceholder": "Mínimo 6 caracteres",
+    "passwordRepeatPlaceholder": "Repita a senha",
     "confirmPassword": "Confirmar senha",
+    "newPassword": "Nova senha",
+    "createAccountUpper": "CRIAR CONTA",
+    "saveNewPasswordUpper": "SALVAR NOVA SENHA",
+    "definePasswordUpper": "DEFINIR SENHA",
+    "sendLinkUpper": "ENVIAR LINK",
     "forgotPassword": "Esqueceu sua senha?",
     "continueWithGoogle": "Continuar com Google",
     "continueAsGuest": "Continuar como convidado",
@@ -37,7 +48,12 @@
     "termsLink": "Termos de Uso",
     "andText": "e a",
     "privacyLink": "Política de Privacidade",
-    "tagline": "seu companheiro holístico de bem-estar"
+    "tagline": "seu companheiro holístico de bem-estar",
+    "passwordsDontMatch": "As senhas não coincidem.",
+    "linkExpired": "Link inválido ou expirado. Solicite um novo e-mail de recuperação.",
+    "inviteLinkExpired": "Link inválido ou expirado. Solicite um novo convite.",
+    "resetLinkSentTitle": "Enviamos o link de recuperação",
+    "resetLinkSentDesc": "Confira sua caixa de entrada em {email} e clique no link para definir uma nova senha."
   },
   "challenges": {
     "title": "Desafios",
@@ -45,21 +61,38 @@
     "days28": "28 dias",
     "locked": "Bloqueado",
     "unlock": "Desbloquear",
+    "unlockEmoji": "🔒 Desbloquear",
     "start": "Começar desafio",
     "continue": "Continuar",
+    "continueDay": "Continuar — Dia {day}",
     "completed": "Concluído",
     "inProgress": "Em andamento",
     "beginner": "Iniciante",
     "intermediate": "Intermediário",
     "advanced": "Avançado",
+    "all": "Todos",
     "focusAreas": "Áreas de Foco",
     "equipment": "Equipamento",
     "duration": "{minutes} min",
-    "calories": "{kcal} kcal"
+    "calories": "{kcal} kcal",
+    "trainingsCount": "{count} TREINOS",
+    "dayLabel": "Dia {day}",
+    "lessonLocked": "Aula bloqueada",
+    "lessonLockedDesc": "Para melhores resultados, complete as aulas na sequência. Finalize a aula anterior para desbloquear esta.",
+    "understood": "Entendido",
+    "videoSoon": "Vídeo em breve",
+    "warmup": "AQUECIMENTO",
+    "training": "TREINO",
+    "cooldown": "FINALIZAÇÃO",
+    "remaining": "RESTANTE",
+    "previous": "ANTERIOR",
+    "next": "PRÓXIMO",
+    "upNext": "A SEGUIR"
   },
   "subscription": {
     "exclusiveOffer": "Oferta exclusiva de assinatura",
     "unlockAll": "Desbloqueie todos os desafios",
+    "unlockBlock": "Desbloqueie {title} e todos os outros desafios",
     "monthly": "Mensal",
     "annual": "Anual",
     "save": "Economize {percent}%",
@@ -72,7 +105,24 @@
     "benefit2": "Novos desafios toda semana",
     "benefit3": "Rastreamento de progresso completo",
     "benefit4": "Notificações personalizadas",
-    "restorePurchases": "Restaurar compras"
+    "restorePurchases": "Restaurar compras",
+    "unlockAccess": "Desbloquear meu acesso"
+  },
+  "subscriptionPage": {
+    "title": "Assinatura",
+    "currentPlan": "Plano atual",
+    "starter": "Starter",
+    "starterBadge": "Plano inicial",
+    "starterDesc": "Acesso ao seu desafio e aos treinos gratuitos",
+    "unlockAllHeader": "Desbloqueie tudo",
+    "unlimitedAccess": "Acesso ilimitado a todos os desafios",
+    "benefit1": "Acesso a todos os desafios de 28 dias",
+    "benefit2": "Calistenia, Pilates, Yoga, HIIT e mais",
+    "benefit3": "Progresso salvo e streak diário",
+    "benefit4": "Novos desafios adicionados todo mês",
+    "annualRenewal": "Renova por $49/ano",
+    "monthlyRenewal": "Renova por $14,90/mês",
+    "save70": "-70%"
   },
   "progress": {
     "title": "Progresso",
@@ -85,7 +135,23 @@
     "weight": "Peso",
     "steps": "Passos",
     "heartRate": "Taxa Cardíaca",
-    "sleep": "Pontuação de Sono"
+    "sleep": "Pontuação de Sono",
+    "weeklyActivity": "Atividade semanal",
+    "ofDays": "{done}/7 dias",
+    "today": "HOJE",
+    "weekDays": "D,L,M,M,J,V,S",
+    "activeChallenge": "Desafio ativo",
+    "viewArrow": "Ver →",
+    "completedOf": "{done} de {total} concluídos",
+    "noActiveChallenge": "Nenhum desafio em andamento",
+    "noActiveChallengeDesc": "Comece um desafio para ver seu progresso aqui.",
+    "exploreChallenges": "Explorar desafios",
+    "statTrainingsThisWeek": "Treinos\nesta semana",
+    "statTotalMinutes": "Minutos\ntotais",
+    "statCompletedChallenges": "Desafios\nconcluídos",
+    "statActiveDaysMonth": "Dias ativos\nno mês",
+    "totalLabel": "Total",
+    "daysSequence": "dias seguidos"
   },
   "home": {
     "greeting": "Olá, {name}!",
@@ -94,7 +160,20 @@
     "continueChallenge": "Continuar desafio",
     "dayOf": "Dia {current} de {total}",
     "noActiveChallenges": "Nenhum desafio ativo",
-    "startOne": "Comece um desafio"
+    "startOne": "Comece um desafio",
+    "inProgressLabel": "Em andamento",
+    "startNowLabel": "Comece agora",
+    "completedOf": "{completed} de {total} concluídos",
+    "continueDay": "Continuar — Dia {day}",
+    "startDay": "Começar — Dia 1",
+    "streakDays": "{count, plural, one {# dia seguido 🔥} other {# dias seguidos 🔥}}",
+    "startStreak": "Comece sua sequência hoje",
+    "keepGoing": "Continue assim!",
+    "completeToStart": "Complete um treino pra começar",
+    "drinkWater": "Beber água",
+    "waterAmount": "0 de 2.000 ml",
+    "exploreChallenges": "Explorar desafios",
+    "challengesAvailable": "{count} desafios disponíveis"
   },
   "more": {
     "title": "Mais",
@@ -108,6 +187,190 @@
     "inviteFriend": "Convide um amigo",
     "gift": "Presente",
     "help": "Central de ajuda",
-    "helpCenter": "Ajuda"
+    "helpCenter": "Ajuda",
+    "account": "Conta",
+    "myProfile": "Meu perfil",
+    "notificationsLabel": "Notificações",
+    "manageSubscription": "Gerenciar assinatura",
+    "language": "Idioma",
+    "support": "Suporte",
+    "version": "RiseMe v0.1.0"
+  },
+  "profile": {
+    "title": "Meu perfil",
+    "personalDetails": "Detalhes pessoais",
+    "fitnessLevel": "Nível físico",
+    "legal": "Legal e privacidade",
+    "termsOfUse": "Termos de uso",
+    "privacyPolicy": "Política de privacidade"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "dailyTitle": "Lembrete diário de treino",
+    "dailyDesc": "Receba um lembrete para não perder seu streak",
+    "achievementsTitle": "Conquistas",
+    "achievementsDesc": "Notificações quando desbloquear badges",
+    "newChallengesTitle": "Novos desafios",
+    "newChallengesDesc": "Aviso quando novos desafios forem adicionados",
+    "tipsTitle": "Dicas de bem-estar",
+    "tipsDesc": "Dicas semanais para potencializar seus resultados",
+    "autoSaved": "As preferências de notificação serão salvas automaticamente."
+  },
+  "languagePage": {
+    "title": "Idioma",
+    "applyDescription": "O idioma será aplicado em todo o aplicativo.",
+    "ptBRLabel": "Português",
+    "ptBRRegion": "Brasil",
+    "esLabel": "Español",
+    "esRegion": "Neutro (América Latina)",
+    "enLabel": "English",
+    "enRegion": "United States"
+  },
+  "referral": {
+    "title": "Convide um amigo",
+    "earn7Days": "Ganhe 7 dias grátis",
+    "earnDescription": "Para cada amigo que se cadastrar pelo seu link, você ganha 7 dias de acesso premium gratuito.",
+    "yourLink": "Seu link de indicação",
+    "linkCopied": "Link copiado! ✓",
+    "copyLink": "Copiar link",
+    "shareWhatsApp": "Compartilhar no WhatsApp",
+    "whatsappMessage": "Estou usando o RiseMe para meus treinos e tô adorando! 🔥 Baixa pelo meu link e ganhe acesso grátis: {link}",
+    "howItWorks": "Como funciona",
+    "step1": "Compartilhe seu link com amigos",
+    "step2": "Seu amigo se cadastra no RiseMe",
+    "step3": "Você ganha 7 dias de acesso premium"
+  },
+  "help": {
+    "title": "Ajuda",
+    "infoBanner": "Você receberá uma cópia da sua mensagem por e-mail após o envio.",
+    "trainingDoubts": "Dúvidas sobre os treinos",
+    "suggestions": "Sugestões de melhorias",
+    "billingQuestions": "Perguntas sobre faturamento",
+    "technicalProblems": "Problemas técnicos",
+    "manageSubscription": "Gerenciar assinatura",
+    "otherQuestions": "Outras perguntas"
+  },
+  "fasting": {
+    "title": "Jejum",
+    "comingSoon": "Em breve",
+    "comingSoonDesc": "O tracker de jejum intermitente está a caminho. Você poderá registrar e acompanhar seus jejuns com timer, histórico semanal e protocolos (16:8, 18:6 e mais)."
+  },
+  "workoutsPage": {
+    "title": "Treinos",
+    "free": "Treinos gratuitos",
+    "wantMore": "Quer mais treinos?",
+    "unlockChallenges": "Desbloqueie os desafios",
+    "guidedDays": "28 dias de treinos guiados",
+    "lessonsCount": "{count} aulas",
+    "lessonsLabel": "AULAS",
+    "lessonNumber": "Aula {number}",
+    "continueLesson": "Continuar — Aula {number}",
+    "startWorkout": "Começar treino",
+    "ofTotal": "{done} / {total}",
+    "lessonOf": "AULA {current} DE {total}",
+    "elapsed": "ESGOTADO",
+    "kcal": "KCAL",
+    "lovingThisWorkout": "Gostando desse treino?",
+    "unlockSubscription": "Desbloqueie todos os desafios com uma assinatura",
+    "save70": "Economize 70%",
+    "benefit1": "28 dias de treino guiado",
+    "benefit2": "Desafios de calistenia, pilates e yoga",
+    "benefit3": "Progresso salvo e streak diário",
+    "continueWorkout": "Continuar treino",
+    "backToWorkouts": "Voltar aos treinos"
+  },
+  "challengeData": {
+    "1": {
+      "title": "Calistenia em Casa",
+      "category": "Calistenia"
+    },
+    "2": {
+      "title": "Pilates na Parede",
+      "category": "Pilates"
+    },
+    "3": {
+      "title": "Yoga Facial",
+      "category": "Yoga"
+    },
+    "4": {
+      "title": "Yoga na Cadeira",
+      "category": "Yoga"
+    },
+    "5": {
+      "title": "Corpo Sexy de Verão",
+      "category": "Fitness"
+    }
+  },
+  "challengeDays": {
+    "1": [
+      "Aquecimento e Mobilidade", "Força de Braços", "Core e Abdômen", "Agachamento e Glúteos",
+      "Empurrada e Puxada", "Cardio Ativo", "Recuperação Ativa", "Resistência Muscular",
+      "Explosão e Potência", "Equilíbrio e Estabilidade", "Força Total", "Intervalado Curto",
+      "Pernas e Posterior", "Ombros e Trapézio", "Core Profundo", "Descanso Ativo",
+      "Força de Braços II", "Glúteos e Posterior", "Cardio e Core", "Flexibilidade",
+      "Força Total II", "Potência Muscular", "Mobilidade Avançada", "Resistência Cardio",
+      "Força e Controle", "Treino Completo", "Desafio Final", "Celebração e Recuperação"
+    ],
+    "2": [
+      "Introdução à Parede", "Postura e Alinhamento", "Glúteos na Parede", "Pernas e Quadril",
+      "Core e Estabilidade", "Mobilidade da Coluna", "Alongamento Profundo", "Força nas Pernas",
+      "Equilíbrio na Parede", "Glúteos Avançado", "Coxa Interna", "Postura Total",
+      "Pilates Cardio", "Abdômen Profundo", "Quadril e Coluna", "Recuperação",
+      "Pernas Definidas", "Glúteos Firmes", "Core Avançado", "Mobilidade Total",
+      "Força e Flexibilidade", "Pilates Intenso", "Postura Premium", "Equilíbrio Total",
+      "Corpo Conectado", "Pilates Completo", "Desafio Final", "Conquista e Celebração"
+    ],
+    "3": [
+      "Despertar dos Músculos do Rosto", "Tonificação da Bochecha", "Linha do Maxilar",
+      "Olhos e Pálpebras", "Pescoço e Papada", "Testa e Sobrancelhas", "Lábios e Sorriso",
+      "Drenagem Linfática Facial", "Rejuvenescimento Total", "Brilho e Firmeza"
+    ],
+    "4": [
+      "Aquecimento na Cadeira", "Pescoço e Ombros", "Coluna e Postura", "Quadril e Pelve",
+      "Pernas e Pés", "Core Sentado", "Respiração e Calma", "Mobilidade dos Braços",
+      "Alongamento Lateral", "Equilíbrio Sentado", "Flexibilidade da Coluna", "Liberação de Tensões",
+      "Energia e Vitalidade", "Postura Real", "Coluna Saudável", "Recuperação Ativa",
+      "Mobilidade Total", "Articulações Livres", "Pés e Tornozelos", "Quadril Aberto",
+      "Costas Fortes", "Core e Equilíbrio", "Yoga Suave", "Respiração Profunda",
+      "Conexão Mente-Corpo", "Yoga Energético", "Desafio Final", "Celebração e Gratidão"
+    ],
+    "5": [
+      "Ativação do Corpo", "Glúteos de Verão", "Cintura Definida", "Pernas Tonificadas",
+      "Abdômen Sequinho", "Cardio Queimador", "Braços Definidos", "Glúteos Avançado",
+      "Coxa Interna", "HIIT de Verão", "Postura Sexy", "Cintura Fina",
+      "Pernas e Glúteos", "Cardio Intenso", "Core Total", "Recuperação Ativa",
+      "Glúteos Firmes", "Abdômen Definido", "Cardio Acelerado", "Pernas Torneadas",
+      "Corpo Conectado", "Treino Completo", "Cintura e Quadril", "HIIT Avançado",
+      "Resistência Total", "Corpo Esculpido", "Desafio Final", "Celebração de Verão"
+    ]
+  },
+  "workoutData": {
+    "w1": {
+      "title": "Treino Express 10 min",
+      "description": "Queime calorias rápido sem equipamento"
+    },
+    "w2": {
+      "title": "Alongamento Total",
+      "description": "Relaxe e melhore sua flexibilidade"
+    },
+    "w3": {
+      "title": "Core Forte",
+      "description": "Fortaleça seu abdômen e lombar"
+    }
+  },
+  "workoutLessons": {
+    "w1": [
+      "Aquecimento Dinâmico", "Agachamentos", "Flexão de Braços",
+      "Mountain Climbers", "Burpees Express", "Desaceleração"
+    ],
+    "w2": [
+      "Respiração e Centragem", "Pescoço e Ombros", "Tronco e Lateral",
+      "Quadril e Glúteos", "Pernas e Isquiotibiais"
+    ],
+    "w3": [
+      "Ativação do Core", "Prancha Clássica", "Prancha Lateral",
+      "Abdominal Crunch", "Leg Raises", "Russian Twist",
+      "Bird-Dog", "Relaxamento Lombar"
+    ]
   }
 }

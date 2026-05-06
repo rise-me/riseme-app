@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
       const { data: invited, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(buyerEmail, {
         data: { name: data.buyer.name },
-        redirectTo: `${appUrl}/pt-BR/set-password`,
+        redirectTo: `${appUrl}/set-password`,
       })
       if (inviteError || !invited.user) {
         console.error('[hotmart] Failed to invite user:', inviteError)

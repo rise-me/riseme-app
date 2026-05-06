@@ -1,10 +1,12 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { LogOut, ChevronRight } from 'lucide-react'
 
 export function LogoutButton({ locale }: { locale: string }) {
+  const t = useTranslations('auth')
   const router = useRouter()
 
   async function handleLogout() {
@@ -21,7 +23,7 @@ export function LogoutButton({ locale }: { locale: string }) {
       <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
         <LogOut size={18} className="text-destructive" />
       </div>
-      <span className="flex-1 text-sm font-medium text-destructive">Sair</span>
+      <span className="flex-1 text-sm font-medium text-destructive">{t('logout')}</span>
       <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
     </button>
   )

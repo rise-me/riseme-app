@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { ArrowLeft, Camera } from 'lucide-react'
 import Link from 'next/link'
 
@@ -7,10 +8,12 @@ export default async function ProfilePage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations('profile')
+  const tAuth = await getTranslations('auth')
+  const tChallenges = await getTranslations('challenges')
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Link
           href={`/${locale}/more`}
@@ -18,10 +21,9 @@ export default async function ProfilePage({
         >
           <ArrowLeft size={18} />
         </Link>
-        <h1 className="text-xl font-bold">Meu perfil</h1>
+        <h1 className="text-xl font-bold">{t('title')}</h1>
       </div>
 
-      {/* Avatar */}
       <div className="flex flex-col items-center gap-2 py-2">
         <div className="relative">
           <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-2xl font-black">
@@ -35,25 +37,24 @@ export default async function ProfilePage({
         <p className="text-sm text-muted-foreground">brunobarros119@gmail.com</p>
       </div>
 
-      {/* Campos */}
       <section className="space-y-2">
         <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest px-1">
-          Detalhes pessoais
+          {t('personalDetails')}
         </p>
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
-          <ProfileField label="Nome" value="Bruno" />
-          <ProfileField label="E-mail" value="brunobarros119@gmail.com" />
-          <ProfileField label="Nível físico" value="Iniciante" />
+          <ProfileField label={tAuth('name')} value="Bruno" />
+          <ProfileField label={tAuth('email')} value="brunobarros119@gmail.com" />
+          <ProfileField label={t('fitnessLevel')} value={tChallenges('beginner')} />
         </div>
       </section>
 
       <section className="space-y-2">
         <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest px-1">
-          Legal e privacidade
+          {t('legal')}
         </p>
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
-          <ProfileField label="Termos de uso" />
-          <ProfileField label="Política de privacidade" />
+          <ProfileField label={t('termsOfUse')} />
+          <ProfileField label={t('privacyPolicy')} />
         </div>
       </section>
     </div>

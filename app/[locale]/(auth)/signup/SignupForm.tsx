@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -8,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export function SignupForm({ locale }: { locale: string }) {
+  const t = useTranslations('auth')
   const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -19,7 +21,7 @@ export function SignupForm({ locale }: { locale: string }) {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     if (password !== confirm) {
-      setError('As senhas não coincidem.')
+      setError(t('passwordsDontMatch'))
       return
     }
     setLoading(true)
@@ -42,31 +44,31 @@ export function SignupForm({ locale }: { locale: string }) {
     <div className="w-full space-y-4">
       <form onSubmit={handleSignup} className="space-y-3">
         <div className="space-y-1.5">
-          <Label htmlFor="name">Nome</Label>
+          <Label htmlFor="name">{t('name')}</Label>
           <Input
             id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            placeholder="Seu nome"
+            placeholder={t('namePlaceholder')}
             className="h-12 rounded-xl bg-card border-border"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="email">E-mail</Label>
+          <Label htmlFor="email">{t('email')}</Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="seu@email.com"
+            placeholder={t('emailPlaceholder')}
             className="h-12 rounded-xl bg-card border-border"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="password">Senha</Label>
+          <Label htmlFor="password">{t('password')}</Label>
           <Input
             id="password"
             type="password"
@@ -74,19 +76,19 @@ export function SignupForm({ locale }: { locale: string }) {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            placeholder="Mínimo 6 caracteres"
+            placeholder={t('passwordPlaceholder')}
             className="h-12 rounded-xl bg-card border-border"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="confirm">Confirmar senha</Label>
+          <Label htmlFor="confirm">{t('confirmPassword')}</Label>
           <Input
             id="confirm"
             type="password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
-            placeholder="Repita a senha"
+            placeholder={t('passwordRepeatPlaceholder')}
             className="h-12 rounded-xl bg-card border-border"
           />
         </div>
@@ -100,7 +102,7 @@ export function SignupForm({ locale }: { locale: string }) {
           disabled={loading}
           className="w-full h-12 rounded-xl font-bold tracking-wide text-sm bg-foreground text-background hover:bg-foreground/90"
         >
-          {loading ? '...' : 'CRIAR CONTA'}
+          {loading ? '...' : t('createAccountUpper')}
         </Button>
       </form>
     </div>

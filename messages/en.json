@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "RiseMe",
+    "appDescription": "28-day fitness challenges to transform your body and life.",
     "loading": "Loading...",
     "error": "Something went wrong",
     "retry": "Try again",
@@ -22,22 +23,37 @@
     "more": "More"
   },
   "auth": {
-    "login": "Log in",
-    "signup": "Create account",
+    "login": "Sign in",
+    "signup": "Sign up",
     "logout": "Log out",
     "email": "Email",
     "password": "Password",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "Min. 6 characters",
+    "passwordRepeatPlaceholder": "Repeat password",
     "confirmPassword": "Confirm password",
+    "newPassword": "New password",
+    "createAccountUpper": "CREATE ACCOUNT",
+    "saveNewPasswordUpper": "SAVE NEW PASSWORD",
+    "definePasswordUpper": "SET PASSWORD",
+    "sendLinkUpper": "SEND LINK",
     "forgotPassword": "Forgot your password?",
     "continueWithGoogle": "Continue with Google",
     "continueAsGuest": "Continue as guest",
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
-    "termsPrefix": "I confirm that I have read and agreed to the",
+    "termsPrefix": "I confirm I've read and agreed to the",
     "termsLink": "Terms of Use",
     "andText": "and the",
     "privacyLink": "Privacy Policy",
-    "tagline": "your holistic wellness companion"
+    "tagline": "your holistic wellness companion",
+    "passwordsDontMatch": "Passwords don't match.",
+    "linkExpired": "Invalid or expired link. Request a new recovery email.",
+    "inviteLinkExpired": "Invalid or expired link. Request a new invitation.",
+    "resetLinkSentTitle": "We sent the recovery link",
+    "resetLinkSentDesc": "Check your inbox at {email} and click the link to set a new password."
   },
   "challenges": {
     "title": "Challenges",
@@ -45,21 +61,38 @@
     "days28": "28 days",
     "locked": "Locked",
     "unlock": "Unlock",
+    "unlockEmoji": "🔒 Unlock",
     "start": "Start challenge",
     "continue": "Continue",
+    "continueDay": "Continue — Day {day}",
     "completed": "Completed",
     "inProgress": "In progress",
     "beginner": "Beginner",
     "intermediate": "Intermediate",
     "advanced": "Advanced",
+    "all": "All",
     "focusAreas": "Focus Areas",
     "equipment": "Equipment",
     "duration": "{minutes} min",
-    "calories": "{kcal} kcal"
+    "calories": "{kcal} kcal",
+    "trainingsCount": "{count} WORKOUTS",
+    "dayLabel": "Day {day}",
+    "lessonLocked": "Lesson locked",
+    "lessonLockedDesc": "For best results, complete lessons in order. Finish the previous lesson to unlock this one.",
+    "understood": "Got it",
+    "videoSoon": "Video coming soon",
+    "warmup": "WARM-UP",
+    "training": "WORKOUT",
+    "cooldown": "COOL-DOWN",
+    "remaining": "REMAINING",
+    "previous": "PREVIOUS",
+    "next": "NEXT",
+    "upNext": "UP NEXT"
   },
   "subscription": {
     "exclusiveOffer": "Exclusive subscription offer",
     "unlockAll": "Unlock all challenges",
+    "unlockBlock": "Unlock {title} and all other challenges",
     "monthly": "Monthly",
     "annual": "Annual",
     "save": "Save {percent}%",
@@ -70,13 +103,30 @@
     "cancelAnytime": "Cancel anytime",
     "benefit1": "Unlimited access to all challenges",
     "benefit2": "New challenges every week",
-    "benefit3": "Full progress tracking",
+    "benefit3": "Complete progress tracking",
     "benefit4": "Personalized notifications",
-    "restorePurchases": "Restore purchases"
+    "restorePurchases": "Restore purchases",
+    "unlockAccess": "Unlock my access"
+  },
+  "subscriptionPage": {
+    "title": "Subscription",
+    "currentPlan": "Current plan",
+    "starter": "Starter",
+    "starterBadge": "Starter plan",
+    "starterDesc": "Access to your challenge and free workouts",
+    "unlockAllHeader": "Unlock everything",
+    "unlimitedAccess": "Unlimited access to all challenges",
+    "benefit1": "Access to all 28-day challenges",
+    "benefit2": "Calisthenics, Pilates, Yoga, HIIT and more",
+    "benefit3": "Progress saved and daily streak",
+    "benefit4": "New challenges added every month",
+    "annualRenewal": "Renews at $49/year",
+    "monthlyRenewal": "Renews at $14.90/month",
+    "save70": "-70%"
   },
   "progress": {
     "title": "Progress",
-    "streak": "{count} day streak",
+    "streak": "{count} days in a row",
     "daysCompleted": "{count} days completed",
     "connectHealth": "Connect Health app",
     "connectHealthDesc": "Optimize your health data and track your progress.",
@@ -85,16 +135,45 @@
     "weight": "Weight",
     "steps": "Steps",
     "heartRate": "Heart Rate",
-    "sleep": "Sleep Score"
+    "sleep": "Sleep Score",
+    "weeklyActivity": "Weekly activity",
+    "ofDays": "{done}/7 days",
+    "today": "TODAY",
+    "weekDays": "S,M,T,W,T,F,S",
+    "activeChallenge": "Active challenge",
+    "viewArrow": "View →",
+    "completedOf": "{done} of {total} completed",
+    "noActiveChallenge": "No active challenge",
+    "noActiveChallengeDesc": "Start a challenge to see your progress here.",
+    "exploreChallenges": "Explore challenges",
+    "statTrainingsThisWeek": "Workouts\nthis week",
+    "statTotalMinutes": "Total\nminutes",
+    "statCompletedChallenges": "Completed\nchallenges",
+    "statActiveDaysMonth": "Active days\nthis month",
+    "totalLabel": "Total",
+    "daysSequence": "days in a row"
   },
   "home": {
-    "greeting": "Hello, {name}!",
+    "greeting": "Hi, {name}!",
     "todayPlan": "My Plan",
     "today": "Today",
     "continueChallenge": "Continue challenge",
     "dayOf": "Day {current} of {total}",
     "noActiveChallenges": "No active challenges",
-    "startOne": "Start a challenge"
+    "startOne": "Start a challenge",
+    "inProgressLabel": "In progress",
+    "startNowLabel": "Start now",
+    "completedOf": "{completed} of {total} completed",
+    "continueDay": "Continue — Day {day}",
+    "startDay": "Start — Day 1",
+    "streakDays": "{count, plural, one {# day in a row 🔥} other {# days in a row 🔥}}",
+    "startStreak": "Start your streak today",
+    "keepGoing": "Keep going!",
+    "completeToStart": "Complete a workout to start",
+    "drinkWater": "Drink water",
+    "waterAmount": "0 of 2,000 ml",
+    "exploreChallenges": "Explore challenges",
+    "challengesAvailable": "{count} challenges available"
   },
   "more": {
     "title": "More",
@@ -108,6 +187,166 @@
     "inviteFriend": "Invite a friend",
     "gift": "Gift",
     "help": "Help center",
-    "helpCenter": "Help"
+    "helpCenter": "Help",
+    "account": "Account",
+    "myProfile": "My profile",
+    "notificationsLabel": "Notifications",
+    "manageSubscription": "Manage subscription",
+    "language": "Language",
+    "support": "Support",
+    "version": "RiseMe v0.1.0"
+  },
+  "profile": {
+    "title": "My profile",
+    "personalDetails": "Personal details",
+    "fitnessLevel": "Fitness level",
+    "legal": "Legal and privacy",
+    "termsOfUse": "Terms of use",
+    "privacyPolicy": "Privacy policy"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "dailyTitle": "Daily workout reminder",
+    "dailyDesc": "Get a reminder so you don't lose your streak",
+    "achievementsTitle": "Achievements",
+    "achievementsDesc": "Notifications when you unlock badges",
+    "newChallengesTitle": "New challenges",
+    "newChallengesDesc": "Alert when new challenges are added",
+    "tipsTitle": "Wellness tips",
+    "tipsDesc": "Weekly tips to boost your results",
+    "autoSaved": "Notification preferences are saved automatically."
+  },
+  "languagePage": {
+    "title": "Language",
+    "applyDescription": "The language will apply throughout the app.",
+    "ptBRLabel": "Português",
+    "ptBRRegion": "Brasil",
+    "esLabel": "Español",
+    "esRegion": "Neutral (Latin America)",
+    "enLabel": "English",
+    "enRegion": "United States"
+  },
+  "referral": {
+    "title": "Invite a friend",
+    "earn7Days": "Get 7 days free",
+    "earnDescription": "For every friend who signs up with your link, you get 7 days of premium access free.",
+    "yourLink": "Your referral link",
+    "linkCopied": "Link copied! ✓",
+    "copyLink": "Copy link",
+    "shareWhatsApp": "Share on WhatsApp",
+    "whatsappMessage": "I'm using RiseMe for my workouts and loving it! 🔥 Download with my link and get free access: {link}",
+    "howItWorks": "How it works",
+    "step1": "Share your link with friends",
+    "step2": "Your friend signs up on RiseMe",
+    "step3": "You get 7 days of premium access"
+  },
+  "help": {
+    "title": "Help",
+    "infoBanner": "You'll receive a copy of your message by email after sending.",
+    "trainingDoubts": "Workout questions",
+    "suggestions": "Improvement suggestions",
+    "billingQuestions": "Billing questions",
+    "technicalProblems": "Technical issues",
+    "manageSubscription": "Manage subscription",
+    "otherQuestions": "Other questions"
+  },
+  "fasting": {
+    "title": "Fasting",
+    "comingSoon": "Coming soon",
+    "comingSoonDesc": "Intermittent fasting tracker is on the way. You'll be able to log and track fasts with timer, weekly history and protocols (16:8, 18:6 and more)."
+  },
+  "workoutsPage": {
+    "title": "Workouts",
+    "free": "Free workouts",
+    "wantMore": "Want more workouts?",
+    "unlockChallenges": "Unlock the challenges",
+    "guidedDays": "28 days of guided workouts",
+    "lessonsCount": "{count} lessons",
+    "lessonsLabel": "LESSONS",
+    "lessonNumber": "Lesson {number}",
+    "continueLesson": "Continue — Lesson {number}",
+    "startWorkout": "Start workout",
+    "ofTotal": "{done} / {total}",
+    "lessonOf": "LESSON {current} OF {total}",
+    "elapsed": "ELAPSED",
+    "kcal": "KCAL",
+    "lovingThisWorkout": "Loving this workout?",
+    "unlockSubscription": "Unlock all challenges with a subscription",
+    "save70": "Save 70%",
+    "benefit1": "28 days of guided training",
+    "benefit2": "Calisthenics, Pilates and Yoga challenges",
+    "benefit3": "Saved progress and daily streak",
+    "continueWorkout": "Continue workout",
+    "backToWorkouts": "Back to workouts"
+  },
+  "challengeData": {
+    "1": { "title": "Calisthenics at Home", "category": "Calisthenics" },
+    "2": { "title": "Wall Pilates", "category": "Pilates" },
+    "3": { "title": "Facial Yoga", "category": "Yoga" },
+    "4": { "title": "Chair Yoga", "category": "Yoga" },
+    "5": { "title": "Summer Sexy Body", "category": "Fitness" }
+  },
+  "challengeDays": {
+    "1": [
+      "Warm-up and Mobility", "Arm Strength", "Core and Abs", "Squats and Glutes",
+      "Push and Pull", "Active Cardio", "Active Recovery", "Muscular Endurance",
+      "Power and Explosion", "Balance and Stability", "Total Strength", "Short Intervals",
+      "Legs and Posterior", "Shoulders and Trapezius", "Deep Core", "Active Rest",
+      "Arm Strength II", "Glutes and Posterior", "Cardio and Core", "Flexibility",
+      "Total Strength II", "Muscular Power", "Advanced Mobility", "Cardio Endurance",
+      "Strength and Control", "Full Workout", "Final Challenge", "Celebration and Recovery"
+    ],
+    "2": [
+      "Wall Introduction", "Posture and Alignment", "Glutes on the Wall", "Legs and Hips",
+      "Core and Stability", "Spine Mobility", "Deep Stretching", "Leg Strength",
+      "Wall Balance", "Advanced Glutes", "Inner Thigh", "Total Posture",
+      "Pilates Cardio", "Deep Abs", "Hip and Spine", "Recovery",
+      "Defined Legs", "Firm Glutes", "Advanced Core", "Total Mobility",
+      "Strength and Flexibility", "Intense Pilates", "Premium Posture", "Total Balance",
+      "Connected Body", "Complete Pilates", "Final Challenge", "Achievement and Celebration"
+    ],
+    "3": [
+      "Awakening Facial Muscles", "Cheek Toning", "Jawline",
+      "Eyes and Eyelids", "Neck and Double Chin", "Forehead and Eyebrows", "Lips and Smile",
+      "Facial Lymphatic Drainage", "Total Rejuvenation", "Glow and Firmness"
+    ],
+    "4": [
+      "Chair Warm-up", "Neck and Shoulders", "Spine and Posture", "Hip and Pelvis",
+      "Legs and Feet", "Seated Core", "Breath and Calm", "Arm Mobility",
+      "Lateral Stretching", "Seated Balance", "Spine Flexibility", "Tension Release",
+      "Energy and Vitality", "Royal Posture", "Healthy Spine", "Active Recovery",
+      "Total Mobility", "Free Joints", "Feet and Ankles", "Open Hip",
+      "Strong Back", "Core and Balance", "Gentle Yoga", "Deep Breathing",
+      "Mind-Body Connection", "Energetic Yoga", "Final Challenge", "Celebration and Gratitude"
+    ],
+    "5": [
+      "Body Activation", "Summer Glutes", "Defined Waist", "Toned Legs",
+      "Flat Abs", "Burning Cardio", "Defined Arms", "Advanced Glutes",
+      "Inner Thigh", "Summer HIIT", "Sexy Posture", "Slim Waist",
+      "Legs and Glutes", "Intense Cardio", "Total Core", "Active Recovery",
+      "Firm Glutes", "Defined Abs", "Accelerated Cardio", "Toned Legs",
+      "Connected Body", "Full Workout", "Waist and Hip", "Advanced HIIT",
+      "Total Endurance", "Sculpted Body", "Final Challenge", "Summer Celebration"
+    ]
+  },
+  "workoutData": {
+    "w1": { "title": "10-min Express Workout", "description": "Burn calories fast with no equipment" },
+    "w2": { "title": "Total Stretching", "description": "Relax and improve your flexibility" },
+    "w3": { "title": "Strong Core", "description": "Strengthen your abs and lower back" }
+  },
+  "workoutLessons": {
+    "w1": [
+      "Dynamic Warm-up", "Squats", "Push-ups",
+      "Mountain Climbers", "Express Burpees", "Cool-down"
+    ],
+    "w2": [
+      "Breath and Centering", "Neck and Shoulders", "Trunk and Lateral",
+      "Hips and Glutes", "Legs and Hamstrings"
+    ],
+    "w3": [
+      "Core Activation", "Classic Plank", "Side Plank",
+      "Crunches", "Leg Raises", "Russian Twist",
+      "Bird-Dog", "Lower Back Relaxation"
+    ]
   }
 }

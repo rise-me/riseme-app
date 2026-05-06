@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { Timer, Gift, User, HelpCircle, Bell, CreditCard, Globe, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/layout/LogoutButton'
@@ -8,12 +9,13 @@ export default async function MorePage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations('more')
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Mais</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
         <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
           B
         </div>
@@ -22,23 +24,23 @@ export default async function MorePage({
       {/* Seu progresso */}
       <section className="space-y-2">
         <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest px-1">
-          Seu progresso
+          {t('yourProgress')}
         </p>
         <MoreGroup>
-          <MoreLink href={`/${locale}/more/fasting`} icon={<Timer size={18} />} label="Jejum" />
+          <MoreLink href={`/${locale}/more/fasting`} icon={<Timer size={18} />} label={t('fasting')} />
         </MoreGroup>
       </section>
 
       {/* Conta */}
       <section className="space-y-2">
         <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest px-1">
-          Conta
+          {t('account')}
         </p>
         <MoreGroup>
-          <MoreLink href={`/${locale}/more/profile`} icon={<User size={18} />} label="Meu perfil" />
-          <MoreLink href={`/${locale}/more/notifications`} icon={<Bell size={18} />} label="Notificações" />
-          <MoreLink href={`/${locale}/more/subscription`} icon={<CreditCard size={18} />} label="Gerenciar assinatura" />
-          <MoreLink href={`/${locale}/more/language`} icon={<Globe size={18} />} label="Idioma" />
+          <MoreLink href={`/${locale}/more/profile`} icon={<User size={18} />} label={t('myProfile')} />
+          <MoreLink href={`/${locale}/more/notifications`} icon={<Bell size={18} />} label={t('notificationsLabel')} />
+          <MoreLink href={`/${locale}/more/subscription`} icon={<CreditCard size={18} />} label={t('manageSubscription')} />
+          <MoreLink href={`/${locale}/more/language`} icon={<Globe size={18} />} label={t('language')} />
           <LogoutButton locale={locale} />
         </MoreGroup>
       </section>
@@ -46,24 +48,24 @@ export default async function MorePage({
       {/* Indicação */}
       <section className="space-y-2">
         <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest px-1">
-          Indicação
+          {t('referral')}
         </p>
         <MoreGroup>
-          <MoreLink href={`/${locale}/more/referral`} icon={<Gift size={18} />} label="Convida um amigo" badge="Presente" />
+          <MoreLink href={`/${locale}/more/referral`} icon={<Gift size={18} />} label={t('inviteFriend')} badge={t('gift')} />
         </MoreGroup>
       </section>
 
       {/* Suporte */}
       <section className="space-y-2">
         <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest px-1">
-          Suporte
+          {t('support')}
         </p>
         <MoreGroup>
-          <MoreLink href={`/${locale}/more/help`} icon={<HelpCircle size={18} />} label="Ajuda" />
+          <MoreLink href={`/${locale}/more/help`} icon={<HelpCircle size={18} />} label={t('helpCenter')} />
         </MoreGroup>
       </section>
 
-      <p className="text-center text-xs text-muted-foreground pt-2">RiseMe v0.1.0</p>
+      <p className="text-center text-xs text-muted-foreground pt-2">{t('version')}</p>
     </div>
   )
 }

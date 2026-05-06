@@ -6,12 +6,12 @@ import { useTranslations } from 'next-intl'
 import { ArrowLeft, Heart, CheckCircle2, Lock, Play, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MockChallenge } from '@/lib/mock-challenges'
-import type { MockDay } from '@/lib/mock-challenge-days'
+import type { MockDay, LevelKey } from '@/lib/mock-challenge-days'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
-type Level = 'Todos' | 'Iniciante' | 'Intermediário' | 'Avançado'
-const LEVELS: Level[] = ['Todos', 'Iniciante', 'Intermediário', 'Avançado']
+type LevelFilter = 'all' | LevelKey
+const LEVELS: LevelFilter[] = ['all', 'beginner', 'intermediate', 'advanced']
 
 interface Props {
   challenge: MockChallenge
@@ -22,20 +22,23 @@ interface Props {
 export function ChallengeDetailClient({ challenge, days, locale }: Props) {
   const router = useRouter()
   const t = useTranslations('challenges')
-  const [activeLevel, setActiveLevel] = useState<Level>('Todos')
+  const tData = useTranslations('challengeData')
+  const [activeLevel, setActiveLevel] = useState<LevelFilter>('all')
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [sequentialOpen, setSequentialOpen] = useState(false)
   const [favorited, setFavorited] = useState(false)
+
+  const challengeTitle = tData(`${challenge.id}.title`)
+  const challengeCategory = tData(`${challenge.id}.category`)
 
   const isLocked = challenge.status === 'locked'
   const completedCount = days.filter((d) => d.completed).length
 
   const filteredDays =
-    activeLevel === 'Todos' ? days : days.filter((d) => d.level === activeLevel)
+    activeLevel === 'all' ? days : days.filter((d) => d.level === activeLevel)
 
   function isDayUnlocked(day: MockDay): boolean {
     if (isLocked) return false
-    // Day 1 always unlocked; subsequent days unlock after previous is completed
     return day.day_number === 1 || days.find(d => d.day_number === day.day_number - 1)?.completed === true
   }
 
@@ -54,7 +57,6 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
   return (
     <>
       <div className="flex flex-col min-h-screen">
-        {/* Hero */}
         <div className="relative bg-foreground text-background pt-14 pb-6 px-4">
           <button
             onClick={() => router.back()}
@@ -63,7 +65,6 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
             <ArrowLeft size={18} className="text-background" />
           </button>
 
-          {/* Favorite only (removed download) */}
           <button
             onClick={() => setFavorited(f => !f)}
             className="absolute top-4 right-4 w-9 h-9 rounded-full bg-background/10 flex items-center justify-center"
@@ -75,9 +76,9 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
           </button>
 
           <div className="text-6xl mb-4">{challenge.thumbnail_emoji}</div>
-          <h1 className="text-2xl font-black leading-tight mb-1">{challenge.title}</h1>
+          <h1 className="text-2xl font-black leading-tight mb-1">{challengeTitle}</h1>
           <p className="text-background/60 text-sm">
-            {challenge.days_count} {t('workouts')} · {challenge.category}
+            {challenge.days_count} {t('workouts')} · {challengeCategory}
           </p>
 
           {challenge.status === 'active' && (
@@ -105,14 +106,13 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
             )}
           >
             {isLocked
-              ? `🔒 ${t('unlock')}`
+              ? t('unlockEmoji')
               : completedCount > 0
-              ? `${t('continue')} — Dia ${completedCount + 1}`
+              ? t('continueDay', { day: completedCount + 1 })
               : t('start')}
           </button>
         </div>
 
-        {/* Level filter */}
         <div className="px-4 pt-4 pb-2">
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             {LEVELS.map((level) => (
@@ -126,7 +126,7 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
                     : 'bg-background text-muted-foreground border-border'
                 )}
               >
-                {level}
+                {t(level)}
               </button>
             ))}
           </div>
@@ -134,11 +134,10 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
 
         <div className="px-4 py-2">
           <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
-            {filteredDays.length} TREINOS
+            {t('trainingsCount', { count: filteredDays.length })}
           </p>
         </div>
 
-        {/* Day list */}
         <div className="flex-1 px-4 pb-6 space-y-2">
           {filteredDays.map((day) => {
             const unlocked = isDayUnlocked(day)
@@ -150,7 +149,6 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
                 onClick={() => handleDayClick(day)}
                 className="w-full flex items-center gap-3 bg-card border border-border rounded-2xl p-3.5 text-left transition-all active:scale-[0.98]"
               >
-                {/* Thumbnail */}
                 <div className={cn(
                   'w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0',
                   completed ? 'bg-foreground' : 'bg-secondary',
@@ -164,7 +162,7 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-muted-foreground font-medium mb-0.5">{day.level}</p>
+                  <p className="text-[11px] text-muted-foreground font-medium mb-0.5">{t(day.level)}</p>
                   <p className={cn(
                     'font-bold text-sm leading-tight truncate',
                     (!unlocked || isLocked) && 'text-muted-foreground'
@@ -178,7 +176,7 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
                 </div>
 
                 <span className="text-xs text-muted-foreground font-semibold flex-shrink-0">
-                  Dia {day.day_number}
+                  {t('dayLabel', { day: day.day_number })}
                 </span>
               </button>
             )
@@ -186,26 +184,24 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
         </div>
       </div>
 
-      {/* Paywall modal */}
       <PaywallModal
         open={paywallOpen}
         onClose={() => setPaywallOpen(false)}
-        challengeTitle={challenge.title}
+        challengeTitle={challengeTitle}
       />
 
-      {/* Sequential unlock explanation */}
       <Dialog open={sequentialOpen} onOpenChange={setSequentialOpen}>
         <DialogContent className="sm:max-w-xs rounded-3xl text-center p-6 gap-0">
           <div className="text-4xl mb-4">🔒</div>
-          <h3 className="text-lg font-bold mb-2">Aula bloqueada</h3>
+          <h3 className="text-lg font-bold mb-2">{t('lessonLocked')}</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Para melhores resultados, complete as aulas na sequência. Finalize a aula anterior para desbloquear esta.
+            {t('lessonLockedDesc')}
           </p>
           <button
             onClick={() => setSequentialOpen(false)}
             className="mt-5 w-full py-3 bg-foreground text-background rounded-2xl text-sm font-bold"
           >
-            Entendido
+            {t('understood')}
           </button>
         </DialogContent>
       </Dialog>
