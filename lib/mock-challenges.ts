@@ -11,7 +11,6 @@ export interface MockChallenge {
   current_day?: number
 }
 
-// Mock data — will be replaced with Supabase queries after setup
 export const mockChallenges: MockChallenge[] = [
   {
     id: '1',
@@ -34,26 +33,26 @@ export const mockChallenges: MockChallenge[] = [
   },
   {
     id: '3',
-    title: 'Jejum Intermitente',
-    category: 'Nutrição',
-    days_count: 28,
-    thumbnail_emoji: '⏰',
+    title: 'Yoga Facial',
+    category: 'Yoga',
+    days_count: 10,
+    thumbnail_emoji: '✨',
     is_free: false,
     status: 'locked',
   },
   {
     id: '4',
-    title: 'Yoga para Iniciantes',
+    title: 'Yoga na Cadeira',
     category: 'Yoga',
     days_count: 28,
-    thumbnail_emoji: '🌿',
+    thumbnail_emoji: '🪑',
     is_free: false,
     status: 'locked',
   },
   {
     id: '5',
-    title: 'HIIT em 15 Minutos',
-    category: 'HIIT',
+    title: 'Corpo Sexy de Verão',
+    category: 'Fitness',
     days_count: 28,
     thumbnail_emoji: '🔥',
     is_free: false,

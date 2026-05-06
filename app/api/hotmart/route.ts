@@ -6,7 +6,10 @@ const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
 // Offer codes (parâmetro ?off=) — a Hotmart envia em data.purchase.offer.code
 const OFFER_MONTHLY = process.env.HOTMART_OFFER_MONTHLY
 const OFFER_ANNUAL = process.env.HOTMART_OFFER_ANNUAL
-const SUBSCRIPTION_OFFERS = new Set([OFFER_MONTHLY, OFFER_ANNUAL].filter(Boolean))
+const OFFER_TRIAL_ANNUAL = process.env.HOTMART_OFFER_TRIAL_ANNUAL
+const SUBSCRIPTION_OFFERS = new Set(
+  [OFFER_MONTHLY, OFFER_ANNUAL, OFFER_TRIAL_ANNUAL].filter(Boolean)
+)
 
 type HotmartEvent =
   | 'PURCHASE_APPROVED'
@@ -93,7 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (isSubscription) {
-      const planType = offerCode === OFFER_ANNUAL ? 'annual' : 'monthly'
+      const planType = (offerCode === OFFER_ANNUAL || offerCode === OFFER_TRIAL_ANNUAL) ? 'annual' : 'monthly'
       const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
 
       await supabase.from('subscriptions').upsert({
