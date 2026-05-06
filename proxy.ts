@@ -13,42 +13,43 @@ function isAppPath(pathname: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
-  if (isAppPath(request.nextUrl.pathname)) {
-    let response = NextResponse.next({ request })
+  // Always start with intl middleware so unprefixed paths get rewritten to default locale.
+  let response = intlMiddleware(request)
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-            response = NextResponse.next({ request })
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            )
-          },
-        },
-      }
-    )
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      const localeMatch = request.nextUrl.pathname.match(/^\/(pt-BR|es|en)/)
-      const locale = localeMatch ? localeMatch[1] : ''
-      const loginUrl = request.nextUrl.clone()
-      loginUrl.pathname = locale ? `/${locale}/login` : '/login'
-      return NextResponse.redirect(loginUrl)
-    }
-
+  if (!isAppPath(request.nextUrl.pathname)) {
     return response
   }
 
-  return intlMiddleware(request)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          response = intlMiddleware(request)
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    const localeMatch = request.nextUrl.pathname.match(/^\/(pt-BR|es|en)/)
+    const locale = localeMatch ? localeMatch[1] : ''
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = locale ? `/${locale}/login` : '/login'
+    return NextResponse.redirect(loginUrl)
+  }
+
+  return response
 }
 
 export const config = {
