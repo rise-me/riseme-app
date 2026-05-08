@@ -3,6 +3,7 @@ import { Flame, CalendarDays, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { getProgressSummary } from '@/lib/progress-server'
 import { mockChallenges } from '@/lib/mock-challenges'
+import { getCurrentUser } from '@/lib/current-user-server'
 
 export default async function HomePage({
   params,
@@ -13,7 +14,10 @@ export default async function HomePage({
   const t = await getTranslations('home')
   const tData = await getTranslations('challengeData')
 
-  const { streak, progressByChallenge, activeChallengeId } = await getProgressSummary()
+  const [{ streak, progressByChallenge, activeChallengeId }, user] = await Promise.all([
+    getProgressSummary(),
+    getCurrentUser(),
+  ])
 
   const activeChallenge = activeChallengeId
     ? mockChallenges.find((c) => c.id === activeChallengeId)
@@ -38,7 +42,7 @@ export default async function HomePage({
           <p className="text-muted-foreground text-sm mt-0.5">{t('today')}</p>
         </div>
         <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
-          B
+          {user?.initial ?? '?'}
         </div>
       </div>
 

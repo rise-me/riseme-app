@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { getAllProgressForUser } from '@/lib/progress-server'
 import { mockChallenges } from '@/lib/mock-challenges'
+import { getCurrentUser } from '@/lib/current-user-server'
 
 const MINUTES_PER_DAY_AVG = 20
 
@@ -51,7 +52,10 @@ export default async function ProgressPage({
   const { locale } = await params
   const t = await getTranslations('progress')
   const tData = await getTranslations('challengeData')
-  const progress = await getAllProgressForUser()
+  const [progress, user] = await Promise.all([
+    getAllProgressForUser(),
+    getCurrentUser(),
+  ])
 
   const WEEK_DAYS = t('weekDays').split(',')
 
@@ -117,7 +121,7 @@ export default async function ProgressPage({
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
         <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
-          B
+          {user?.initial ?? '?'}
         </div>
       </div>
 

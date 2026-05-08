@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { Timer, Gift, User, HelpCircle, Bell, CreditCard, Globe, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/layout/LogoutButton'
+import { getCurrentUser } from '@/lib/current-user-server'
 
 export default async function MorePage({
   params,
@@ -10,6 +11,7 @@ export default async function MorePage({
 }) {
   const { locale } = await params
   const t = await getTranslations('more')
+  const user = await getCurrentUser()
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
@@ -17,7 +19,7 @@ export default async function MorePage({
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
         <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
-          B
+          {user?.initial ?? '?'}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { ArrowLeft, Camera } from 'lucide-react'
 import Link from 'next/link'
+import { getCurrentUser } from '@/lib/current-user-server'
 
 export default async function ProfilePage({
   params,
@@ -11,6 +12,7 @@ export default async function ProfilePage({
   const t = await getTranslations('profile')
   const tAuth = await getTranslations('auth')
   const tChallenges = await getTranslations('challenges')
+  const user = await getCurrentUser()
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
@@ -27,14 +29,14 @@ export default async function ProfilePage({
       <div className="flex flex-col items-center gap-2 py-2">
         <div className="relative">
           <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-2xl font-black">
-            B
+            {user?.initial ?? '?'}
           </div>
           <button className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-foreground flex items-center justify-center border-2 border-background">
             <Camera size={13} className="text-background" />
           </button>
         </div>
-        <p className="text-base font-bold">Bruno</p>
-        <p className="text-sm text-muted-foreground">brunobarros119@gmail.com</p>
+        <p className="text-base font-bold">{user?.name ?? ''}</p>
+        <p className="text-sm text-muted-foreground">{user?.email ?? ''}</p>
       </div>
 
       <section className="space-y-2">
@@ -42,8 +44,8 @@ export default async function ProfilePage({
           {t('personalDetails')}
         </p>
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
-          <ProfileField label={tAuth('name')} value="Bruno" />
-          <ProfileField label={tAuth('email')} value="brunobarros119@gmail.com" />
+          <ProfileField label={tAuth('name')} value={user?.name ?? ''} />
+          <ProfileField label={tAuth('email')} value={user?.email ?? ''} />
           <ProfileField label={t('fitnessLevel')} value={tChallenges('beginner')} />
         </div>
       </section>
