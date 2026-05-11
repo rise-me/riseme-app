@@ -14,9 +14,8 @@ export const mockChallenges: MockChallenge[] = [
     id: '1',
     days_count: 28,
     thumbnail_emoji: '💪',
-    is_free: true,
-    status: 'active',
-    current_day: 3,
+    is_free: false,
+    status: 'locked',
   },
   {
     id: '2',

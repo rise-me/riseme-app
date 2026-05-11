@@ -132,11 +132,42 @@ export async function POST(request: NextRequest) {
   }
 
   if (event === 'SUBSCRIPTION_CANCELLATION' || event === 'PURCHASE_REFUNDED') {
-    const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
-    await supabase
-      .from('subscriptions')
-      .update({ status: 'canceled' })
-      .eq('stripe_sub_id', subCode)
+    // Look up the user by buyer email — only revoke their own access.
+    const { data: existingUsers } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', buyerEmail)
+      .limit(1)
+
+    if (!existingUsers || existingUsers.length === 0) {
+      return NextResponse.json({ ok: true, skipped: 'user not found' })
+    }
+    const userId = existingUsers[0].id
+
+    if (isSubscription) {
+      const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
+      await supabase
+        .from('subscriptions')
+        .update({ status: 'canceled' })
+        .eq('stripe_sub_id', subCode)
+        .eq('user_id', userId)
+
+      await supabase
+        .from('user_challenges')
+        .delete()
+        .eq('user_id', userId)
+        .eq('access_type', 'subscription')
+    } else {
+      const challengeId = getChallengeIdForProduct(productId)
+      if (challengeId) {
+        await supabase
+          .from('user_challenges')
+          .delete()
+          .eq('user_id', userId)
+          .eq('challenge_id', challengeId)
+          .eq('access_type', 'lifetime')
+      }
+    }
   }
 
   return NextResponse.json({ ok: true })
