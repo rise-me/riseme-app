@@ -115,6 +115,14 @@
     "starter": "Starter",
     "starterBadge": "Plano inicial",
     "starterDesc": "Acesso ao seu desafio e aos treinos gratuitos",
+    "planMonthly": "Mensal",
+    "planAnnual": "Anual",
+    "planLifetime": "Vitalício",
+    "activeBadge": "Ativo",
+    "subscriberDesc": "Você tem acesso a todos os desafios premium",
+    "lifetimeDesc": "Você tem acesso vitalício aos desafios que comprou",
+    "renewsOn": "Renova em {date}",
+    "manageInHotmart": "Gerenciar minha assinatura na Hotmart",
     "unlockAllHeader": "Desbloqueie tudo",
     "unlimitedAccess": "Acesso ilimitado a todos os desafios",
     "benefit1": "Acesso a todos os desafios de 28 dias",
@@ -184,9 +192,6 @@
     "powerUps": "Seus Power-Ups",
     "meals": "Refeições",
     "store": "Loja RiseMe",
-    "referral": "Indicação",
-    "inviteFriend": "Convide um amigo",
-    "gift": "Presente",
     "help": "Central de ajuda",
     "helpCenter": "Ajuda",
     "account": "Conta",
@@ -215,7 +220,9 @@
     "newChallengesDesc": "Aviso quando novos desafios forem adicionados",
     "tipsTitle": "Dicas de bem-estar",
     "tipsDesc": "Dicas semanais para potencializar seus resultados",
-    "autoSaved": "As preferências de notificação serão salvas automaticamente."
+    "autoSaved": "As preferências de notificação serão salvas automaticamente.",
+    "comingSoon": "Em breve",
+    "comingSoonDesc": "Estamos terminando os lembretes diários de treino, notificações de conquistas e avisos de novos desafios. Te avisamos quando estiver pronto."
   },
   "languagePage": {
     "title": "Idioma",
@@ -226,20 +233,6 @@
     "esRegion": "Neutro (América Latina)",
     "enLabel": "English",
     "enRegion": "United States"
-  },
-  "referral": {
-    "title": "Convide um amigo",
-    "earn7Days": "Ganhe 7 dias grátis",
-    "earnDescription": "Para cada amigo que se cadastrar pelo seu link, você ganha 7 dias de acesso premium gratuito.",
-    "yourLink": "Seu link de indicação",
-    "linkCopied": "Link copiado! ✓",
-    "copyLink": "Copiar link",
-    "shareWhatsApp": "Compartilhar no WhatsApp",
-    "whatsappMessage": "Estou usando o RiseMe para meus treinos e tô adorando! 🔥 Baixa pelo meu link e ganhe acesso grátis: {link}",
-    "howItWorks": "Como funciona",
-    "step1": "Compartilhe seu link com amigos",
-    "step2": "Seu amigo se cadastra no RiseMe",
-    "step3": "Você ganha 7 dias de acesso premium"
   },
   "help": {
     "title": "Ajuda",

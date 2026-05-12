@@ -46,9 +46,17 @@ function createAdminClient() {
 }
 
 export async function POST(request: NextRequest) {
-  // Verify hottok
-  const token = request.nextUrl.searchParams.get('hottok')
-  if (HOTMART_TOKEN && token !== HOTMART_TOKEN) {
+  // Fail closed: refuse all webhooks if the secret isn't configured.
+  if (!HOTMART_TOKEN) {
+    console.error('[hotmart] HOTMART_WEBHOOK_TOKEN is not set — rejecting webhook')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
+  }
+
+  // Accept token via header (preferred — doesn't leak in logs) or query string (legacy).
+  const headerToken = request.headers.get('x-hotmart-hottok')
+  const queryToken = request.nextUrl.searchParams.get('hottok')
+  const token = headerToken ?? queryToken
+  if (token !== HOTMART_TOKEN) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server'
-import { Timer, Gift, User, HelpCircle, Bell, CreditCard, Globe, ChevronRight } from 'lucide-react'
+import { Timer, User, HelpCircle, Bell, CreditCard, Globe, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/layout/LogoutButton'
 import { getCurrentUser } from '@/lib/current-user-server'
@@ -44,16 +44,6 @@ export default async function MorePage({
           <MoreLink href={`/${locale}/more/subscription`} icon={<CreditCard size={18} />} label={t('manageSubscription')} />
           <MoreLink href={`/${locale}/more/language`} icon={<Globe size={18} />} label={t('language')} />
           <LogoutButton locale={locale} />
-        </MoreGroup>
-      </section>
-
-      {/* Indicação */}
-      <section className="space-y-2">
-        <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest px-1">
-          {t('referral')}
-        </p>
-        <MoreGroup>
-          <MoreLink href={`/${locale}/more/referral`} icon={<Gift size={18} />} label={t('inviteFriend')} badge={t('gift')} />
         </MoreGroup>
       </section>
 
