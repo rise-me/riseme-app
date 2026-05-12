@@ -196,7 +196,6 @@
     "helpCenter": "Ajuda",
     "account": "Conta",
     "myProfile": "Meu perfil",
-    "notificationsLabel": "Notificações",
     "manageSubscription": "Gerenciar assinatura",
     "language": "Idioma",
     "support": "Suporte",
@@ -209,20 +208,6 @@
     "legal": "Legal e privacidade",
     "termsOfUse": "Termos de uso",
     "privacyPolicy": "Política de privacidade"
-  },
-  "notifications": {
-    "title": "Notificações",
-    "dailyTitle": "Lembrete diário de treino",
-    "dailyDesc": "Receba um lembrete para não perder seu streak",
-    "achievementsTitle": "Conquistas",
-    "achievementsDesc": "Notificações quando desbloquear badges",
-    "newChallengesTitle": "Novos desafios",
-    "newChallengesDesc": "Aviso quando novos desafios forem adicionados",
-    "tipsTitle": "Dicas de bem-estar",
-    "tipsDesc": "Dicas semanais para potencializar seus resultados",
-    "autoSaved": "As preferências de notificação serão salvas automaticamente.",
-    "comingSoon": "Em breve",
-    "comingSoonDesc": "Estamos terminando os lembretes diários de treino, notificações de conquistas e avisos de novos desafios. Te avisamos quando estiver pronto."
   },
   "languagePage": {
     "title": "Idioma",

@@ -196,7 +196,6 @@
     "helpCenter": "Help",
     "account": "Account",
     "myProfile": "My profile",
-    "notificationsLabel": "Notifications",
     "manageSubscription": "Manage subscription",
     "language": "Language",
     "support": "Support",
@@ -209,18 +208,6 @@
     "legal": "Legal and privacy",
     "termsOfUse": "Terms of use",
     "privacyPolicy": "Privacy policy"
-  },
-  "notifications": {
-    "title": "Notifications",
-    "dailyTitle": "Daily workout reminder",
-    "dailyDesc": "Get a reminder so you don't lose your streak",
-    "achievementsTitle": "Achievements",
-    "achievementsDesc": "Notifications when you unlock badges",
-    "newChallengesTitle": "New challenges",
-    "newChallengesDesc": "Alert when new challenges are added",
-    "tipsTitle": "Wellness tips",
-    "tipsDesc": "Weekly tips to boost your results",
-    "autoSaved": "Notification preferences are saved automatically."
   },
   "languagePage": {
     "title": "Language",

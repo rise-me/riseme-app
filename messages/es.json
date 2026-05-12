@@ -196,7 +196,6 @@
     "helpCenter": "Ayuda",
     "account": "Cuenta",
     "myProfile": "Mi perfil",
-    "notificationsLabel": "Notificaciones",
     "manageSubscription": "Gestionar suscripción",
     "language": "Idioma",
     "support": "Soporte",
@@ -209,20 +208,6 @@
     "legal": "Legal y privacidad",
     "termsOfUse": "Términos de uso",
     "privacyPolicy": "Política de privacidad"
-  },
-  "notifications": {
-    "title": "Notificaciones",
-    "dailyTitle": "Recordatorio diario de entrenamiento",
-    "dailyDesc": "Recibe un recordatorio para no perder tu racha",
-    "achievementsTitle": "Logros",
-    "achievementsDesc": "Notificaciones cuando desbloquees insignias",
-    "newChallengesTitle": "Nuevos desafíos",
-    "newChallengesDesc": "Aviso cuando se agreguen nuevos desafíos",
-    "tipsTitle": "Consejos de bienestar",
-    "tipsDesc": "Consejos semanales para potenciar tus resultados",
-    "autoSaved": "Las preferencias de notificación se guardarán automáticamente.",
-    "comingSoon": "Próximamente",
-    "comingSoonDesc": "Estamos terminando los recordatorios diarios de entrenamiento, notificaciones de logros y avisos de nuevos desafíos. Te avisaremos cuando esté listo."
   },
   "languagePage": {
     "title": "Idioma",
