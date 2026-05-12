@@ -38,6 +38,7 @@
     "createAccountUpper": "CREATE ACCOUNT",
     "saveNewPasswordUpper": "SAVE NEW PASSWORD",
     "definePasswordUpper": "SET PASSWORD",
+    "setPasswordSubtitle": "Set your password to access your challenges",
     "sendLinkUpper": "SEND LINK",
     "forgotPassword": "Forgot your password?",
     "continueWithGoogle": "Continue with Google",

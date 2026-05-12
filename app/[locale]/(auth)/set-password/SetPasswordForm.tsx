@@ -19,10 +19,26 @@ export function SetPasswordForm({ locale }: { locale: string }) {
 
   useEffect(() => {
     const supabase = createClient()
+
+    // PKCE flow (new default): ?code=... in query string
+    const code = new URL(window.location.href).searchParams.get('code')
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          setError(t('inviteLinkExpired'))
+        } else {
+          setSessionReady(true)
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+      })
+      return
+    }
+
+    // Implicit flow (legacy): #access_token=...&refresh_token=... in hash
     const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
-    const params = new URLSearchParams(hash)
-    const access_token = params.get('access_token')
-    const refresh_token = params.get('refresh_token')
+    const hashParams = new URLSearchParams(hash)
+    const access_token = hashParams.get('access_token')
+    const refresh_token = hashParams.get('refresh_token')
 
     if (access_token && refresh_token) {
       supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {

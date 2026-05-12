@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { SetPasswordForm } from './SetPasswordForm'
 
 export default async function SetPasswordPage({
@@ -6,6 +7,7 @@ export default async function SetPasswordPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations('auth')
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background">
@@ -15,7 +17,7 @@ export default async function SetPasswordPage({
             Rise<span className="text-sm align-super">Me</span>
           </h1>
           <p className="text-sm text-muted-foreground">
-            Defina sua senha para acessar seus desafios
+            {t('setPasswordSubtitle')}
           </p>
         </div>
         <SetPasswordForm locale={locale} />
