@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getProgressSummary } from '@/lib/progress-server'
 import { mockChallenges } from '@/lib/mock-challenges'
 import { getCurrentUser } from '@/lib/current-user-server'
+import { getUserAccess, canAccessChallenge } from '@/lib/user-access-server'
 
 export default async function HomePage({
   params,
@@ -14,14 +15,22 @@ export default async function HomePage({
   const t = await getTranslations('home')
   const tData = await getTranslations('challengeData')
 
-  const [{ streak, progressByChallenge, activeChallengeId }, user] = await Promise.all([
+  const [{ streak, progressByChallenge, activeChallengeId }, user, access] = await Promise.all([
     getProgressSummary(),
     getCurrentUser(),
+    getUserAccess(),
   ])
 
-  const activeChallenge = activeChallengeId
-    ? mockChallenges.find((c) => c.id === activeChallengeId)
-    : mockChallenges.find((c) => c.is_free) ?? mockChallenges[0]
+  let activeChallenge: typeof mockChallenges[number] | null = null
+  if (activeChallengeId) {
+    const candidate = mockChallenges.find((c) => c.id === activeChallengeId)
+    if (candidate && canAccessChallenge(candidate.id, access)) {
+      activeChallenge = candidate
+    }
+  }
+  if (!activeChallenge) {
+    activeChallenge = mockChallenges.find((c) => canAccessChallenge(c.id, access)) ?? null
+  }
 
   const completedCount = activeChallenge
     ? progressByChallenge.get(activeChallenge.id) ?? 0

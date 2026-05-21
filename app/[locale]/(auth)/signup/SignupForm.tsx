@@ -6,11 +6,9 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 
 export function SignupForm({ locale }: { locale: string }) {
   const t = useTranslations('auth')
-  const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,7 +34,7 @@ export function SignupForm({ locale }: { locale: string }) {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push(`/${locale}/home`)
+      window.location.href = `/${locale}/home`
     }
   }
 
