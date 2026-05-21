@@ -54,7 +54,8 @@
     "linkExpired": "Invalid or expired link. Request a new recovery email.",
     "inviteLinkExpired": "Invalid or expired link. Request a new invitation.",
     "resetLinkSentTitle": "We sent the recovery link",
-    "resetLinkSentDesc": "Check your inbox at {email} and click the link to set a new password."
+    "resetLinkSentDesc": "Check your inbox at {email} and click the link to set a new password.",
+    "requestNewLink": "Request a new link"
   },
   "challenges": {
     "title": "Challenges",

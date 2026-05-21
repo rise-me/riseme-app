@@ -54,7 +54,8 @@
     "linkExpired": "Enlace inválido o expirado. Solicita un nuevo correo de recuperación.",
     "inviteLinkExpired": "Enlace inválido o expirado. Solicita una nueva invitación.",
     "resetLinkSentTitle": "Te enviamos el enlace de recuperación",
-    "resetLinkSentDesc": "Revisa tu bandeja de entrada en {email} y haz clic en el enlace para definir una nueva contraseña."
+    "resetLinkSentDesc": "Revisa tu bandeja de entrada en {email} y haz clic en el enlace para definir una nueva contraseña.",
+    "requestNewLink": "Pedir un nuevo enlace"
   },
   "challenges": {
     "title": "Desafíos",

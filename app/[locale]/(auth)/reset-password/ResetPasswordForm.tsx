@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,12 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionReady, setSessionReady] = useState(false)
+  const [linkExpired, setLinkExpired] = useState(false)
+
+  function markExpired() {
+    setError(t('linkExpired'))
+    setLinkExpired(true)
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -23,7 +30,7 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {
-          setError(t('linkExpired'))
+          markExpired()
         } else {
           setSessionReady(true)
           window.history.replaceState(null, '', window.location.pathname)
@@ -41,7 +48,7 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
     if (access_token && refresh_token) {
       supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
         if (error) {
-          setError(t('linkExpired'))
+          markExpired()
         } else {
           setSessionReady(true)
           window.history.replaceState(null, '', window.location.pathname)
@@ -52,7 +59,7 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
 
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) setSessionReady(true)
-      else setError(t('linkExpired'))
+      else markExpired()
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -107,13 +114,22 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
 
       {error && <p className="text-sm text-destructive text-center">{error}</p>}
 
-      <Button
-        type="submit"
-        disabled={loading || !sessionReady}
-        className="w-full h-12 rounded-xl font-bold tracking-wide text-sm bg-foreground text-background hover:bg-foreground/90"
-      >
-        {loading ? '...' : t('saveNewPasswordUpper')}
-      </Button>
+      {linkExpired ? (
+        <Link
+          href={`/${locale}/forgot-password`}
+          className="block w-full h-12 rounded-xl font-bold tracking-wide text-sm bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center"
+        >
+          {t('requestNewLink')}
+        </Link>
+      ) : (
+        <Button
+          type="submit"
+          disabled={loading || !sessionReady}
+          className="w-full h-12 rounded-xl font-bold tracking-wide text-sm bg-foreground text-background hover:bg-foreground/90"
+        >
+          {loading ? '...' : t('saveNewPasswordUpper')}
+        </Button>
+      )}
     </form>
   )
 }
