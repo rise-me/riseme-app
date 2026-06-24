@@ -9,6 +9,7 @@ import type { MockChallenge } from '@/lib/mock-challenges'
 import type { MockDay, LevelKey } from '@/lib/mock-challenge-days'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { track } from '@/lib/posthog/track'
 
 type LevelFilter = 'all' | LevelKey
 const LEVELS: LevelFilter[] = ['all', 'beginner', 'intermediate', 'advanced']
@@ -97,7 +98,16 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
           )}
 
           <button
-            onClick={() => isLocked ? setPaywallOpen(true) : handleDayClick(days[completedCount] ?? days[0])}
+            onClick={() => {
+              if (isLocked) {
+                setPaywallOpen(true)
+                return
+              }
+              if (completedCount === 0) {
+                track('challenge_started', { challenge_id: challenge.id, challenge_title: challengeTitle })
+              }
+              handleDayClick(days[completedCount] ?? days[0])
+            }}
             className={cn(
               'mt-5 w-full py-3.5 rounded-2xl text-sm font-bold tracking-wide',
               isLocked

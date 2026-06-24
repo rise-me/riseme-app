@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { track } from '@/lib/posthog/track'
 
 export function SignupForm({ locale }: { locale: string }) {
   const t = useTranslations('auth')
@@ -34,6 +35,7 @@ export function SignupForm({ locale }: { locale: string }) {
       setError(error.message)
       setLoading(false)
     } else {
+      track('signup_completed', { locale })
       window.location.href = `/${locale}/home`
     }
   }

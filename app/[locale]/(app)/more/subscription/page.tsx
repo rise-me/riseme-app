@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCircle2, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { getUserAccess } from '@/lib/user-access-server'
 import { createClient } from '@/lib/supabase/server'
+import { PaywallPageTracker } from './PaywallPageTracker'
 
 type Subscription = {
   plan_type: string | null
@@ -110,6 +111,8 @@ export default async function SubscriptionPage({
           </a>
         )}
       </div>
+
+      {showUpsell && <PaywallPageTracker currentPlan={planLabel} />}
 
       {showUpsell && (
         <div className="bg-foreground text-background rounded-2xl p-5 space-y-4">

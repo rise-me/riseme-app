@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { X, SkipBack, SkipForward } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { markDayComplete } from '@/lib/progress'
+import { track } from '@/lib/posthog/track'
 import type { MockChallenge } from '@/lib/mock-challenges'
 import type { MockDay } from '@/lib/mock-challenge-days'
 
@@ -101,11 +102,23 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
         setElapsed(t)
         if (d > 0 && t / d >= 0.8 && !savedRef.current) {
           savedRef.current = true
+          const watchedPct = Math.round((t / d) * 100)
           markDayComplete({
             challengeId: challenge.id,
             dayNumber: currentDayNumber,
-            watchedPct: Math.round((t / d) * 100),
+            watchedPct,
           }).catch((err) => console.error('[progress] failed to save:', err))
+          track('workout_completed', {
+            challenge_id: challenge.id,
+            day_number: currentDayNumber,
+            watched_pct: watchedPct,
+          })
+          if (currentDayNumber >= days.length) {
+            track('challenge_finished', {
+              challenge_id: challenge.id,
+              total_days: days.length,
+            })
+          }
         }
       }, 1000)
     })

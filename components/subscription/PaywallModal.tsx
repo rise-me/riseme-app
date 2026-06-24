@@ -3,7 +3,8 @@
 import { CheckCircle2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { track } from '@/lib/posthog/track'
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,12 @@ interface PaywallModalProps {
 export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProps) {
   const t = useTranslations('subscription')
   const [selectedPlan, setSelectedPlan] = useState<Plan>('annual')
+
+  useEffect(() => {
+    if (open) {
+      track('paywall_viewed', { source: 'modal', challenge_title: challengeTitle ?? null })
+    }
+  }, [open, challengeTitle])
 
   const plans = {
     annual: {
@@ -134,6 +141,7 @@ export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProp
               const url = selectedPlan === 'annual'
                 ? process.env.NEXT_PUBLIC_HOTMART_CHECKOUT_ANNUAL
                 : process.env.NEXT_PUBLIC_HOTMART_CHECKOUT_MONTHLY
+              track('subscription_clicked', { plan: selectedPlan, source: 'modal' })
               if (url) window.location.href = url
             }}
             className="w-full py-4 bg-foreground text-background rounded-2xl text-sm font-bold tracking-wide"
