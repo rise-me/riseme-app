@@ -1,9 +1,8 @@
 import { getTranslations } from 'next-intl/server'
-import { ArrowLeft, CheckCircle2, ExternalLink } from 'lucide-react'
+import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { getUserAccess } from '@/lib/user-access-server'
 import { createClient } from '@/lib/supabase/server'
-import { PaywallPageTracker } from './PaywallPageTracker'
 
 type Subscription = {
   plan_type: string | null
@@ -29,7 +28,6 @@ export default async function SubscriptionPage({
 }) {
   const { locale } = await params
   const t = await getTranslations('subscriptionPage')
-  const tSub = await getTranslations('subscription')
 
   const access = await getUserAccess()
   const subscription =
@@ -61,9 +59,6 @@ export default async function SubscriptionPage({
           year: 'numeric',
         })
       : null
-
-  const benefits = [t('benefit1'), t('benefit2'), t('benefit3'), t('benefit4')]
-  const showUpsell = !hasSubscription
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
@@ -112,59 +107,6 @@ export default async function SubscriptionPage({
         )}
       </div>
 
-      {showUpsell && <PaywallPageTracker currentPlan={planLabel} />}
-
-      {showUpsell && (
-        <div className="bg-foreground text-background rounded-2xl p-5 space-y-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-background/60 mb-1">
-              {t('unlockAllHeader')}
-            </p>
-            <p className="text-xl font-black leading-tight">{t('unlimitedAccess')}</p>
-          </div>
-
-          <div className="space-y-2">
-            {benefits.map((b) => (
-              <div key={b} className="flex items-center gap-2.5">
-                <CheckCircle2 size={15} className="text-background/70 flex-shrink-0" />
-                <span className="text-sm text-background/80">{b}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between bg-background/10 rounded-xl px-4 py-3 border border-background/20">
-              <div>
-                <p className="text-sm font-bold">{tSub('annual')}</p>
-                <p className="text-xs text-background/60">{t('annualRenewal')}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-black">$19</p>
-                <p className="text-xs text-background/60">{tSub('perYear')}</p>
-              </div>
-              <span className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-400/20 text-green-300">
-                {t('save70')}
-              </span>
-            </div>
-            <div className="flex items-center justify-between bg-background/5 rounded-xl px-4 py-3 border border-background/10">
-              <div>
-                <p className="text-sm font-bold">{tSub('monthly')}</p>
-                <p className="text-xs text-background/60">{t('monthlyRenewal')}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-black">$7</p>
-                <p className="text-xs text-background/60">{tSub('perMonth')}</p>
-              </div>
-            </div>
-          </div>
-
-          <button className="w-full py-4 bg-background text-foreground rounded-2xl text-sm font-bold tracking-wide">
-            {tSub('unlockAccess')}
-          </button>
-
-          <p className="text-center text-xs text-background/40">{tSub('cancelAnytime')}</p>
-        </div>
-      )}
     </div>
   )
 }
