@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirma tu nuevo correo</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#F5F0E8; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#262626;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5F0E8; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px; width:100%; background-color:#FAF7F2; border-radius:20px; overflow:hidden;">
+            <tr>
+              <td style="padding:40px 40px 24px 40px;">
+                <p style="margin:0; font-size:14px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#7A7361;">RiseMe</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 40px 8px 40px;">
+                <h1 style="margin:0; font-size:28px; line-height:1.2; font-weight:800; color:#171717;">Confirma tu nuevo correo</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 8px 40px;">
+                <p style="margin:0; font-size:16px; line-height:1.6; color:#262626;">
+                  Solicitaste cambiar el correo de tu cuenta a <strong style="color:#171717;">{{ .NewEmail }}</strong>. Confirma este cambio haciendo clic en el botón de abajo.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 8px 40px;">
+                <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change" style="display:inline-block; background-color:#171717; color:#FFFFFF; text-decoration:none; font-weight:700; font-size:16px; padding:16px 32px; border-radius:999px;">
+                  Confirmar nuevo correo
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 8px 40px;">
+                <p style="margin:0; font-size:14px; line-height:1.6; color:#7A7361;">
+                  Si el botón no funciona, copia y pega este enlace en tu navegador:
+                </p>
+                <p style="margin:8px 0 0 0; font-size:13px; line-height:1.5; color:#171717; word-break:break-all;">
+                  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change" style="color:#171717; text-decoration:underline;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 40px 40px 40px; border-top:1px solid #E8E2D5;">
+                <p style="margin:24px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  Si no fuiste tú quien solicitó este cambio, ignora este correo y considera cambiar tu contraseña.
+                </p>
+                <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  Con cariño,<br />El equipo RiseMe
+                </p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:24px 0 0 0; font-size:12px; color:#A39A88;">
+            RiseMe · riseme.app
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
