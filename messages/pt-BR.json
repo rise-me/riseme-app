@@ -60,7 +60,12 @@
     "checkYourEmailTitle": "Verifica seu email",
     "checkYourEmailDesc": "Enviamos um link de confirmação para {email}. Clique nele para ativar sua conta.",
     "resendConfirmation": "Reenviar email",
-    "confirmationResent": "Email reenviado ✓",
+    "resendIn": "Reenviar em {seconds}s...",
+    "noLoEncuentras": "Não encontrou? Verifique sua pasta de spam ou tente novamente:",
+    "emailAlreadyExistsTitle": "Este email já tem uma conta",
+    "emailAlreadyExistsDesc": "{email} já está cadastrado. Faça login ou recupere sua senha.",
+    "loginInstead": "Fazer login",
+    "recoverPasswordInstead": "Recuperar senha",
     "invalidCredentialsDetailed": "Email ou senha incorretos. Se você acabou de criar sua conta, confirme primeiro o link que enviamos para seu email."
   },
   "challenges": {

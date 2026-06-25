@@ -4,9 +4,12 @@ import { useTranslations } from 'next-intl'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { track } from '@/lib/posthog/track'
+import Link from 'next/link'
+
+const RESEND_COOLDOWN_SECONDS = 60
 
 export function SignupForm({ locale }: { locale: string }) {
   const t = useTranslations('auth')
@@ -17,8 +20,15 @@ export function SignupForm({ locale }: { locale: string }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
+  const [accountAlreadyExisted, setAccountAlreadyExisted] = useState(false)
   const [resending, setResending] = useState(false)
-  const [resent, setResent] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const id = setInterval(() => setCooldown((s) => Math.max(0, s - 1)), 1000)
+    return () => clearInterval(id)
+  }, [cooldown])
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -29,7 +39,7 @@ export function SignupForm({ locale }: { locale: string }) {
     setLoading(true)
     setError(null)
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { name } },
@@ -37,20 +47,60 @@ export function SignupForm({ locale }: { locale: string }) {
     if (error) {
       setError(error.message)
       setLoading(false)
+      return
+    }
+    const isDuplicate = (data?.user?.identities?.length ?? 0) === 0
+    if (isDuplicate) {
+      setAccountAlreadyExisted(true)
+      setSubmittedEmail(email)
     } else {
       track('signup_completed', { locale })
+      setCooldown(RESEND_COOLDOWN_SECONDS)
       setSubmittedEmail(email)
-      setLoading(false)
     }
+    setLoading(false)
   }
 
   async function handleResend() {
-    if (!submittedEmail || resending || resent) return
+    if (!submittedEmail || resending || cooldown > 0) return
     setResending(true)
     const supabase = createClient()
-    const { error } = await supabase.auth.resend({ type: 'signup', email: submittedEmail })
+    await supabase.auth.resend({ type: 'signup', email: submittedEmail })
     setResending(false)
-    if (!error) setResent(true)
+    setCooldown(RESEND_COOLDOWN_SECONDS)
+  }
+
+  if (submittedEmail && accountAlreadyExisted) {
+    return (
+      <div className="w-full space-y-4">
+        <div className="text-center space-y-3 bg-card border border-border rounded-2xl p-6">
+          <p className="text-3xl">🔑</p>
+          <p className="text-sm font-semibold">{t('emailAlreadyExistsTitle')}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('emailAlreadyExistsDesc', { email: submittedEmail })}
+          </p>
+          <div className="space-y-2 pt-2">
+            <Link href={`/${locale}/login`} className="block">
+              <Button
+                type="button"
+                className="w-full h-11 rounded-xl text-sm font-bold tracking-wide bg-foreground text-background hover:bg-foreground/90"
+              >
+                {t('loginInstead')}
+              </Button>
+            </Link>
+            <Link href={`/${locale}/forgot-password`} className="block">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-11 rounded-xl text-sm font-semibold"
+              >
+                {t('recoverPasswordInstead')}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (submittedEmail) {
@@ -62,14 +112,21 @@ export function SignupForm({ locale }: { locale: string }) {
           <p className="text-xs text-muted-foreground">
             {t('checkYourEmailDesc', { email: submittedEmail })}
           </p>
+          <p className="text-xs text-muted-foreground pt-2">
+            {t('noLoEncuentras')}
+          </p>
           <Button
             type="button"
             onClick={handleResend}
-            disabled={resending || resent}
+            disabled={resending || cooldown > 0}
             variant="outline"
             className="w-full h-11 rounded-xl text-sm font-semibold"
           >
-            {resent ? t('confirmationResent') : resending ? '...' : t('resendConfirmation')}
+            {cooldown > 0
+              ? t('resendIn', { seconds: cooldown })
+              : resending
+              ? '...'
+              : t('resendConfirmation')}
           </Button>
         </div>
       </div>
