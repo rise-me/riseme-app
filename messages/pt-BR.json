@@ -66,6 +66,8 @@
     "emailAlreadyExistsDesc": "{email} já está cadastrado. Faça login ou recupere sua senha.",
     "loginInstead": "Fazer login",
     "recoverPasswordInstead": "Recuperar senha",
+    "stillNotReceivingTitle": "Continua sem receber o email?",
+    "stillNotReceivingDesc": "Verifique se {email} está correto. Se já tem uma conta:",
     "invalidCredentialsDetailed": "Email ou senha incorretos. Se você acabou de criar sua conta, confirme primeiro o link que enviamos para seu email."
   },
   "challenges": {

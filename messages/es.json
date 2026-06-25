@@ -66,6 +66,8 @@
     "emailAlreadyExistsDesc": "{email} ya está registrado. Inicia sesión o recupera tu contraseña.",
     "loginInstead": "Iniciar sesión",
     "recoverPasswordInstead": "Recuperar contraseña",
+    "stillNotReceivingTitle": "¿Sigues sin recibir el correo?",
+    "stillNotReceivingDesc": "Verifica que {email} sea correcto. Si ya tienes cuenta:",
     "invalidCredentialsDetailed": "Correo o contraseña incorrectos. Si recién creaste tu cuenta, confirma primero el enlace que enviamos a tu correo."
   },
   "challenges": {

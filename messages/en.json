@@ -66,6 +66,8 @@
     "emailAlreadyExistsDesc": "{email} is already registered. Log in or recover your password.",
     "loginInstead": "Log in",
     "recoverPasswordInstead": "Recover password",
+    "stillNotReceivingTitle": "Still not getting the email?",
+    "stillNotReceivingDesc": "Make sure {email} is correct. If you already have an account:",
     "invalidCredentialsDetailed": "Wrong email or password. If you just created your account, confirm the link we sent to your email first."
   },
   "challenges": {

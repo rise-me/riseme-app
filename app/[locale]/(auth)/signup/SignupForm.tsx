@@ -10,6 +10,7 @@ import { track } from '@/lib/posthog/track'
 import Link from 'next/link'
 
 const RESEND_COOLDOWN_SECONDS = 60
+const MAX_RESEND_ATTEMPTS = 2
 
 export function SignupForm({ locale }: { locale: string }) {
   const t = useTranslations('auth')
@@ -23,6 +24,7 @@ export function SignupForm({ locale }: { locale: string }) {
   const [accountAlreadyExisted, setAccountAlreadyExisted] = useState(false)
   const [resending, setResending] = useState(false)
   const [cooldown, setCooldown] = useState(0)
+  const [resendAttempts, setResendAttempts] = useState(0)
 
   useEffect(() => {
     if (cooldown <= 0) return
@@ -62,12 +64,13 @@ export function SignupForm({ locale }: { locale: string }) {
   }
 
   async function handleResend() {
-    if (!submittedEmail || resending || cooldown > 0) return
+    if (!submittedEmail || resending || cooldown > 0 || resendAttempts >= MAX_RESEND_ATTEMPTS) return
     setResending(true)
     const supabase = createClient()
     await supabase.auth.resend({ type: 'signup', email: submittedEmail })
     setResending(false)
     setCooldown(RESEND_COOLDOWN_SECONDS)
+    setResendAttempts((n) => n + 1)
   }
 
   if (submittedEmail && accountAlreadyExisted) {
@@ -104,6 +107,7 @@ export function SignupForm({ locale }: { locale: string }) {
   }
 
   if (submittedEmail) {
+    const reachedLimit = resendAttempts >= MAX_RESEND_ATTEMPTS && cooldown === 0
     return (
       <div className="w-full space-y-4">
         <div className="text-center space-y-3 bg-card border border-border rounded-2xl p-6">
@@ -118,7 +122,7 @@ export function SignupForm({ locale }: { locale: string }) {
           <Button
             type="button"
             onClick={handleResend}
-            disabled={resending || cooldown > 0}
+            disabled={resending || cooldown > 0 || resendAttempts >= MAX_RESEND_ATTEMPTS}
             variant="outline"
             className="w-full h-11 rounded-xl text-sm font-semibold"
           >
@@ -129,6 +133,34 @@ export function SignupForm({ locale }: { locale: string }) {
               : t('resendConfirmation')}
           </Button>
         </div>
+
+        {reachedLimit && (
+          <div className="text-center space-y-3 bg-card border border-border rounded-2xl p-6">
+            <p className="text-sm font-semibold">{t('stillNotReceivingTitle')}</p>
+            <p className="text-xs text-muted-foreground">
+              {t('stillNotReceivingDesc', { email: submittedEmail })}
+            </p>
+            <div className="space-y-2 pt-2">
+              <Link href={`/${locale}/login`} className="block">
+                <Button
+                  type="button"
+                  className="w-full h-11 rounded-xl text-sm font-bold tracking-wide bg-foreground text-background hover:bg-foreground/90"
+                >
+                  {t('loginInstead')}
+                </Button>
+              </Link>
+              <Link href={`/${locale}/forgot-password`} className="block">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-11 rounded-xl text-sm font-semibold"
+                >
+                  {t('recoverPasswordInstead')}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
