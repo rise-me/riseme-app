@@ -56,7 +56,12 @@
     "resetLinkSentTitle": "We sent the recovery link",
     "resetLinkSentDesc": "Check your inbox at {email} and click the link to set a new password.",
     "requestNewLink": "Request a new link",
-    "verifyingLink": "Verifying your link..."
+    "verifyingLink": "Verifying your link...",
+    "checkYourEmailTitle": "Check your email",
+    "checkYourEmailDesc": "We sent a confirmation link to {email}. Click it to activate your account.",
+    "resendConfirmation": "Resend email",
+    "confirmationResent": "Email resent ✓",
+    "invalidCredentialsDetailed": "Wrong email or password. If you just created your account, confirm the link we sent to your email first."
   },
   "challenges": {
     "title": "Challenges",

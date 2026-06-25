@@ -16,6 +16,9 @@ export function SignupForm({ locale }: { locale: string }) {
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
+  const [resending, setResending] = useState(false)
+  const [resent, setResent] = useState(false)
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -36,8 +39,41 @@ export function SignupForm({ locale }: { locale: string }) {
       setLoading(false)
     } else {
       track('signup_completed', { locale })
-      window.location.href = `/${locale}/home`
+      setSubmittedEmail(email)
+      setLoading(false)
     }
+  }
+
+  async function handleResend() {
+    if (!submittedEmail || resending || resent) return
+    setResending(true)
+    const supabase = createClient()
+    const { error } = await supabase.auth.resend({ type: 'signup', email: submittedEmail })
+    setResending(false)
+    if (!error) setResent(true)
+  }
+
+  if (submittedEmail) {
+    return (
+      <div className="w-full space-y-4">
+        <div className="text-center space-y-3 bg-card border border-border rounded-2xl p-6">
+          <p className="text-3xl">📧</p>
+          <p className="text-sm font-semibold">{t('checkYourEmailTitle')}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('checkYourEmailDesc', { email: submittedEmail })}
+          </p>
+          <Button
+            type="button"
+            onClick={handleResend}
+            disabled={resending || resent}
+            variant="outline"
+            className="w-full h-11 rounded-xl text-sm font-semibold"
+          >
+            {resent ? t('confirmationResent') : resending ? '...' : t('resendConfirmation')}
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (

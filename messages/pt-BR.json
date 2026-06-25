@@ -56,7 +56,12 @@
     "resetLinkSentTitle": "Enviamos o link de recuperação",
     "resetLinkSentDesc": "Confira sua caixa de entrada em {email} e clique no link para definir uma nova senha.",
     "requestNewLink": "Pedir novo link",
-    "verifyingLink": "Verificando seu link..."
+    "verifyingLink": "Verificando seu link...",
+    "checkYourEmailTitle": "Verifica seu email",
+    "checkYourEmailDesc": "Enviamos um link de confirmação para {email}. Clique nele para ativar sua conta.",
+    "resendConfirmation": "Reenviar email",
+    "confirmationResent": "Email reenviado ✓",
+    "invalidCredentialsDetailed": "Email ou senha incorretos. Se você acabou de criar sua conta, confirme primeiro o link que enviamos para seu email."
   },
   "challenges": {
     "title": "Desafios",

@@ -22,7 +22,8 @@ export function LoginForm({ locale }: { locale: string }) {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      setError(error.message)
+      const isInvalidCreds = /invalid login credentials/i.test(error.message)
+      setError(isInvalidCreds ? t('invalidCredentialsDetailed') : error.message)
       setLoading(false)
     } else {
       window.location.href = `/${locale}/home`

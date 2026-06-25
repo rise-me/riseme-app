@@ -56,7 +56,12 @@
     "resetLinkSentTitle": "Te enviamos el enlace de recuperación",
     "resetLinkSentDesc": "Revisa tu bandeja de entrada en {email} y haz clic en el enlace para definir una nueva contraseña.",
     "requestNewLink": "Pedir un nuevo enlace",
-    "verifyingLink": "Verificando tu enlace..."
+    "verifyingLink": "Verificando tu enlace...",
+    "checkYourEmailTitle": "Revisa tu correo",
+    "checkYourEmailDesc": "Te enviamos un enlace de confirmación a {email}. Haz clic en él para activar tu cuenta.",
+    "resendConfirmation": "Reenviar correo",
+    "confirmationResent": "Correo reenviado ✓",
+    "invalidCredentialsDetailed": "Correo o contraseña incorrectos. Si recién creaste tu cuenta, confirma primero el enlace que enviamos a tu correo."
   },
   "challenges": {
     "title": "Desafíos",
