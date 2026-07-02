@@ -4,12 +4,19 @@ import { NextRequest, NextResponse } from 'next/server'
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
 
 // Offer codes (parâmetro ?off=) — a Hotmart envia em data.purchase.offer.code
-const OFFER_MONTHLY = process.env.HOTMART_OFFER_MONTHLY
-const OFFER_ANNUAL = process.env.HOTMART_OFFER_ANNUAL
-const OFFER_TRIAL_ANNUAL = process.env.HOTMART_OFFER_TRIAL_ANNUAL
-const SUBSCRIPTION_OFFERS = new Set(
-  [OFFER_MONTHLY, OFFER_ANNUAL, OFFER_TRIAL_ANNUAL].filter(Boolean)
-)
+// Cada env aceita lista separada por vírgula: ofertas antigas e novas convivem
+// (assinantes do preço antigo continuam tendo cancelamento/reembolso processados).
+function parseOfferList(value?: string): Set<string> {
+  return new Set((value ?? '').split(',').map((s) => s.trim()).filter(Boolean))
+}
+const MONTHLY_OFFERS = parseOfferList(process.env.HOTMART_OFFER_MONTHLY)
+const ANNUAL_OFFERS = parseOfferList(process.env.HOTMART_OFFER_ANNUAL)
+const TRIAL_ANNUAL_OFFERS = parseOfferList(process.env.HOTMART_OFFER_TRIAL_ANNUAL)
+const SUBSCRIPTION_OFFERS = new Set([
+  ...MONTHLY_OFFERS,
+  ...ANNUAL_OFFERS,
+  ...TRIAL_ANNUAL_OFFERS,
+])
 
 type HotmartEvent =
   | 'PURCHASE_APPROVED'
@@ -104,7 +111,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (isSubscription) {
-      const planType = (offerCode === OFFER_ANNUAL || offerCode === OFFER_TRIAL_ANNUAL) ? 'annual' : 'monthly'
+      const planType =
+        offerCode && (ANNUAL_OFFERS.has(offerCode) || TRIAL_ANNUAL_OFFERS.has(offerCode))
+          ? 'annual'
+          : 'monthly'
       const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
 
       await supabase.from('subscriptions').upsert({

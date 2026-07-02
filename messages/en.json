@@ -142,10 +142,7 @@
     "benefit1": "Access to all 28-day challenges",
     "benefit2": "Calisthenics, Pilates, Yoga, HIIT and more",
     "benefit3": "Progress saved and daily streak",
-    "benefit4": "New challenges added every month",
-    "annualRenewal": "Renews at $49/year",
-    "monthlyRenewal": "Renews at $14.90/month",
-    "save70": "-70%"
+    "benefit4": "New challenges added every month"
   },
   "progress": {
     "title": "Progress",
@@ -267,7 +264,7 @@
     "kcal": "KCAL",
     "lovingThisWorkout": "Loving this workout?",
     "unlockSubscription": "Unlock all challenges with a subscription",
-    "save70": "Save 70%",
+    "saveBadge": "Save 89%",
     "benefit1": "28 days of guided training",
     "benefit2": "Calisthenics, Pilates and Yoga challenges",
     "benefit3": "Saved progress and daily streak",
@@ -275,73 +272,200 @@
     "backToWorkouts": "Back to workouts"
   },
   "challengeData": {
-    "1": { "title": "Calisthenics at Home", "category": "Calisthenics" },
-    "2": { "title": "Wall Pilates", "category": "Pilates" },
-    "3": { "title": "Facial Yoga", "category": "Yoga" },
-    "4": { "title": "Chair Yoga", "category": "Yoga" },
-    "5": { "title": "Summer Sexy Body", "category": "Fitness" }
+    "1": {
+      "title": "Calisthenics at Home",
+      "category": "Calisthenics"
+    },
+    "2": {
+      "title": "Wall Pilates",
+      "category": "Pilates"
+    },
+    "3": {
+      "title": "Facial Yoga",
+      "category": "Yoga"
+    },
+    "4": {
+      "title": "Chair Yoga",
+      "category": "Yoga"
+    },
+    "5": {
+      "title": "Summer Sexy Body",
+      "category": "Fitness"
+    }
   },
   "challengeDays": {
     "1": [
-      "Warm-up and Mobility", "Arm Strength", "Core and Abs", "Squats and Glutes",
-      "Push and Pull", "Active Cardio", "Active Recovery", "Muscular Endurance",
-      "Power and Explosion", "Balance and Stability", "Total Strength", "Short Intervals",
-      "Legs and Posterior", "Shoulders and Trapezius", "Deep Core", "Active Rest",
-      "Arm Strength II", "Glutes and Posterior", "Cardio and Core", "Flexibility",
-      "Total Strength II", "Muscular Power", "Advanced Mobility", "Cardio Endurance",
-      "Strength and Control", "Full Workout", "Final Challenge", "Celebration and Recovery"
+      "Warm-up and Mobility",
+      "Arm Strength",
+      "Core and Abs",
+      "Squats and Glutes",
+      "Push and Pull",
+      "Active Cardio",
+      "Active Recovery",
+      "Muscular Endurance",
+      "Power and Explosion",
+      "Balance and Stability",
+      "Total Strength",
+      "Short Intervals",
+      "Legs and Posterior",
+      "Shoulders and Trapezius",
+      "Deep Core",
+      "Active Rest",
+      "Arm Strength II",
+      "Glutes and Posterior",
+      "Cardio and Core",
+      "Flexibility",
+      "Total Strength II",
+      "Muscular Power",
+      "Advanced Mobility",
+      "Cardio Endurance",
+      "Strength and Control",
+      "Full Workout",
+      "Final Challenge",
+      "Celebration and Recovery"
     ],
     "2": [
-      "Wall Introduction", "Posture and Alignment", "Glutes on the Wall", "Legs and Hips",
-      "Core and Stability", "Spine Mobility", "Deep Stretching", "Leg Strength",
-      "Wall Balance", "Advanced Glutes", "Inner Thigh", "Total Posture",
-      "Pilates Cardio", "Deep Abs", "Hip and Spine", "Recovery",
-      "Defined Legs", "Firm Glutes", "Advanced Core", "Total Mobility",
-      "Strength and Flexibility", "Intense Pilates", "Premium Posture", "Total Balance",
-      "Connected Body", "Complete Pilates", "Final Challenge", "Achievement and Celebration"
+      "Wall Introduction",
+      "Posture and Alignment",
+      "Glutes on the Wall",
+      "Legs and Hips",
+      "Core and Stability",
+      "Spine Mobility",
+      "Deep Stretching",
+      "Leg Strength",
+      "Wall Balance",
+      "Advanced Glutes",
+      "Inner Thigh",
+      "Total Posture",
+      "Pilates Cardio",
+      "Deep Abs",
+      "Hip and Spine",
+      "Recovery",
+      "Defined Legs",
+      "Firm Glutes",
+      "Advanced Core",
+      "Total Mobility",
+      "Strength and Flexibility",
+      "Intense Pilates",
+      "Premium Posture",
+      "Total Balance",
+      "Connected Body",
+      "Complete Pilates",
+      "Final Challenge",
+      "Achievement and Celebration"
     ],
     "3": [
-      "Awakening Facial Muscles", "Cheek Toning", "Jawline",
-      "Eyes and Eyelids", "Neck and Double Chin", "Forehead and Eyebrows", "Lips and Smile",
-      "Facial Lymphatic Drainage", "Total Rejuvenation", "Glow and Firmness"
+      "Awakening Facial Muscles",
+      "Cheek Toning",
+      "Jawline",
+      "Eyes and Eyelids",
+      "Neck and Double Chin",
+      "Forehead and Eyebrows",
+      "Lips and Smile",
+      "Facial Lymphatic Drainage",
+      "Total Rejuvenation",
+      "Glow and Firmness"
     ],
     "4": [
-      "Chair Warm-up", "Neck and Shoulders", "Spine and Posture", "Hip and Pelvis",
-      "Legs and Feet", "Seated Core", "Breath and Calm", "Arm Mobility",
-      "Lateral Stretching", "Seated Balance", "Spine Flexibility", "Tension Release",
-      "Energy and Vitality", "Royal Posture", "Healthy Spine", "Active Recovery",
-      "Total Mobility", "Free Joints", "Feet and Ankles", "Open Hip",
-      "Strong Back", "Core and Balance", "Gentle Yoga", "Deep Breathing",
-      "Mind-Body Connection", "Energetic Yoga", "Final Challenge", "Celebration and Gratitude"
+      "Chair Warm-up",
+      "Neck and Shoulders",
+      "Spine and Posture",
+      "Hip and Pelvis",
+      "Legs and Feet",
+      "Seated Core",
+      "Breath and Calm",
+      "Arm Mobility",
+      "Lateral Stretching",
+      "Seated Balance",
+      "Spine Flexibility",
+      "Tension Release",
+      "Energy and Vitality",
+      "Royal Posture",
+      "Healthy Spine",
+      "Active Recovery",
+      "Total Mobility",
+      "Free Joints",
+      "Feet and Ankles",
+      "Open Hip",
+      "Strong Back",
+      "Core and Balance",
+      "Gentle Yoga",
+      "Deep Breathing",
+      "Mind-Body Connection",
+      "Energetic Yoga",
+      "Final Challenge",
+      "Celebration and Gratitude"
     ],
     "5": [
-      "Body Activation", "Summer Glutes", "Defined Waist", "Toned Legs",
-      "Flat Abs", "Burning Cardio", "Defined Arms", "Advanced Glutes",
-      "Inner Thigh", "Summer HIIT", "Sexy Posture", "Slim Waist",
-      "Legs and Glutes", "Intense Cardio", "Total Core", "Active Recovery",
-      "Firm Glutes", "Defined Abs", "Accelerated Cardio", "Toned Legs",
-      "Connected Body", "Full Workout", "Waist and Hip", "Advanced HIIT",
-      "Total Endurance", "Sculpted Body", "Final Challenge", "Summer Celebration"
+      "Body Activation",
+      "Summer Glutes",
+      "Defined Waist",
+      "Toned Legs",
+      "Flat Abs",
+      "Burning Cardio",
+      "Defined Arms",
+      "Advanced Glutes",
+      "Inner Thigh",
+      "Summer HIIT",
+      "Sexy Posture",
+      "Slim Waist",
+      "Legs and Glutes",
+      "Intense Cardio",
+      "Total Core",
+      "Active Recovery",
+      "Firm Glutes",
+      "Defined Abs",
+      "Accelerated Cardio",
+      "Toned Legs",
+      "Connected Body",
+      "Full Workout",
+      "Waist and Hip",
+      "Advanced HIIT",
+      "Total Endurance",
+      "Sculpted Body",
+      "Final Challenge",
+      "Summer Celebration"
     ]
   },
   "workoutData": {
-    "w1": { "title": "10-min Express Workout", "description": "Burn calories fast with no equipment" },
-    "w2": { "title": "Total Stretching", "description": "Relax and improve your flexibility" },
-    "w3": { "title": "Strong Core", "description": "Strengthen your abs and lower back" }
+    "w1": {
+      "title": "10-min Express Workout",
+      "description": "Burn calories fast with no equipment"
+    },
+    "w2": {
+      "title": "Total Stretching",
+      "description": "Relax and improve your flexibility"
+    },
+    "w3": {
+      "title": "Strong Core",
+      "description": "Strengthen your abs and lower back"
+    }
   },
   "workoutLessons": {
     "w1": [
-      "Dynamic Warm-up", "Squats", "Push-ups",
-      "Mountain Climbers", "Express Burpees", "Cool-down"
+      "Dynamic Warm-up",
+      "Squats",
+      "Push-ups",
+      "Mountain Climbers",
+      "Express Burpees",
+      "Cool-down"
     ],
     "w2": [
-      "Breath and Centering", "Neck and Shoulders", "Trunk and Lateral",
-      "Hips and Glutes", "Legs and Hamstrings"
+      "Breath and Centering",
+      "Neck and Shoulders",
+      "Trunk and Lateral",
+      "Hips and Glutes",
+      "Legs and Hamstrings"
     ],
     "w3": [
-      "Core Activation", "Classic Plank", "Side Plank",
-      "Crunches", "Leg Raises", "Russian Twist",
-      "Bird-Dog", "Lower Back Relaxation"
+      "Core Activation",
+      "Classic Plank",
+      "Side Plank",
+      "Crunches",
+      "Leg Raises",
+      "Russian Twist",
+      "Bird-Dog",
+      "Lower Back Relaxation"
     ]
   }
 }

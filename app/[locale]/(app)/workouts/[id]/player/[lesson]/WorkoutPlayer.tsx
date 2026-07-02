@@ -32,17 +32,17 @@ export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale }:
     annual: {
       key: 'annual' as Plan,
       label: tSub('annual'),
-      price: '$19',
+      price: '$39',
       period: tSub('perYear'),
-      renewsAt: '$49',
-      badge: t('save70'),
+      renewsAt: '$39',
+      badge: t('saveBadge'),
     },
     monthly: {
       key: 'monthly' as Plan,
       label: tSub('monthly'),
-      price: '$7',
+      price: '$29',
       period: tSub('perMonth'),
-      renewsAt: '$14,90',
+      renewsAt: '$29',
       badge: null as string | null,
     },
   }
