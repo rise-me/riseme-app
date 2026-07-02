@@ -16,6 +16,7 @@ export default function LanguagePage() {
     { code: 'pt-BR', label: t('ptBRLabel'), region: t('ptBRRegion') },
     { code: 'es', label: t('esLabel'), region: t('esRegion') },
     { code: 'en', label: t('enLabel'), region: t('enRegion') },
+    { code: 'tr', label: t('trLabel'), region: t('trRegion') },
   ]
 
   function selectLanguage(code: string) {

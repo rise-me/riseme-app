@@ -231,7 +231,9 @@
     "esLabel": "Español",
     "esRegion": "Neutral (Latin America)",
     "enLabel": "English",
-    "enRegion": "United States"
+    "enRegion": "United States",
+    "trLabel": "Türkçe",
+    "trRegion": "Türkiye"
   },
   "help": {
     "title": "Help",
