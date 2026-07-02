@@ -38,25 +38,36 @@ export function ConfirmClient({ locale }: { locale: string }) {
 
     const type = typeParam
 
-    supabase.auth.verifyOtp({ token_hash, type }).then(({ error }) => {
+    supabase.auth.verifyOtp({ token_hash, type }).then(async ({ error }) => {
       if (error) {
         setStatus('error')
         return
+      }
+
+      // O link do email não carrega locale (template é compartilhado), então a URL
+      // cai no default (es). O locale real da usuária vem do metadata da conta —
+      // gravado pelo webhook na compra (ex: 'tr' pra Perfect Pay Turquia).
+      const KNOWN_LOCALES = ['pt-BR', 'es', 'en', 'tr']
+      let dest = locale
+      const { data: { user } } = await supabase.auth.getUser()
+      const metaLocale = user?.user_metadata?.locale as string | undefined
+      if (metaLocale && KNOWN_LOCALES.includes(metaLocale)) {
+        dest = metaLocale
       }
 
       let nextPath: string
       switch (type) {
         case 'invite':
         case 'recovery':
-          nextPath = `/${locale}/set-password`
+          nextPath = `/${dest}/set-password`
           break
         case 'email_change':
-          nextPath = `/${locale}/more/profile`
+          nextPath = `/${dest}/more/profile`
           break
         case 'signup':
         case 'email':
         default:
-          nextPath = `/${locale}/home`
+          nextPath = `/${dest}/home`
       }
 
       window.location.href = nextPath
