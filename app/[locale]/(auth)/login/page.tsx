@@ -1,5 +1,4 @@
 import { getTranslations } from 'next-intl/server'
-import Link from 'next/link'
 import { LoginForm } from './LoginForm'
 
 export default async function LoginPage({
@@ -22,14 +21,6 @@ export default async function LoginPage({
 
       {/* Form */}
       <LoginForm locale={locale} />
-
-      {/* Signup link */}
-      <p className="text-sm text-muted-foreground text-center">
-        {t('dontHaveAccount')}{' '}
-        <Link href={`/${locale}/signup`} className="font-semibold text-foreground underline underline-offset-2">
-          {t('signup')}
-        </Link>
-      </p>
 
       {/* Terms */}
       <p className="text-xs text-muted-foreground text-center px-4">
