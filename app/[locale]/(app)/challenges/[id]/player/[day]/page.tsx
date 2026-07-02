@@ -22,7 +22,7 @@ export default async function PlayerPage({
   const tDays = await getTranslations('challengeDays')
   const dayTitles = (tDays.raw(id) as string[] | undefined) ?? []
 
-  const days = getMockDays(id, dayTitles)
+  const days = getMockDays(id, dayTitles, locale)
   const dayNumber = parseInt(day)
   const currentDay = days.find((d) => d.day_number === dayNumber)
   if (!currentDay) notFound()

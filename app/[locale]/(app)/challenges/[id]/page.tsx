@@ -24,7 +24,7 @@ export default async function ChallengeDetailPage({
   const dayTitles = (tDays.raw(id) as string[] | undefined) ?? []
 
   const completedDayNumbers = new Set(progress.map((p) => p.day_number))
-  const rawDays = getMockDays(id, dayTitles)
+  const rawDays = getMockDays(id, dayTitles, locale)
   const days = rawDays.map((d) => ({
     ...d,
     completed: completedDayNumbers.has(d.day_number),

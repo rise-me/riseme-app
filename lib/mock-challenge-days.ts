@@ -50,10 +50,25 @@ const VIDEOS_BY_CHALLENGE: Record<string, string[]> = {
   ],
 }
 
+// Vídeos dublados por idioma. Dia sem vídeo no idioma cai no default (espanhol) acima.
+const VIDEO_OVERRIDES_BY_LOCALE: Record<string, Record<string, (string | undefined)[]>> = {
+  tr: {
+    '1': [
+      'tSKy8hjx4jY', 'ObcUhlY8NvY', 'buw-Az3QAcs', 'ggTMvs9qZuo', 'NkgW8XGgv3w',
+      'wLtZYqw5kRc', 'nW7mitMVy_A', 'Du4qcqSFyz0', 'iwU6yexjYhw', 'BTWCa4Gj0YI',
+      'fx33E1ZbYZ8', 'aZs7hez6tTI', 'kIQ-vr0r7cM', 'FbjC_W3uL94', 'n6BclLkTc5Y',
+      '4oTsI5ATvWk', 'bwsmEFGSiG8', '8zkNZBZG7gY', 'hZzYVk_hheM', 'qvcCz5qWK54',
+      'LDXpynHFpko', '6EpYvZ1SsTc', 'PlVdFGYOYG8', 'cIBmMQPN3NA', 'WkF1cRTRDAQ',
+      'pzKWPsZwPAc', 'A4cpanEQq6M', 'aKRKo08kpZg',
+    ],
+  },
+}
+
 const LEVEL_ROTATION: LevelKey[] = ['beginner', 'beginner', 'intermediate', 'advanced']
 
-export function getMockDays(challengeId: string, dayTitles: string[]): MockDay[] {
+export function getMockDays(challengeId: string, dayTitles: string[], locale?: string): MockDay[] {
   const videos = VIDEOS_BY_CHALLENGE[challengeId] ?? []
+  const overrides = locale ? VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId] : undefined
   const challenge = mockChallenges.find((c) => c.id === challengeId)
   const daysCount = challenge?.days_count ?? 28
 
@@ -62,6 +77,6 @@ export function getMockDays(challengeId: string, dayTitles: string[]): MockDay[]
     title: dayTitles[i] ?? `Day ${i + 1}`,
     duration_minutes: [15, 20, 25, 30][i % 4],
     level: LEVEL_ROTATION[i % 4],
-    youtube_id: videos[i],
+    youtube_id: overrides?.[i] ?? videos[i],
   }))
 }
