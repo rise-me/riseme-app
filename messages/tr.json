@@ -195,9 +195,10 @@
     "keepGoing": "Böyle devam!",
     "completeToStart": "Başlamak için bir antrenman tamamla",
     "drinkWater": "Su iç",
-    "waterAmount": "0 / 2.000 ml",
     "exploreChallenges": "Meydan okumaları keşfet",
-    "challengesAvailable": "{count} meydan okuma mevcut"
+    "challengesAvailable": "{count} meydan okuma mevcut",
+    "waterProgress": "{current} / {goal} ml",
+    "waterDone": "Günlük su hedefi tamamlandı! 💧"
   },
   "more": {
     "title": "Daha Fazla",

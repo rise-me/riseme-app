@@ -195,9 +195,10 @@
     "keepGoing": "Continue assim!",
     "completeToStart": "Complete um treino pra começar",
     "drinkWater": "Beber água",
-    "waterAmount": "0 de 2.000 ml",
     "exploreChallenges": "Explorar desafios",
-    "challengesAvailable": "{count} desafios disponíveis"
+    "challengesAvailable": "{count} desafios disponíveis",
+    "waterProgress": "{current} de {goal} ml",
+    "waterDone": "Meta de água do dia batida! 💧"
   },
   "more": {
     "title": "Mais",

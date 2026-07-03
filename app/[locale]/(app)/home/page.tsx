@@ -5,6 +5,7 @@ import { getProgressSummary } from '@/lib/progress-server'
 import { mockChallenges } from '@/lib/mock-challenges'
 import { getCurrentUser } from '@/lib/current-user-server'
 import { getUserAccess, canAccessChallenge } from '@/lib/user-access-server'
+import { WaterTracker } from '@/components/home/WaterTracker'
 
 export default async function HomePage({
   params,
@@ -99,17 +100,8 @@ export default async function HomePage({
         </div>
       </div>
 
-      {/* Hydration tracker (simple) */}
-      <div className="flex items-center gap-3 bg-card rounded-2xl p-4 border border-border">
-        <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-xl">
-          💧
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold">{t('drinkWater')}</p>
-          <p className="text-xs text-muted-foreground">{t('waterAmount')}</p>
-        </div>
-        <ChevronRight size={16} className="text-muted-foreground" />
-      </div>
+      {/* Hydration tracker */}
+      <WaterTracker />
 
       {/* Explore more challenges CTA */}
       <Link href={`/${locale}/challenges`}>

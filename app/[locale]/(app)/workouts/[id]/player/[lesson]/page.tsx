@@ -1,7 +1,10 @@
 import { getMockWorkoutById, getMockWorkoutLessons } from '@/lib/mock-workouts'
 import { getUserAccess } from '@/lib/user-access-server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { WorkoutPlayer } from './WorkoutPlayer'
+
+// Seção desativada em 2026-07-03 — remover o redirect pra reativar.
+const WORKOUTS_DISABLED = true
 
 export default async function WorkoutPlayerPage({
   params,
@@ -9,6 +12,7 @@ export default async function WorkoutPlayerPage({
   params: Promise<{ locale: string; id: string; lesson: string }>
 }) {
   const { locale, id, lesson } = await params
+  if (WORKOUTS_DISABLED) redirect(`/${locale}/challenges`)
   const workout = getMockWorkoutById(id)
   if (!workout) notFound()
 
