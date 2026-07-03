@@ -107,7 +107,22 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
             challengeId: challenge.id,
             dayNumber: currentDayNumber,
             watchedPct,
-          }).catch((err) => console.error('[progress] failed to save:', err))
+          })
+            .then(({ error }) => {
+              if (error) {
+                // libera pra tentar de novo no próximo tick do poll
+                savedRef.current = false
+                console.error('[progress] save rejected:', error)
+                return
+              }
+              // invalida o cache do client router: a tela do desafio volta fresca
+              // mesmo via swipe-back (router.back restaura RSC antigo por padrão)
+              router.refresh()
+            })
+            .catch((err) => {
+              savedRef.current = false
+              console.error('[progress] failed to save:', err)
+            })
           track('workout_completed', {
             challenge_id: challenge.id,
             day_number: currentDayNumber,
@@ -166,7 +181,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
         )}
 
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push(`/${locale}/challenges/${challenge.id}`)}
           className="absolute top-12 right-4 z-20 w-9 h-9 rounded-full bg-black/60 backdrop-blur flex items-center justify-center"
         >
           <X size={18} className="text-white" />
