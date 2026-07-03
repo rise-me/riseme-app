@@ -239,13 +239,14 @@
   },
   "help": {
     "title": "Ajuda",
-    "infoBanner": "Você receberá uma cópia da sua mensagem por e-mail após o envio.",
+    "infoBanner": "Nossa equipe te atende pelo WhatsApp. Toque em um tema e a conversa abre com a mensagem pronta.",
     "trainingDoubts": "Dúvidas sobre os treinos",
     "suggestions": "Sugestões de melhorias",
     "billingQuestions": "Perguntas sobre faturamento",
     "technicalProblems": "Problemas técnicos",
     "manageSubscription": "Gerenciar assinatura",
-    "otherQuestions": "Outras perguntas"
+    "otherQuestions": "Outras perguntas",
+    "whatsappIntro": "Olá, sou aluna do RiseMe 💛 Preciso de ajuda com: {topic}"
   },
   "fasting": {
     "title": "Jejum",

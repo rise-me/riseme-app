@@ -2,6 +2,9 @@ import { getTranslations } from 'next-intl/server'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
+// WhatsApp do suporte (Iza) — +55 31 98379-2759
+const SUPPORT_WHATSAPP = '5531983792759'
+
 const HELP_KEYS = [
   { emoji: '💪', key: 'trainingDoubts' },
   { emoji: '💡', key: 'suggestions' },
@@ -39,16 +42,23 @@ export default async function HelpPage({
       </div>
 
       <div className="space-y-2">
-        {HELP_KEYS.map((item) => (
-          <button
-            key={item.key}
-            className="w-full flex items-center gap-4 bg-card border border-border rounded-2xl px-4 py-4 text-left active:bg-secondary/50 transition-colors"
-          >
-            <span className="text-xl flex-shrink-0">{item.emoji}</span>
-            <span className="flex-1 text-sm font-medium">{t(item.key)}</span>
-            <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
-          </button>
-        ))}
+        {HELP_KEYS.map((item) => {
+          const message = t('whatsappIntro', { topic: t(item.key) })
+          const href = `https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(message)}`
+          return (
+            <a
+              key={item.key}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-4 bg-card border border-border rounded-2xl px-4 py-4 text-left active:bg-secondary/50 transition-colors"
+            >
+              <span className="text-xl flex-shrink-0">{item.emoji}</span>
+              <span className="flex-1 text-sm font-medium">{t(item.key)}</span>
+              <ChevronRight size={16} className="text-muted-foreground flex-shrink-0" />
+            </a>
+          )
+        })}
       </div>
     </div>
   )

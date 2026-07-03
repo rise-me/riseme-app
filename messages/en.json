@@ -239,13 +239,14 @@
   },
   "help": {
     "title": "Help",
-    "infoBanner": "You'll receive a copy of your message by email after sending.",
+    "infoBanner": "Our team is available on WhatsApp. Tap a topic and the chat opens with your message ready.",
     "trainingDoubts": "Workout questions",
     "suggestions": "Improvement suggestions",
     "billingQuestions": "Billing questions",
     "technicalProblems": "Technical issues",
     "manageSubscription": "Manage subscription",
-    "otherQuestions": "Other questions"
+    "otherQuestions": "Other questions",
+    "whatsappIntro": "Hi, I'm a RiseMe member 💛 I need help with: {topic}"
   },
   "fasting": {
     "title": "Fasting",

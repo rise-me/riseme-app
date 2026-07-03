@@ -239,13 +239,14 @@
   },
   "help": {
     "title": "Yardım",
-    "infoBanner": "Gönderdikten sonra mesajının bir kopyasını e-posta ile alacaksın.",
+    "infoBanner": "Ekibimiz WhatsApp üzerinden yardımcı oluyor. Bir konuya dokun, sohbet hazır mesajla açılır.",
     "trainingDoubts": "Antrenmanlarla ilgili sorular",
     "suggestions": "İyileştirme önerileri",
     "billingQuestions": "Faturalandırma soruları",
     "technicalProblems": "Teknik sorunlar",
     "manageSubscription": "Aboneliği yönet",
-    "otherQuestions": "Diğer sorular"
+    "otherQuestions": "Diğer sorular",
+    "whatsappIntro": "Merhaba, RiseMe üyesiyim 💛 Şu konuda yardıma ihtiyacım var: {topic}"
   },
   "fasting": {
     "title": "Oruç",
