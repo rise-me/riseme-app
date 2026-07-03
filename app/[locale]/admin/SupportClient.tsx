@@ -238,7 +238,9 @@ export function SupportClient() {
                 disabled={pending}
                 onClick={() => startTransition(async () => {
                   const res = await grantChallenge(result.id!, grantId)
-                  setFeedback(res.ok ? { ok: true, text: 'Desafio liberado (vitalício).' } : { ok: false, text: res.error ?? 'Erro' })
+                  setFeedback(res.ok
+                    ? { ok: true, text: 'Desafio liberado (vitalício). Não envia email — o desafio já aparece no app dela.' }
+                    : { ok: false, text: res.error ?? 'Erro' })
                   refresh()
                 })}
                 className="px-4 py-2.5 rounded-xl bg-foreground text-background text-sm font-bold flex items-center gap-1.5 disabled:opacity-50"
@@ -253,7 +255,7 @@ export function SupportClient() {
               onClick={() => startTransition(async () => {
                 const res = await sendPasswordLink(result.email!, result.locale ?? 'es')
                 setFeedback(res.ok
-                  ? { ok: true, text: 'Link de senha enviado pro email dela (vale 24h).' }
+                  ? { ok: true, text: `Link de senha enviado pra ${result.email} (vale 24h). Se não chegar em ~2 min, pede pra olhar o spam.` }
                   : { ok: false, text: res.error ?? 'Erro ao enviar' })
               })}
               className="w-full py-3 rounded-2xl border border-border text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"

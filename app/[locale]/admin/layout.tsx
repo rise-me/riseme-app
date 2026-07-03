@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getAdminUser } from '@/lib/admin-server'
+import { AdminNav } from './AdminNav'
 
 export default async function AdminLayout({
   children,
@@ -24,14 +24,7 @@ export default async function AdminLayout({
           </p>
           <p className="text-[11px] text-muted-foreground mt-0.5">{admin.email}</p>
         </div>
-        <nav className="flex gap-2 text-sm font-semibold">
-          <Link href={`/${locale}/admin`} className="px-3 py-1.5 rounded-full bg-secondary">
-            Suporte
-          </Link>
-          <Link href={`/${locale}/admin/numeros`} className="px-3 py-1.5 rounded-full bg-secondary">
-            Números
-          </Link>
-        </nav>
+        <AdminNav />
       </header>
       <main className="max-w-3xl mx-auto px-4 py-6">{children}</main>
     </div>
