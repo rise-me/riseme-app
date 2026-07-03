@@ -68,7 +68,11 @@
     "recoverPasswordInstead": "Şifremi kurtar",
     "stillNotReceivingTitle": "Hâlâ e-posta gelmedi mi?",
     "stillNotReceivingDesc": "{email} adresinin doğru olduğundan emin ol. Zaten hesabın varsa:",
-    "invalidCredentialsDetailed": "E-posta veya şifre hatalı. Hesabını yeni oluşturduysan, önce e-postana gönderdiğimiz bağlantıyı onayla."
+    "invalidCredentialsDetailed": "E-posta veya şifre hatalı. Hesabını yeni oluşturduysan, önce e-postana gönderdiğimiz bağlantıyı onayla.",
+    "signupSubtitle": "Ücretsiz hesabını oluştur",
+    "forgotSubtitle": "Hesabına erişimi geri kazan",
+    "resetSubtitle": "Yeni şifreni belirle",
+    "backToLogin": "Girişe dön"
   },
   "challenges": {
     "title": "Meydan Okumalar",
@@ -102,7 +106,8 @@
     "remaining": "KALAN",
     "previous": "ÖNCEKİ",
     "next": "SONRAKİ",
-    "upNext": "SIRADAKİ"
+    "upNext": "SIRADAKİ",
+    "restart": "Meydan okumayı tekrarla"
   },
   "subscription": {
     "exclusiveOffer": "Özel abonelik teklifi",
@@ -117,10 +122,9 @@
     "addToPlan": "Planıma ekle",
     "cancelAnytime": "İstediğin zaman iptal et",
     "benefit1": "Tüm meydan okumalara sınırsız erişim",
-    "benefit2": "Her hafta yeni meydan okumalar",
+    "benefit2": "Kalistenik, pilates, yoga ve daha fazlası",
     "benefit3": "Eksiksiz ilerleme takibi",
-    "benefit4": "Kişiselleştirilmiş bildirimler",
-    "restorePurchases": "Satın alımları geri yükle",
+    "benefit4": "140'tan fazla rehberli video ders",
     "unlockAccess": "Erişimimin kilidini aç"
   },
   "subscriptionPage": {
@@ -142,7 +146,7 @@
     "benefit1": "Tüm 28 günlük meydan okumalara erişim",
     "benefit2": "Kalistenik, Pilates, Yoga, HIIT ve daha fazlası",
     "benefit3": "Kayıtlı ilerleme ve günlük seri",
-    "benefit4": "Her ay yeni meydan okumalar"
+    "benefit4": "140'tan fazla rehberli video ders"
   },
   "progress": {
     "title": "İlerleme",

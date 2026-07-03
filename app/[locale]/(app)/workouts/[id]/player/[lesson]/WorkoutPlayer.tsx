@@ -3,8 +3,9 @@
 import { useTranslations } from 'next-intl'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, SkipBack, SkipForward, Sparkles, CheckCircle2 } from 'lucide-react'
+import { X, SkipBack, SkipForward, Sparkles, CheckCircle2, Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { track } from '@/lib/posthog/track'
 import type { MockWorkout, MockWorkoutLesson } from '@/lib/mock-workouts'
 
 type Plan = 'annual' | 'monthly'
@@ -14,15 +15,15 @@ interface Props {
   lessons: MockWorkoutLesson[]
   currentLessonNumber: number
   locale: string
+  hideUpsell: boolean
 }
 
 const SEGMENTS = 20
 
-export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale }: Props) {
+export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale, hideUpsell }: Props) {
   const router = useRouter()
   const t = useTranslations('workoutsPage')
   const tSub = useTranslations('subscription')
-  const tSubPage = useTranslations('subscriptionPage')
   const tChallenges = useTranslations('challenges')
   const tLessons = useTranslations('workoutLessons')
 
@@ -61,13 +62,22 @@ export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale }:
   const [selectedPlan, setSelectedPlan] = useState<Plan>('annual')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // navegar pra outra aula reaproveita o componente montado — zera o cronômetro
+  const [prevLessonNumber, setPrevLessonNumber] = useState(currentLessonNumber)
+  if (prevLessonNumber !== currentLessonNumber) {
+    setPrevLessonNumber(currentLessonNumber)
+    setElapsed(0)
+    setRunning(true)
+    setUpsellOpen(false)
+  }
+
   useEffect(() => {
     if (running && elapsed < totalSeconds) {
       intervalRef.current = setInterval(() => {
         setElapsed((s) => {
           if (s >= totalSeconds - 1) {
             setRunning(false)
-            setUpsellOpen(true)
+            if (!hideUpsell) setUpsellOpen(true)
             return totalSeconds
           }
           return s + 1
@@ -77,7 +87,13 @@ export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale }:
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
-  }, [running, elapsed, totalSeconds])
+  }, [running, elapsed, totalSeconds, hideUpsell])
+
+  useEffect(() => {
+    if (upsellOpen) {
+      track('paywall_viewed', { source: 'workout_player', workout_id: workout.id, lesson_number: currentLessonNumber })
+    }
+  }, [upsellOpen, workout.id, currentLessonNumber])
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60)
@@ -105,11 +121,24 @@ export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale }:
   return (
     <>
       <div className="fixed inset-0 z-50 bg-black flex flex-col">
-        <div className="relative flex-1 bg-zinc-900 flex items-center justify-center">
+        <div
+          className="relative flex-1 bg-zinc-900 flex items-center justify-center"
+          onClick={() => {
+            if (elapsed < totalSeconds) setRunning((r) => !r)
+          }}
+        >
           <div className="absolute inset-0 bg-gradient-to-b from-zinc-800 to-zinc-950" />
 
+          {!running && elapsed < totalSeconds && (
+            <div className="absolute inset-0 z-[5] flex items-center justify-center bg-black/40">
+              <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur flex items-center justify-center">
+                <Play size={28} className="text-white ml-1" />
+              </div>
+            </div>
+          )}
+
           <button
-            onClick={() => router.back()}
+            onClick={(e) => { e.stopPropagation(); router.back() }}
             className="absolute top-12 right-4 z-10 w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"
           >
             <X size={18} className="text-white" />
@@ -151,8 +180,8 @@ export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale }:
               <p>{t('elapsed')}</p>
             </div>
             <div className="text-right">
-              <p className="text-white text-sm">0</p>
-              <p>{t('kcal')}</p>
+              <p className="text-white text-sm tabular-nums">{formatTime(Math.max(0, totalSeconds - elapsed))}</p>
+              <p>{tChallenges('remaining')}</p>
             </div>
           </div>
 
@@ -171,7 +200,10 @@ export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale }:
               {tChallenges('previous')}
             </button>
             <button
-              onClick={() => { setUpsellOpen(true) }}
+              onClick={() => {
+                if (hideUpsell) handleNext()
+                else setUpsellOpen(true)
+              }}
               className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold bg-white text-black"
             >
               {tChallenges('next')}
@@ -274,6 +306,7 @@ export function WorkoutPlayer({ workout, lessons, currentLessonNumber, locale }:
                   const url = selectedPlan === 'annual'
                     ? process.env.NEXT_PUBLIC_HOTMART_CHECKOUT_ANNUAL
                     : process.env.NEXT_PUBLIC_HOTMART_CHECKOUT_MONTHLY
+                  track('subscription_clicked', { plan: selectedPlan, source: 'workout_player' })
                   if (url) window.location.href = url
                 }}
                 className="w-full py-4 bg-foreground text-background rounded-2xl text-sm font-bold tracking-wide"

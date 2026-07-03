@@ -18,6 +18,9 @@ export function BottomNav({ locale }: { locale: string }) {
   const pathname = usePathname()
   const t = useTranslations('nav')
 
+  // players são fullscreen — a nav por cima cobria os controles e roubava toques
+  if (pathname.includes('/player/')) return null
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border pb-safe">
       <div className="flex items-stretch h-16 max-w-lg mx-auto">

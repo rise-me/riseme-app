@@ -68,7 +68,11 @@
     "recoverPasswordInstead": "Recuperar senha",
     "stillNotReceivingTitle": "Continua sem receber o email?",
     "stillNotReceivingDesc": "Verifique se {email} está correto. Se já tem uma conta:",
-    "invalidCredentialsDetailed": "Email ou senha incorretos. Se você acabou de criar sua conta, confirme primeiro o link que enviamos para seu email."
+    "invalidCredentialsDetailed": "Email ou senha incorretos. Se você acabou de criar sua conta, confirme primeiro o link que enviamos para seu email.",
+    "signupSubtitle": "Crie sua conta grátis",
+    "forgotSubtitle": "Recupere o acesso à sua conta",
+    "resetSubtitle": "Defina sua nova senha",
+    "backToLogin": "Voltar para entrar"
   },
   "challenges": {
     "title": "Desafios",
@@ -102,7 +106,8 @@
     "remaining": "RESTANTE",
     "previous": "ANTERIOR",
     "next": "PRÓXIMO",
-    "upNext": "A SEGUIR"
+    "upNext": "A SEGUIR",
+    "restart": "Repetir desafio"
   },
   "subscription": {
     "exclusiveOffer": "Oferta exclusiva de assinatura",
@@ -117,10 +122,9 @@
     "addToPlan": "Adicionar ao meu plano",
     "cancelAnytime": "Cancele quando quiser",
     "benefit1": "Acesso ilimitado a todos os desafios",
-    "benefit2": "Novos desafios toda semana",
+    "benefit2": "Calistenia, pilates, yoga e mais",
     "benefit3": "Rastreamento de progresso completo",
-    "benefit4": "Notificações personalizadas",
-    "restorePurchases": "Restaurar compras",
+    "benefit4": "Mais de 140 aulas guiadas em vídeo",
     "unlockAccess": "Desbloquear meu acesso"
   },
   "subscriptionPage": {
@@ -142,7 +146,7 @@
     "benefit1": "Acesso a todos os desafios de 28 dias",
     "benefit2": "Calistenia, Pilates, Yoga, HIIT e mais",
     "benefit3": "Progresso salvo e streak diário",
-    "benefit4": "Novos desafios adicionados todo mês"
+    "benefit4": "Mais de 140 aulas guiadas em vídeo"
   },
   "progress": {
     "title": "Progresso",
@@ -159,7 +163,7 @@
     "weeklyActivity": "Atividade semanal",
     "ofDays": "{done}/7 dias",
     "today": "HOJE",
-    "weekDays": "D,L,M,M,J,V,S",
+    "weekDays": "D,S,T,Q,Q,S,S",
     "activeChallenge": "Desafio ativo",
     "viewArrow": "Ver →",
     "completedOf": "{done} de {total} concluídos",

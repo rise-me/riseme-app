@@ -68,7 +68,11 @@
     "recoverPasswordInstead": "Recover password",
     "stillNotReceivingTitle": "Still not getting the email?",
     "stillNotReceivingDesc": "Make sure {email} is correct. If you already have an account:",
-    "invalidCredentialsDetailed": "Wrong email or password. If you just created your account, confirm the link we sent to your email first."
+    "invalidCredentialsDetailed": "Wrong email or password. If you just created your account, confirm the link we sent to your email first.",
+    "signupSubtitle": "Create your free account",
+    "forgotSubtitle": "Recover access to your account",
+    "resetSubtitle": "Set your new password",
+    "backToLogin": "Back to log in"
   },
   "challenges": {
     "title": "Challenges",
@@ -102,7 +106,8 @@
     "remaining": "REMAINING",
     "previous": "PREVIOUS",
     "next": "NEXT",
-    "upNext": "UP NEXT"
+    "upNext": "UP NEXT",
+    "restart": "Repeat challenge"
   },
   "subscription": {
     "exclusiveOffer": "Exclusive subscription offer",
@@ -117,10 +122,9 @@
     "addToPlan": "Add to my plan",
     "cancelAnytime": "Cancel anytime",
     "benefit1": "Unlimited access to all challenges",
-    "benefit2": "New challenges every week",
+    "benefit2": "Calisthenics, Pilates, Yoga and more",
     "benefit3": "Complete progress tracking",
-    "benefit4": "Personalized notifications",
-    "restorePurchases": "Restore purchases",
+    "benefit4": "140+ guided video classes",
     "unlockAccess": "Unlock my access"
   },
   "subscriptionPage": {
@@ -142,7 +146,7 @@
     "benefit1": "Access to all 28-day challenges",
     "benefit2": "Calisthenics, Pilates, Yoga, HIIT and more",
     "benefit3": "Progress saved and daily streak",
-    "benefit4": "New challenges added every month"
+    "benefit4": "140+ guided video classes"
   },
   "progress": {
     "title": "Progress",

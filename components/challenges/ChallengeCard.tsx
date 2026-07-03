@@ -55,8 +55,8 @@ export function ChallengeCard({ challenge, locale, onLockedClick }: ChallengeCar
 
       <div className="flex-shrink-0">
         {isLocked ? (
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-            <Lock size={14} className="text-muted-foreground" />
+          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center lock-glow">
+            <Lock size={14} className="text-foreground" />
           </div>
         ) : (
           <ChevronRight size={18} className="text-muted-foreground" />

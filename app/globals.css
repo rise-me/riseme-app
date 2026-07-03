@@ -102,3 +102,16 @@
     margin-bottom: calc(4rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Glow pulsante no cadeado dos desafios bloqueados — convida o toque (abre o paywall) */
+.lock-glow {
+  animation: lock-glow 2.2s ease-in-out infinite;
+}
+@keyframes lock-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(193, 145, 55, 0);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px rgba(193, 145, 55, 0.55);
+  }
+}

@@ -58,7 +58,7 @@ export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProp
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-sm rounded-3xl p-0 gap-0 border-0 overflow-hidden">
+      <DialogContent showCloseButton={false} className="sm:max-w-sm rounded-3xl p-0 gap-0 border-0 overflow-hidden">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -150,11 +150,8 @@ export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProp
           </button>
 
           {/* Footer */}
-          <div className="text-center space-y-1">
+          <div className="text-center">
             <p className="text-xs text-muted-foreground">{t('cancelAnytime')}</p>
-            <button className="text-xs text-muted-foreground underline">
-              {t('restorePurchases')}
-            </button>
           </div>
         </div>
       </DialogContent>

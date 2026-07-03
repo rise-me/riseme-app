@@ -68,7 +68,11 @@
     "recoverPasswordInstead": "Recuperar contraseña",
     "stillNotReceivingTitle": "¿Sigues sin recibir el correo?",
     "stillNotReceivingDesc": "Verifica que {email} sea correcto. Si ya tienes cuenta:",
-    "invalidCredentialsDetailed": "Correo o contraseña incorrectos. Si recién creaste tu cuenta, confirma primero el enlace que enviamos a tu correo."
+    "invalidCredentialsDetailed": "Correo o contraseña incorrectos. Si recién creaste tu cuenta, confirma primero el enlace que enviamos a tu correo.",
+    "signupSubtitle": "Crea tu cuenta gratis",
+    "forgotSubtitle": "Recupera el acceso a tu cuenta",
+    "resetSubtitle": "Define tu nueva contraseña",
+    "backToLogin": "Volver a iniciar sesión"
   },
   "challenges": {
     "title": "Desafíos",
@@ -102,7 +106,8 @@
     "remaining": "RESTANTE",
     "previous": "ANTERIOR",
     "next": "SIGUIENTE",
-    "upNext": "A CONTINUACIÓN"
+    "upNext": "A CONTINUACIÓN",
+    "restart": "Repetir desafío"
   },
   "subscription": {
     "exclusiveOffer": "Oferta exclusiva de suscripción",
@@ -117,10 +122,9 @@
     "addToPlan": "Agregar a mi plan",
     "cancelAnytime": "Cancela cuando quieras",
     "benefit1": "Acceso ilimitado a todos los desafíos",
-    "benefit2": "Nuevos desafíos cada semana",
+    "benefit2": "Calistenia, pilates, yoga y más",
     "benefit3": "Seguimiento completo del progreso",
-    "benefit4": "Notificaciones personalizadas",
-    "restorePurchases": "Restaurar compras",
+    "benefit4": "Más de 140 clases guiadas en video",
     "unlockAccess": "Desbloquear mi acceso"
   },
   "subscriptionPage": {
@@ -142,7 +146,7 @@
     "benefit1": "Acceso a todos los desafíos de 28 días",
     "benefit2": "Calistenia, Pilates, Yoga, HIIT y más",
     "benefit3": "Progreso guardado y racha diaria",
-    "benefit4": "Nuevos desafíos cada mes"
+    "benefit4": "Más de 140 clases guiadas en video"
   },
   "progress": {
     "title": "Progreso",

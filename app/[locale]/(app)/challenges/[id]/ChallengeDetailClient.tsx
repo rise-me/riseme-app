@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ArrowLeft, Heart, CheckCircle2, Lock, Play, Clock } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Lock, Play, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MockChallenge } from '@/lib/mock-challenges'
 import type { MockDay, LevelKey } from '@/lib/mock-challenge-days'
@@ -27,13 +27,13 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
   const [activeLevel, setActiveLevel] = useState<LevelFilter>('all')
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [sequentialOpen, setSequentialOpen] = useState(false)
-  const [favorited, setFavorited] = useState(false)
 
   const challengeTitle = tData(`${challenge.id}.title`)
   const challengeCategory = tData(`${challenge.id}.category`)
 
   const isLocked = challenge.status === 'locked'
   const completedCount = days.filter((d) => d.completed).length
+  const isFinished = days.length > 0 && completedCount >= days.length
 
   const filteredDays =
     activeLevel === 'all' ? days : days.filter((d) => d.level === activeLevel)
@@ -66,26 +66,16 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
             <ArrowLeft size={18} className="text-background" />
           </button>
 
-          <button
-            onClick={() => setFavorited(f => !f)}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-background/10 flex items-center justify-center"
-          >
-            <Heart
-              size={18}
-              className={cn(favorited ? 'fill-red-400 text-red-400' : 'text-background')}
-            />
-          </button>
-
           <div className="text-6xl mb-4">{challenge.thumbnail_emoji}</div>
           <h1 className="text-2xl font-black leading-tight mb-1">{challengeTitle}</h1>
           <p className="text-background/60 text-sm">
             {challenge.days_count} {t('workouts')} · {challengeCategory}
           </p>
 
-          {challenge.status === 'active' && (
+          {challenge.status === 'active' && completedCount > 0 && (
             <div className="mt-4 space-y-1.5">
               <div className="flex justify-between text-xs text-background/60">
-                <span>{t('inProgress')}</span>
+                <span>{isFinished ? t('completed') : t('inProgress')}</span>
                 <span>{completedCount} / {challenge.days_count}</span>
               </div>
               <div className="h-1.5 bg-background/20 rounded-full">
@@ -106,7 +96,7 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
               if (completedCount === 0) {
                 track('challenge_started', { challenge_id: challenge.id, challenge_title: challengeTitle })
               }
-              handleDayClick(days[completedCount] ?? days[0])
+              handleDayClick(isFinished ? days[0] : days[completedCount] ?? days[0])
             }}
             className={cn(
               'mt-5 w-full py-3.5 rounded-2xl text-sm font-bold tracking-wide',
@@ -117,6 +107,8 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
           >
             {isLocked
               ? t('unlockEmoji')
+              : isFinished
+              ? t('restart')
               : completedCount > 0
               ? t('continueDay', { day: completedCount + 1 })
               : t('start')}
