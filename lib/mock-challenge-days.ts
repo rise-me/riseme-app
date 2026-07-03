@@ -16,7 +16,9 @@ const VIDEOS_BY_CHALLENGE: Record<string, string[]> = {
     '9MOWGVPUJSU', 'tzhajbcmXo0', 'B5zFShBvR3E', '-yDswsRCtAY', 'btL5hjOMqvA',
     'HIx7RwKn7Ho', '_yJqpWhSJ_o', 'blrg1GihFsM', 'oLh64RTwLJ8', '3HrvYNw2zfE',
     'g2-eIZEYUmM', 'onfnrSxGH1s', 'S8m5OUFS1p8', 'wZjRnJgqO1A', '4jmcko6l2pg',
-    '7XRcR6FLXuo', 'G3bgT83lWns', 'vWGKkeU_daw', 'OLlLHvZJQ_8', 'S8m5OUFS1p8',
+    // dia 20: Aula 20 ES nunca foi gravada — usa a Aula 6 "Flujo de Flexibilidad"
+    // (mesmo tema do dia 20 "Flexibilidad"), decisão Bruno 2026-07-03
+    '7XRcR6FLXuo', 'G3bgT83lWns', 'vWGKkeU_daw', 'OLlLHvZJQ_8', 'HIx7RwKn7Ho',
     'YxP7prefrLc', 'o80JwtFZLrU', '2UIqNP_xQpQ', 'klZMaePTkE8', 'mgnia_ou09M',
     'JZHCjx50VTI', 'zzaWk-vESIw', 'BiCLBJRDxUI',
   ],
