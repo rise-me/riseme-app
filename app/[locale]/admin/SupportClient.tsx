@@ -48,11 +48,12 @@ export function SupportClient() {
   const [newLocale, setNewLocale] = useState('es')
   const [newChallenge, setNewChallenge] = useState('1')
 
-  function runSearch(target?: string) {
+  // keepFeedback: a recarga da ficha após uma ação não pode apagar o aviso verde
+  function runSearch(target?: string, keepFeedback = false) {
     const q = (target ?? email).trim()
     if (!q) return
     startTransition(async () => {
-      setFeedback(null)
+      if (!keepFeedback) setFeedback(null)
       const res = await searchUser(q)
       if ('error' in res) {
         setFeedback({ ok: false, text: res.error })
@@ -69,7 +70,7 @@ export function SupportClient() {
   }
 
   function refresh() {
-    if (result?.email) runSearch(result.email)
+    if (result?.email) runSearch(result.email, true)
   }
 
   const neverLoggedIn = result?.found && !result.lastSignInAt
@@ -146,7 +147,7 @@ export function SupportClient() {
               setFeedback(res.ok
                 ? { ok: true, text: 'Conta criada — email de boas-vindas enviado com o desafio liberado.' }
                 : { ok: false, text: res.error ?? 'Erro ao criar conta' })
-              if (res.ok) runSearch(notFoundEmail)
+              if (res.ok) runSearch(notFoundEmail, true)
             })}
             className="w-full py-3 rounded-2xl bg-foreground text-background text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
           >
@@ -236,13 +237,19 @@ export function SupportClient() {
               </select>
               <button
                 disabled={pending}
-                onClick={() => startTransition(async () => {
-                  const res = await grantChallenge(result.id!, grantId)
-                  setFeedback(res.ok
-                    ? { ok: true, text: 'Desafio liberado (vitalício). Não envia email — o desafio já aparece no app dela.' }
-                    : { ok: false, text: res.error ?? 'Erro' })
-                  refresh()
-                })}
+                onClick={() => {
+                  if (result.challenges?.some((c) => c.challenge_id === grantId)) {
+                    setFeedback({ ok: true, text: 'Ela já tem esse desafio liberado — nada a fazer.' })
+                    return
+                  }
+                  startTransition(async () => {
+                    const res = await grantChallenge(result.id!, grantId)
+                    setFeedback(res.ok
+                      ? { ok: true, text: 'Desafio liberado (vitalício). Não envia email — o desafio já aparece no app dela.' }
+                      : { ok: false, text: res.error ?? 'Erro' })
+                    refresh()
+                  })
+                }}
                 className="px-4 py-2.5 rounded-xl bg-foreground text-background text-sm font-bold flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Plus size={15} />
