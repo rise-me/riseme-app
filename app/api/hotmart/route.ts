@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   const { event, data } = payload
   const supabase = createAdminClient()
 
-  if (!['PURCHASE_APPROVED', 'PURCHASE_COMPLETE', 'SUBSCRIPTION_CANCELLATION', 'PURCHASE_REFUNDED'].includes(event)) {
+  if (!['PURCHASE_APPROVED', 'PURCHASE_COMPLETE', 'SUBSCRIPTION_CANCELLATION', 'PURCHASE_REFUNDED', 'PURCHASE_CHARGEBACK'].includes(event)) {
     return NextResponse.json({ ok: true, skipped: true })
   }
 
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (event === 'SUBSCRIPTION_CANCELLATION' || event === 'PURCHASE_REFUNDED') {
+  if (event === 'SUBSCRIPTION_CANCELLATION' || event === 'PURCHASE_REFUNDED' || event === 'PURCHASE_CHARGEBACK') {
     // Look up the user by buyer email — only revoke their own access.
     const { data: existingUsers } = await supabase
       .from('users')
@@ -162,11 +162,27 @@ export async function POST(request: NextRequest) {
     }
     const userId = existingUsers[0].id
 
+    if (event === 'SUBSCRIPTION_CANCELLATION') {
+      // Cancelar = desligar a renovação. A Hotmart dispara na hora do clique,
+      // mas o período já foi pago: só marca 'canceled' e o getUserAccess
+      // mantém o acesso até current_period_end. Nada é deletado aqui.
+      if (isSubscription) {
+        const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
+        await supabase
+          .from('subscriptions')
+          .update({ status: 'canceled' })
+          .eq('stripe_sub_id', subCode)
+          .eq('user_id', userId)
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    // Reembolso/chargeback: dinheiro devolvido — acesso cai na hora.
     if (isSubscription) {
       const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
       await supabase
         .from('subscriptions')
-        .update({ status: 'canceled' })
+        .update({ status: 'refunded' })
         .eq('stripe_sub_id', subCode)
         .eq('user_id', userId)
 

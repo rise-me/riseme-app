@@ -15,21 +15,27 @@ export async function getUserAccess(): Promise<UserAccess> {
   }
 
   const [{ data: userChallenges }, { data: subs }] = await Promise.all([
-    supabase.from('user_challenges').select('challenge_id').eq('user_id', user.id),
+    supabase.from('user_challenges').select('challenge_id, access_type').eq('user_id', user.id),
     supabase
       .from('subscriptions')
       .select('status, current_period_end')
       .eq('user_id', user.id)
-      .eq('status', 'active')
-      .limit(1),
+      .in('status', ['active', 'canceled']),
   ])
 
-  const ownedRows = (userChallenges ?? []) as Array<{ challenge_id: string }>
+  const ownedRows = (userChallenges ?? []) as Array<{ challenge_id: string; access_type: string | null }>
   const subRows = (subs ?? []) as Array<{ current_period_end: string }>
 
-  const ownedChallengeIds = new Set<string>(ownedRows.map((r) => String(r.challenge_id)))
+  // Cancelar assinatura = desligar a renovação: o acesso vale até o fim do
+  // período já pago. Só reembolso/chargeback (status 'refunded') corta antes.
   const hasActiveSubscription = subRows.some(
     (s) => new Date(s.current_period_end).getTime() > Date.now()
+  )
+
+  // Linhas 'subscription' em user_challenges só valem enquanto houver período
+  // pago (cobertas pelo hasActiveSubscription); avulsas contam só as lifetime.
+  const ownedChallengeIds = new Set<string>(
+    ownedRows.filter((r) => r.access_type === 'lifetime').map((r) => String(r.challenge_id))
   )
 
   return { userId: user.id, hasActiveSubscription, ownedChallengeIds }

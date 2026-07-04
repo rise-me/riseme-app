@@ -107,7 +107,8 @@
     "previous": "ANTERIOR",
     "next": "PRÓXIMO",
     "upNext": "A SEGUIR",
-    "restart": "Repetir desafio"
+    "restart": "Repetir desafio",
+    "audioSpanish": "🎧 Aulas com áudio em espanhol"
   },
   "subscription": {
     "exclusiveOffer": "Oferta exclusiva de assinatura",
@@ -473,5 +474,13 @@
       "Bird-Dog",
       "Relaxamento Lombar"
     ]
+  },
+  "errors": {
+    "notFoundTitle": "Página não encontrada",
+    "notFoundDesc": "O link que você abriu não existe ou mudou de lugar.",
+    "backHome": "Ir para o início",
+    "errorTitle": "Algo deu errado",
+    "errorDesc": "Ocorreu um erro inesperado. Tente de novo.",
+    "retry": "Tentar de novo"
   }
 }

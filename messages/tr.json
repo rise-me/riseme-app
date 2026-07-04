@@ -107,7 +107,8 @@
     "previous": "ÖNCEKİ",
     "next": "SONRAKİ",
     "upNext": "SIRADAKİ",
-    "restart": "Meydan okumayı tekrarla"
+    "restart": "Meydan okumayı tekrarla",
+    "audioSpanish": "🎧 Ders videoları İspanyolca"
   },
   "subscription": {
     "exclusiveOffer": "Özel abonelik teklifi",
@@ -473,5 +474,13 @@
       "Bird-Dog",
       "Bel Rahatlatma"
     ]
+  },
+  "errors": {
+    "notFoundTitle": "Sayfa bulunamadı",
+    "notFoundDesc": "Açtığın bağlantı mevcut değil ya da taşınmış.",
+    "backHome": "Ana sayfaya git",
+    "errorTitle": "Bir şeyler ters gitti",
+    "errorDesc": "Beklenmedik bir hata oluştu. Lütfen tekrar dene.",
+    "retry": "Tekrar dene"
   }
 }

@@ -68,6 +68,12 @@ const VIDEO_OVERRIDES_BY_LOCALE: Record<string, Record<string, (string | undefin
 
 const LEVEL_ROTATION: LevelKey[] = ['beginner', 'beginner', 'intermediate', 'advanced']
 
+// true quando as aulas do desafio tocam no idioma da usuária (es é o áudio
+// original; outros idiomas dependem de dublagem em VIDEO_OVERRIDES_BY_LOCALE)
+export function hasLocalizedVideos(challengeId: string, locale: string): boolean {
+  return locale === 'es' || Boolean(VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId])
+}
+
 export function getMockDays(challengeId: string, dayTitles: string[], locale?: string): MockDay[] {
   const videos = VIDEOS_BY_CHALLENGE[challengeId] ?? []
   const overrides = locale ? VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId] : undefined

@@ -16,7 +16,7 @@ export interface UserLookup {
   confirmedAt?: string | null
   lastSignInAt?: string | null
   challenges?: Array<{ challenge_id: string; access_type: string | null }>
-  activeSubscription?: { plan_type: string | null; current_period_end: string | null } | null
+  activeSubscription?: { plan_type: string | null; current_period_end: string | null; status: string | null } | null
 }
 
 export async function searchUser(rawEmail: string): Promise<UserLookup | { error: string }> {
@@ -42,12 +42,12 @@ export async function searchUser(rawEmail: string): Promise<UserLookup | { error
       .from('subscriptions')
       .select('plan_type, current_period_end, status')
       .eq('user_id', row.id)
-      .eq('status', 'active')
+      .order('current_period_end', { ascending: false })
       .limit(1),
   ])
 
   const authUser = authData?.user
-  const subRows = (subs ?? []) as Array<{ plan_type: string | null; current_period_end: string | null }>
+  const subRows = (subs ?? []) as Array<{ plan_type: string | null; current_period_end: string | null; status: string | null }>
 
   return {
     found: true,

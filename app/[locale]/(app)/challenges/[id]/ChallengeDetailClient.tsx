@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { ArrowLeft, CheckCircle2, Lock, Play, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MockChallenge } from '@/lib/mock-challenges'
-import type { MockDay, LevelKey } from '@/lib/mock-challenge-days'
+import { hasLocalizedVideos, type MockDay, type LevelKey } from '@/lib/mock-challenge-days'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { track } from '@/lib/posthog/track'
@@ -71,6 +71,12 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
           <p className="text-background/60 text-sm">
             {challenge.days_count} {t('workouts')} · {challengeCategory}
           </p>
+
+          {!hasLocalizedVideos(challenge.id, locale) && (
+            <span className="inline-block mt-2 text-[11px] font-semibold bg-background/15 text-background/80 px-2.5 py-1 rounded-full">
+              {t('audioSpanish')}
+            </span>
+          )}
 
           {challenge.status === 'active' && completedCount > 0 && (
             <div className="mt-4 space-y-1.5">

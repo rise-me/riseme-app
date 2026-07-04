@@ -30,6 +30,13 @@ const LOCALES = [
   { code: 'en', label: 'Inglês' },
 ]
 
+function subStatusLabel(status: string | null | undefined): string {
+  if (status === 'active') return 'Ativa'
+  if (status === 'canceled') return 'Cancelada — acesso vale'
+  if (status === 'refunded') return 'Reembolsada'
+  return status ?? '?'
+}
+
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return '—'
   return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
@@ -184,7 +191,7 @@ export function SupportClient() {
               <p className="text-[11px] text-muted-foreground uppercase font-semibold">Assinatura</p>
               <p>
                 {result.activeSubscription
-                  ? `Ativa (${result.activeSubscription.plan_type ?? '?'}) até ${formatDate(result.activeSubscription.current_period_end)}`
+                  ? `${subStatusLabel(result.activeSubscription.status)} (${result.activeSubscription.plan_type ?? '?'}) até ${formatDate(result.activeSubscription.current_period_end)}`
                   : 'Nenhuma'}
               </p>
             </div>

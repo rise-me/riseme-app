@@ -107,7 +107,8 @@
     "previous": "ANTERIOR",
     "next": "SIGUIENTE",
     "upNext": "A CONTINUACIÓN",
-    "restart": "Repetir desafío"
+    "restart": "Repetir desafío",
+    "audioSpanish": "🎧 Audio en español"
   },
   "subscription": {
     "exclusiveOffer": "Oferta exclusiva de suscripción",
@@ -473,5 +474,13 @@
       "Bird-Dog",
       "Relajación Lumbar"
     ]
+  },
+  "errors": {
+    "notFoundTitle": "Página no encontrada",
+    "notFoundDesc": "El enlace que abriste no existe o cambió de lugar.",
+    "backHome": "Ir al inicio",
+    "errorTitle": "Algo salió mal",
+    "errorDesc": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "retry": "Intentar de nuevo"
   }
 }

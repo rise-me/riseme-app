@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { VideoPlayer } from './VideoPlayer'
 import { canAccessChallenge, getUserAccess } from '@/lib/user-access-server'
+import { getProgressForChallenge } from '@/lib/progress-server'
 
 export default async function PlayerPage({
   params,
@@ -26,6 +27,16 @@ export default async function PlayerPage({
   const dayNumber = parseInt(day)
   const currentDay = days.find((d) => d.day_number === dayNumber)
   if (!currentDay) notFound()
+
+  // Trava sequencial no servidor: URL direta /player/28 não pula a fila.
+  // Um dia só abre se for o 1 ou se o anterior estiver concluído.
+  if (dayNumber > 1) {
+    const progress = await getProgressForChallenge(id)
+    const completed = new Set(progress.map((p) => p.day_number))
+    if (!completed.has(dayNumber - 1)) {
+      redirect(`/${locale}/challenges/${id}`)
+    }
+  }
 
   return (
     <VideoPlayer

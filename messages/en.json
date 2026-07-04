@@ -107,7 +107,8 @@
     "previous": "PREVIOUS",
     "next": "NEXT",
     "upNext": "UP NEXT",
-    "restart": "Repeat challenge"
+    "restart": "Repeat challenge",
+    "audioSpanish": "🎧 Video audio in Spanish"
   },
   "subscription": {
     "exclusiveOffer": "Exclusive subscription offer",
@@ -473,5 +474,13 @@
       "Bird-Dog",
       "Lower Back Relaxation"
     ]
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundDesc": "The link you opened doesn't exist or has moved.",
+    "backHome": "Go home",
+    "errorTitle": "Something went wrong",
+    "errorDesc": "An unexpected error occurred. Please try again.",
+    "retry": "Try again"
   }
 }
