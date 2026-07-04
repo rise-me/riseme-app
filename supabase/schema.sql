@@ -119,9 +119,11 @@ create policy "challenges_select_all" on public.challenges for select using (tru
 -- Challenge days: everyone can read
 create policy "challenge_days_select_all" on public.challenge_days for select using (true);
 
--- User challenges: own rows only
+-- User challenges: leitura da própria linha. Escrita é EXCLUSIVA do servidor
+-- (webhooks/admin via service_role) — sem policy de insert/update pro cliente,
+-- senão o usuário se concede acesso vitalício direto pela API (vuln A10). Ver
+-- migration_004.
 create policy "user_challenges_select_own" on public.user_challenges for select using (auth.uid() = user_id);
-create policy "user_challenges_insert_own" on public.user_challenges for insert with check (auth.uid() = user_id);
 
 -- User progress: own rows only
 create policy "user_progress_select_own" on public.user_progress for select using (auth.uid() = user_id);
