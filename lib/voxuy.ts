@@ -1,12 +1,17 @@
 // Entrega do acesso pela Voxuy (WhatsApp que o Bruno já dispara na compra).
-// Best-effort: se as envs não estiverem configuradas, apenas loga e segue —
-// a criação da conta NUNCA depende disso (email/recovery é o backup).
+// Fluxo: pagamento → webhook RiseMe (cria conta + código) → POST aqui na Voxuy
+// com metadata { codigo_acesso, link_acesso } → Voxuy dispara o WhatsApp usando
+// essas variáveis (Inserir variável → Venda → Campo metadata (API)).
 //
-// A Voxuy recebe um POST no webhook dela (URL + Token API do painel) e expõe
-// os campos de `metadata` como variáveis na mensagem (Inserir variável → Venda →
-// Campo metadata (API)). O shape exato é confirmado quando o Bruno ligar a conta.
+// Best-effort: se as envs não estiverem configuradas, apenas loga e segue — a
+// criação da conta NUNCA depende disso (backup = recovery por email).
+//
+// Schema conforme doc da Voxuy: apiToken vai no BODY; valores são inteiros;
+// disparo por evento customizado (status 99 + customEvent) pra ter uma automação
+// dedicada ao "acesso liberado", sem colidir com outros fluxos.
 
 export async function sendVoxuyAccess(params: {
+  transactionId: string
   name?: string
   email: string
   phone?: string
@@ -15,23 +20,28 @@ export async function sendVoxuyAccess(params: {
 }): Promise<void> {
   const url = process.env.VOXUY_WEBHOOK_URL
   const token = process.env.VOXUY_API_TOKEN
-  if (!url || !token) {
-    console.warn('[voxuy] VOXUY_WEBHOOK_URL/TOKEN ausentes — pulando envio WhatsApp (backup: email/recovery)')
+  const customEvent = process.env.VOXUY_CUSTOM_EVENT_ID
+  if (!url || !token || !customEvent) {
+    console.warn('[voxuy] envs ausentes (URL/TOKEN/CUSTOM_EVENT) — pulando WhatsApp (backup: email/recovery)')
     return
   }
 
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        token,
-        name: params.name ?? '',
-        email: params.email,
-        phone: params.phone ?? '',
+        apiToken: token,
+        id: params.transactionId,
+        clientName: params.name ?? '',
+        clientEmail: params.email,
+        clientPhoneNumber: params.phone ?? '',
+        value: 0,
+        freight: 0,
+        totalValue: 0,
+        paymentType: 1,
+        status: 99,
+        customEvent,
         metadata: {
           codigo_acesso: params.code,
           link_acesso: params.link,
