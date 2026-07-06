@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
       await sendVoxuyAccess({
+        productCode,
         transactionId: payload.code,
         name: payload.customer.full_name,
         email: buyerEmail,
