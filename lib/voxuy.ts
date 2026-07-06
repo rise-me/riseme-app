@@ -4,10 +4,12 @@
 // essas variáveis (Inserir variável → Venda → Campo metadata (API)).
 //
 // MULTI-PRODUTO: cada produto tem sua própria mensagem/evento na Voxuy. O mapa
-// VOXUY_PRODUCTS liga o CÓDIGO DO PRODUTO ao ID DO EVENTO da Voxuy. Adicionar um
-// produto novo = criar o evento na Voxuy + acrescentar uma linha nessa env.
-//   VOXUY_PRODUCTS="PPPBF0A2:1176594,OUTROPRODUTO:1234567"
-//   (formato: codigoProduto:idEvento — o planId da Voxuy é o próprio código do produto)
+// VOXUY_PRODUCTS liga o CÓDIGO QUE O PAGAMENTO MANDA (ex.: PPPBF0A2 da Perfect Pay)
+// ao PLAN CODE + ID DO EVENTO da Voxuy. Adicionar produto = criar o evento na
+// Voxuy + acrescentar uma linha nessa env.
+//   Formato: codigoPagamento:planCodeVoxuy:idEvento
+//   Ex.: VOXUY_PRODUCTS="PPPBF0A2:0d97d04a-...:1176597,OUTRO:planX:1234567"
+//   (compat: se só houver 2 campos "codigo:idEvento", o planId vira o próprio código)
 //
 // URL e TOKEN são da CONTA (um só). Best-effort: se faltar env ou o produto não
 // estiver mapeado, apenas loga e segue — a criação da conta NUNCA depende disso
@@ -21,10 +23,10 @@ interface VoxuyProduct {
 function getVoxuyProduct(productCode: string): VoxuyProduct | null {
   const map = process.env.VOXUY_PRODUCTS ?? ''
   for (const entry of map.split(',')) {
-    const [code, eventId] = entry.split(':').map((s) => s?.trim())
-    if (code && code === productCode && eventId) {
-      return { planId: code, eventId: Number(eventId) }
-    }
+    const [code, second, third] = entry.split(':').map((s) => s?.trim())
+    if (!code || code !== productCode) continue
+    if (second && third) return { planId: second, eventId: Number(third) } // codigo:planCode:evento
+    if (second) return { planId: code, eventId: Number(second) }           // codigo:evento (planId = código)
   }
   return null
 }
