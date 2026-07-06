@@ -15,7 +15,14 @@ export interface MockBonus {
 }
 
 export const mockBonuses: MockBonus[] = [
-  // preenchido conforme o Bruno entrega os PDFs por idioma (ver script de upload)
+  { id: 'linha-suporte', emoji: '💬', pages: { tr: 3 } },
+  { id: 'falsos-saudaveis', emoji: '🎭', pages: { tr: 7 } },
+  { id: 'anti-inchaco', emoji: '💧', pages: { tr: 11 } },
+  { id: 'vinagre-maca', emoji: '🍎', pages: { tr: 7 } },
+  { id: 'tres-botoes', emoji: '🔑', pages: { tr: 8 } },
+  { id: 'frutas-inocentes', emoji: '🍇', pages: { tr: 6 } },
+  { id: 'depois-28-dias', emoji: '🎯', pages: { tr: 7 } },
+  { id: 'rastreador-progresso', emoji: '📊', pages: { tr: 7 } },
 ]
 
 export function getMockBonusById(id: string): MockBonus | undefined {

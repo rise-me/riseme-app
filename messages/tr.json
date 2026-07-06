@@ -494,5 +494,38 @@
     "pageCount": "PDF · {count} sayfa",
     "emptyState": "Bonusların yakında burada olacak."
   },
-  "bonusData": {}
+  "bonusData": {
+    "linha-suporte": {
+      "title": "WhatsApp Destek Hattın",
+      "description": "28 gün boyunca gerçek uzmanlardan sana özel destek — robot yok, sadece insan."
+    },
+    "falsos-saudaveis": {
+      "title": "Sağlıklı Sanılan Düşmanlar",
+      "description": "\"Sağlıklı\" etiketiyle satılan ama zayıflamanı baltalayan yiyecekler — ve yerine ne koyacağın."
+    },
+    "anti-inchaco": {
+      "title": "Ödem Karşıtı Plan",
+      "description": "72 saatte daha düz, daha sıkı bir karın. Çay yok, hap yok — sadece doğru beslenme."
+    },
+    "vinagre-maca": {
+      "title": "Elma Sirkesi Hilesi",
+      "description": "3 dakikalık bir hareket + bir kaşık elma sirkesi. Kan şekerini dengeleyen ikili."
+    },
+    "tres-botoes": {
+      "title": "3 Gizli Düğme",
+      "description": "Vücudunda yağ yakımını ateşleyen üç gizli düğme. Çoğu kadın bunlara hiç dokunmuyor."
+    },
+    "frutas-inocentes": {
+      "title": "Metabolizmayı Yavaşlatan 3 Masum Meyve",
+      "description": "\"Sağlıklı\" diye her gün yediğin ama sonuçlarını yavaşlatan üç meyve."
+    },
+    "depois-28-dias": {
+      "title": "28 Günden Sonra",
+      "description": "Kazandığın sonucu nasıl kalıcı kılarsın? 28 gün sonrası için yol haritan."
+    },
+    "rastreador-progresso": {
+      "title": "İlerleme Takipçisi",
+      "description": "28 günlük dönüşümünü ölç, gör ve kutla. Yazdırılabilir takip aracı."
+    }
+  }
 }
