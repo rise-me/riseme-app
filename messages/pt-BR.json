@@ -73,7 +73,13 @@
     "signupSubtitle": "Crie sua conta grátis",
     "forgotSubtitle": "Recupere o acesso à sua conta",
     "resetSubtitle": "Defina sua nova senha",
-    "backToLogin": "Voltar para entrar"
+    "backToLogin": "Voltar para entrar",
+    "entrarSubtitle": "Entre com seu acesso",
+    "accessCodeHint": "É a senha que enviamos no seu WhatsApp.",
+    "enter": "Entrar",
+    "entering": "Entrando...",
+    "noAccess": "Não recebi meu acesso",
+    "accessInvalid": "Email ou senha incorretos. Confira a mensagem que enviamos."
   },
   "challenges": {
     "title": "Desafios",
@@ -494,5 +500,11 @@
     "pageCount": "PDF · {count} págs.",
     "emptyState": "Em breve seus bônus aparecem aqui."
   },
-  "bonusData": {}
+  "bonusData": {},
+  "firstAccess": {
+    "title": "Você está dentro! 🎉",
+    "body": "Sua senha de acesso está no seu WhatsApp. Guarde ela pra entrar sempre — ou crie uma senha sua agora.",
+    "changeCta": "Criar minha senha",
+    "keepCta": "Manter essa"
+  }
 }

@@ -73,7 +73,13 @@
     "signupSubtitle": "Crea tu cuenta gratis",
     "forgotSubtitle": "Recupera el acceso a tu cuenta",
     "resetSubtitle": "Define tu nueva contraseña",
-    "backToLogin": "Volver a iniciar sesión"
+    "backToLogin": "Volver a iniciar sesión",
+    "entrarSubtitle": "Ingresa con tu acceso",
+    "accessCodeHint": "Es la contraseña que enviamos a tu WhatsApp.",
+    "enter": "Entrar",
+    "entering": "Entrando...",
+    "noAccess": "No recibí mi acceso",
+    "accessInvalid": "Correo o contraseña incorrectos. Revisa el mensaje que te enviamos."
   },
   "challenges": {
     "title": "Desafíos",
@@ -494,5 +500,11 @@
     "pageCount": "PDF · {count} págs.",
     "emptyState": "Pronto agregaremos tus bonos aquí."
   },
-  "bonusData": {}
+  "bonusData": {},
+  "firstAccess": {
+    "title": "¡Estás dentro! 🎉",
+    "body": "Tu contraseña de acceso está en tu WhatsApp. Guárdala para entrar siempre — o crea una contraseña tuya ahora.",
+    "changeCta": "Crear mi contraseña",
+    "keepCta": "Mantener esta"
+  }
 }

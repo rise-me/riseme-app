@@ -5,6 +5,7 @@ export interface CurrentUser {
   email: string
   name: string
   initial: string
+  onboarded: boolean
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -16,6 +17,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const metaName = (user.user_metadata?.name as string | undefined)?.trim()
   const name = metaName || email.split('@')[0] || ''
   const initial = (name || email).charAt(0).toUpperCase() || '?'
+  const onboarded = user.user_metadata?.onboarded === true
 
-  return { id: user.id, email, name, initial }
+  return { id: user.id, email, name, initial, onboarded }
 }

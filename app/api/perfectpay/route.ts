@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
+import { sendVoxuyAccess } from '@/lib/voxuy'
 
 const PERFECTPAY_TOKEN = process.env.PERFECTPAY_WEBHOOK_TOKEN
 
@@ -13,7 +15,7 @@ interface PerfectPayPayload {
   code: string // identificador da venda
   sale_status_enum: number
   sale_status_detail?: string
-  customer: { email: string; full_name?: string }
+  customer: { email: string; full_name?: string; phone_number?: string; phone_formated?: string; phone_ddd?: string }
   product: { code: string; name?: string }
   plan?: { code?: string; name?: string }
 }
@@ -89,20 +91,39 @@ export async function POST(request: NextRequest) {
     .limit(1)
 
   if (isGrant) {
+    const phone = payload.customer.phone_formated
+      ?? (payload.customer.phone_ddd && payload.customer.phone_number
+        ? `${payload.customer.phone_ddd}${payload.customer.phone_number}`
+        : payload.customer.phone_number)
+      ?? undefined
+
     let userId: string
     if (existingUsers && existingUsers.length > 0) {
       userId = existingUsers[0].id
     } else {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-      const { data: invited, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(buyerEmail, {
-        data: { name: payload.customer.full_name, locale: mapping.locale },
-        redirectTo: `${appUrl}/${mapping.locale}/set-password`,
+      // Conta JÁ ATIVA com código de acesso (senha inicial), entregue via Voxuy (WhatsApp).
+      const code = generateAccessCode()
+      const { data: created, error: createError } = await supabase.auth.admin.createUser({
+        email: buyerEmail,
+        password: code,
+        email_confirm: true,
+        user_metadata: { name: payload.customer.full_name, locale: mapping.locale },
       })
-      if (inviteError || !invited.user) {
-        console.error('[perfectpay] Failed to invite user:', inviteError)
-        return NextResponse.json({ error: 'Failed to invite user' }, { status: 500 })
+      if (createError || !created.user) {
+        console.error('[perfectpay] Failed to create user:', createError)
+        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
       }
-      userId = invited.user.id
+      userId = created.user.id
+      if (phone) await supabase.from('users').update({ phone }).eq('id', userId)
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+      await sendVoxuyAccess({
+        name: payload.customer.full_name,
+        email: buyerEmail,
+        phone,
+        code,
+        link: buildAccessLink(appUrl, mapping.locale, buyerEmail, code),
+      })
     }
 
     await supabase.from('user_challenges').upsert(

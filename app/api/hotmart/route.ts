@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
+import { sendVoxuyAccess } from '@/lib/voxuy'
 
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
 
@@ -29,7 +31,7 @@ interface HotmartPayload {
   event: HotmartEvent
   data: {
     product: { id: number; ucode: string; name: string }
-    buyer: { email: string; name: string }
+    buyer: { email: string; name: string; checkout_phone?: string; phone?: string }
     purchase: {
       transaction: string
       status: string
@@ -94,20 +96,39 @@ export async function POST(request: NextRequest) {
       .eq('email', buyerEmail)
       .limit(1)
 
+    // Hotmart = público Latam → espanhol. Grava o locale explícito pra o app/email
+    // saírem no idioma certo (antes não gravava e caía sempre em es por acaso).
+    const locale = 'es'
+    const phone = data.buyer.checkout_phone ?? data.buyer.phone ?? undefined
+
     let userId: string
     if (existingUsers && existingUsers.length > 0) {
       userId = existingUsers[0].id
     } else {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-      const { data: invited, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(buyerEmail, {
-        data: { name: data.buyer.name },
-        redirectTo: `${appUrl}/set-password`,
+      // Conta nasce JÁ ATIVA com um código de acesso (senha inicial), entregue
+      // pela Voxuy (WhatsApp) + backup por recovery. Sem etapa de "invente a senha".
+      const code = generateAccessCode()
+      const { data: created, error: createError } = await supabase.auth.admin.createUser({
+        email: buyerEmail,
+        password: code,
+        email_confirm: true,
+        user_metadata: { name: data.buyer.name, locale },
       })
-      if (inviteError || !invited.user) {
-        console.error('[hotmart] Failed to invite user:', inviteError)
-        return NextResponse.json({ error: 'Failed to invite user' }, { status: 500 })
+      if (createError || !created.user) {
+        console.error('[hotmart] Failed to create user:', createError)
+        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
       }
-      userId = invited.user.id
+      userId = created.user.id
+      if (phone) await supabase.from('users').update({ phone }).eq('id', userId)
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+      await sendVoxuyAccess({
+        name: data.buyer.name,
+        email: buyerEmail,
+        phone,
+        code,
+        link: buildAccessLink(appUrl, locale, buyerEmail, code),
+      })
     }
 
     if (isSubscription) {

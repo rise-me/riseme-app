@@ -73,7 +73,13 @@
     "signupSubtitle": "Ücretsiz hesabını oluştur",
     "forgotSubtitle": "Hesabına erişimi geri kazan",
     "resetSubtitle": "Yeni şifreni belirle",
-    "backToLogin": "Girişe dön"
+    "backToLogin": "Girişe dön",
+    "entrarSubtitle": "Erişiminle gir",
+    "accessCodeHint": "WhatsApp'ına gönderdiğimiz şifre.",
+    "enter": "Gir",
+    "entering": "Giriş yapılıyor...",
+    "noAccess": "Erişimimi almadım",
+    "accessInvalid": "E-posta veya şifre hatalı. Sana gönderdiğimiz mesajı kontrol et."
   },
   "challenges": {
     "title": "Meydan Okumalar",
@@ -527,5 +533,11 @@
       "title": "İlerleme Takipçisi",
       "description": "28 günlük dönüşümünü ölç, gör ve kutla. Yazdırılabilir takip aracı."
     }
+  },
+  "firstAccess": {
+    "title": "İçerdesin! 🎉",
+    "body": "Erişim şifren WhatsApp'ında. Her zaman girmek için sakla — ya da şimdi kendi şifreni oluştur.",
+    "changeCta": "Şifremi oluştur",
+    "keepCta": "Bunu tut"
   }
 }

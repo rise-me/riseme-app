@@ -73,7 +73,13 @@
     "signupSubtitle": "Create your free account",
     "forgotSubtitle": "Recover access to your account",
     "resetSubtitle": "Set your new password",
-    "backToLogin": "Back to log in"
+    "backToLogin": "Back to log in",
+    "entrarSubtitle": "Log in with your access",
+    "accessCodeHint": "It's the password we sent to your WhatsApp.",
+    "enter": "Enter",
+    "entering": "Signing in...",
+    "noAccess": "I didn't get my access",
+    "accessInvalid": "Wrong email or password. Check the message we sent you."
   },
   "challenges": {
     "title": "Challenges",
@@ -494,5 +500,11 @@
     "pageCount": "PDF · {count} pages",
     "emptyState": "Your bonuses will appear here soon."
   },
-  "bonusData": {}
+  "bonusData": {},
+  "firstAccess": {
+    "title": "You're in! 🎉",
+    "body": "Your access password is in your WhatsApp. Save it to log in anytime — or set your own password now.",
+    "changeCta": "Set my password",
+    "keepCta": "Keep this one"
+  }
 }

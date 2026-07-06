@@ -6,6 +6,7 @@ import { mockChallenges } from '@/lib/mock-challenges'
 import { getCurrentUser } from '@/lib/current-user-server'
 import { getUserAccess, canAccessChallenge } from '@/lib/user-access-server'
 import { WaterTracker } from '@/components/home/WaterTracker'
+import { FirstAccessNotice } from '@/components/home/FirstAccessNotice'
 
 export default async function HomePage({
   params,
@@ -45,6 +46,8 @@ export default async function HomePage({
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
+      {user && !user.onboarded && <FirstAccessNotice locale={locale} />}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
