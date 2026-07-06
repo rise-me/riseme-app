@@ -20,7 +20,8 @@
     "progress": "Progreso",
     "workouts": "Entrenamientos",
     "challenges": "Desafíos",
-    "more": "Más"
+    "more": "Más",
+    "bonus": "Bonos"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -482,5 +483,16 @@
     "errorTitle": "Algo salió mal",
     "errorDesc": "Ocurrió un error inesperado. Inténtalo de nuevo.",
     "retry": "Intentar de nuevo"
-  }
+  },
+  "bonus": {
+    "title": "Bonos",
+    "subtitle": "Materiales extra incluidos en tu compra",
+    "lockedTitle": "Desbloquea tus bonos",
+    "lockedSubtitle": "Los bonos están incluidos con cualquier desafío. Consíguelos y accede a todo.",
+    "lockedCta": "Desbloquear acceso",
+    "downloadPdf": "Descargar PDF",
+    "pageCount": "PDF · {count} págs.",
+    "emptyState": "Pronto agregaremos tus bonos aquí."
+  },
+  "bonusData": {}
 }

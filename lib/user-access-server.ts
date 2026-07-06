@@ -51,3 +51,9 @@ export function canAccessChallenge(
   if (access.hasActiveSubscription) return true
   return access.ownedChallengeIds.has(challengeId)
 }
+
+// Bônus liberados pra quem comprou qualquer coisa: assinante OU dono de qualquer
+// desafio vitalício. (Mesma lógica do hideUpsell no player de workout.)
+export function canAccessBonuses(access: UserAccess): boolean {
+  return access.hasActiveSubscription || access.ownedChallengeIds.size > 0
+}

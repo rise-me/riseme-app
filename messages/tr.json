@@ -20,7 +20,8 @@
     "progress": "İlerleme",
     "workouts": "Antrenmanlar",
     "challenges": "Meydan Okumalar",
-    "more": "Daha Fazla"
+    "more": "Daha Fazla",
+    "bonus": "Bonuslar"
   },
   "auth": {
     "login": "Giriş yap",
@@ -482,5 +483,16 @@
     "errorTitle": "Bir şeyler ters gitti",
     "errorDesc": "Beklenmedik bir hata oluştu. Lütfen tekrar dene.",
     "retry": "Tekrar dene"
-  }
+  },
+  "bonus": {
+    "title": "Bonuslar",
+    "subtitle": "Satın alımına dahil ekstra materyaller",
+    "lockedTitle": "Bonuslarının kilidini aç",
+    "lockedSubtitle": "Bonuslar her meydan okumaya dahildir. Seninkini al ve her şeye eriş.",
+    "lockedCta": "Erişimi aç",
+    "downloadPdf": "PDF'i indir",
+    "pageCount": "PDF · {count} sayfa",
+    "emptyState": "Bonusların yakında burada olacak."
+  },
+  "bonusData": {}
 }

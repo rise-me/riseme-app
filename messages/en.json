@@ -20,7 +20,8 @@
     "progress": "Progress",
     "workouts": "Workouts",
     "challenges": "Challenges",
-    "more": "More"
+    "more": "More",
+    "bonus": "Bonus"
   },
   "auth": {
     "login": "Sign in",
@@ -482,5 +483,16 @@
     "errorTitle": "Something went wrong",
     "errorDesc": "An unexpected error occurred. Please try again.",
     "retry": "Try again"
-  }
+  },
+  "bonus": {
+    "title": "Bonus",
+    "subtitle": "Extra materials included with your purchase",
+    "lockedTitle": "Unlock your bonuses",
+    "lockedSubtitle": "Bonuses are included with any challenge. Get yours and access everything.",
+    "lockedCta": "Unlock access",
+    "downloadPdf": "Download PDF",
+    "pageCount": "PDF · {count} pages",
+    "emptyState": "Your bonuses will appear here soon."
+  },
+  "bonusData": {}
 }

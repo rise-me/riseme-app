@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { CalendarDays, TrendingUp, Swords, MoreHorizontal } from 'lucide-react'
+import { CalendarDays, TrendingUp, Swords, Gift, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // aba Treinos removida em 2026-07-03 (aulas grátis sem vídeo real) — decisão
@@ -12,6 +12,7 @@ const navItems = [
   { key: 'plan', href: '/home', icon: CalendarDays },
   { key: 'progress', href: '/progress', icon: TrendingUp },
   { key: 'challenges', href: '/challenges', icon: Swords },
+  { key: 'bonus', href: '/bonus', icon: Gift },
   { key: 'more', href: '/more', icon: MoreHorizontal },
 ] as const
 

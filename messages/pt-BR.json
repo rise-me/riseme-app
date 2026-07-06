@@ -20,7 +20,8 @@
     "progress": "Progresso",
     "workouts": "Treinos",
     "challenges": "Desafios",
-    "more": "Mais"
+    "more": "Mais",
+    "bonus": "Bônus"
   },
   "auth": {
     "login": "Entrar",
@@ -482,5 +483,16 @@
     "errorTitle": "Algo deu errado",
     "errorDesc": "Ocorreu um erro inesperado. Tente de novo.",
     "retry": "Tentar de novo"
-  }
+  },
+  "bonus": {
+    "title": "Bônus",
+    "subtitle": "Materiais extras inclusos na sua compra",
+    "lockedTitle": "Desbloqueie seus bônus",
+    "lockedSubtitle": "Os bônus vêm inclusos com qualquer desafio. Garanta o seu e acesse tudo.",
+    "lockedCta": "Desbloquear acesso",
+    "downloadPdf": "Baixar PDF",
+    "pageCount": "PDF · {count} págs.",
+    "emptyState": "Em breve seus bônus aparecem aqui."
+  },
+  "bonusData": {}
 }
