@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { sendVoxuyAccess } from '@/lib/voxuy'
+import { toE164 } from '@/lib/phone'
 
 const PERFECTPAY_TOKEN = process.env.PERFECTPAY_WEBHOOK_TOKEN
 
@@ -15,7 +16,15 @@ interface PerfectPayPayload {
   code: string // identificador da venda
   sale_status_enum: number
   sale_status_detail?: string
-  customer: { email: string; full_name?: string; phone_number?: string; phone_formated?: string; phone_ddd?: string }
+  customer: {
+    email: string
+    full_name?: string
+    phone_number?: string
+    phone_formated?: string
+    phone_ddd?: string
+    phone_area_code?: string // campo oficial da doc Perfect Pay (equivale ao DDD)
+    country?: string // ISO-2 do país do comprador (ex.: "BR", "TR") — traz o DDI certo
+  }
   product: { code: string; name?: string }
   plan?: { code?: string; name?: string }
 }
@@ -91,11 +100,22 @@ export async function POST(request: NextRequest) {
     .limit(1)
 
   if (isGrant) {
-    const phone = payload.customer.phone_formated
-      ?? (payload.customer.phone_ddd && payload.customer.phone_number
-        ? `${payload.customer.phone_ddd}${payload.customer.phone_number}`
-        : payload.customer.phone_number)
-      ?? undefined
+    // Monta o número cru (área + número, ou o formatado) e normaliza pra E.164
+    // com o DDI do país. Sem o "+DDI" a Voxuy assume Brasil e o número estrangeiro
+    // vira inválido (bug comprovado com a turca Ömür em 2026-07-07).
+    const areaCode = payload.customer.phone_area_code ?? payload.customer.phone_ddd
+    const rawPhone = (areaCode && payload.customer.phone_number
+      ? `${areaCode}${payload.customer.phone_number}`
+      : payload.customer.phone_formated ?? payload.customer.phone_number) ?? undefined
+    const { phone, hadCountry } = toE164(rawPhone, {
+      countryIso: payload.customer.country,
+      locale: mapping.locale,
+    })
+    if (rawPhone && !hadCountry) {
+      console.warn(
+        `[perfectpay] telefone sem país definido (venda ${payload.code}, country=${payload.customer.country ?? 'vazio'}, locale=${mapping.locale}) — enviado sem +DDI: ${phone}`
+      )
+    }
 
     let userId: string
     if (existingUsers && existingUsers.length > 0) {
