@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { sendVoxuyAccess } from '@/lib/voxuy'
+import { sendAccessEmail } from '@/lib/email'
 
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
 
@@ -122,6 +123,9 @@ export async function POST(request: NextRequest) {
       if (phone) await supabase.from('users').update({ phone }).eq('id', userId)
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+      const link = buildAccessLink(appUrl, locale, buyerEmail, code)
+      // Entrega dupla, best-effort: WhatsApp (Voxuy) + email (Resend, contingência
+      // que não depende de telefone). Se um falhar, o outro cobre.
       await sendVoxuyAccess({
         productCode: productId,
         transactionId: data.purchase.transaction,
@@ -129,8 +133,9 @@ export async function POST(request: NextRequest) {
         email: buyerEmail,
         phone,
         code,
-        link: buildAccessLink(appUrl, locale, buyerEmail, code),
+        link,
       })
+      await sendAccessEmail({ email: buyerEmail, code, link, locale })
     }
 
     if (isSubscription) {
