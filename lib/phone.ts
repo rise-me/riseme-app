@@ -51,7 +51,9 @@ export function toE164(
 
   const ddi = resolveDdi(opts)
   if (!ddi) return { phone: digits, hadCountry: false } // sem país → não arrisca prefixo errado
-  // Evita duplicar o DDI se o número já vier com ele.
-  const withDdi = digits.startsWith(ddi) ? digits : `${ddi}${digits}`
-  return { phone: `+${withDdi}`, hadCountry: true }
+  if (digits.startsWith(ddi)) return { phone: `+${digits}`, hadCountry: true } // já tem o DDI
+  // Tira o zero-troncal nacional (ex.: turco 0532... → 532...) antes de pôr o DDI.
+  // Sem isso o número sai como +90 0532... e continua inválido.
+  const nsn = digits.replace(/^0+/, '')
+  return { phone: `+${ddi}${nsn}`, hadCountry: true }
 }

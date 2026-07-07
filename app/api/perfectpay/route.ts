@@ -116,6 +116,17 @@ export async function POST(request: NextRequest) {
         `[perfectpay] telefone sem país definido (venda ${payload.code}, country=${payload.customer.country ?? 'vazio'}, locale=${mapping.locale}) — enviado sem +DDI: ${phone}`
       )
     }
+    // TEMP DEBUG (remover após validar): mostra o que a Perfect Pay realmente manda,
+    // pra confirmar se o número chega inteiro no payload (nosso banco antigo veio truncado).
+    console.log('[perfectpay][DEBUG-TEL]', JSON.stringify({
+      venda: payload.code,
+      country: payload.customer.country ?? null,
+      phone_area_code: payload.customer.phone_area_code ?? null,
+      phone_ddd: payload.customer.phone_ddd ?? null,
+      phone_number: payload.customer.phone_number ?? null,
+      phone_formated: payload.customer.phone_formated ?? null,
+      normalizado: phone ?? null,
+    }))
 
     let userId: string
     if (existingUsers && existingUsers.length > 0) {
