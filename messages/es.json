@@ -493,6 +493,8 @@
   "bonus": {
     "title": "Extras",
     "subtitle": "Tus materiales y contenidos extra",
+    "sectionProducts": "Tus productos",
+    "sectionBonuses": "Incluido con tu compra",
     "lockedTitle": "Desbloquea tus bonos",
     "lockedSubtitle": "Los bonos están incluidos con cualquier desafío. Consíguelos y accede a todo.",
     "lockedCta": "Desbloquear acceso",

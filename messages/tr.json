@@ -493,6 +493,8 @@
   "bonus": {
     "title": "Ekstralar",
     "subtitle": "Materyallerin ve ekstra içeriklerin",
+    "sectionProducts": "Ürünlerin",
+    "sectionBonuses": "Satın alımına dahil",
     "lockedTitle": "Bonuslarının kilidini aç",
     "lockedSubtitle": "Bonuslar her meydan okumaya dahildir. Seninkini al ve her şeye eriş.",
     "lockedCta": "Erişimi aç",

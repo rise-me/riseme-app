@@ -493,6 +493,8 @@
   "bonus": {
     "title": "Extras",
     "subtitle": "Your materials and extra content",
+    "sectionProducts": "Your products",
+    "sectionBonuses": "Included with your purchase",
     "lockedTitle": "Unlock your bonuses",
     "lockedSubtitle": "Bonuses are included with any challenge. Get yours and access everything.",
     "lockedCta": "Unlock access",
