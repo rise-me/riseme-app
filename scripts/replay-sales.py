@@ -148,6 +148,10 @@ def main() -> None:
     ap.add_argument("--url", default="https://riseme.app/api/perfectpay")
     ap.add_argument("--token", default=None)
     ap.add_argument("--only-missing", action="store_true", help="pula quem já tem conta")
+    ap.add_argument("--only-existing", action="store_true",
+                    help="pula quem NÃO tem conta — usar pra conceder upsell em silêncio "
+                         "(sem conta, o webhook criaria a conta e mandaria a mensagem pelo "
+                         "produto errado; essa gente tem que passar antes pelo produto principal)")
     ap.add_argument("--limit", type=int, default=0, help="0 = todas")
     ap.add_argument("--exclude", default="", help="e-mails a pular, separados por vírgula")
     ap.add_argument("--delay", type=float, default=1.5, help="segundos entre envios")
@@ -176,11 +180,15 @@ def main() -> None:
     for e in pulados_excl:
         por_email.pop(e)
 
-    pulados_tem_conta = []
-    if args.only_missing:
+    if args.only_missing and args.only_existing:
+        sys.exit("[erro] --only-missing e --only-existing são opostos; escolha um")
+
+    pulados_conta = []
+    if args.only_missing or args.only_existing:
         tem = existing_emails()
-        pulados_tem_conta = sorted(e for e in por_email if e in tem)
-        for e in pulados_tem_conta:
+        # only-missing pula quem TEM conta; only-existing pula quem NÃO tem
+        pulados_conta = sorted(e for e in por_email if (e in tem) == args.only_missing)
+        for e in pulados_conta:
             por_email.pop(e)
 
     fila = sorted(por_email.values(), key=parse_data, reverse=True)  # mais recente primeiro
@@ -193,7 +201,9 @@ def main() -> None:
     if pulados_excl:
         print(f"excluídas à mão:  {len(pulados_excl)}  ({', '.join(pulados_excl)})")
     if args.only_missing:
-        print(f"já têm conta:     {len(pulados_tem_conta)}  (puladas)")
+        print(f"já têm conta:     {len(pulados_conta)}  (puladas)")
+    if args.only_existing:
+        print(f"sem conta:        {len(pulados_conta)}  (puladas — precisam do produto principal antes)")
     print(f"\nNA FILA AGORA:    {len(fila)}" + (f"  (limitado a {args.limit})" if args.limit else ""))
     print("=" * 78)
 
