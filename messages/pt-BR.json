@@ -21,7 +21,7 @@
     "workouts": "Treinos",
     "challenges": "Desafios",
     "more": "Mais",
-    "bonus": "Bônus"
+    "bonus": "Extras"
   },
   "auth": {
     "login": "Entrar",
@@ -491,8 +491,8 @@
     "retry": "Tentar de novo"
   },
   "bonus": {
-    "title": "Bônus",
-    "subtitle": "Materiais extras inclusos na sua compra",
+    "title": "Extras",
+    "subtitle": "Seus materiais e conteúdos extras",
     "lockedTitle": "Desbloqueie seus bônus",
     "lockedSubtitle": "Os bônus vêm inclusos com qualquer desafio. Garanta o seu e acesse tudo.",
     "lockedCta": "Desbloquear acesso",

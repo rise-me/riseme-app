@@ -21,7 +21,7 @@
     "workouts": "Workouts",
     "challenges": "Challenges",
     "more": "More",
-    "bonus": "Bonus"
+    "bonus": "Extras"
   },
   "auth": {
     "login": "Sign in",
@@ -491,8 +491,8 @@
     "retry": "Try again"
   },
   "bonus": {
-    "title": "Bonus",
-    "subtitle": "Extra materials included with your purchase",
+    "title": "Extras",
+    "subtitle": "Your materials and extra content",
     "lockedTitle": "Unlock your bonuses",
     "lockedSubtitle": "Bonuses are included with any challenge. Get yours and access everything.",
     "lockedCta": "Unlock access",

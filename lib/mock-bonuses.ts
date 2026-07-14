@@ -1,17 +1,27 @@
-// Bônus em PDF entregues junto com a compra, exibidos na aba Bônus como páginas-imagem.
+// Materiais em PDF exibidos na aba Extras como páginas-imagem.
 // Padrão espelha lib/mock-challenges.ts: metadados aqui, títulos/descrições no i18n (bonusData).
 //
-// Cada bônus tem um PDF por idioma (o design do Bruno, convertido em páginas .webp).
-// `pages` diz em quais locales o bônus existe e quantas páginas cada um tem — a lista
-// só mostra o bônus nos idiomas presentes aqui (fallback: oculto no locale sem PDF).
+// Cada material tem um PDF por idioma (o design do Bruno, convertido em páginas .webp).
+// `pages` diz em quais locales o material existe e quantas páginas cada um tem — a lista
+// só mostra o material nos idiomas presentes aqui (fallback: oculto no locale sem PDF).
 // Arquivos no Supabase Storage (bucket privado 'bonuses'):
 //   bonuses/{id}/{locale}/page-01.webp … page-NN.webp  +  bonuses/{id}/{locale}/original.pdf
+// Pra publicar um material novo: scripts/publish-material.py (converte + sobe + diz o pages).
+//
+// `access` decide quem vê:
+//   'bonus'    → brinde da compra: liberado pra quem tem qualquer desafio/assinatura
+//   'purchase' → produto vendido à parte (upsell): só pra quem comprou ESTE id.
+//                O id tem que bater com o valor no mapa do webhook da plataforma
+//                (ex.: PERFECTPAY_CHALLENGE_MAP="CODIGO:protocolo-metabolico:tr"),
+//                que grava o id em user_challenges — a mesma tabela dos desafios.
+// A nomenclatura "bonus" no código e no bucket é histórica (a aba nasceu só com brindes).
 
 export interface MockBonus {
   id: string
   emoji: string
   is_free?: boolean
   pages: Record<string, number>
+  access?: 'bonus' | 'purchase' // default: 'bonus'
 }
 
 export const mockBonuses: MockBonus[] = [
@@ -23,6 +33,8 @@ export const mockBonuses: MockBonus[] = [
   { id: 'frutas-inocentes', emoji: '🍇', pages: { tr: 6 } },
   { id: 'depois-28-dias', emoji: '🎯', pages: { tr: 7 } },
   { id: 'rastreador-progresso', emoji: '📊', pages: { tr: 7 } },
+  // Upsell vendido na Perfect Pay (ebook do sistema de chás de 28 dias)
+  { id: 'protocolo-metabolico', emoji: '🍵', access: 'purchase', pages: { tr: 31 } },
 ]
 
 export function getMockBonusById(id: string): MockBonus | undefined {

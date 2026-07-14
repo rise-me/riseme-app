@@ -21,7 +21,7 @@
     "workouts": "Antrenmanlar",
     "challenges": "Meydan Okumalar",
     "more": "Daha Fazla",
-    "bonus": "Bonuslar"
+    "bonus": "Ekstralar"
   },
   "auth": {
     "login": "Giriş yap",
@@ -491,8 +491,8 @@
     "retry": "Tekrar dene"
   },
   "bonus": {
-    "title": "Bonuslar",
-    "subtitle": "Satın alımına dahil ekstra materyaller",
+    "title": "Ekstralar",
+    "subtitle": "Materyallerin ve ekstra içeriklerin",
     "lockedTitle": "Bonuslarının kilidini aç",
     "lockedSubtitle": "Bonuslar her meydan okumaya dahildir. Seninkini al ve her şeye eriş.",
     "lockedCta": "Erişimi aç",
@@ -532,6 +532,10 @@
     "rastreador-progresso": {
       "title": "İlerleme Takipçisi",
       "description": "28 günlük dönüşümünü ölç, gör ve kutla. Yazdırılabilir takip aracı."
+    },
+    "protocolo-metabolico": {
+      "title": "Metabolik Protokol",
+      "description": "Meydan Okumanı ateşleyen 28 günlük çay sistemi. Dört faz: Ateşleme, Arınma, Hızlanma, Sabitleme."
     }
   },
   "firstAccess": {

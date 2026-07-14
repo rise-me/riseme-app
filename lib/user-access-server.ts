@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { mockChallenges } from '@/lib/mock-challenges'
+import type { MockBonus } from '@/lib/mock-bonuses'
 
 export interface UserAccess {
   userId: string | null
@@ -56,4 +57,11 @@ export function canAccessChallenge(
 // desafio vitalício. (Mesma lógica do hideUpsell no player de workout.)
 export function canAccessBonuses(access: UserAccess): boolean {
   return access.hasActiveSubscription || access.ownedChallengeIds.size > 0
+}
+
+// Acesso a UM material da aba Extras. Produto de upsell ('purchase') exige compra
+// daquele id específico — assinatura NÃO libera, é venda avulsa à parte.
+export function canAccessBonus(bonus: MockBonus, access: UserAccess): boolean {
+  if (bonus.access === 'purchase') return access.ownedChallengeIds.has(bonus.id)
+  return canAccessBonuses(access)
 }

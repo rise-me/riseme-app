@@ -13,16 +13,17 @@ interface BonusItem {
   pageCount: number
   title: string
   description: string
+  unlocked: boolean
 }
 
 export function BonusList({
   items,
   locale,
-  unlocked,
+  hasAnyAccess,
 }: {
   items: BonusItem[]
   locale: string
-  unlocked: boolean
+  hasAnyAccess: boolean
 }) {
   const t = useTranslations('bonus')
   const [paywallOpen, setPaywallOpen] = useState(false)
@@ -33,7 +34,7 @@ export function BonusList({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {unlocked ? t('subtitle') : t('lockedSubtitle')}
+            {hasAnyAccess ? t('subtitle') : t('lockedSubtitle')}
           </p>
         </div>
 
@@ -46,13 +47,13 @@ export function BonusList({
                 <div
                   className={cn(
                     'flex items-center gap-4 bg-card rounded-2xl p-4 border border-border transition-all active:scale-[0.98]',
-                    !unlocked && 'opacity-75'
+                    !item.unlocked && 'opacity-75'
                   )}
                 >
                   <div
                     className={cn(
                       'w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-secondary',
-                      !unlocked && 'grayscale'
+                      !item.unlocked && 'grayscale'
                     )}
                   >
                     {item.emoji}
@@ -70,7 +71,7 @@ export function BonusList({
                   </div>
 
                   <div className="flex-shrink-0">
-                    {unlocked ? (
+                    {item.unlocked ? (
                       <ChevronRight size={18} className="text-muted-foreground" />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center lock-glow">
@@ -81,7 +82,7 @@ export function BonusList({
                 </div>
               )
 
-              return unlocked ? (
+              return item.unlocked ? (
                 <Link key={item.id} href={`/${locale}/bonus/${item.id}`}>
                   {card}
                 </Link>
