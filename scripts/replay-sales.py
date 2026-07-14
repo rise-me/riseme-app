@@ -41,6 +41,7 @@ import time
 import urllib.error
 import urllib.request
 import zipfile
+from datetime import datetime
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
@@ -108,6 +109,18 @@ def existing_emails() -> set[str]:
         page += 1
 
 
+def parse_data(sale: dict) -> datetime:
+    """DataVenda vem 'DD/MM/AAAA HH:MM:SS'. Comparar como texto ordena errado
+    (30/06 > 02/07, porque '3' > '0') — então converte de verdade."""
+    raw = (sale.get("DataVenda") or "").strip()
+    for fmt in ("%d/%m/%Y %H:%M:%S", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(raw, fmt)
+        except ValueError:
+            continue
+    return datetime.min  # sem data → vai pro fim da fila
+
+
 def build_payload(sale: dict, token: str, product_code: str) -> dict:
     """Espelha o formato que a Perfect Pay manda de verdade (ver PerfectPayPayload)."""
     pais = (sale.get("País") or "").strip().lower()
@@ -155,7 +168,7 @@ def main() -> None:
     por_email: dict[str, dict] = {}
     for r in aprovadas:
         e = r["EmailCliente"].strip().lower()
-        if e not in por_email or (r.get("DataVenda", "") > por_email[e].get("DataVenda", "")):
+        if e not in por_email or parse_data(r) > parse_data(por_email[e]):
             por_email[e] = r
 
     excluidos = {e.strip().lower() for e in args.exclude.split(",") if e.strip()}
@@ -170,7 +183,7 @@ def main() -> None:
         for e in pulados_tem_conta:
             por_email.pop(e)
 
-    fila = sorted(por_email.values(), key=lambda r: r.get("DataVenda", ""), reverse=True)
+    fila = sorted(por_email.values(), key=parse_data, reverse=True)  # mais recente primeiro
     if args.limit:
         fila = fila[:args.limit]
 
