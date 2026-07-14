@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Search, Mail, KeyRound, Plus, Trash2, UserPlus, CheckCircle2, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { mockBonuses } from '@/lib/mock-bonuses'
 import {
   searchUser,
   sendPasswordLink,
@@ -21,7 +22,16 @@ const CHALLENGES = [
   { id: '4', name: '🪑 Yoga en la Silla' },
   { id: '5', name: '🔥 Cuerpo Sexy de Verano' },
 ]
-const challengeName = (id: string) => CHALLENGES.find((c) => c.id === id)?.name ?? `Desafio ${id}`
+
+// Produtos vendidos à parte (upsell) vivem na MESMA tabela user_challenges, então
+// o suporte libera igual. Derivado de mock-bonuses pra não desandar quando um novo
+// for cadastrado lá — sem isso, a Iza não consegue atender "comprei e não apareceu".
+const MATERIAIS = mockBonuses
+  .filter((b) => b.access === 'purchase')
+  .map((b) => ({ id: b.id, name: `${b.emoji} ${b.id} (upsell)` }))
+
+const CONCEDIVEIS = [...CHALLENGES, ...MATERIAIS]
+const challengeName = (id: string) => CONCEDIVEIS.find((c) => c.id === id)?.name ?? `Desafio ${id}`
 
 const LOCALES = [
   { code: 'es', label: 'Espanhol' },
@@ -144,7 +154,7 @@ export function SupportClient() {
               onChange={(e) => setNewChallenge(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-border bg-card text-sm"
             >
-              {CHALLENGES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {CONCEDIVEIS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <button
@@ -240,7 +250,7 @@ export function SupportClient() {
                 onChange={(e) => setGrantId(e.target.value)}
                 className="flex-1 px-3 py-2.5 rounded-xl border border-border bg-card text-sm"
               >
-                {CHALLENGES.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {CONCEDIVEIS.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
               <button
                 disabled={pending}
