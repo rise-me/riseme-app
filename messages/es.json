@@ -502,7 +502,32 @@
     "pageCount": "PDF · {count} págs.",
     "emptyState": "Pronto agregaremos tus bonos aquí."
   },
-  "bonusData": {},
+  "bonusData": {
+    "falsos-saudaveis": {
+      "title": "Enemigos con Cara de Salud",
+      "description": "Alimentos con la etiqueta \"saludable\" que frenan tu adelgazamiento en silencio — y qué poner en su lugar."
+    },
+    "anti-inchaco": {
+      "title": "Plan Antihinchazón",
+      "description": "72 horas para un vientre más plano y firme. Sin tés, sin pastillas — solo comida correcta."
+    },
+    "vinagre-maca": {
+      "title": "El Truco del Hielo",
+      "description": "Un vaso con hielo, una cucharada de vinagre de manzana y 3 minutos. Suaviza tu glucosa y despierta tu grasa parda."
+    },
+    "tres-botoes": {
+      "title": "3 Interruptores Ocultos",
+      "description": "Tres interruptores que encienden la quema de grasa de forma rápida y natural. La mayoría de las mujeres nunca los toca."
+    },
+    "frutas-inocentes": {
+      "title": "Las 3 Frutas Que Frenan tu Metabolismo",
+      "description": "Tres frutas que comes cada día creyéndolas \"saludables\", pero que frenan tus resultados — y qué poner en su lugar."
+    },
+    "depois-28-dias": {
+      "title": "Después de los 28 Días",
+      "description": "¿Cómo haces que el resultado que lograste se quede para siempre? El mapa de lo que viene después."
+    }
+  },
   "firstAccess": {
     "title": "¡Estás dentro! 🎉",
     "body": "Tu contraseña de acceso está en tu WhatsApp. Guárdala para entrar siempre — o crea una contraseña tuya ahora.",

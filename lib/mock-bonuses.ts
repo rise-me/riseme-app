@@ -25,13 +25,15 @@ export interface MockBonus {
 }
 
 export const mockBonuses: MockBonus[] = [
+  // ES de propósito NÃO tem linha-suporte: a Central de Ajuda já leva ao WhatsApp
+  // (decisão Bruno 2026-07-14). rastreador-progresso ES entra quando o PDF chegar.
   { id: 'linha-suporte', emoji: '💬', pages: { tr: 3 } },
-  { id: 'falsos-saudaveis', emoji: '🎭', pages: { tr: 7 } },
-  { id: 'anti-inchaco', emoji: '💧', pages: { tr: 11 } },
-  { id: 'vinagre-maca', emoji: '🍎', pages: { tr: 7 } },
-  { id: 'tres-botoes', emoji: '🔑', pages: { tr: 8 } },
-  { id: 'frutas-inocentes', emoji: '🍇', pages: { tr: 6 } },
-  { id: 'depois-28-dias', emoji: '🎯', pages: { tr: 7 } },
+  { id: 'falsos-saudaveis', emoji: '🎭', pages: { tr: 7, es: 7 } },
+  { id: 'anti-inchaco', emoji: '💧', pages: { tr: 11, es: 11 } },
+  { id: 'vinagre-maca', emoji: '🍎', pages: { tr: 7, es: 9 } },
+  { id: 'tres-botoes', emoji: '🔑', pages: { tr: 8, es: 8 } },
+  { id: 'frutas-inocentes', emoji: '🍇', pages: { tr: 6, es: 6 } },
+  { id: 'depois-28-dias', emoji: '🎯', pages: { tr: 7, es: 7 } },
   { id: 'rastreador-progresso', emoji: '📊', pages: { tr: 7 } },
   // Upsell vendido na Perfect Pay (ebook do sistema de chás de 28 dias)
   { id: 'protocolo-metabolico', emoji: '🍵', access: 'purchase', pages: { tr: 31 } },
