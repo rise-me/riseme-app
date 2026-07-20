@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
+# Entregáveis (PDFs/mídia) — ficam AQUI junto do app, mas fora do git (P6)
+/Entregáveis Calistenia Múltiplos idiomas/
