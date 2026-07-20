@@ -36,7 +36,7 @@ export const mockBonuses: MockBonus[] = [
   { id: 'depois-28-dias', emoji: '🎯', pages: { tr: 7, es: 7 } },
   { id: 'rastreador-progresso', emoji: '📊', pages: { tr: 7 } },
   // Upsell vendido na Perfect Pay (ebook do sistema de chás de 28 dias)
-  { id: 'protocolo-metabolico', emoji: '🍵', access: 'purchase', pages: { tr: 31 } },
+  { id: 'protocolo-metabolico', emoji: '🍵', access: 'purchase', pages: { tr: 31, es: 31 } },
 ]
 
 export function getMockBonusById(id: string): MockBonus | undefined {
