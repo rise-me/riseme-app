@@ -64,7 +64,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
   const iframeHostRef = useRef<HTMLDivElement | null>(null)
   const savedRef = useRef(false)
   const [elapsed, setElapsed] = useState(0)
-  const [duration, setDuration] = useState((currentDay.duration_minutes ?? 15) * 60)
+  const [duration, setDuration] = useState(currentDay.duration_seconds ?? 15 * 60)
 
   useEffect(() => {
     savedRef.current = false
@@ -249,7 +249,9 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
             <div className="min-w-0">
               <p className="text-white/40 text-[10px] font-semibold">{t('upNext')}</p>
               <p className="text-white text-xs font-bold truncate">{nextDay.title}</p>
-              <p className="text-white/40 text-[10px]">{nextDay.duration_minutes} min</p>
+              {nextDay.duration_minutes && (
+                <p className="text-white/40 text-[10px]">{nextDay.duration_minutes} min</p>
+              )}
             </div>
           </div>
         )}
