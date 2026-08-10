@@ -500,7 +500,9 @@
     "lockedCta": "Desbloquear acesso",
     "downloadPdf": "Baixar PDF",
     "pageCount": "PDF · {count} págs.",
-    "emptyState": "Em breve seus bônus aparecem aqui."
+    "emptyState": "Em breve seus bônus aparecem aqui.",
+    "menuCardTitle": "Meu cardápio personalizado",
+    "menuCardDesc": "Um cardápio sob medida com IA: seu objetivo, seus gostos, suas calorias."
   },
   "bonusData": {},
   "firstAccess": {
@@ -508,5 +510,94 @@
     "body": "Sua senha de acesso está no seu WhatsApp. Guarde ela pra entrar sempre — ou crie uma senha sua agora.",
     "changeCta": "Criar minha senha",
     "keepCta": "Manter essa"
+  },
+  "menu": {
+    "title": "Meu cardápio",
+    "subtitle": "Cardápios personalizados pro seu objetivo",
+    "lockedDesc": "Os cardápios personalizados são para alunas com acesso.",
+    "unlock": "Desbloquear",
+    "generating": "Criando seu cardápio…",
+    "generatingHint": "Leva cerca de um minuto. Não feche o app.",
+    "formTitle": "Conta pra gente",
+    "formSubtitle": "Com isso montamos seu cardápio sob medida",
+    "age": "Idade",
+    "weight": "Peso (kg)",
+    "height": "Altura (cm)",
+    "sex": "Sexo",
+    "sexo": {
+      "female": "Mulher",
+      "male": "Homem"
+    },
+    "objective": "Objetivo",
+    "objetivo": {
+      "lose": "Emagrecer",
+      "maintain": "Manter",
+      "gain": "Ganhar massa"
+    },
+    "activity": "Atividade",
+    "atividade": {
+      "sedentary": "Sedentária",
+      "light": "Leve",
+      "moderate": "Moderada",
+      "active": "Ativa",
+      "very_active": "Muito ativa"
+    },
+    "meals": "Refeições por dia",
+    "includeBreakfast": "Com café da manhã",
+    "restrictions": "Restrições",
+    "restricao": {
+      "vegetariano": "Vegetariana",
+      "vegano": "Vegana",
+      "sem_gluten": "Sem glúten",
+      "sem_lactose": "Sem lactose",
+      "sem_acucar_refinado": "Sem açúcar refinado",
+      "low_carb": "Low carb",
+      "halal": "Halal"
+    },
+    "preferences": "Preferências",
+    "preferencia": {
+      "frango": "Frango",
+      "peixe": "Peixe",
+      "carne_vermelha": "Carne vermelha",
+      "ovos": "Ovos",
+      "leguminosas": "Leguminosas",
+      "evita_fritura": "Evito fritura",
+      "refeicoes_rapidas": "Refeições rápidas"
+    },
+    "conditions": "Saúde",
+    "condicao": {
+      "diabetes": "Diabetes",
+      "hipertensao": "Hipertensão",
+      "colesterol_alto": "Colesterol alto",
+      "refluxo": "Refluxo",
+      "intolerancias": "Intolerâncias"
+    },
+    "budget": "Orçamento",
+    "custo": {
+      "barata": "Econômico",
+      "moderada": "Moderado",
+      "cara": "Premium"
+    },
+    "notesPlaceholder": "Algo mais que a gente deva saber? (opcional)",
+    "generateCta": "Criar meu cardápio",
+    "errorGenerating": "Não conseguimos criar seu cardápio. Tente de novo.",
+    "remaining": "{count, plural, one {Resta # cardápio} other {Restam # cardápios}}",
+    "quotaMonthlyDone": "Você já usou seus cardápios deste mês. Renovam no próximo mês.",
+    "quotaWeeklyDone": "Você já usou seu cardápio desta semana. Renova na próxima semana.",
+    "quotaLifetimeDone": "Você usou seus 2 cardápios incluídos. Assine para continuar criando.",
+    "upgrade": "Assinar",
+    "emptyTitle": "Seu cardápio, feito pra você",
+    "emptyDesc": "Conte seu objetivo e seus gostos, e montamos um cardápio de um dia com 3 opções por refeição.",
+    "createFirst": "Criar meu primeiro cardápio",
+    "create": "Novo cardápio",
+    "swapHint": "Cada refeição traz 3 opções equivalentes: escolha a que quiser no dia.",
+    "momento": {
+      "cafe_da_manha": "Café da manhã",
+      "lanche_da_manha": "Lanche da manhã",
+      "almoco": "Almoço",
+      "lanche_da_tarde": "Lanche da tarde",
+      "jantar": "Jantar",
+      "ceia": "Ceia"
+    }
   }
 }

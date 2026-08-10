@@ -500,7 +500,9 @@
     "lockedCta": "Erişimi aç",
     "downloadPdf": "PDF'i indir",
     "pageCount": "PDF · {count} sayfa",
-    "emptyState": "Bonusların yakında burada olacak."
+    "emptyState": "Bonusların yakında burada olacak.",
+    "menuCardTitle": "Kişisel menüm",
+    "menuCardDesc": "Yapay zekâ ile sana özel menü: hedefin, damak zevkin, kalorilerin."
   },
   "bonusData": {
     "linha-suporte": {
@@ -545,5 +547,94 @@
     "body": "Erişim şifren WhatsApp'ında. Her zaman girmek için sakla — ya da şimdi kendi şifreni oluştur.",
     "changeCta": "Şifremi oluştur",
     "keepCta": "Bunu tut"
+  },
+  "menu": {
+    "title": "Menüm",
+    "subtitle": "Hedefine özel kişisel menüler",
+    "lockedDesc": "Kişisel menüler, erişimi olan öğrenciler içindir.",
+    "unlock": "Kilidini aç",
+    "generating": "Menün hazırlanıyor…",
+    "generatingHint": "Yaklaşık bir dakika sürer. Uygulamayı kapatma.",
+    "formTitle": "Bize kendinden bahset",
+    "formSubtitle": "Bu bilgilerle menünü sana özel hazırlıyoruz",
+    "age": "Yaş",
+    "weight": "Kilo (kg)",
+    "height": "Boy (cm)",
+    "sex": "Cinsiyet",
+    "sexo": {
+      "female": "Kadın",
+      "male": "Erkek"
+    },
+    "objective": "Hedef",
+    "objetivo": {
+      "lose": "Kilo vermek",
+      "maintain": "Korumak",
+      "gain": "Kas kazanmak"
+    },
+    "activity": "Aktivite",
+    "atividade": {
+      "sedentary": "Hareketsiz",
+      "light": "Hafif",
+      "moderate": "Orta",
+      "active": "Aktif",
+      "very_active": "Çok aktif"
+    },
+    "meals": "Günde öğün sayısı",
+    "includeBreakfast": "Kahvaltı dahil",
+    "restrictions": "Kısıtlamalar",
+    "restricao": {
+      "vegetariano": "Vejetaryen",
+      "vegano": "Vegan",
+      "sem_gluten": "Glütensiz",
+      "sem_lactose": "Laktozsuz",
+      "sem_acucar_refinado": "Rafine şekersiz",
+      "low_carb": "Düşük karbonhidrat",
+      "halal": "Helal"
+    },
+    "preferences": "Tercihler",
+    "preferencia": {
+      "frango": "Tavuk",
+      "peixe": "Balık",
+      "carne_vermelha": "Kırmızı et",
+      "ovos": "Yumurta",
+      "leguminosas": "Baklagiller",
+      "evita_fritura": "Kızartmadan kaçınırım",
+      "refeicoes_rapidas": "Hızlı hazırlanan yemekler"
+    },
+    "conditions": "Sağlık",
+    "condicao": {
+      "diabetes": "Diyabet",
+      "hipertensao": "Hipertansiyon",
+      "colesterol_alto": "Yüksek kolesterol",
+      "refluxo": "Reflü",
+      "intolerancias": "İntoleranslar"
+    },
+    "budget": "Bütçe",
+    "custo": {
+      "barata": "Ekonomik",
+      "moderada": "Orta",
+      "cara": "Premium"
+    },
+    "notesPlaceholder": "Bilmemiz gereken başka bir şey var mı? (isteğe bağlı)",
+    "generateCta": "Menümü oluştur",
+    "errorGenerating": "Menünü oluşturamadık. Lütfen tekrar dene.",
+    "remaining": "{count, plural, other {# menü hakkın kaldı}}",
+    "quotaMonthlyDone": "Bu ayki menülerini kullandın. Gelecek ay yenilenir.",
+    "quotaWeeklyDone": "Bu haftaki menünü kullandın. Gelecek hafta yenilenir.",
+    "quotaLifetimeDone": "Dahil olan 2 menünü kullandın. Devam etmek için abone ol.",
+    "upgrade": "Abone ol",
+    "emptyTitle": "Sana özel menün",
+    "emptyDesc": "Hedefini ve damak zevkini anlat; her öğün için 3 seçenekli, bir günlük menü hazırlayalım.",
+    "createFirst": "İlk menümü oluştur",
+    "create": "Yeni menü",
+    "swapHint": "Her öğünde 3 eşdeğer seçenek var: o gün hangisini istersen onu seç.",
+    "momento": {
+      "cafe_da_manha": "Kahvaltı",
+      "lanche_da_manha": "Kuşluk ara öğünü",
+      "almoco": "Öğle yemeği",
+      "lanche_da_tarde": "İkindi ara öğünü",
+      "jantar": "Akşam yemeği",
+      "ceia": "Gece ara öğünü"
+    }
   }
 }

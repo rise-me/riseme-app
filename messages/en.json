@@ -500,7 +500,9 @@
     "lockedCta": "Unlock access",
     "downloadPdf": "Download PDF",
     "pageCount": "PDF · {count} pages",
-    "emptyState": "Your bonuses will appear here soon."
+    "emptyState": "Your bonuses will appear here soon.",
+    "menuCardTitle": "My personalized menu",
+    "menuCardDesc": "A custom menu with AI: your goal, your tastes, your calories."
   },
   "bonusData": {},
   "firstAccess": {
@@ -508,5 +510,94 @@
     "body": "Your access password is in your WhatsApp. Save it to log in anytime — or set your own password now.",
     "changeCta": "Set my password",
     "keepCta": "Keep this one"
+  },
+  "menu": {
+    "title": "My menu",
+    "subtitle": "Personalized menus for your goal",
+    "lockedDesc": "Personalized menus are for students with access.",
+    "unlock": "Unlock",
+    "generating": "Creating your menu…",
+    "generatingHint": "Takes about a minute. Don’t close the app.",
+    "formTitle": "Tell us about you",
+    "formSubtitle": "We use this to build your custom menu",
+    "age": "Age",
+    "weight": "Weight (kg)",
+    "height": "Height (cm)",
+    "sex": "Sex",
+    "sexo": {
+      "female": "Woman",
+      "male": "Man"
+    },
+    "objective": "Goal",
+    "objetivo": {
+      "lose": "Lose weight",
+      "maintain": "Maintain",
+      "gain": "Gain muscle"
+    },
+    "activity": "Activity",
+    "atividade": {
+      "sedentary": "Sedentary",
+      "light": "Light",
+      "moderate": "Moderate",
+      "active": "Active",
+      "very_active": "Very active"
+    },
+    "meals": "Meals per day",
+    "includeBreakfast": "With breakfast",
+    "restrictions": "Restrictions",
+    "restricao": {
+      "vegetariano": "Vegetarian",
+      "vegano": "Vegan",
+      "sem_gluten": "Gluten-free",
+      "sem_lactose": "Lactose-free",
+      "sem_acucar_refinado": "No refined sugar",
+      "low_carb": "Low carb",
+      "halal": "Halal"
+    },
+    "preferences": "Preferences",
+    "preferencia": {
+      "frango": "Chicken",
+      "peixe": "Fish",
+      "carne_vermelha": "Red meat",
+      "ovos": "Eggs",
+      "leguminosas": "Legumes",
+      "evita_fritura": "I avoid fried food",
+      "refeicoes_rapidas": "Quick meals"
+    },
+    "conditions": "Health",
+    "condicao": {
+      "diabetes": "Diabetes",
+      "hipertensao": "Hypertension",
+      "colesterol_alto": "High cholesterol",
+      "refluxo": "Reflux",
+      "intolerancias": "Intolerances"
+    },
+    "budget": "Budget",
+    "custo": {
+      "barata": "Budget-friendly",
+      "moderada": "Moderate",
+      "cara": "Premium"
+    },
+    "notesPlaceholder": "Anything else we should know? (optional)",
+    "generateCta": "Create my menu",
+    "errorGenerating": "We couldn’t create your menu. Please try again.",
+    "remaining": "{count, plural, one {# menu left} other {# menus left}}",
+    "quotaMonthlyDone": "You’ve used this month’s menus. They renew next month.",
+    "quotaWeeklyDone": "You’ve used this week’s menu. It renews next week.",
+    "quotaLifetimeDone": "You’ve used your 2 included menus. Subscribe to keep creating.",
+    "upgrade": "Subscribe",
+    "emptyTitle": "Your menu, made for you",
+    "emptyDesc": "Tell us your goal and tastes, and we’ll build a one-day menu with 3 options per meal.",
+    "createFirst": "Create my first menu",
+    "create": "New menu",
+    "swapHint": "Each meal has 3 equivalent options: pick whichever you feel like that day.",
+    "momento": {
+      "cafe_da_manha": "Breakfast",
+      "lanche_da_manha": "Morning snack",
+      "almoco": "Lunch",
+      "lanche_da_tarde": "Afternoon snack",
+      "jantar": "Dinner",
+      "ceia": "Evening snack"
+    }
   }
 }

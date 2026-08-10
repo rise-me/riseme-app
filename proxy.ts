@@ -5,7 +5,7 @@ import { routing } from './i18n/routing'
 
 const intlMiddleware = createIntlMiddleware(routing)
 
-const APP_PATHS = ['/home', '/challenges', '/workouts', '/progress', '/more']
+const APP_PATHS = ['/home', '/challenges', '/workouts', '/progress', '/more', '/menu']
 
 function isAppPath(pathname: string): boolean {
   const withoutLocale = pathname.replace(/^\/(pt-BR|es|en|tr)/, '')
