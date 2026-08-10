@@ -570,14 +570,6 @@
       "maintain": "Korumak",
       "gain": "Kas kazanmak"
     },
-    "activity": "Aktivite",
-    "atividade": {
-      "sedentary": "Hareketsiz",
-      "light": "Hafif",
-      "moderate": "Orta",
-      "active": "Aktif",
-      "very_active": "Çok aktif"
-    },
     "meals": "Günde öğün sayısı",
     "includeBreakfast": "Kahvaltı dahil",
     "restrictions": "Kısıtlamalar",
@@ -614,7 +606,7 @@
       "moderada": "Orta",
       "cara": "Premium"
     },
-    "notesPlaceholder": "Bilmemiz gereken başka bir şey var mı? (isteğe bağlı)",
+    "notesPlaceholder": "Sormadığımız ama bilmemiz gereken bir şey var mı? (isteğe bağlı)",
     "generateCta": "Menümü oluştur",
     "errorGenerating": "Menünü oluşturamadık. Lütfen tekrar dene.",
     "remaining": "{count, plural, other {# menü hakkın kaldı}}",
@@ -634,6 +626,30 @@
       "lanche_da_tarde": "İkindi ara öğünü",
       "jantar": "Akşam yemeği",
       "ceia": "Gece ara öğünü"
-    }
+    },
+    "freq": "Haftada kaç kez antrenman yapıyorsun?",
+    "freqOpt": {
+      "none": "Yapmıyorum",
+      "f1_2": "1-2",
+      "f3_4": "3-4",
+      "f5_6": "5-6",
+      "daily": "Her gün"
+    },
+    "minutes": "Antrenman başına kaç dakika?",
+    "minutesOpt": {
+      "15": "~15 dk",
+      "30": "~30 dk",
+      "45": "~45 dk",
+      "60": "1 saat veya daha fazla"
+    },
+    "effort": "Antrenmanın ne kadar zorlayıcı?",
+    "effortOpt": {
+      "leve": "Hafif (konuşabilirim)",
+      "moderado": "Orta (konuşmak zorlaşır)",
+      "intenso": "Yoğun (nefesim kesilir)"
+    },
+    "loves": "Diyetinde görmeyi çok isteyeceğin 1-4 yiyecek",
+    "hates": "Asla yemeyeceğin 1-4 yiyecek",
+    "foodPlaceholder": "Bir yiyecek yaz ve + dokun"
   }
 }

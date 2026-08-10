@@ -533,14 +533,6 @@
       "maintain": "Maintain",
       "gain": "Gain muscle"
     },
-    "activity": "Activity",
-    "atividade": {
-      "sedentary": "Sedentary",
-      "light": "Light",
-      "moderate": "Moderate",
-      "active": "Active",
-      "very_active": "Very active"
-    },
     "meals": "Meals per day",
     "includeBreakfast": "With breakfast",
     "restrictions": "Restrictions",
@@ -577,7 +569,7 @@
       "moderada": "Moderate",
       "cara": "Premium"
     },
-    "notesPlaceholder": "Anything else we should know? (optional)",
+    "notesPlaceholder": "Tell us something we didn't ask but should know (optional)",
     "generateCta": "Create my menu",
     "errorGenerating": "We couldn’t create your menu. Please try again.",
     "remaining": "{count, plural, one {# menu left} other {# menus left}}",
@@ -597,6 +589,30 @@
       "lanche_da_tarde": "Afternoon snack",
       "jantar": "Dinner",
       "ceia": "Evening snack"
-    }
+    },
+    "freq": "How many times a week do you train?",
+    "freqOpt": {
+      "none": "I don't train",
+      "f1_2": "1-2",
+      "f3_4": "3-4",
+      "f5_6": "5-6",
+      "daily": "Every day"
+    },
+    "minutes": "How many minutes per workout?",
+    "minutesOpt": {
+      "15": "~15 min",
+      "30": "~30 min",
+      "45": "~45 min",
+      "60": "1 hour or more"
+    },
+    "effort": "How hard are your workouts?",
+    "effortOpt": {
+      "leve": "Easy (I can chat)",
+      "moderado": "Moderate (hard to talk)",
+      "intenso": "Intense (out of breath)"
+    },
+    "loves": "1 to 4 foods you would love in your diet",
+    "hates": "1 to 4 foods you would never eat",
+    "foodPlaceholder": "Type a food and tap +"
   }
 }

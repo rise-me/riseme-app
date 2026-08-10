@@ -88,13 +88,26 @@ export interface Cardapio {
   refeicoes: RefeicaoPlano[]
 }
 
+/** Frequência de treino por semana — pergunta OBJETIVA (autopercepção de
+ *  "muito ativa" inflava o multiplicador e a dieta engordava; decisão Bruno). */
+export const FREQ_TREINO = ['none', 'f1_2', 'f3_4', 'f5_6', 'daily'] as const
+export type FreqTreino = (typeof FREQ_TREINO)[number]
+
+export const MINUTOS_TREINO = [15, 30, 45, 60] as const
+export type MinutosTreino = (typeof MINUTOS_TREINO)[number]
+
+export const ESFORCOS = ['leve', 'moderado', 'intenso'] as const
+export type Esforco = (typeof ESFORCOS)[number]
+
 /** Dados que a aluna preenche no formulário (uma tela). */
 export interface PerfilCardapio {
   sex: Sex
   age: number
   weightKg: number
   heightCm: number
-  activity: ActivityLevel
+  freqTreino: FreqTreino
+  minutosTreino: MinutosTreino
+  esforco: Esforco
   objective: Objective
   numRefeicoes: 3 | 4 | 5 | 6
   incluiCafe: boolean
@@ -102,5 +115,9 @@ export interface PerfilCardapio {
   preferencias: Preferencia[]
   condicoes: Condicao[]
   custo: Custo
+  /** 1-4 alimentos que ela ADORA (entram na dieta onde fizer sentido). */
+  adora: string[]
+  /** 1-4 alimentos que ela NÃO come de jeito nenhum (proibidos no prompt). */
+  naoCome: string[]
   observacao: string
 }

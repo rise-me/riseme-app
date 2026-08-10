@@ -7,7 +7,7 @@ import { ChefHat, Clock, Flame, Lock, Plus, ArrowLeft, Apple } from 'lucide-reac
 import { cn } from '@/lib/utils'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 import type { Cardapio, PerfilCardapio } from '@/lib/diet/tipos'
-import { RESTRICOES, PREFERENCIAS, CONDICOES } from '@/lib/diet/tipos'
+import { RESTRICOES, PREFERENCIAS, CONDICOES, FREQ_TREINO, MINUTOS_TREINO, ESFORCOS } from '@/lib/diet/tipos'
 import type { Cota } from '@/lib/diet/quota'
 
 // "Mi menú": lista de cardápios → formulário (1 tela) → geração (~1 min) → leitor.
@@ -29,7 +29,6 @@ interface Props {
 
 type Tela = 'lista' | 'form' | 'gerando' | 'ver'
 
-const ATIVIDADES = ['sedentary', 'light', 'moderate', 'active', 'very_active'] as const
 const OBJETIVOS = ['lose', 'maintain', 'gain'] as const
 const CUSTOS = ['barata', 'moderada', 'cara'] as const
 
@@ -49,7 +48,13 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
   const [age, setAge] = useState('')
   const [weightKg, setWeightKg] = useState('')
   const [heightCm, setHeightCm] = useState('')
-  const [activity, setActivity] = useState<(typeof ATIVIDADES)[number]>('light')
+  const [freqTreino, setFreqTreino] = useState<(typeof FREQ_TREINO)[number]>('f1_2')
+  const [minutosTreino, setMinutosTreino] = useState<number>(30)
+  const [esforco, setEsforco] = useState<(typeof ESFORCOS)[number]>('moderado')
+  const [adora, setAdora] = useState<string[]>([])
+  const [naoCome, setNaoCome] = useState<string[]>([])
+  const [adoraDraft, setAdoraDraft] = useState('')
+  const [naoComeDraft, setNaoComeDraft] = useState('')
   const [objective, setObjective] = useState<(typeof OBJETIVOS)[number]>('lose')
   const [numRefeicoes, setNumRefeicoes] = useState(4)
   const [incluiCafe, setIncluiCafe] = useState(true)
@@ -61,6 +66,13 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
 
   function toggle(list: string[], setList: (v: string[]) => void, item: string) {
     setList(list.includes(item) ? list.filter((x) => x !== item) : [...list, item])
+  }
+
+  function addTag(list: string[], setList: (v: string[]) => void, draft: string, setDraft: (v: string) => void) {
+    const item = draft.trim().slice(0, 40)
+    if (!item || list.length >= 4 || list.includes(item)) return
+    setList([...list, item])
+    setDraft('')
   }
 
   function novoCardapio() {
@@ -84,7 +96,9 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
           age: Number(age),
           weightKg: Number(weightKg),
           heightCm: Number(heightCm),
-          activity,
+          freqTreino,
+          minutosTreino,
+          esforco,
           objective,
           numRefeicoes,
           incluiCafe,
@@ -92,6 +106,8 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
           preferencias,
           condicoes,
           custo,
+          adora,
+          naoCome,
           observacao,
         }),
       })
@@ -256,13 +272,35 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t('activity')}</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t('freq')}</p>
             <div className="flex gap-2 flex-wrap">
-              {ATIVIDADES.map((a) => (
-                <button key={a} onClick={() => setActivity(a)} className={chip(activity === a)}>{t(`atividade.${a}`)}</button>
+              {FREQ_TREINO.map((f) => (
+                <button key={f} onClick={() => setFreqTreino(f)} className={chip(freqTreino === f)}>{t(`freqOpt.${f}`)}</button>
               ))}
             </div>
           </div>
+
+          {freqTreino !== 'none' && (
+            <>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t('minutes')}</p>
+                <div className="flex gap-2 flex-wrap">
+                  {MINUTOS_TREINO.map((m) => (
+                    <button key={m} onClick={() => setMinutosTreino(m)} className={chip(minutosTreino === m)}>{t(`minutesOpt.${m}`)}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t('effort')}</p>
+                <div className="flex gap-2 flex-wrap">
+                  {ESFORCOS.map((e) => (
+                    <button key={e} onClick={() => setEsforco(e)} className={chip(esforco === e)}>{t(`effortOpt.${e}`)}</button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           <div>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t('meals')}</p>
@@ -297,6 +335,50 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
               ))}
             </div>
           </div>
+
+          {([
+            { label: t('loves'), list: adora, setList: setAdora, draft: adoraDraft, setDraft: setAdoraDraft },
+            { label: t('hates'), list: naoCome, setList: setNaoCome, draft: naoComeDraft, setDraft: setNaoComeDraft },
+          ] as const).map((campo, idx) => (
+            <div key={idx}>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{campo.label}</p>
+              {campo.list.length > 0 && (
+                <div className="flex gap-2 flex-wrap mb-2">
+                  {campo.list.map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => campo.setList(campo.list.filter((x) => x !== item))}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium bg-foreground text-background"
+                    >
+                      {item} ✕
+                    </button>
+                  ))}
+                </div>
+              )}
+              {campo.list.length < 4 && (
+                <div className="flex gap-2">
+                  <input
+                    value={campo.draft}
+                    onChange={(e) => campo.setDraft(e.target.value.slice(0, 40))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        addTag(campo.list, campo.setList, campo.draft, campo.setDraft)
+                      }
+                    }}
+                    placeholder={t('foodPlaceholder')}
+                    className="flex-1 bg-card border border-border rounded-2xl px-4 py-2.5 text-sm"
+                  />
+                  <button
+                    onClick={() => addTag(campo.list, campo.setList, campo.draft, campo.setDraft)}
+                    className="w-11 rounded-2xl bg-secondary text-foreground font-bold flex-shrink-0"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
 
           <div>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{t('conditions')}</p>

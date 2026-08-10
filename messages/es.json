@@ -562,14 +562,6 @@
       "maintain": "Mantener",
       "gain": "Ganar masa"
     },
-    "activity": "Actividad",
-    "atividade": {
-      "sedentary": "Sedentaria",
-      "light": "Ligera",
-      "moderate": "Moderada",
-      "active": "Activa",
-      "very_active": "Muy activa"
-    },
     "meals": "Comidas por día",
     "includeBreakfast": "Con desayuno",
     "restrictions": "Restricciones",
@@ -606,7 +598,7 @@
       "moderada": "Moderado",
       "cara": "Premium"
     },
-    "notesPlaceholder": "¿Algo más que debamos saber? (opcional)",
+    "notesPlaceholder": "Cuéntanos algo que no te preguntamos pero deberíamos saber (opcional)",
     "generateCta": "Crear mi menú",
     "errorGenerating": "No pudimos crear tu menú. Inténtalo de nuevo.",
     "remaining": "{count, plural, one {Te queda # menú} other {Te quedan # menús}}",
@@ -626,6 +618,30 @@
       "lanche_da_tarde": "Merienda de la tarde",
       "jantar": "Cena",
       "ceia": "Colación nocturna"
-    }
+    },
+    "freq": "¿Cuántas veces entrenas por semana?",
+    "freqOpt": {
+      "none": "No entreno",
+      "f1_2": "1-2",
+      "f3_4": "3-4",
+      "f5_6": "5-6",
+      "daily": "Todos los días"
+    },
+    "minutes": "¿Cuántos minutos por entrenamiento?",
+    "minutesOpt": {
+      "15": "~15 min",
+      "30": "~30 min",
+      "45": "~45 min",
+      "60": "1 hora o más"
+    },
+    "effort": "¿Qué tan exigente es tu entrenamiento?",
+    "effortOpt": {
+      "leve": "Suave (puedo conversar)",
+      "moderado": "Moderado (me cuesta hablar)",
+      "intenso": "Intenso (quedo sin aliento)"
+    },
+    "loves": "De 1 a 4 alimentos que amarías ver en tu dieta",
+    "hates": "De 1 a 4 alimentos que no comerías jamás",
+    "foodPlaceholder": "Escribe un alimento y toca +"
   }
 }

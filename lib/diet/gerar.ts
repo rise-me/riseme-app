@@ -15,7 +15,7 @@ import {
   type RefeicaoPlano,
   type OpcaoRefeicao,
 } from './tipos'
-import { kcalDiaAlvo, macrosDoDia } from './macros'
+import { kcalDiaAlvo, macrosDoDia, nivelAtividade } from './macros'
 
 const CLAUDE_MODEL = 'claude-sonnet-5'
 
@@ -126,6 +126,12 @@ async function gerarMomento(
   const rotulo = MOMENTO_LABEL[momento][locale] ?? MOMENTO_LABEL[momento].es
   const macros = macrosDoDia(kcalDia, perfil.weightKg, perfil.objective)
 
+  const FREQ_DESC: Record<string, string> = {
+    none: 'não treina', f1_2: 'treina 1-2x/semana', f3_4: 'treina 3-4x/semana',
+    f5_6: 'treina 5-6x/semana', daily: 'treina todos os dias',
+  }
+  const treino = `${FREQ_DESC[perfil.freqTreino]}, ~${perfil.minutosTreino} min por treino, esforço ${perfil.esforco}`
+
   const system =
     `Você é um nutricionista que monta refeições equilibradas e realistas para o app RiseMe ` +
     `(público: mulheres que treinam em casa). Baseia-se em boa prática nutricional (proteína ` +
@@ -138,13 +144,17 @@ async function gerarMomento(
     `(kcal parecidas entre si, cada uma perto de ${kcalAlvo} kcal) — são substituições equivalentes.\n\n` +
     `Contexto do dia (meta diária: ${kcalDia} kcal · macros-alvo: proteína ${macros.proteina_g} g, ` +
     `carboidrato ${macros.carbo_g} g, gordura ${macros.gordura_g} g). Este momento vale ~${kcalAlvo} kcal.\n` +
-    `Objetivo: ${perfil.objective}. Nível de atividade: ${perfil.activity}.\n` +
+    `Objetivo: ${perfil.objective}. Atividade física: ${treino}.\n` +
     `Restrições alimentares: ${listaLegivel(perfil.restricoes)}.\n` +
     `Preferências: ${listaLegivel(perfil.preferencias)}.\n` +
     `Condições de saúde a considerar: ${listaLegivel(perfil.condicoes)}.\n` +
     `Perfil de custo: ${perfil.custo}.\n` +
+    `Alimentos que a pessoa ADORA: ${listaLegivel(perfil.adora)} — faça-os aparecer em ALGUMAS opções do dia, ` +
+    `no máximo 1 opção por momento; as outras opções ficam SEM eles (variedade importa).\n` +
+    `Alimentos que a pessoa NÃO COME DE JEITO NENHUM: ${listaLegivel(perfil.naoCome)}.\n` +
     `Observações da pessoa: ${perfil.observacao?.trim() || '—'}.\n\n` +
     `Respeite as restrições à risca (ex.: vegano não leva carne, ovo, leite nem mel). ` +
+    `JAMAIS use os alimentos que a pessoa não come — nem como ingrediente secundário. ` +
     `As opções devem ser adequadas ao momento "${rotulo}". ` +
     `Cada opção precisa de ingredientes com quantidade legível (ex.: "2 unidades", "60 g", "1 xícara (200 ml)").\n\n` +
     `Formato EXATO da resposta:\n` +
@@ -167,7 +177,8 @@ async function gerarMomento(
 }
 
 export async function gerarCardapio(perfil: PerfilCardapio, locale: string): Promise<Cardapio> {
-  const kcalDia = kcalDiaAlvo(perfil)
+  const activity = nivelAtividade(perfil.freqTreino, perfil.minutosTreino, perfil.esforco)
+  const kcalDia = kcalDiaAlvo({ ...perfil, activity })
   const momentos = momentosDoCardapio(perfil.numRefeicoes, perfil.incluiCafe)
   const kcalMom = kcalPorMomento(momentos, kcalDia)
 

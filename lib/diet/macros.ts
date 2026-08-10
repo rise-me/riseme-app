@@ -1,7 +1,7 @@
 // Meta calórica e macros — matemática pura, sem IA (Mifflin-St Jeor + fator de
 // atividade + ajuste por objetivo). A IA nunca decide número: garante que o
 // cardápio "fecha a conta" sempre. Portado do Salvou (sem a camada GLP-1).
-import type { Sex, Objective, ActivityLevel } from './tipos'
+import type { Sex, Objective, ActivityLevel, FreqTreino, MinutosTreino, Esforco } from './tipos'
 
 const ACTIVITY_FACTOR: Record<ActivityLevel, number> = {
   sedentary: 1.2,
@@ -14,6 +14,27 @@ const ACTIVITY_FACTOR: Record<ActivityLevel, number> = {
 function bmr(sex: Sex, weightKg: number, heightCm: number, age: number): number {
   const base = 10 * weightKg + 6.25 * heightCm - 5 * age
   return sex === 'male' ? base + 5 : base - 161
+}
+
+/** Converte respostas OBJETIVAS (frequência × minutos × esforço) no nível de
+ *  atividade. Régua ancorada na diretriz OMS (150 min/semana moderados =
+ *  "moderada"). Motivo: autopercepção infla — caminhada de 20 min/dia parece
+ *  "muito ativa" pra quem faz, mas é atividade leve; o multiplicador errado
+ *  jogava a meta calórica ~700 kcal pra cima e a dieta engordava. */
+const SESSOES: Record<FreqTreino, number> = { none: 0, f1_2: 1.5, f3_4: 3.5, f5_6: 5.5, daily: 7 }
+const PESO_ESFORCO: Record<Esforco, number> = { leve: 0.8, moderado: 1.0, intenso: 1.3 }
+
+export function nivelAtividade(
+  freq: FreqTreino,
+  minutos: MinutosTreino,
+  esforco: Esforco,
+): ActivityLevel {
+  const minutosSemana = SESSOES[freq] * minutos * PESO_ESFORCO[esforco]
+  if (minutosSemana < 60) return 'sedentary'
+  if (minutosSemana < 150) return 'light'
+  if (minutosSemana < 300) return 'moderate'
+  if (minutosSemana < 500) return 'active'
+  return 'very_active'
 }
 
 /** Déficit de 20% pra emagrecer, superávit de 10% pra ganhar, com piso de segurança. */
