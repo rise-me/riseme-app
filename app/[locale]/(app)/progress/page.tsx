@@ -46,6 +46,15 @@ function computeStreak(completedDates: Date[]): number {
   return streak
 }
 
+// Primeiro nome apresentável a partir do nome do checkout ("ÖMÜR GÜREL" -> "Ömür").
+// toLocale* respeita regras do idioma (ex.: İ/i do turco). Sem nome real -> null.
+function firstNameForGreeting(realName: string | null, locale: string): string | null {
+  const first = realName?.trim().split(/\s+/)[0]
+  if (!first) return null
+  const lower = first.toLocaleLowerCase(locale)
+  return lower.charAt(0).toLocaleUpperCase(locale) + lower.slice(1)
+}
+
 export default async function ProgressPage({
   params,
 }: {
@@ -58,6 +67,8 @@ export default async function ProgressPage({
     getAllProgressForUser(),
     getCurrentUser(),
   ])
+
+  const greetName = firstNameForGreeting(user?.realName ?? null, locale)
 
   const WEEK_DAYS = t('weekDays').split(',')
 
@@ -121,9 +132,11 @@ export default async function ProgressPage({
     <div className="px-4 pt-12 pb-6 space-y-4">
       {user && !user.onboarded && <FirstAccessNotice locale={locale} />}
 
-      {/* Header */}
+      {/* Header — saudação pelo nome quando temos o nome REAL da compra */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {greetName ? t('greeting', { name: greetName }) : t('title')}
+        </h1>
         <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
           {user?.initial ?? '?'}
         </div>

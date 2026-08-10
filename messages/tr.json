@@ -183,7 +183,8 @@
     "statCompletedChallenges": "Tamamlanan\nmeydan okumalar",
     "statActiveDaysMonth": "Bu ayki\naktif günler",
     "totalLabel": "Toplam",
-    "daysSequence": "günlük seri"
+    "daysSequence": "günlük seri",
+    "greeting": "Merhaba {name}! 👋"
   },
   "home": {
     "greeting": "Merhaba, {name}!",

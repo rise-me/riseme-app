@@ -183,7 +183,8 @@
     "statCompletedChallenges": "Completed\nchallenges",
     "statActiveDaysMonth": "Active days\nthis month",
     "totalLabel": "Total",
-    "daysSequence": "days in a row"
+    "daysSequence": "days in a row",
+    "greeting": "Hi, {name}! 👋"
   },
   "home": {
     "greeting": "Hi, {name}!",

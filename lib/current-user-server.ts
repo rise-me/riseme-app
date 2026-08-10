@@ -4,6 +4,9 @@ export interface CurrentUser {
   id: string
   email: string
   name: string
+  /** Nome REAL (metadata da compra) ou null — nunca o prefixo do email.
+   *  Usar pra saudação: só cumprimenta pelo nome quando temos certeza dele. */
+  realName: string | null
   initial: string
   onboarded: boolean
 }
@@ -19,5 +22,5 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const initial = (name || email).charAt(0).toUpperCase() || '?'
   const onboarded = user.user_metadata?.onboarded === true
 
-  return { id: user.id, email, name, initial, onboarded }
+  return { id: user.id, email, name, realName: metaName || null, initial, onboarded }
 }

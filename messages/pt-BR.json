@@ -183,7 +183,8 @@
     "statCompletedChallenges": "Desafios\nconcluídos",
     "statActiveDaysMonth": "Dias ativos\nno mês",
     "totalLabel": "Total",
-    "daysSequence": "dias seguidos"
+    "daysSequence": "dias seguidos",
+    "greeting": "Olá, {name}! 👋"
   },
   "home": {
     "greeting": "Olá, {name}!",
