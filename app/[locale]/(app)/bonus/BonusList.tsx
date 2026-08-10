@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { FileText, ChevronRight, Lock, ChefHat } from 'lucide-react'
+import { FileText, ChevronRight, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 
@@ -150,20 +150,6 @@ export function BonusList({
             {hasAnyAccess ? t('subtitle') : t('lockedSubtitle')}
           </p>
         </div>
-
-        {/* Cardápio personalizado por IA — feature viva, ganha destaque acima dos PDFs */}
-        <Link href={`/${locale}/menu`} className="block">
-          <div className="flex items-center gap-4 bg-foreground text-background rounded-2xl p-4 transition-all active:scale-[0.98]">
-            <div className="w-14 h-14 rounded-xl bg-background/15 flex items-center justify-center flex-shrink-0">
-              <ChefHat size={24} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-sm leading-tight">{t('menuCardTitle')}</p>
-              <p className="text-xs text-background/70 mt-0.5 line-clamp-2">{t('menuCardDesc')}</p>
-            </div>
-            <ChevronRight size={18} className="text-background/70 flex-shrink-0" />
-          </div>
-        </Link>
 
         {vazio && <p className="text-sm text-muted-foreground pt-8 text-center">{t('emptyState')}</p>}
 

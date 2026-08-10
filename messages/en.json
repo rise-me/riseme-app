@@ -21,7 +21,8 @@
     "workouts": "Workouts",
     "challenges": "Challenges",
     "more": "More",
-    "bonus": "Extras"
+    "bonus": "Extras",
+    "menu": "Menu"
   },
   "auth": {
     "login": "Sign in",
@@ -500,9 +501,7 @@
     "lockedCta": "Unlock access",
     "downloadPdf": "Download PDF",
     "pageCount": "PDF · {count} pages",
-    "emptyState": "Your bonuses will appear here soon.",
-    "menuCardTitle": "My personalized menu",
-    "menuCardDesc": "A custom menu with AI: your goal, your tastes, your calories."
+    "emptyState": "Your bonuses will appear here soon."
   },
   "bonusData": {},
   "firstAccess": {

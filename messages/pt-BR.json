@@ -21,7 +21,8 @@
     "workouts": "Treinos",
     "challenges": "Desafios",
     "more": "Mais",
-    "bonus": "Extras"
+    "bonus": "Extras",
+    "menu": "Cardápio"
   },
   "auth": {
     "login": "Entrar",
@@ -500,9 +501,7 @@
     "lockedCta": "Desbloquear acesso",
     "downloadPdf": "Baixar PDF",
     "pageCount": "PDF · {count} págs.",
-    "emptyState": "Em breve seus bônus aparecem aqui.",
-    "menuCardTitle": "Meu cardápio personalizado",
-    "menuCardDesc": "Um cardápio sob medida com IA: seu objetivo, seus gostos, suas calorias."
+    "emptyState": "Em breve seus bônus aparecem aqui."
   },
   "bonusData": {},
   "firstAccess": {

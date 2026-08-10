@@ -21,7 +21,8 @@
     "workouts": "Entrenamientos",
     "challenges": "Desafíos",
     "more": "Más",
-    "bonus": "Extras"
+    "bonus": "Extras",
+    "menu": "Menú"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -500,9 +501,7 @@
     "lockedCta": "Desbloquear acceso",
     "downloadPdf": "Descargar PDF",
     "pageCount": "PDF · {count} págs.",
-    "emptyState": "Pronto agregaremos tus bonos aquí.",
-    "menuCardTitle": "Mi menú personalizado",
-    "menuCardDesc": "Un menú a tu medida con IA: tu objetivo, tus gustos, tus calorías."
+    "emptyState": "Pronto agregaremos tus bonos aquí."
   },
   "bonusData": {
     "falsos-saudaveis": {

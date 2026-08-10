@@ -21,7 +21,8 @@
     "workouts": "Antrenmanlar",
     "challenges": "Meydan Okumalar",
     "more": "Daha Fazla",
-    "bonus": "Ekstralar"
+    "bonus": "Ekstralar",
+    "menu": "Menü"
   },
   "auth": {
     "login": "Giriş yap",
@@ -500,9 +501,7 @@
     "lockedCta": "Erişimi aç",
     "downloadPdf": "PDF'i indir",
     "pageCount": "PDF · {count} sayfa",
-    "emptyState": "Bonusların yakında burada olacak.",
-    "menuCardTitle": "Kişisel menüm",
-    "menuCardDesc": "Yapay zekâ ile sana özel menü: hedefin, damak zevkin, kalorilerin."
+    "emptyState": "Bonusların yakında burada olacak."
   },
   "bonusData": {
     "linha-suporte": {
