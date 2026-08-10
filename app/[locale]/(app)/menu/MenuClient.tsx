@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ChefHat, Clock, Flame, Lock, Plus, ArrowLeft, Sparkles } from 'lucide-react'
+import { ChefHat, Clock, Flame, Lock, Plus, ArrowLeft, Apple } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 import type { Cardapio, PerfilCardapio } from '@/lib/diet/tipos'
@@ -374,7 +374,7 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
       {menus.length === 0 ? (
         <div className="flex flex-col items-center text-center pt-10 px-4">
           <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center mb-4">
-            <Sparkles size={24} className="text-foreground" />
+            <Apple size={24} className="text-foreground" />
           </div>
           <h2 className="font-bold text-lg mb-2">{t('emptyTitle')}</h2>
           <p className="text-sm text-muted-foreground mb-6 max-w-xs">{t('emptyDesc')}</p>

@@ -3,15 +3,16 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { CalendarDays, TrendingUp, Swords, Apple, Sparkles, MoreHorizontal } from 'lucide-react'
+import { TrendingUp, Swords, Apple, Sparkles, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // aba Treinos removida em 2026-07-03 (aulas grátis sem vídeo real) — decisão
 // "por enquanto" do Bruno; rotas /workouts redirecionam pra /challenges.
 // aba Menú (maçã) adicionada em 2026-08-06 — decisão Bruno: alimentação
 // merece porta própria na navegação, não card dentro de Extras.
+// aba Plan removida em 2026-08-06 (decisão Bruno: duplicava Desafíos);
+// /home redireciona pro Progresso, que virou a tela inicial.
 const navItems = [
-  { key: 'plan', href: '/home', icon: CalendarDays },
   { key: 'progress', href: '/progress', icon: TrendingUp },
   { key: 'challenges', href: '/challenges', icon: Swords },
   { key: 'menu', href: '/menu', icon: Apple },

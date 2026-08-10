@@ -16,7 +16,6 @@
     "days": "{count, plural, one {# day} other {# days}}"
   },
   "nav": {
-    "plan": "Plan",
     "progress": "Progress",
     "workouts": "Workouts",
     "challenges": "Challenges",

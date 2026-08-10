@@ -16,7 +16,6 @@
     "days": "{count, plural, one {# gün} other {# gün}}"
   },
   "nav": {
-    "plan": "Plan",
     "progress": "İlerleme",
     "workouts": "Antrenmanlar",
     "challenges": "Meydan Okumalar",

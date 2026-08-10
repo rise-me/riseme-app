@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { getAllProgressForUser } from '@/lib/progress-server'
 import { mockChallenges } from '@/lib/mock-challenges'
 import { getCurrentUser } from '@/lib/current-user-server'
+import { WaterTracker } from '@/components/home/WaterTracker'
+import { FirstAccessNotice } from '@/components/home/FirstAccessNotice'
 
 const MINUTES_PER_DAY_AVG = 20
 
@@ -117,6 +119,8 @@ export default async function ProgressPage({
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-4">
+      {user && !user.onboarded && <FirstAccessNotice locale={locale} />}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
@@ -275,6 +279,9 @@ export default async function ProgressPage({
           </div>
         ))}
       </div>
+
+      {/* Hidratação — veio da antiga aba Plan (removida 2026-08-06) */}
+      <WaterTracker />
     </div>
   )
 }
