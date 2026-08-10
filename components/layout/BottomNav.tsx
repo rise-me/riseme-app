@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { TrendingUp, Swords, Apple, Sparkles, MoreHorizontal } from 'lucide-react'
+import { House, Swords, Apple, Sparkles, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // aba Treinos removida em 2026-07-03 (aulas grátis sem vídeo real) — decisão
@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils'
 // aba Plan removida em 2026-08-06 (decisão Bruno: duplicava Desafíos);
 // /home redireciona pro Progresso, que virou a tela inicial.
 const navItems = [
-  { key: 'progress', href: '/progress', icon: TrendingUp },
+  { key: 'progress', href: '/progress', icon: House },
   { key: 'challenges', href: '/challenges', icon: Swords },
   { key: 'menu', href: '/menu', icon: Apple },
   { key: 'bonus', href: '/bonus', icon: Sparkles },
