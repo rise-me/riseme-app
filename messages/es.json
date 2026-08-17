@@ -643,5 +643,24 @@
     "loves": "De 1 a 4 alimentos que amarías ver en tu dieta",
     "hates": "De 1 a 4 alimentos que no comerías jamás",
     "foodPlaceholder": "Escribe un alimento y toca +"
+  },
+  "castTv": {
+    "button": "Ver en la TV",
+    "title": "Ver en la TV",
+    "subtitle": "Duplica la pantalla de tu celular en la TV en 3 pasos y entrena en grande.",
+    "stepLabel": "Paso {n}",
+    "step1": "Conecta el celular y la TV a la misma red Wi-Fi.",
+    "step3": "Elige tu TV en la lista que aparece.",
+    "ios": {
+      "label": "iPhone / iPad",
+      "step2": "Abre el Centro de control (desliza desde la esquina superior derecha) y toca «Duplicar pantalla»."
+    },
+    "android": {
+      "label": "Android",
+      "step2": "Desliza desde arriba para abrir los ajustes rápidos y toca «Transmitir pantalla» (en Samsung: «Smart View»)."
+    },
+    "then": "Listo: vuelve a la app y dale play.",
+    "note": "Funciona con TVs compatibles con AirPlay (Apple TV, Samsung, LG) o con Chromecast / Google TV.",
+    "gotIt": "Entendido"
   }
 }

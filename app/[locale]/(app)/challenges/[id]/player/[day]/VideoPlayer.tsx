@@ -3,12 +3,13 @@
 import { useTranslations } from 'next-intl'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, SkipBack, SkipForward } from 'lucide-react'
+import { X, SkipBack, SkipForward, Tv } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { markDayComplete } from '@/lib/progress'
 import { track } from '@/lib/posthog/track'
 import type { MockChallenge } from '@/lib/mock-challenges'
 import type { MockDay } from '@/lib/mock-challenge-days'
+import { CastTvHelp } from '@/components/challenges/CastTvHelp'
 
 interface Props {
   challenge: MockChallenge
@@ -55,6 +56,7 @@ function loadYouTubeAPI(): Promise<void> {
 export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props) {
   const router = useRouter()
   const t = useTranslations('challenges')
+  const tTv = useTranslations('castTv')
   const currentDay = days.find((d) => d.day_number === currentDayNumber)!
   const nextDay = days.find((d) => d.day_number === currentDayNumber + 1)
   const prevDay = days.find((d) => d.day_number === currentDayNumber - 1)
@@ -65,6 +67,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
   const savedRef = useRef(false)
   const [elapsed, setElapsed] = useState(0)
   const [duration, setDuration] = useState(currentDay.duration_seconds ?? 15 * 60)
+  const [tvOpen, setTvOpen] = useState(false)
 
   useEffect(() => {
     savedRef.current = false
@@ -181,6 +184,13 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
         )}
 
         <button
+          onClick={() => setTvOpen(true)}
+          aria-label={tTv('button')}
+          className="absolute top-12 right-16 z-20 w-9 h-9 rounded-full bg-black/60 backdrop-blur flex items-center justify-center"
+        >
+          <Tv size={18} className="text-white" />
+        </button>
+        <button
           onClick={() => router.push(`/${locale}/challenges/${challenge.id}`)}
           className="absolute top-12 right-4 z-20 w-9 h-9 rounded-full bg-black/60 backdrop-blur flex items-center justify-center"
         >
@@ -256,6 +266,8 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
           </div>
         )}
       </div>
+
+      <CastTvHelp open={tvOpen} onClose={() => setTvOpen(false)} />
     </div>
   )
 }

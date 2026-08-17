@@ -614,5 +614,24 @@
     "loves": "De 1 a 4 alimentos que você amaria na dieta",
     "hates": "De 1 a 4 alimentos que você não comeria jamais",
     "foodPlaceholder": "Escreva um alimento e toque +"
+  },
+  "castTv": {
+    "button": "Ver na TV",
+    "title": "Ver na TV",
+    "subtitle": "Espelhe a tela do celular na TV em 3 passos e treine em tela grande.",
+    "stepLabel": "Passo {n}",
+    "step1": "Conecte o celular e a TV na mesma rede Wi-Fi.",
+    "step3": "Escolha sua TV na lista que aparece.",
+    "ios": {
+      "label": "iPhone / iPad",
+      "step2": "Abra a Central de Controle (deslize do canto superior direito) e toque em «Espelhamento de Tela»."
+    },
+    "android": {
+      "label": "Android",
+      "step2": "Deslize de cima para abrir os atalhos rápidos e toque em «Transmitir tela» (na Samsung: «Smart View»)."
+    },
+    "then": "Pronto: volte pro app e dê play.",
+    "note": "Funciona em TVs com AirPlay (Apple TV, Samsung, LG) ou com Chromecast / Google TV.",
+    "gotIt": "Entendi"
   }
 }

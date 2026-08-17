@@ -651,5 +651,24 @@
     "loves": "Diyetinde görmeyi çok isteyeceğin 1-4 yiyecek",
     "hates": "Asla yemeyeceğin 1-4 yiyecek",
     "foodPlaceholder": "Bir yiyecek yaz ve + dokun"
+  },
+  "castTv": {
+    "button": "TV'de izle",
+    "title": "TV'de izle",
+    "subtitle": "Telefonunun ekranını 3 adımda TV'ye yansıt ve büyük ekranda antrenman yap.",
+    "stepLabel": "Adım {n}",
+    "step1": "Telefonu ve TV'yi aynı Wi-Fi ağına bağla.",
+    "step3": "Açılan listeden TV'ni seç.",
+    "ios": {
+      "label": "iPhone / iPad",
+      "step2": "Denetim Merkezi'ni aç (sağ üst köşeden aşağı kaydır) ve «Ekran Yansıtma»ya dokun."
+    },
+    "android": {
+      "label": "Android",
+      "step2": "Yukarıdan aşağı kaydırarak hızlı ayarları aç ve «Ekran yayınla»ya dokun (Samsung'da: «Smart View»)."
+    },
+    "then": "Hazır: uygulamaya dön ve oynat.",
+    "note": "AirPlay destekli TV'lerde (Apple TV, Samsung, LG) veya Chromecast / Google TV ile çalışır.",
+    "gotIt": "Anladım"
   }
 }

@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ArrowLeft, CheckCircle2, Lock, Play, Clock } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Lock, Play, Clock, Tv } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MockChallenge } from '@/lib/mock-challenges'
 import { hasLocalizedVideos, type MockDay } from '@/lib/mock-challenge-days'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
+import { CastTvHelp } from '@/components/challenges/CastTvHelp'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { track } from '@/lib/posthog/track'
 
@@ -21,8 +22,10 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
   const router = useRouter()
   const t = useTranslations('challenges')
   const tData = useTranslations('challengeData')
+  const tTv = useTranslations('castTv')
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [sequentialOpen, setSequentialOpen] = useState(false)
+  const [tvOpen, setTvOpen] = useState(false)
 
   const challengeTitle = tData(`${challenge.id}.title`)
   const challengeCategory = tData(`${challenge.id}.category`)
@@ -112,6 +115,17 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
               ? t('continueDay', { day: completedCount + 1 })
               : t('start')}
           </button>
+
+          {!isLocked && (
+            <button
+              type="button"
+              onClick={() => setTvOpen(true)}
+              className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-background/70 hover:text-background transition-colors"
+            >
+              <Tv size={14} />
+              {tTv('button')}
+            </button>
+          )}
         </div>
 
         <div className="px-4 pt-4 pb-2">
@@ -166,6 +180,8 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
           })}
         </div>
       </div>
+
+      <CastTvHelp open={tvOpen} onClose={() => setTvOpen(false)} />
 
       <PaywallModal
         open={paywallOpen}

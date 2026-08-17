@@ -614,5 +614,24 @@
     "loves": "1 to 4 foods you would love in your diet",
     "hates": "1 to 4 foods you would never eat",
     "foodPlaceholder": "Type a food and tap +"
+  },
+  "castTv": {
+    "button": "Watch on TV",
+    "title": "Watch on TV",
+    "subtitle": "Mirror your phone to the TV in 3 steps and train on the big screen.",
+    "stepLabel": "Step {n}",
+    "step1": "Connect your phone and TV to the same Wi-Fi network.",
+    "step3": "Pick your TV from the list that appears.",
+    "ios": {
+      "label": "iPhone / iPad",
+      "step2": "Open Control Center (swipe down from the top-right corner) and tap “Screen Mirroring”."
+    },
+    "android": {
+      "label": "Android",
+      "step2": "Swipe down from the top to open quick settings and tap “Cast screen” (on Samsung: “Smart View”)."
+    },
+    "then": "Done: come back to the app and press play.",
+    "note": "Works with AirPlay-compatible TVs (Apple TV, Samsung, LG) or Chromecast / Google TV.",
+    "gotIt": "Got it"
   }
 }
