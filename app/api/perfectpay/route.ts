@@ -5,8 +5,6 @@ import { sendWhatsAppAccess } from '@/lib/whatsapp-access'
 import { sendAccessEmail } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
 
-// A 2ª mensagem de WhatsApp sai ~45 s depois, via after() (lib/whatsapp-access.ts).
-export const maxDuration = 60
 
 const PERFECTPAY_TOKEN = process.env.PERFECTPAY_WEBHOOK_TOKEN
 

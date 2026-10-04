@@ -4,7 +4,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { MensagemConversa, PerfilAluna } from './responder'
 
 let _admin: SupabaseClient | null = null
-function admin(): SupabaseClient {
+export function admin(): SupabaseClient {
   if (!_admin) {
     _admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
       auth: { autoRefreshToken: false, persistSession: false },

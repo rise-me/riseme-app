@@ -7,20 +7,22 @@
 // da conta NUNCA depende disso — o email (lib/email.ts) sai sempre, em paralelo.
 //
 // SEQUÊNCIA (herdada da Voxuy, texto que rodava desde o início — 04/10/2026):
-//   1) ACESSO: email + senha + link de um toque + como entrar outro dia + instalar o app
-//   2) APOIO, ~45 s depois: "se ainda não conseguiu, me escreve" + playlist das aulas
+//   1) ACESSO, ~15 min após a compra (fim da VSL do upsell): email + senha + link de um
+//      toque + como entrar outro dia + instalar o app
+//   2) APOIO, ~45 s depois da 1ª: "se ainda não conseguiu, me escreve" + playlist das aulas
 //      no YouTube (só nos idiomas com playlist em PLAYLIST)
 // A 3ª mensagem da Voxuy (grupo de WhatsApp das alunas) foi REMOVIDA de propósito:
 // grupo com 150–200 entradas/dia virou moderação/spam; dúvida agora é no privado (agente).
 
-import { after } from 'next/server'
 import { sendVoxuyAccess } from '@/lib/voxuy'
-import { isZapiConfigured, sendZapiText, toZapiPhone } from '@/lib/zapi'
-import { registrarMensagem } from '@/lib/whatsapp-agent/conversa'
+import { isZapiConfigured } from '@/lib/zapi'
+import { enfileirar } from '@/lib/whatsapp-outbox'
 
 type AccessCopy = (p: { email: string; code: string; link: string; homeUrl: string }) => string
 type SupportCopy = (p: { playlist?: string }) => string
 
+// Atraso do acesso: tempo da VSL do upsell (~15 min). Ajustável sem deploy de código.
+const ATRASO_ACESSO_MIN = Number(process.env.WHATSAPP_ACCESS_DELAY_MIN ?? 15)
 const ESPERA_MSG2_MS = 45_000
 
 // Playlist (não listada) das aulas por idioma — reserva pra ela não perder o dia
@@ -255,24 +257,6 @@ const SUPPORT: Record<string, SupportCopy> = {
     ].join('\n'),
 }
 
-// Manda e registra no histórico como 'system' — o agente vê o que ela recebeu, e o
-// webhook "enviada por mim" não confunde com uma pessoa (o que calaria o bot).
-async function enviarDoSistema(phone: string, message: string, mascarar?: string): Promise<boolean> {
-  const result = await sendZapiText({ phone, message, delayTyping: 3 })
-  if (!result.ok) {
-    console.error(`[whatsapp] Z-API falhou (${phone}):`, result.error)
-    return false
-  }
-  await registrarMensagem({
-    phone: toZapiPhone(phone),
-    direction: 'out',
-    author: 'system',
-    body: mascarar ? message.replaceAll(mascarar, '••••••') : message, // senha (texto e link) fora do histórico
-    waMessageId: result.messageId,
-  })
-  return true
-}
-
 export async function sendWhatsAppAccess(params: {
   productCode: string
   transactionId: string
@@ -296,14 +280,19 @@ export async function sendWhatsAppAccess(params: {
     return
   }
 
+  // NÃO envia na hora: a compradora está na VSL do upsell logo após pagar, e a
+  // notificação do WhatsApp tira ela da página de venda. Enfileira com atraso; o cron
+  // /api/whatsapp/outbox envia. O email (contingência) continua saindo na hora.
   const [acesso, apoio] = mensagensDeAcesso(params)
-  const ok = await enviarDoSistema(phone, acesso, params.code)
-  if (!ok) return
-
-  // Msg 2 depois que ela teve tempo de ler a 1ª — roda após a resposta ao webhook.
-  after(async () => {
-    await new Promise((r) => setTimeout(r, ESPERA_MSG2_MS))
-    await enviarDoSistema(phone, apoio)
+  const sendAt = new Date(Date.now() + ATRASO_ACESSO_MIN * 60_000)
+  const idAcesso = await enfileirar({ phone, kind: 'acesso', body: acesso, mask: params.code, sendAfter: sendAt })
+  if (!idAcesso) return
+  await enfileirar({
+    phone,
+    kind: 'apoio',
+    body: apoio,
+    sendAfter: new Date(sendAt.getTime() + ESPERA_MSG2_MS),
+    dependsOn: idAcesso,
   })
 }
 
