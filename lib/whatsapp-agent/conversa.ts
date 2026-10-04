@@ -76,7 +76,11 @@ export interface Chat {
 
 async function acharUsuario(phone: string): Promise<string | null> {
   // users.phone é gravado em E.164 ("+34…") pela Perfect Pay; a Hotmart pode ter gravado cru.
-  const { data } = await admin().from('users').select('id').in('phone', [`+${phone}`, phone]).limit(1)
+  // Celular BR: o WhatsApp devolve o número SEM o 9 (55 31 8991-1328), a compra grava COM.
+  const variantes = [phone]
+  if (/^55\d{10}$/.test(phone)) variantes.push(`${phone.slice(0, 4)}9${phone.slice(4)}`)
+  const candidatos = variantes.flatMap((v) => [`+${v}`, v])
+  const { data } = await admin().from('users').select('id').in('phone', candidatos).limit(1)
   return data?.[0]?.id ?? null
 }
 

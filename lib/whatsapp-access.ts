@@ -5,64 +5,272 @@
 // A chave existe pra voltar à Voxuy em minutos se o número tiver problema na Z-API
 // (trocar a env + redeploy), sem mexer em código. Best-effort como antes: a criação
 // da conta NUNCA depende disso — o email (lib/email.ts) sai sempre, em paralelo.
+//
+// SEQUÊNCIA (herdada da Voxuy, texto que rodava desde o início — 04/10/2026):
+//   1) ACESSO: email + senha + link de um toque + como entrar outro dia + instalar o app
+//   2) APOIO, ~45 s depois: "se ainda não conseguiu, me escreve" + playlist das aulas
+//      no YouTube (só nos idiomas com playlist em PLAYLIST)
+// A 3ª mensagem da Voxuy (grupo de WhatsApp das alunas) foi REMOVIDA de propósito:
+// grupo com 150–200 entradas/dia virou moderação/spam; dúvida agora é no privado (agente).
 
+import { after } from 'next/server'
 import { sendVoxuyAccess } from '@/lib/voxuy'
 import { isZapiConfigured, sendZapiText, toZapiPhone } from '@/lib/zapi'
 import { registrarMensagem } from '@/lib/whatsapp-agent/conversa'
 
-type AccessCopy = (p: { firstName: string; email: string; code: string; link: string }) => string
+type AccessCopy = (p: { email: string; code: string; link: string; homeUrl: string }) => string
+type SupportCopy = (p: { playlist?: string }) => string
 
-// MESMO conteúdo do email de acesso (lib/email.ts), em formato de conversa.
-// O convite pra responder no fim abre a conversa (e é por onde o agente vai entrar).
+const ESPERA_MSG2_MS = 45_000
+
+// Playlist (não listada) das aulas por idioma — reserva pra ela não perder o dia
+// se o app der problema. Idioma sem playlist → a msg 2 sai sem esse trecho.
+const PLAYLIST: Record<string, string> = {
+  es: 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d',
+}
+
 const COPY: Record<string, AccessCopy> = {
-  es: ({ firstName, email, code, link }) =>
+  es: ({ email, code, link, homeUrl }) =>
     [
-      `¡Hola${firstName ? `, ${firstName}` : ''}! 💛 Bienvenida a RiseMe.`,
+      '¡Bienvenida al Desafío de Calistenia RiseMe™️! 🎉',
       '',
-      'Tu cuenta ya está lista. Este es tu acceso:',
-      `📧 Email: ${email}`,
-      `🔑 Contraseña: *${code}*`,
+      '¡Felicitaciones por esta excelente decisión! Estoy segura de que esta experiencia será transformadora para ti. 😍',
       '',
-      `Entra con un toque aquí 👉 ${link}`,
+      'Tu acceso a la aplicación está listo — aquí está tu información 👇',
       '',
-      'Guarda este mensaje — es tu acceso de siempre. Si tienes cualquier duda, respóndeme aquí mismo.',
+      `📧 Correo electrónico: ${email}`,
+      `🔑 Contraseña: ${code}`,
+      '',
+      'Guarda esta contraseña — ingresarás a la aplicación con ella. 🔒',
+      '',
+      `Toca aquí para entrar ahora: 👉 ${link}`,
+      '',
+      '(Cuando toques, la aplicación se abrirá automáticamente, ni siquiera necesitas escribir la contraseña — ¡tu desafío ya está listo!) 💪',
+      '',
+      '📌 ¿Cómo ingresar otro día?',
+      `👉 Ve a ${homeUrl}, inicia sesión con tu correo electrónico y la contraseña anterior.`,
+      'Si lo deseas, puedes cambiar tu contraseña por una que elijas dentro de la aplicación.',
+      '¿Olvidaste tu contraseña? Usa el enlace "¿Olvidaste tu contraseña?" en la pantalla de inicio de sesión.',
+      '',
+      '📱 Opcional: descarga la aplicación en tu teléfono',
+      'RiseMe™️ funciona como una verdadera aplicación en tu teléfono 👇',
+      '',
+      `📲 iPhone: abre ${homeUrl} en SAFARI → botón compartir → "Añadir a la pantalla de inicio" → "Añadir"`,
+      '⚠️ La opción correcta es "Añadir a la pantalla de inicio" (NO "Añadir a favoritos")',
+      '',
+      `📲 Android: abre ${homeUrl} en CHROME → menú de tres puntos → "Instalar aplicación" → "Instalar"`,
+      '',
+      '✅ El icono de RiseMe aparecerá en tu pantalla de inicio. ¿No lo ves? Desliza hacia las últimas pantallas de tu teléfono — a veces queda al final. 😉',
+      '',
+      '¡De esta manera tendrás acceso a tu desafío con un solo toque! 🚀',
+      '(Si no puedes hacerlo, no hay problema: la aplicación funciona perfectamente desde el navegador también.)',
+      '',
+      'Si necesitas ayuda, no dudes en escribirme. Estoy aquí para que tengas la mejor experiencia. 😄 ❤️',
     ].join('\n'),
-  tr: ({ firstName, email, code, link }) =>
+  tr: ({ email, code, link, homeUrl }) =>
     [
-      `Merhaba${firstName ? ` ${firstName}` : ''}! 💛 RiseMe'ye hoş geldin.`,
+      'RiseMe™️ Kalistenik Meydan Okumasına hoş geldin! 🎉',
       '',
-      'Hesabın hazır. İşte erişim bilgilerin:',
+      'Bu harika karar için tebrikler! Bu deneyimin senin için dönüştürücü olacağından eminim. 😍',
+      '',
+      'Uygulamaya erişimin hazır — bilgilerin burada 👇',
+      '',
       `📧 E-posta: ${email}`,
-      `🔑 Şifre: *${code}*`,
+      `🔑 Şifre: ${code}`,
       '',
-      `Tek dokunuşla buradan gir 👉 ${link}`,
+      'Bu şifreyi sakla — uygulamaya onunla gireceksin. 🔒',
       '',
-      'Bu mesajı sakla — her zaman bu bilgilerle girersin. Herhangi bir sorun olursa buradan bana yaz.',
+      `Hemen girmek için buraya dokun: 👉 ${link}`,
+      '',
+      '(Dokunduğunda uygulama kendiliğinden açılır, şifreyi yazmana bile gerek yok — meydan okuman hazır!) 💪',
+      '',
+      '📌 Başka bir gün nasıl girersin?',
+      `👉 ${homeUrl} adresine git, e-postan ve yukarıdaki şifreyle giriş yap.`,
+      'İstersen uygulamanın içinden şifreni kendi seçtiğin bir şifreyle değiştirebilirsin.',
+      'Şifreni mi unuttun? Giriş ekranındaki "Şifreni mi unuttun?" bağlantısını kullan.',
+      '',
+      '📱 İsteğe bağlı: uygulamayı telefonuna indir',
+      'RiseMe™️ telefonunda gerçek bir uygulama gibi çalışır 👇',
+      '',
+      `📲 iPhone: ${homeUrl} adresini SAFARI'de aç → paylaş düğmesi → "Ana Ekrana Ekle" → "Ekle"`,
+      '⚠️ Doğru seçenek "Ana Ekrana Ekle" (Favorilere Ekle DEĞİL)',
+      '',
+      `📲 Android: ${homeUrl} adresini CHROME'da aç → üç nokta menüsü → "Uygulamayı yükle" → "Yükle"`,
+      '',
+      '✅ RiseMe simgesi ana ekranında görünecek. Göremiyor musun? Telefonunun son ekranlarına kaydır — bazen en sonda kalır. 😉',
+      '',
+      'Böylece meydan okumana tek dokunuşla ulaşırsın! 🚀',
+      '(Yapamazsan sorun değil: uygulama tarayıcıdan da sorunsuz çalışır.)',
+      '',
+      'Yardıma ihtiyacın olursa bana yazmaktan çekinme. En iyi deneyimi yaşaman için buradayım. 😄 ❤️',
     ].join('\n'),
-  'pt-BR': ({ firstName, email, code, link }) =>
+  'pt-BR': ({ email, code, link, homeUrl }) =>
     [
-      `Oi${firstName ? `, ${firstName}` : ''}! 💛 Bem-vinda ao RiseMe.`,
+      'Bem-vinda ao Desafio de Calistenia RiseMe™️! 🎉',
       '',
-      'Sua conta já está pronta. Este é o seu acesso:',
+      'Parabéns por essa excelente decisão! Tenho certeza de que essa experiência vai ser transformadora pra você. 😍',
+      '',
+      'Seu acesso ao aplicativo está pronto — aqui estão suas informações 👇',
+      '',
       `📧 Email: ${email}`,
-      `🔑 Senha: *${code}*`,
+      `🔑 Senha: ${code}`,
       '',
-      `Entre com um toque aqui 👉 ${link}`,
+      'Guarde esta senha — é com ela que você entra no aplicativo. 🔒',
       '',
-      'Guarde esta mensagem — é o seu acesso de sempre. Qualquer dúvida, é só me responder aqui.',
+      `Toque aqui para entrar agora: 👉 ${link}`,
+      '',
+      '(Ao tocar, o aplicativo abre sozinho, nem precisa digitar a senha — seu desafio já está pronto!) 💪',
+      '',
+      '📌 Como entrar em outro dia?',
+      `👉 Vá em ${homeUrl}, entre com seu email e a senha acima.`,
+      'Se quiser, você pode trocar a senha por uma de sua escolha dentro do aplicativo.',
+      'Esqueceu a senha? Use o link "Esqueceu sua senha?" na tela de login.',
+      '',
+      '📱 Opcional: baixe o aplicativo no seu celular',
+      'O RiseMe™️ funciona como um aplicativo de verdade no seu celular 👇',
+      '',
+      `📲 iPhone: abra ${homeUrl} no SAFARI → botão compartilhar → "Adicionar à Tela de Início" → "Adicionar"`,
+      '⚠️ A opção certa é "Adicionar à Tela de Início" (NÃO "Adicionar aos Favoritos")',
+      '',
+      `📲 Android: abra ${homeUrl} no CHROME → menu de três pontinhos → "Instalar app" → "Instalar"`,
+      '',
+      '✅ O ícone do RiseMe vai aparecer na sua tela inicial. Não está vendo? Deslize até as últimas telas do celular — às vezes ele fica no final. 😉',
+      '',
+      'Assim você acessa seu desafio com um toque só! 🚀',
+      '(Se não conseguir, sem problema: o aplicativo funciona perfeitamente pelo navegador também.)',
+      '',
+      'Se precisar de ajuda, é só me escrever. Estou aqui pra você ter a melhor experiência. 😄 ❤️',
     ].join('\n'),
-  en: ({ firstName, email, code, link }) =>
+  en: ({ email, code, link, homeUrl }) =>
     [
-      `Hi${firstName ? ` ${firstName}` : ''}! 💛 Welcome to RiseMe.`,
+      'Welcome to the RiseMe™️ Calisthenics Challenge! 🎉',
       '',
-      'Your account is ready. Here is your access:',
+      'Congratulations on this great decision! I am sure this experience will be transformative for you. 😍',
+      '',
+      'Your access to the app is ready — here is your information 👇',
+      '',
       `📧 Email: ${email}`,
-      `🔑 Password: *${code}*`,
+      `🔑 Password: ${code}`,
       '',
-      `Enter with one tap here 👉 ${link}`,
+      'Keep this password — it is how you log in to the app. 🔒',
       '',
-      'Keep this message — it is your access for good. Any question, just reply here.',
+      `Tap here to enter now: 👉 ${link}`,
+      '',
+      '(When you tap, the app opens automatically, you do not even need to type the password — your challenge is ready!) 💪',
+      '',
+      '📌 How to log in another day?',
+      `👉 Go to ${homeUrl}, log in with your email and the password above.`,
+      'If you like, you can change it to a password of your choice inside the app.',
+      'Forgot your password? Use the "Forgot your password?" link on the login screen.',
+      '',
+      '📱 Optional: get the app on your phone',
+      'RiseMe™️ works like a real app on your phone 👇',
+      '',
+      `📲 iPhone: open ${homeUrl} in SAFARI → share button → "Add to Home Screen" → "Add"`,
+      '⚠️ The right option is "Add to Home Screen" (NOT "Add to Favorites")',
+      '',
+      `📲 Android: open ${homeUrl} in CHROME → three-dot menu → "Install app" → "Install"`,
+      '',
+      '✅ The RiseMe icon will appear on your home screen. Can not see it? Swipe to the last screens of your phone — sometimes it ends up there. 😉',
+      '',
+      'This way your challenge is one tap away! 🚀',
+      '(If you can not do it, no problem: the app works perfectly in the browser too.)',
+      '',
+      'If you need help, just write to me. I am here so you have the best experience. 😄 ❤️',
     ].join('\n'),
+}
+
+const SUPPORT: Record<string, SupportCopy> = {
+  es: ({ playlist }) =>
+    [
+      '💛 Un último mensaje importante:',
+      '',
+      'Si completaste todos los pasos y aún tienes dificultades para acceder a la aplicación, escríbeme — nuestro equipo de soporte te ayudará a resolverlo. 😉',
+      ...(playlist
+        ? [
+            '',
+            'Mientras tanto, para que no te pierdas ni un solo día del desafío, puedes ver las lecciones desde esta lista especial de reproducción de YouTube:',
+            '',
+            `👉 ${playlist}`,
+            '',
+            '🙏 Este enlace es exclusivamente tuyo y solo es para nuestras estudiantes.',
+          ]
+        : []),
+      '',
+      '¡Nos vemos en el desafío! 💪',
+    ].join('\n'),
+  tr: ({ playlist }) =>
+    [
+      '💛 Son bir önemli mesaj:',
+      '',
+      'Tüm adımları tamamladın ve uygulamaya girmekte hâlâ zorlanıyorsan bana yaz — destek ekibimiz çözmene yardım edecek. 😉',
+      ...(playlist
+        ? [
+            '',
+            'Bu arada meydan okumanın tek bir gününü bile kaçırmaman için dersleri bu özel YouTube oynatma listesinden izleyebilirsin:',
+            '',
+            `👉 ${playlist}`,
+            '',
+            '🙏 Bu bağlantı sadece sana ve öğrencilerimize özeldir.',
+          ]
+        : []),
+      '',
+      'Meydan okumada görüşürüz! 💪',
+    ].join('\n'),
+  'pt-BR': ({ playlist }) =>
+    [
+      '💛 Uma última mensagem importante:',
+      '',
+      'Se você fez todos os passos e ainda está com dificuldade para entrar no aplicativo, me escreve — nossa equipe de suporte vai te ajudar a resolver. 😉',
+      ...(playlist
+        ? [
+            '',
+            'Enquanto isso, para você não perder nenhum dia do desafio, dá pra assistir às aulas nesta playlist especial do YouTube:',
+            '',
+            `👉 ${playlist}`,
+            '',
+            '🙏 Este link é exclusivo seu e só para as nossas alunas.',
+          ]
+        : []),
+      '',
+      'Nos vemos no desafio! 💪',
+    ].join('\n'),
+  en: ({ playlist }) =>
+    [
+      '💛 One last important message:',
+      '',
+      'If you followed all the steps and still have trouble getting into the app, write to me — our support team will help you sort it out. 😉',
+      ...(playlist
+        ? [
+            '',
+            'Meanwhile, so you do not miss a single day of the challenge, you can watch the lessons in this special YouTube playlist:',
+            '',
+            `👉 ${playlist}`,
+            '',
+            '🙏 This link is exclusively yours and only for our students.',
+          ]
+        : []),
+      '',
+      'See you in the challenge! 💪',
+    ].join('\n'),
+}
+
+// Manda e registra no histórico como 'system' — o agente vê o que ela recebeu, e o
+// webhook "enviada por mim" não confunde com uma pessoa (o que calaria o bot).
+async function enviarDoSistema(phone: string, message: string, mascarar?: string): Promise<boolean> {
+  const result = await sendZapiText({ phone, message, delayTyping: 3 })
+  if (!result.ok) {
+    console.error(`[whatsapp] Z-API falhou (${phone}):`, result.error)
+    return false
+  }
+  await registrarMensagem({
+    phone: toZapiPhone(phone),
+    direction: 'out',
+    author: 'system',
+    body: mascarar ? message.replaceAll(mascarar, '••••••') : message, // senha (texto e link) fora do histórico
+    waMessageId: result.messageId,
+  })
+  return true
 }
 
 export async function sendWhatsAppAccess(params: {
@@ -80,28 +288,33 @@ export async function sendWhatsAppAccess(params: {
     return
   }
 
-  if (!isZapiConfigured() || !params.phone) {
+  const phone = params.phone
+  if (!isZapiConfigured() || !phone) {
     console.warn(
-      `[whatsapp] pulando Z-API — ${!params.phone ? 'sem telefone' : 'env ausente'} (venda ${params.transactionId}). Backup: email`
+      `[whatsapp] pulando Z-API — ${!phone ? 'sem telefone' : 'env ausente'} (venda ${params.transactionId}). Backup: email`
     )
     return
   }
 
-  const copy = COPY[params.locale] ?? COPY.es
-  const firstName = params.name?.trim().split(/\s+/)[0] ?? ''
-  const message = copy({ firstName, email: params.email, code: params.code, link: params.link })
-  const result = await sendZapiText({ phone: params.phone, message, delayTyping: 3 })
-  if (!result.ok) {
-    console.error(`[whatsapp] Z-API falhou (venda ${params.transactionId}):`, result.error)
-    return
-  }
-  // Entra no histórico (o agente vê o que ela recebeu) e marca o messageId como do
-  // sistema — senão o webhook "enviada por mim" acha que foi uma pessoa e cala o bot.
-  await registrarMensagem({
-    phone: toZapiPhone(params.phone),
-    direction: 'out',
-    author: 'system',
-    body: message.replaceAll(params.code, '••••••'), // senha (no texto e no link) fora do histórico
-    waMessageId: result.messageId,
+  const [acesso, apoio] = mensagensDeAcesso(params)
+  const ok = await enviarDoSistema(phone, acesso, params.code)
+  if (!ok) return
+
+  // Msg 2 depois que ela teve tempo de ler a 1ª — roda após a resposta ao webhook.
+  after(async () => {
+    await new Promise((r) => setTimeout(r, ESPERA_MSG2_MS))
+    await enviarDoSistema(phone, apoio)
   })
+}
+
+/** As 2 mensagens da sequência, prontas — exportado também pra pré-visualizar/testar o texto. */
+export function mensagensDeAcesso(p: { locale: string; email: string; code: string; link: string }): [string, string] {
+  const copy = COPY[p.locale] ?? COPY.es
+  const support = SUPPORT[p.locale] ?? SUPPORT.es
+  // Raiz do app no idioma dela (mesmo prefixo do link de acesso: /tr, /pl…; es sem prefixo).
+  const homeUrl = p.link.split('/entrar')[0]
+  return [
+    copy({ email: p.email, code: p.code, link: p.link, homeUrl }),
+    support({ playlist: PLAYLIST[p.locale] }),
+  ]
 }

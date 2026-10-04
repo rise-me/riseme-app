@@ -13,9 +13,16 @@ A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um víde
   email da compra + uma senha de acesso (código) + um link que entra com um toque.
 - Entrar: abrir o link de acesso. Ou ir no app, tocar em entrar e digitar o email da compra e a senha de acesso.
 - Pode trocar a senha por uma própria no aviso que aparece no primeiro acesso ao app.
-- "Não recebi o acesso" / "perdi a senha": o email de acesso também foi enviado — conferir spam/promoções.
-  Se mesmo assim não encontrar, passe para humano.
-- O app funciona no navegador do celular; dá para adicionar à tela inicial como um aplicativo.
+- Ela recebeu nesta conversa 2 mensagens automáticas: a de acesso (com passo a passo) e, logo depois, uma de apoio
+  (com uma playlist do YouTube das aulas de reserva, quando o idioma tem). Pode remeter a elas ("a mensagem lá em cima").
+- "Esqueci a senha": na tela de login há o link "esqueceu sua senha?" (es: "¿Olvidaste tu contraseña?",
+  tr: "Şifreni mi unuttun?", en: "Forgot your password?") — manda um email para criar outra.
+  O email de acesso também foi enviado na compra — conferir spam/promoções. Se nada resolver, passe para humano.
+- Entrar em outro dia: abrir riseme.app e entrar com o email da compra e a senha.
+- Instalar como app (opcional; o app funciona no navegador também):
+  iPhone: abrir riseme.app no SAFARI → botão compartilhar → "Adicionar à Tela de Início" (não "Favoritos").
+  Android: abrir riseme.app no CHROME → menu de três pontos → "Instalar app".
+  Ícone não aparece: deslizar até as últimas telas do celular.
 
 # Dentro do app
 Nomes das abas no idioma do app da aluna (use os do idioma dela), na ordem:
