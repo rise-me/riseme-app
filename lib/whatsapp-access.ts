@@ -7,7 +7,8 @@
 // da conta NUNCA depende disso — o email (lib/email.ts) sai sempre, em paralelo.
 
 import { sendVoxuyAccess } from '@/lib/voxuy'
-import { isZapiConfigured, sendZapiText } from '@/lib/zapi'
+import { isZapiConfigured, sendZapiText, toZapiPhone } from '@/lib/zapi'
+import { registrarMensagem } from '@/lib/whatsapp-agent/conversa'
 
 type AccessCopy = (p: { firstName: string; email: string; code: string; link: string }) => string
 
@@ -88,12 +89,19 @@ export async function sendWhatsAppAccess(params: {
 
   const copy = COPY[params.locale] ?? COPY.es
   const firstName = params.name?.trim().split(/\s+/)[0] ?? ''
-  const result = await sendZapiText({
-    phone: params.phone,
-    message: copy({ firstName, email: params.email, code: params.code, link: params.link }),
-    delayTyping: 3,
-  })
+  const message = copy({ firstName, email: params.email, code: params.code, link: params.link })
+  const result = await sendZapiText({ phone: params.phone, message, delayTyping: 3 })
   if (!result.ok) {
     console.error(`[whatsapp] Z-API falhou (venda ${params.transactionId}):`, result.error)
+    return
   }
+  // Entra no histórico (o agente vê o que ela recebeu) e marca o messageId como do
+  // sistema — senão o webhook "enviada por mim" acha que foi uma pessoa e cala o bot.
+  await registrarMensagem({
+    phone: toZapiPhone(params.phone),
+    direction: 'out',
+    author: 'system',
+    body: message.replaceAll(params.code, '••••••'), // senha (no texto e no link) fora do histórico
+    waMessageId: result.messageId,
+  })
 }
