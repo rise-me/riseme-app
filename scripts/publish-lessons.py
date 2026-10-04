@@ -18,6 +18,10 @@ Uso:
 
 Requer CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_STREAM_TOKEN (permissão Stream:Edit)
 no .env.local da raiz do projeto. Sem dependências além da stdlib.
+
+CLOUDFLARE_STREAM_ALLOWED_ORIGINS (ex.: riseme.app,www.riseme.app,localhost:3000)
+restringe o player do Stream a esses domínios — a aula não toca embutida em
+outro site. Aplicado em toda aula enviada; sem a variável a aula sobe aberta.
 """
 
 import argparse
@@ -43,7 +47,7 @@ POLL_EVERY = 15
 POLL_TIMEOUT = 2 * 60 * 60
 
 
-def load_env() -> tuple[str, str]:
+def load_env() -> tuple[str, str, list[str]]:
     env_path = ROOT / ".env.local"
     if not env_path.exists():
         sys.exit(f"[erro] {env_path} não encontrado")
@@ -58,7 +62,10 @@ def load_env() -> tuple[str, str]:
     # placeholders curtos ("xxx") passaram despercebidos uma vez — barra aqui
     if len(account) < 20 or len(token) < 20:
         sys.exit("[erro] CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_STREAM_TOKEN ausentes ou placeholder no .env.local")
-    return account, token
+    origins = [o.strip() for o in env.get("CLOUDFLARE_STREAM_ALLOWED_ORIGINS", "").split(",") if o.strip()]
+    if not origins:
+        print("[aviso] CLOUDFLARE_STREAM_ALLOWED_ORIGINS vazio — aulas vão subir sem proteção por domínio")
+    return account, token, origins
 
 
 def request(method: str, url: str, token: str, data: bytes | None = None, headers: dict | None = None):
@@ -99,6 +106,16 @@ def find_lessons(folder: Path, pattern: str) -> dict[int, Path]:
             sys.exit(f"[erro] dia {day} duplicado: {by_day[day].name} e {f.name}")
         by_day[day] = f
     return dict(sorted(by_day.items()))
+
+
+def set_allowed_origins(base: str, token: str, uid: str, origins: list[str]) -> None:
+    body = json.dumps({"uid": uid, "allowedOrigins": origins}).encode()
+    try:
+        with request("POST", f"{base}/{uid}", token, data=body, headers={"Content-Type": "application/json"}) as r:
+            if not json.load(r).get("success"):
+                sys.exit(f"[erro] {uid}: Stream recusou allowedOrigins")
+    except urllib.error.HTTPError as e:
+        sys.exit(f"[erro] allowedOrigins de {uid} → {e.code} {e.read().decode(errors='replace')[:300]}")
 
 
 def find_existing_uid(base: str, token: str, name: str) -> str | None:
@@ -216,7 +233,7 @@ def main() -> None:
         print("\n[dry-run] nada foi enviado")
         return
 
-    account, token = load_env()
+    account, token, origins = load_env()
     base = API.format(account=account)
     data = load_data()
     entries = data["lessons"].setdefault(args.locale, {}).setdefault(args.challenge, {})
@@ -233,6 +250,8 @@ def main() -> None:
         else:
             print(f"\ndia {day:>2}: enviando {path.name}")
             uid = tus_upload(base, token, path, name)
+        if origins:
+            set_allowed_origins(base, token, uid, origins)
         entries[key] = {"uid": uid, "seconds": None}
         save_data(data)
 
