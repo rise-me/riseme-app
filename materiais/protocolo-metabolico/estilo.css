@@ -1,0 +1,379 @@
+/* Protocolo Metabólico (upsell) — componentes próprios, por cima de ../_tema/riseme.css.
+ *
+ * Reconstruído em 2026-10-04 a partir do PDF turco [CL-TR] EBOOK-UPSELL01.pdf.
+ * Só cor/medida nova aqui; tipografia e paleta-base vêm das variáveis do tema.
+ * As 4 fases têm cor própria (clara = barras/ícones, escura = títulos/badges):
+ * .p1 ateşleme/âmbar · .p2 arınma/laranja · .p3 hızlanma/rosa · .p4 sabitleme/ameixa.
+ */
+
+:root {
+  --ph1: #e1a23a; --ph1-d: #ba7c12; --ph1-dim: #3e2a14; --ph1-rgb: 186 124 18;
+  --ph2: #e4783f; --ph2-d: var(--orange); --ph2-dim: #432717; --ph2-rgb: 197 87 31;
+  --ph3: var(--rose-soft); --ph3-d: var(--rose); --ph3-dim: #431c21; --ph3-rgb: 188 35 80;
+  --ph4: #9c2e57; --ph4-d: #7c1e40; --ph4-dim: #34171d; --ph4-rgb: 124 30 64;
+  --sage-dot: #5d7c57;
+  --navy: #312953;
+  --night-card: #201c33;
+  --night-line: #342e52;
+}
+.p1 { --c: var(--ph1); --cd: var(--ph1-d); --dim: var(--ph1-dim); --rgb: var(--ph1-rgb); }
+.p2 { --c: var(--ph2); --cd: var(--ph2-d); --dim: var(--ph2-dim); --rgb: var(--ph2-rgb); }
+.p3 { --c: var(--ph3); --cd: var(--ph3-d); --dim: var(--ph3-dim); --rgb: var(--ph3-rgb); }
+.p4 { --c: var(--ph4); --cd: var(--ph4-d); --dim: var(--ph4-dim); --rgb: var(--ph4-rgb); }
+
+/* ---------- ícones extras (lucide e desenhos simples do original) ---------- */
+.ic-flame { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z'/></svg>"); }
+.ic-sprout { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 20h10'/><path d='M10 20c5.5-2.5.8-6.4 3-10'/><path d='M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z'/><path d='M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z'/></svg>"); }
+.ic-flask { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 2v7.53a2 2 0 0 1-.21.9L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.07-10.12a2 2 0 0 1-.21-.9V2'/><path d='M8.5 2h7'/><path d='M7 16h10'/></svg>"); }
+.ic-loader { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2v4'/><path d='m16.2 7.8 2.9-2.9'/><path d='M18 12h4'/><path d='m16.2 16.2 2.9 2.9'/><path d='M12 18v4'/><path d='m4.9 19.1 2.9-2.9'/><path d='M2 12h4'/><path d='m4.9 4.9 2.9 2.9'/></svg>"); }
+.ic-zap { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z'/></svg>"); }
+.ic-moon { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'/></svg>"); }
+.ic-tick { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 6 9 17l-5-5'/></svg>"); }
+.ic-tri { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg>"); }
+.ic-tick-box { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect width='20' height='20' x='2' y='2' rx='5'/><path d='m8 12 3 3 5-6'/></svg>"); }
+.ic-mood { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M14 3c-4 1-6 4-6 7.5 0 4 2.5 7.5 6 10.5'/><circle cx='14.5' cy='9.5' r='.6' fill='black'/></svg>"); }
+.ic-muscle { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='8.5' r='4'/><path d='M5 4.5l15 16'/><path d='M12 12.5V22'/><path d='M16.5 6.5l1.5-1.5'/></svg>"); }
+.ic-waves { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 7c.6.5 1.2 1 2.5 1C7 8 7 6 9.5 6c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/><path d='M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/><path d='M2 17c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'/></svg>"); }
+.ic-root { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M3 12c3-4.5 15-4.5 18 0-3 4.5-15 4.5-18 0z'/><circle cx='12' cy='12' r='3'/></svg>"); }
+.ic-citrus { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='13' r='8'/><path d='M12 9v4'/><path d='M14 2.5 12.5 5'/></svg>"); }
+.ic-stalk { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22V11'/><path d='M12 11c0-3 2-5.5 5-6 0 3-2 5.5-5 6z'/><path d='M12 14c0-2.5-2-4.5-4.5-5 0 2.5 2 4.5 4.5 5z'/></svg>"); }
+.ic-parsley { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 21V5'/><path d='M5 11l7 10 7-10'/></svg>"); }
+.ic-cinnamon { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 5c2 4 2 10 0 14'/><path d='M10 5c2 4 2 10 0 14'/><path d='M15 5c2 4 2 10 0 14'/></svg>"); }
+.ic-turmeric { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='m16 12-4-4-4 4'/><path d='M12 16V8'/></svg>"); }
+.ic-pepper { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'><circle cx='7' cy='8' r='2.4'/><circle cx='13' cy='7' r='2.4'/><circle cx='18' cy='11' r='2.4'/><circle cx='10' cy='13' r='2.4'/><circle cx='15' cy='16' r='2.4'/></svg>"); }
+.ic-fennel { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22V7'/><path d='M7 3l5 4 5-4'/><path d='M8 10l4 3 4-3'/></svg>"); }
+.ic-honey { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 3h10'/><path d='M8 3v3H6.5A2.5 2.5 0 0 0 4 8.5V18a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8.5A2.5 2.5 0 0 0 17.5 6H16V3'/><path d='M4 12h16'/></svg>"); }
+
+/* ---------- tipografia extra ---------- */
+.eyebrow.rose { color: var(--rose); font-size: 8.2pt; font-weight: 500; letter-spacing: 0.32em; margin-bottom: 1pt; }
+.eyebrow.sm { font-size: 7.5pt; font-weight: 400; }
+.eyebrow.ph { color: var(--cd); }
+.eyebrow.ph.p1 { color: #bb7c12; }
+.page h2.xl { font-size: 30pt; line-height: 1.02; letter-spacing: -0.03em; margin-bottom: 12pt; }
+.page h2.md { font-size: 24pt; line-height: 1.1; letter-spacing: -0.025em; margin-bottom: 11pt; }
+.page h3.first { margin-top: 0; }
+.page h3.mt { margin-top: 20pt; }
+p.small.tight { margin-bottom: 8pt; }
+p.lead-b { font-weight: 600; }
+.lede.n { margin-bottom: 10pt; }
+.letter p { font-size: 11.6pt; line-height: 1.72; margin-bottom: 10pt; }
+.letter .hi { font-family: var(--display); font-weight: 600; font-size: 13.5pt; color: var(--ink); margin: 0 0 12pt; }
+.sign b { display: block; font-family: var(--display); font-weight: 900; font-size: 15pt; color: var(--ink); margin-top: 20pt; }
+.sign span { display: block; font-family: var(--mono); font-size: 7.9pt; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rose); margin-top: 6pt; }
+.rule { border-top: 0.75pt solid var(--line); margin: 16pt 0; }
+
+/* losangos rosa no corpo do texto */
+.diamonds.lg li { font-size: 11.2pt; line-height: 1.6; padding-left: 19pt; margin-bottom: 7pt; }
+.diamonds.lg li::before { background: var(--rose-soft); top: 0.5em; left: 3pt; }
+.pull { border-left-color: var(--rose-soft); }
+
+/* ---------- capa (cores próprias) ---------- */
+.cover.pm {
+  background:
+    radial-gradient(ellipse 110% 55% at 100% 0%, rgba(197, 87, 31, 0.17), transparent 100%),
+    radial-gradient(ellipse 60% 32% at 0% 100%, rgba(124, 30, 64, 0.38), transparent 100%),
+    var(--night);
+}
+.cover.pm .hero .mono-meta { color: var(--ph1); }
+.cover.pm h1 { font-size: 49.5pt; line-height: 0.95; margin-bottom: 18pt; }
+.cover.pm .hero p { max-width: 262pt; }
+.cover.pm .phases { position: absolute; left: 62pt; bottom: 106pt; width: 348pt; }
+
+/* barra das 4 fases */
+.phases { display: flex; gap: 4pt; }
+.phases > div { flex: 1; text-align: center; }
+.phases > div::before {
+  content: '';
+  display: block;
+  height: 7pt;
+  border-radius: 4pt;
+  background: var(--c);
+  margin-bottom: 7pt;
+}
+.phases span {
+  font-family: var(--mono);
+  font-size: 6.7pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--meta-dark);
+}
+.phases.light span { color: var(--meta); }
+.phases.dim > div::before { background: var(--dim); }
+.phases.dim > div.on::before { background: var(--c); }
+.phases > div.cur span { color: var(--c); }
+.phases.bare > div::before { margin-bottom: 0; }
+
+/* ---------- páginas escuras: abertura de fase, carta final ---------- */
+.page.dark {
+  background:
+    radial-gradient(ellipse 110% 55% at 100% 0%, rgb(var(--rgb) / 0.85), transparent 100%),
+    radial-gradient(ellipse 60% 30% at 0% 100%, rgb(var(--rgb) / 0.13), transparent 100%),
+    var(--night);
+  color: var(--sand);
+  padding: 64pt 62pt;
+}
+.dark .top { display: flex; justify-content: space-between; align-items: center; }
+.dark .brand { font-size: 13.5pt; }
+.dark .top .mono-meta { color: var(--sand); }
+.opener .bottom { position: absolute; left: 62pt; right: 62pt; bottom: 70pt; }
+.opener .bottom .mono-meta { font-size: 9.7pt; color: var(--c); margin-bottom: 4pt; }
+.opener h1 {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 45pt;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--cream);
+  margin-bottom: 8pt;
+}
+.opener .bottom p { font-size: 12.7pt; line-height: 1.6; color: var(--sand); max-width: 250pt; margin-bottom: 30pt; }
+.opener .phases { width: 340pt; }
+
+.page.dark.farewell {
+  background:
+    radial-gradient(ellipse 110% 50% at 100% 0%, rgba(197, 87, 31, 0.36), transparent 100%),
+    radial-gradient(ellipse 60% 30% at 0% 100%, rgba(188, 35, 80, 0.42), transparent 100%),
+    var(--night);
+}
+.farewell .eyebrow { color: var(--ph1); font-size: 7.9pt; font-weight: 500; margin: 28pt 0 8pt; }
+.farewell h1 {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 39pt;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--cream);
+  margin-bottom: 26pt;
+}
+.farewell .hi { font-family: var(--display); font-weight: 800; font-size: 13.5pt; color: var(--cream); margin-bottom: 12pt; }
+.farewell .txt { max-width: 392pt; }
+.farewell .txt p { font-size: 11.6pt; line-height: 1.72; color: var(--sand); margin-bottom: 10pt; }
+.farewell .txt b { color: var(--cream); }
+.farewell .love { font-family: var(--display); font-weight: 800; font-size: 11.2pt; color: var(--sand); margin-top: 20pt; }
+.farewell .sign b { color: var(--cream); margin-top: 10pt; }
+.farewell .phases { width: 292pt; margin-top: 26pt; }
+
+/* contracapa */
+.back.pm {
+  background:
+    radial-gradient(ellipse 75% 40% at 50% 0%, rgba(124, 30, 64, 0.45), transparent 100%),
+    radial-gradient(ellipse 75% 22% at 50% 100%, rgba(197, 87, 31, 0.16), transparent 100%),
+    var(--night);
+}
+.back.pm .dashes i:nth-child(1) { background: var(--ph1); }
+.back.pm .dashes i:nth-child(2) { background: var(--ph2); }
+.back.pm .dashes i:nth-child(3) { background: var(--ph3); }
+.back.pm .dashes i:nth-child(4) { background: var(--ph4); }
+.back.pm .dashes i { width: 19pt; height: 7pt; }
+.back.pm .center { top: 334pt; }
+.back.pm .brand { font-size: 48pt; margin-bottom: 12pt; }
+.back.pm .center p { font-size: 13.5pt; line-height: 1.55; }
+.back.pm .center .mono-meta { margin-top: 26pt; }
+
+/* ---------- colofão ---------- */
+.colophon .brand { color: var(--ink); font-size: 16.5pt; }
+.colophon .ed { font-size: 9.4pt; line-height: 1.7; color: var(--muted); margin-top: 8pt; }
+.colophon .ed b { color: var(--ink); }
+.colophon .disc { font-size: 9.4pt; line-height: 1.7; color: var(--muted); }
+.colophon .copy { font-size: 8.2pt; line-height: 1.7; color: var(--meta); }
+
+/* ---------- sumário ---------- */
+.toc-group {
+  font-family: var(--mono);
+  font-size: 7.5pt;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--meta);
+  margin: 14pt 0 4pt;
+}
+.toc-group.line { border-top: 0.75pt solid var(--line); padding-top: 10pt; }
+.toc-row { border-bottom: 0.75pt solid var(--line-soft); }
+.toc-row .t { display: flex; align-items: baseline; gap: 10pt; padding: 10pt 0 8pt; }
+.toc-row .n { width: 24pt; flex: none; font-family: var(--mono); font-weight: 500; font-size: 8.2pt; letter-spacing: 0.2em; color: var(--rose); }
+.toc-row b { font-family: var(--display); font-weight: 700; font-size: 11.6pt; }
+.toc-row .t::after { content: ''; flex: 1; border-bottom: 0.9pt dotted var(--line); transform: translateY(-3pt); }
+.toc-row p { font-size: 9pt; color: var(--muted); padding: 0 0 10pt 34pt; margin-top: -1pt; }
+
+/* ---------- cartões de número ---------- */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12pt; margin: 14pt 0 18pt; }
+.stats > div { background: var(--card); border: 0.75pt solid var(--line); border-radius: 10pt; padding: 10pt 12pt 11pt; }
+.stats b { display: block; font-family: var(--display); font-weight: 900; font-size: 22.5pt; line-height: 1.15; color: var(--rose); margin-bottom: 4pt; }
+.stats span { display: block; font-size: 8.6pt; line-height: 1.4; color: var(--muted); }
+
+/* ---------- cartões das fases (e dos nutrientes noturnos) ---------- */
+.phasecard {
+  position: relative;
+  background: var(--card);
+  border: 0.75pt solid var(--line);
+  border-radius: 10pt;
+  padding: 10pt 14pt 12pt 28pt;
+  margin-bottom: 9pt;
+  overflow: hidden;
+}
+.phasecard::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4pt; background: linear-gradient(var(--c), var(--cd)); }
+.phasecard .k { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 7.5pt; color: var(--meta); text-transform: uppercase; letter-spacing: 0.12em; }
+.phasecard .k span:first-child { letter-spacing: 0.32em; }
+.phasecard h4 { font-family: var(--display); font-weight: 800; font-size: 13.5pt; color: var(--cd); margin: 3pt 0 4pt; }
+.phasecard.p1 h4 { color: #bb7c12; }
+.phasecard p { font-size: 9.7pt; line-height: 1.5; color: var(--muted); }
+.note { font-size: 9.4pt; line-height: 1.6; color: var(--muted); margin-top: 8pt; }
+.note b { color: var(--ink); }
+
+/* ---------- despensa ---------- */
+.pantry { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7pt; margin: 12pt 0 7pt; }
+.pantry.two { grid-template-columns: 1fr 1fr; margin-top: 0; }
+.pantry > div { background: var(--card); border: 0.75pt solid var(--line); border-radius: 9pt; padding: 9pt 9pt 10pt; }
+.pantry .h { display: flex; align-items: center; gap: 7pt; font-family: var(--display); font-weight: 700; font-size: 10.1pt; line-height: 1.5; color: var(--ink); margin-bottom: 3pt; }
+.pantry .ic { color: var(--sage-dot); width: 9.5pt; height: 9.5pt; }
+.pantry span { display: block; font-size: 7.9pt; line-height: 1.4; color: var(--muted); }
+
+/* ---------- lista com check (regras curtas) ---------- */
+.ticks { list-style: none; margin: 4pt 0 16pt; }
+.ticks li { display: flex; align-items: baseline; gap: 11pt; padding: 7pt 0; border-bottom: 0.75pt solid var(--line-soft); font-size: 10.5pt; line-height: 1.45; }
+.ticks li:last-child { border-bottom: 0; }
+.ticks .ic { color: var(--rose-soft); width: 11pt; height: 11pt; transform: translateY(2pt); }
+
+/* ---------- receita do chá ---------- */
+.recipe {
+  background: var(--card);
+  border: 0.75pt solid var(--line);
+  border-radius: 12pt;
+  overflow: hidden;
+  box-shadow: 0 1pt 3pt rgba(0, 0, 0, 0.03);
+  margin: 14pt 0 22pt;
+}
+.recipe .rh {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 11pt 15pt 9pt 16pt;
+  background: linear-gradient(110deg, var(--c), var(--cd));
+  color: #fff;
+}
+.recipe .rh .kick { display: flex; align-items: center; gap: 6pt; font-family: var(--mono); font-size: 7.1pt; letter-spacing: 0.3em; text-transform: uppercase; }
+.recipe .rh .kick .ic { width: 8pt; height: 8pt; }
+.recipe .rh h4 { font-family: var(--display); font-weight: 900; font-size: 15.7pt; letter-spacing: -0.01em; margin-top: 3pt; }
+.recipe .rh .when { text-align: right; font-family: var(--mono); font-size: 7.5pt; line-height: 1.45; letter-spacing: 0.06em; }
+.recipe .rh .when b { display: block; color: #fff; font-weight: 700; font-size: 9.7pt; letter-spacing: 0.08em; margin-bottom: 1pt; }
+.recipe .rb { display: grid; grid-template-columns: 1fr 1fr; gap: 15pt; padding: 13pt 16pt 4pt; }
+.recipe .lbl { font-family: var(--mono); font-weight: 500; font-size: 7.1pt; letter-spacing: 0.32em; text-transform: uppercase; color: var(--meta); margin-bottom: 8pt; }
+.recipe .ing { list-style: none; }
+.recipe .ing li { display: flex; justify-content: space-between; align-items: baseline; gap: 8pt; padding: 5pt 0 5pt; border-bottom: 0.9pt dashed var(--line-soft); font-size: 10.1pt; }
+.recipe .ing li:last-child { border-bottom: 0; }
+.recipe .ing i { font-style: normal; font-family: var(--mono); font-size: 9pt; color: var(--ink); white-space: nowrap; }
+.recipe .how { list-style: none; counter-reset: how; }
+.recipe .how li { counter-increment: how; position: relative; padding-left: 18pt; font-size: 10.1pt; line-height: 1.5; margin-bottom: 6pt; }
+.recipe .how li::before {
+  content: counter(how);
+  position: absolute;
+  left: 0;
+  top: 1.5pt;
+  width: 12.5pt;
+  height: 12.5pt;
+  border-radius: 50%;
+  background: var(--cd);
+  color: #fff;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 8.2pt;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.recipe .why { display: flex; gap: 10pt; margin: 6pt 16pt 0; padding: 11pt 0 13pt; border-top: 0.75pt solid var(--line); font-size: 9.4pt; line-height: 1.65; color: var(--muted); }
+.recipe .why .ic { color: var(--cd); width: 11pt; height: 11pt; margin-top: 1pt; }
+.recipe .why b { color: var(--ink); }
+
+/* duas colunas com ícone no título (reaproveita .versus do tema) */
+.versus .title .ic { width: 10pt; height: 10pt; }
+.versus.pm { gap: 11pt; margin: 6pt 0 14pt; }
+.versus.pm > div { padding: 13pt 14pt 8pt; }
+.versus.pm .title { font-size: 10.5pt; margin-bottom: 9pt; }
+.versus.pm .bad .title { color: var(--rose); }
+.versus.pm li { padding-left: 11pt; margin-bottom: 7pt; line-height: 1.45; }
+.versus.pm .good li::before { background: var(--sage-dot); }
+
+/* callout escuro (noite) e variações */
+.callout.night { background: var(--night-card); border-color: var(--night-line); color: #cfc9e8; }
+.callout.night .title { color: #e8e3ff; }
+.callout.night .ic { color: #b9aef0; }
+.callout.sage .ic { color: var(--sage-dot); }
+.callout.narrow { max-width: 425pt; }
+.callout b { color: var(--ink); }
+.callout.night b { color: #fff; }
+
+/* ---------- passos com badge quadrado ---------- */
+.rsteps { list-style: none; counter-reset: rs; margin-top: 10pt; }
+.rsteps li { counter-increment: rs; display: grid; grid-template-columns: 30pt 1fr; column-gap: 12pt; margin-bottom: 14pt; }
+.rsteps li::before {
+  content: counter(rs);
+  grid-row: span 2;
+  width: 30pt;
+  height: 30pt;
+  border-radius: 8pt;
+  background: var(--b, var(--rose));
+  color: #fff;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 15pt;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rsteps b { font-family: var(--display); font-weight: 700; font-size: 11.6pt; line-height: 1.4; padding-top: 2pt; }
+.rsteps p { font-size: 10.1pt; line-height: 1.55; color: var(--muted); margin-top: 3pt; }
+.rsteps p b { font-family: var(--text); font-size: inherit; padding: 0; color: var(--ink); }
+.rsteps.tight li { margin-bottom: 9pt; }
+.rsteps.tight p { font-size: 9.7pt; margin-top: 2pt; }
+.rsteps.orange { --b: var(--orange); }
+.rsteps.navy { --b: var(--navy); }
+.rsteps.start3 { counter-reset: rs 2; }
+
+/* ---------- perguntas frequentes ---------- */
+.faq > div { padding: 12pt 0 11pt; border-bottom: 0.75pt solid var(--line-soft); }
+.faq > div:last-child { border-bottom: 0; }
+.faq h4 { font-family: var(--display); font-weight: 800; font-size: 12pt; color: var(--ink); margin-bottom: 4pt; }
+.faq p { font-size: 10.5pt; line-height: 1.62; color: var(--muted); }
+.faq b { color: var(--ink); }
+
+/* ---------- depois dos 28 dias ---------- */
+.after > div { display: grid; grid-template-columns: 67pt 1fr; padding: 12pt 0 13pt; border-bottom: 0.75pt solid var(--line-soft); }
+.after > div:first-child { padding-top: 4pt; }
+.after > div:last-child { border-bottom: 0; }
+.after .num span { display: block; font-family: var(--mono); font-size: 6.7pt; letter-spacing: 0.12em; text-transform: uppercase; color: var(--meta); }
+.after .num b { display: block; font-family: var(--display); font-weight: 900; font-size: 19.5pt; line-height: 1; color: var(--rose); }
+.after h4 { font-family: var(--display); font-weight: 700; font-size: 11.2pt; color: var(--ink); margin-bottom: 4pt; }
+.after p { font-size: 9.7pt; line-height: 1.55; color: var(--muted); }
+
+/* ---------- calendário de 28 dias ---------- */
+.week { margin-top: 12pt; }
+.week .wh { display: flex; align-items: center; gap: 10pt; font-family: var(--mono); font-size: 7.1pt; letter-spacing: 0.3em; text-transform: uppercase; color: var(--meta); margin-bottom: 9pt; }
+.week .wh b { font-weight: 700; font-size: 8.2pt; color: var(--cd); }
+.week.p1 .wh b { color: #bb7c12; }
+.week .wh::after { content: ''; flex: 1; border-top: 0.75pt solid var(--line); }
+.week .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5.5pt; }
+.week .days > div { background: var(--card); border: 0.75pt solid var(--c); border-radius: 6pt; padding: 5pt 5pt 6pt; display: flex; flex-direction: column; min-height: 54pt; }
+.week .days b { font-family: var(--display); font-weight: 800; font-size: 9.7pt; color: var(--ink); }
+.week .days span { font-size: 6.4pt; line-height: 1.3; color: var(--muted); margin-top: 2pt; flex: 1; }
+.week .days i { font-style: normal; display: block; background: var(--cd); color: #fff; border-radius: 3pt; text-align: center; font-family: var(--mono); font-size: 5.6pt; letter-spacing: 0.14em; padding: 2.5pt 0; }
+.legend { display: flex; gap: 14pt; font-size: 8.2pt; color: var(--muted); margin: 12pt 0 10pt; }
+.legend span { display: flex; align-items: center; gap: 5pt; }
+.legend span::before { content: ''; width: 8pt; height: 8pt; border-radius: 2pt; background: var(--cd); }
+
+/* ---------- referências ---------- */
+.refs { list-style: none; counter-reset: ref; margin-top: 16pt; }
+.refs li { counter-increment: ref; position: relative; padding: 0 0 8pt 22pt; margin-bottom: 8pt; border-bottom: 0.75pt solid var(--line-soft); font-size: 8.6pt; line-height: 1.5; color: var(--muted); }
+.refs li:last-child { border-bottom: 0; }
+.refs li::before { content: counter(ref); position: absolute; left: 0; top: 0; font-family: var(--mono); font-weight: 700; font-size: 7.5pt; color: var(--rose); }
+.legal.pm p { max-width: 445pt; margin-bottom: 8pt; }
+
+/* 1ª linha do parágrafo de abertura em semibold (como no original) */
+p.small.fl::first-line { font-weight: 600; }
+
+/* medida de linha do original (~428pt) */
+p.small, .letter p, .diamonds.lg li, .colophon .disc, .colophon .ed { max-width: 428pt; }
+.legal.pm p { max-width: 428pt; }
+.note { max-width: 432pt; }
+.nc { text-transform: none; }
+/* margem final do último bloco não conta como conteúdo */
+.page > :has(+ .foot), .page > :has(+ .foot) > :last-child { margin-bottom: 0; }
