@@ -1,0 +1,62 @@
+/* Elma Sirkesi Hilesi / Trik z octem jabłkowym — complemento ao tema.
+ * Este bônus usa acento âmbar (mel/sirke) no lugar do laranja do tema,
+ * 3 cartões de medida (.stats) e dois ícones que o tema não tem. */
+:root {
+  --orange: #bb7c12;
+  --orange-soft: #e1a23a;
+}
+.cover {
+  background:
+    radial-gradient(ellipse 85% 55% at 100% 0%, rgba(138, 90, 18, 0.6), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(138, 90, 18, 0.4), transparent 70%),
+    var(--night);
+}
+.back {
+  background:
+    radial-gradient(ellipse 95% 40% at 50% 0%, rgba(138, 90, 18, 0.5), transparent 75%),
+    radial-gradient(ellipse 85% 30% at 50% 100%, rgba(120, 55, 30, 0.3), transparent 75%),
+    var(--night);
+}
+.cover h1 { font-size: 45pt; margin-bottom: 14pt; }
+.cover .hero { top: 316pt; }
+.cover .hero p { max-width: 284pt; }
+.cover .claim { bottom: 78pt; }
+.back .center { top: 340pt; }
+.keep { text-transform: none; }
+
+/* o original cabe um pouco mais de texto por linha nestas caixas */
+.callout { padding-right: 11pt; }
+.legal p { max-width: 416pt; }
+.steps li { margin-bottom: 10.5pt; }
+
+/* linha do tempo do dia: sem traço depois do último passo */
+.slot:has(+ .callout) { border-bottom: 0; margin-bottom: 4pt; }
+.slot .what b { margin-bottom: 6pt; }
+
+/* texto corrido fora de caixa, mesma largura do lede */
+p.small.note { max-width: 420pt; margin-top: 18pt; }
+u { text-underline-offset: 2pt; text-decoration-thickness: 0.75pt; }
+
+/* 3 cartões de medida */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12pt; margin: 4pt 0 14pt; }
+.stats > div {
+  background: var(--card);
+  border: 0.75pt solid var(--line);
+  border-radius: 9pt;
+  padding: 7pt 11pt 10pt;
+}
+.stats .n {
+  display: block;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 22.5pt;
+  line-height: 1.15;
+  color: var(--orange);
+  margin-bottom: 4pt;
+}
+.stats span { display: block; font-size: 8.6pt; line-height: 1.4; color: var(--muted); }
+
+.callout.sage .ic { color: #5d7c57; }
+
+.ic-flask { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2'/><path d='M8.5 2h7'/></svg>"); }
+.ic-sprout { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='black' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'><path d='M5.9 0.5C3.9 0.5 2.3 2.1 2.3 4.1C2.3 6.5 5.9 11.2 5.9 11.2C5.9 11.2 9.4 6.5 9.4 4.1C9.4 2.1 7.8 0.5 5.9 0.5Z'/><path d='M11.2 0.5C9.4 1.1 8.2 2.3 8.2 4.1'/></svg>"); }

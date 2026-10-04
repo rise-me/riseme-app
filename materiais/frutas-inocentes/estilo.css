@@ -1,0 +1,99 @@
+/* Componentes próprios de "3 frutas inocentes" (Hediye 06), além do tema.
+ * Este material usa a paleta rosa (capa/contracapa e rótulos) em vez da laranja.
+ */
+
+/* ---------- capa / contracapa com brilho rosa ---------- */
+.cover.rose {
+  background:
+    radial-gradient(ellipse 70% 33% at 75% 0%, rgba(200, 17, 100, 0.31), rgba(200, 17, 100, 0.2) 35%, rgba(200, 17, 100, 0.06) 75%, transparent 100%),
+    radial-gradient(ellipse 30% 9% at 0% 0%, rgba(200, 17, 100, 0.19), transparent 100%),
+    radial-gradient(ellipse 40% 20% at 0% 100%, rgba(200, 17, 100, 0.2), transparent 100%),
+    var(--night);
+}
+.cover.rose .hero .mono-meta { color: var(--rose-soft); }
+.cover.rose h1 { font-size: 37.5pt; line-height: 1; margin-bottom: 11pt; }
+.cover.rose .hero p { max-width: 300pt; }
+.back.rose {
+  background:
+    radial-gradient(ellipse 80% 33% at 50% 0%, rgba(200, 17, 100, 0.31), rgba(200, 17, 100, 0.2) 35%, rgba(200, 17, 100, 0.06) 75%, transparent 100%),
+    radial-gradient(ellipse 63% 20% at 50% 100%, rgba(197, 87, 31, 0.13), transparent 100%),
+    var(--night);
+}
+
+/* rótulo do topo das páginas internas em rosa */
+.rose-eyebrow .eyebrow { color: var(--rose); }
+
+.ic-eye { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0'/><circle cx='12' cy='12' r='3'/></svg>"); }
+
+/* ---------- cartão da fruta: máscara · realidade · no lugar ---------- */
+.fruit {
+  background: var(--card);
+  border: 0.75pt solid var(--line);
+  border-left: 2.6pt solid var(--rose);
+  border-radius: 9pt;
+  padding: 11pt 9pt 13pt 15pt;
+  margin-bottom: 12pt;
+}
+.fruit h4 {
+  display: flex;
+  align-items: center;
+  gap: 8pt;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 12pt;
+  color: var(--ink);
+  margin-bottom: 14pt;
+}
+.fruit h4 .ic { color: var(--rose); width: 12pt; height: 12pt; }
+.fruit .row { display: grid; grid-template-columns: 72pt 1fr; margin-bottom: 5pt; }
+.fruit .row:last-child { margin-bottom: 0; }
+.fruit .row .k {
+  font-family: var(--mono);
+  font-size: 6.8pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--meta);
+  padding-top: 2.5pt;
+}
+.fruit .row .v { font-size: 9.8pt; line-height: 1.55; color: var(--muted); }
+.fruit .row.fix .k { color: #5e7c57; }
+.fruit .row.fix .v { font-weight: 600; color: var(--sage); }
+
+/* bolinhas verdes mais claras, como no original */
+.versus .good li::before { background: #5d7c57; }
+.callout.sage .ic { color: #5d7c57; }
+
+/* ---------- lista com losangos rosa ---------- */
+.rhombs { list-style: none; margin-top: 4pt; }
+.rhombs li {
+  position: relative;
+  padding-left: 19pt;
+  font-size: 11.2pt;
+  line-height: 1.65;
+  margin-bottom: 6pt;
+}
+.rhombs li::before {
+  content: '';
+  position: absolute;
+  left: 3.6pt;
+  top: 0.55em;
+  width: 4.4pt;
+  height: 4.4pt;
+  border-radius: 1.2pt;
+  background: var(--rose-soft);
+  transform: rotate(45deg);
+}
+
+/* aviso legal curto em um parágrafo */
+.legal-note { font-size: 9.8pt; line-height: 1.65; color: var(--muted); margin-top: 22pt; max-width: 430pt; }
+.legal-note b { color: var(--ink); }
+
+/* ajustes de ritmo deste material (medidos no original) */
+.cover.rose .claim { bottom: 76pt; }
+.back.rose .center { top: 346pt; }
+.callout .title { margin-bottom: 2pt; }
+.lede.tight { margin-bottom: 5pt; }
+p.small.narrow { max-width: 424pt; }
+.back.rose .brand { margin-bottom: 4pt; }
+.back.rose .center .mono-meta { margin-top: 35pt; }
+.lede.mid { max-width: 425pt; }

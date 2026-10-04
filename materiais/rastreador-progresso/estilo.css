@@ -1,0 +1,106 @@
+/* Tracker de progresso (Bônus "takip aracı") — complementos ao tema.
+ * Este material usa o acento rosa em vez do laranja (capa, eyebrows, citação)
+ * e tem componentes de preencher: tabelas semanais e caixas de foto.
+ * Espaço de escrita (alturas de linha/colunas/caixas) medido do PDF turco — não reduzir.
+ */
+
+/* ---------- acento rosa ---------- */
+.cover, .back {
+  background:
+    radial-gradient(ellipse 85% 50% at 100% 0%, rgba(188, 35, 80, 0.34), transparent 72%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(188, 35, 80, 0.22), transparent 70%),
+    var(--night);
+}
+.back {
+  background:
+    radial-gradient(ellipse 75% 38% at 50% 0%, rgba(188, 35, 80, 0.36), transparent 72%),
+    radial-gradient(ellipse 70% 25% at 50% 100%, rgba(197, 87, 31, 0.16), transparent 72%),
+    var(--night);
+}
+.cover .hero { top: 318pt; }
+.cover .hero .mono-meta { color: var(--rose-soft); }
+.cover h1 { font-size: 45pt; }
+.cover .hero p { max-width: 285pt; }
+.cover .claim { bottom: 76pt; }
+.back .meta .nc { text-transform: none; }
+.lede { max-width: 432pt; }
+.back .center { top: 342pt; }
+.page .eyebrow { color: var(--rose); }
+.callout.sage .ic { color: #5d7c57; }
+.pull { border-left: 2.2pt solid var(--rose-soft); margin-top: 18pt; }
+
+/* ---------- ícones extras (lucide) ---------- */
+.ic-activity { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2'/></svg>"); }
+.ic-camera { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z'/><circle cx='12' cy='13' r='3'/></svg>"); }
+.ic-heart { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'/></svg>"); }
+.ic-eye { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0'/><circle cx='12' cy='12' r='3'/></svg>"); }
+.ic-bars { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20V10'/><path d='M18 20V4'/><path d='M6 20v-4'/></svg>"); }
+
+/* ---------- 3 cartões (formas de medir) ---------- */
+.levers.three { grid-template-columns: repeat(3, 1fr); gap: 10.5pt; margin-top: -7pt; }
+.levers.three > div { padding: 12pt 12pt 12pt; min-height: 94pt; }
+.levers.three .ic { color: var(--rose); margin-bottom: 11pt; }
+.levers.three b { margin-bottom: 3pt; }
+
+/* ---------- tabela de registro semanal ---------- */
+.track {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 4pt 0 14pt;
+}
+.track th, .track td { border: 0.75pt solid var(--line); }
+.track th {
+  height: 25.5pt;
+  background: var(--rose-bg);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 6.8pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rose);
+  text-align: center;
+  white-space: nowrap;
+}
+.track th:first-child { background: #f0e7d9; color: var(--muted); text-align: left; padding-left: 5pt; }
+.track td { height: 27pt; background: var(--card); }
+.track td:first-child {
+  background: #f0e7d9;
+  padding-left: 9.5pt;
+  font-weight: 700;
+  font-size: 9.4pt;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.track tr:nth-child(even) td:first-child { background: #e7dbc8; }
+.track td:first-child small {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 6pt;
+  color: var(--meta);
+  margin-left: 3pt;
+}
+
+/* ---------- caixas de foto ---------- */
+.photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10.5pt; margin: 4pt 0 12pt; }
+.photos > div {
+  height: 113pt;
+  background: var(--card);
+  border: 1pt dashed var(--rose-soft);
+  border-radius: 8pt;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 30pt;
+}
+.photos .ic { width: 17pt; height: 17pt; color: var(--rose-soft); margin-bottom: 9pt; }
+.photos b {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 7.5pt;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7pt;
+}
+.photos span { font-size: 7.5pt; color: var(--meta); }

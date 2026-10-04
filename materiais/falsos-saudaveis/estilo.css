@@ -1,0 +1,89 @@
+/* Sağlıklı Sanılan Düşmanlar / Zdrowe tylko z pozoru (Bônus · Presente 02).
+ * Variação do tema: acento vinho no lugar do laranja + cartões de "tuzak"
+ * (aparência / armadilha / em vez disso). Usa as variáveis de ../_tema/riseme.css.
+ */
+:root {
+  --wine: #7c1d40;
+  --wine-soft: #9c2f57;
+  --sage-label: #5e7c57;
+}
+
+.eyebrow { color: var(--wine); }
+
+/* capa / contracapa em vinho */
+.cover {
+  background:
+    radial-gradient(ellipse 85% 55% at 100% 0%, rgba(100, 22, 66, 0.42), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(100, 22, 66, 0.25), transparent 70%),
+    var(--night);
+}
+.back {
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(100, 22, 66, 0.5), transparent 70%),
+    radial-gradient(ellipse 80% 30% at 50% 100%, rgba(100, 22, 66, 0.22), transparent 70%),
+    var(--night);
+}
+.cover .hero { top: 323pt; }
+.cover .claim { bottom: 76pt; }
+.cover .hero .mono-meta { color: var(--wine-soft); }
+.cover h1 { font-size: 42pt; margin-bottom: 14pt; }
+
+.lede.tight { max-width: 430pt; margin-bottom: 8pt; }
+.page p.small { max-width: 430pt; }
+.lede.close { margin-bottom: 9pt; }
+.steps li { max-width: 476pt; }
+.legal { margin-top: 14pt; }
+.legal p { font-size: 9.8pt; max-width: 420pt; }
+.back .center { top: 339pt; }
+.keep { text-transform: none; }
+.callout .title .ic-eye { width: 12pt; height: 12pt; }
+
+/* ícone olho (lucide eye) */
+.ic-eye { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0'/><circle cx='12' cy='12' r='3'/></svg>"); }
+
+/* cartões de armadilha */
+.trap {
+  background: var(--card);
+  border-radius: 9pt;
+  border-left: 3pt solid var(--wine);
+  box-shadow: inset 0 0 0 0.75pt var(--line);
+  padding: 13pt 16pt 12pt 14pt;
+  margin-bottom: 10pt;
+}
+.trap h4 {
+  display: flex;
+  align-items: center;
+  gap: 8pt;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 12pt;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 13pt;
+}
+.trap h4 .ic { color: var(--wine); width: 12pt; height: 12pt; }
+.trap dl { display: grid; grid-template-columns: 72pt 1fr; row-gap: 5pt; }
+.trap dt {
+  font-family: var(--mono);
+  font-size: 6.8pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--meta);
+  padding-top: 2pt;
+}
+.trap dd { font-size: 9.8pt; line-height: 1.55; color: var(--muted); }
+.trap dt.alt { color: var(--sage-label); }
+.trap dd.alt { font-weight: 600; color: var(--sage); }
+
+/* lista com losango arredondado (página "Dürüst bir not") */
+.dots.dia li::before {
+  left: 3.5pt;
+  top: 0.55em;
+  width: 4.6pt;
+  height: 4.6pt;
+  border-radius: 1.2pt;
+  transform: rotate(45deg);
+}
+
+/* título longo em PL: quebra equilibrada em vez de palavra sozinha na 2ª linha */
+.page h2 { text-wrap: balance; }

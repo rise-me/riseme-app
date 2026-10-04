@@ -1,0 +1,85 @@
+/* depois-28-dias (Hediye 07 · 28 Günden Sonra) — extras sobre o tema.
+ * Este material é o único em VERDE: capa/contracapa, eyebrow e a linha do tempo
+ * usam o verde-sálvia no lugar do laranja. Componentes próprios: .timeline, .sign.
+ */
+:root {
+  --green: #4d6646;
+  --green-soft: #5e7c57;
+  --green-light: #8fae84;
+}
+
+/* capa / contracapa em verde */
+.cover {
+  background:
+    radial-gradient(ellipse 110% 42% at 30% 0%, rgba(66, 108, 52, 0.42), transparent 70%),
+    radial-gradient(ellipse 55% 35% at 0% 100%, rgba(66, 108, 52, 0.3), transparent 70%),
+    var(--night);
+}
+.back {
+  background:
+    radial-gradient(ellipse 85% 40% at 50% 0%, rgba(66, 108, 52, 0.5), transparent 70%),
+    radial-gradient(ellipse 85% 25% at 50% 100%, rgba(66, 108, 52, 0.3), transparent 70%),
+    var(--night);
+}
+.cover .hero { top: 329pt; }
+.cover h1 { margin-bottom: 13pt; }
+.back .meta .nc { text-transform: none; }
+.cover .hero .mono-meta { color: var(--green-light); }
+.cover .hero p { max-width: 305pt; }
+.back .center { top: 343pt; }
+.cover .claim { bottom: 76pt; }
+
+.eyebrow { color: var(--green); }
+
+/* ícones extras (lucide) */
+.ic-rotate { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'/><path d='M3 3v5h5'/></svg>"); }
+.ic-chart { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 3v16a2 2 0 0 0 2 2h16'/><path d='m19 9-5 5-4-4-3 3'/></svg>"); }
+.ic-x { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 6 6 18'/><path d='m6 6 12 12'/></svg>"); }
+.callout.sage .ic { color: var(--green-soft); }
+.versus { margin-top: 14pt; }
+.versus .good li::before { background: var(--green-soft); }
+
+/* linha do tempo (Semana / Mês / 3 meses+) */
+.timeline { margin-top: 18pt; }
+.timeline .row {
+  display: grid;
+  grid-template-columns: var(--tl-col, 67pt) 1fr;
+  padding: 0 0 13pt;
+  margin-bottom: 12pt;
+  border-bottom: 0.75pt solid var(--line-soft);
+}
+.timeline .row:last-child { border-bottom: 0; margin-bottom: 0; }
+.timeline .when small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 6.8pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--meta);
+  line-height: 1.2;
+}
+.timeline .when b {
+  display: block;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 19.5pt;
+  line-height: 1;
+  color: var(--green);
+}
+.timeline .what b { display: block; font-family: var(--display); font-weight: 700; font-size: 11.2pt; margin: 1pt 0 5pt; }
+.timeline .what p { font-size: 9.8pt; line-height: 1.55; color: var(--muted); }
+.timeline + .callout { margin-top: 24pt; }
+
+/* citação com barra verde */
+.pull.green { border-left: 2.5pt solid var(--green-soft); margin-top: 16pt; }
+
+/* carta final + assinatura */
+.letter p { max-width: 430pt; font-size: 11.6pt; line-height: 1.7; margin-bottom: 10pt; }
+.sign { margin-top: 22pt; }
+.sign .bye { font-family: var(--display); font-weight: 800; font-size: 11.2pt; color: var(--muted); }
+.sign .name { font-family: var(--display); font-weight: 900; font-size: 15pt; color: var(--ink); margin-top: 8pt; }
+.sign .role { font-family: var(--mono); font-size: 7.9pt; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rose); margin-top: 6pt; }
+.disclaimer { margin-top: 20pt; font-size: 9.4pt; line-height: 1.7; color: var(--meta); max-width: 440pt; }
+.disclaimer b { color: var(--ink); }
+
+p.small { max-width: 420pt; }

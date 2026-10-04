@@ -1,0 +1,115 @@
+/* Hediye 05 · 3 Gizli Düğme — o único material com acento VIOLETA em vez de laranja.
+ * Complementa ../_tema/riseme.css (linkado antes deste). Cores medidas no PDF turco. */
+:root {
+  --violet: #8c7fe0;
+  --violet-deep: #312a53;
+  --violet-bar: #5b4fa0;
+  --violet-box: #211d33;
+  --violet-box-line: #352f52;
+  --violet-icon: #b9aef0;
+  --violet-title: #e8e3ff;
+  --violet-text: #cfc9e8;
+}
+
+/* capa / contracapa: brilho violeta discreto */
+.cover {
+  background:
+    radial-gradient(ellipse 85% 45% at 100% 0%, rgba(74, 62, 160, 0.32), transparent 70%),
+    radial-gradient(ellipse 60% 35% at 0% 100%, rgba(74, 62, 160, 0.22), transparent 70%),
+    var(--night);
+}
+.back {
+  background:
+    radial-gradient(ellipse 70% 35% at 50% 0%, rgba(74, 62, 160, 0.34), transparent 70%),
+    radial-gradient(ellipse 80% 25% at 50% 100%, rgba(74, 62, 160, 0.14), transparent 70%),
+    var(--night);
+}
+.cover .hero { top: 342pt; }
+.cover .hero .mono-meta { color: var(--violet); }
+.cover .hero p { max-width: 280pt; }
+.back .brand { margin-bottom: 18pt; }
+
+.eyebrow { color: var(--violet-deep); }
+
+/* caixa escura de aviso */
+.callout.night { background: var(--violet-box); border-color: var(--violet-box-line); color: var(--violet-text); }
+.callout.night .title { color: var(--violet-title); }
+.callout.night .ic { color: var(--violet-icon); }
+.callout.sage .ic { color: #5e7c57; }
+
+/* "Düğme kapalıyken ne oluyor?" — quadrado "!" + texto */
+.off {
+  display: grid;
+  grid-template-columns: 33pt 1fr;
+  gap: 12pt;
+  padding: 4pt 0 16pt;
+  border-bottom: 0.75pt solid var(--line-soft);
+}
+.off .mark {
+  width: 33pt;
+  height: 33pt;
+  border-radius: 8pt;
+  background: var(--violet-deep);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 15pt;
+}
+.off b.q { display: block; font-family: var(--display); font-weight: 700; font-size: 12pt; margin: 2pt 0 5pt; }
+.off p { font-size: 10.1pt; line-height: 1.6; color: var(--muted); }
+.off p b { color: var(--ink); }
+
+/* lista com losango rosa, corpo 11.2pt */
+.rombs { list-style: none; margin-top: 2pt; }
+.rombs li {
+  position: relative;
+  padding-left: 19pt;
+  font-size: 11.2pt;
+  line-height: 1.68;
+  margin-bottom: 7pt;
+}
+.rombs li::before {
+  content: '';
+  position: absolute;
+  left: 3.5pt;
+  top: 0.6em;
+  width: 4.4pt;
+  height: 4.4pt;
+  background: var(--rose-soft);
+  transform: rotate(45deg);
+  border-radius: 0.8pt;
+}
+
+.pull.violet {
+  border-left: 2.2pt solid var(--violet-bar);
+  padding: 0 0 0 14pt;
+  margin: 22pt 0 0;
+  font-size: 15.8pt;
+}
+
+/* 3 cartões da sinergia */
+.trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11pt; margin: 12pt 0 0; }
+.trio > div {
+  background: var(--card);
+  border: 0.75pt solid var(--line);
+  border-radius: 9pt;
+  padding: 13pt 13pt 13pt;
+}
+.trio .ic { color: var(--violet-deep); width: 11pt; height: 11pt; margin-bottom: 20pt; }
+.trio b { display: block; font-family: var(--display); font-weight: 700; font-size: 10.5pt; margin-bottom: 6pt; }
+.trio span { display: block; font-size: 9pt; line-height: 1.45; color: var(--muted); }
+
+.ic-plus { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14'/><path d='M12 5v14'/></svg>"); }
+.ic-arrow { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14'/><path d='m12 5 7 7-7 7'/></svg>"); }
+.ic-moon { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'/></svg>"); }
+
+.legal p { max-width: 440pt; }
+
+/* ajustes finos de posição medidos contra o original */
+.page p.small { max-width: 450pt; }
+.off + h3 { margin-top: 22pt; }
+.back .center { top: 338pt; }
+.back .meta .nt { text-transform: none; }
