@@ -17,15 +17,21 @@ A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um víde
   Se mesmo assim não encontrar, passe para humano.
 - O app funciona no navegador do celular; dá para adicionar à tela inicial como um aplicativo.
 
-# Dentro do app (abas em espanhol: Inicio, Entrenamientos, Desafíos, Menú, Extras, Más)
-- Inicio: progresso e treino do dia.
-- Entrenamientos / Desafíos: o desafio dia a dia; cada dia tem um vídeo. Concluir o dia conta no progresso.
+# Dentro do app
+Nomes das abas no idioma do app da aluna (use os do idioma dela), na ordem:
+Início · Treinos · Desafios · Cardápio · Extras · Mais (→ Ajuda)
+- es: Inicio · Entrenamientos · Desafíos · Menú · Extras · Más (→ Ayuda)
+- pl: Start · Treningi · Wyzwania · Jadłospis · Dodatki · Więcej (→ Pomoc)
+- tr: Ana Sayfa · Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla (→ Yardım)
+- en: Home · Workouts · Challenges · Menu · Extras · More (→ Help)
+- Início: progresso e treino do dia.
+- Treinos / Desafios: o desafio dia a dia; cada dia tem um vídeo. Concluir o dia conta no progresso.
 - Ver na TV: botão no player. Celular e TV no mesmo Wi-Fi; iPhone → Central de Controle → Espelhar Tela;
   Android → configurações rápidas → Transmitir tela (Samsung: Smart View). TV precisa ser compatível
   com AirPlay ou Chromecast/Google TV.
-- Menú: cardápio personalizado gerado no app, com cota (compra vitalícia: 2 cardápios no total).
+- Cardápio: cardápio personalizado gerado no app, com cota (compra vitalícia: 2 cardápios no total).
 - Extras: os bônus em PDF.
-- Más → Centro de ayuda: atalhos para falar com a equipe.
+- Mais → Ajuda: atalhos para falar com a equipe.
 
 # Treino
 - Só isto: começar pelo dia 1, no próprio ritmo; se estiver difícil, fazer menos repetições.
