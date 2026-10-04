@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
-import { sendVoxuyAccess } from '@/lib/voxuy'
+import { sendWhatsAppAccess } from '@/lib/whatsapp-access'
 import { sendAccessEmail } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
 
@@ -139,9 +139,9 @@ export async function POST(request: NextRequest) {
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
       const link = buildAccessLink(appUrl, mapping.locale, buyerEmail, code)
-      // Entrega dupla, best-effort: WhatsApp (Voxuy) + email (Resend, contingência
+      // Entrega dupla, best-effort: WhatsApp (Z-API ou Voxuy, pela env WHATSAPP_PROVIDER) + email (Resend, contingência
       // que não depende de telefone). Se um falhar, o outro cobre.
-      await sendVoxuyAccess({
+      await sendWhatsAppAccess({
         productCode,
         transactionId: payload.code,
         name: payload.customer.full_name,
@@ -149,6 +149,7 @@ export async function POST(request: NextRequest) {
         phone,
         code,
         link,
+        locale: mapping.locale,
       })
       await sendAccessEmail({ email: buyerEmail, code, link, locale: mapping.locale })
     }
