@@ -14,6 +14,7 @@
 // A 3ª mensagem da Voxuy (grupo de WhatsApp das alunas) foi REMOVIDA de propósito:
 // grupo com 150–200 entradas/dia virou moderação/spam; dúvida agora é no privado (agente).
 
+import type { AppLocale } from '@/i18n/routing'
 import { sendVoxuyAccess } from '@/lib/voxuy'
 import { isZapiConfigured } from '@/lib/zapi'
 import { enfileirar } from '@/lib/whatsapp-outbox'
@@ -27,11 +28,11 @@ const ESPERA_MSG2_MS = 45_000
 
 // Playlist (não listada) das aulas por idioma — reserva pra ela não perder o dia
 // se o app der problema. Idioma sem playlist → a msg 2 sai sem esse trecho.
-const PLAYLIST: Record<string, string> = {
+const PLAYLIST: Partial<Record<AppLocale, string>> = {
   es: 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d',
 }
 
-const COPY: Record<string, AccessCopy> = {
+const COPY: Record<AppLocale, AccessCopy> = {
   es: ({ email, code, link, homeUrl }) =>
     [
       '¡Bienvenida al Desafío de Calistenia RiseMe™️! 🎉',
@@ -105,6 +106,43 @@ const COPY: Record<string, AccessCopy> = {
       '(Yapamazsan sorun değil: uygulama tarayıcıdan da sorunsuz çalışır.)',
       '',
       'Yardıma ihtiyacın olursa bana yazmaktan çekinme. En iyi deneyimi yaşaman için buradayım. 😄 ❤️',
+    ].join('\n'),
+  pl: ({ email, code, link, homeUrl }) =>
+    [
+      'Witaj w wyzwaniu RiseMe™️ – Kalistenika w domu! 🎉',
+      '',
+      'Gratuluję świetnej decyzji! Jestem pewna, że te 28 dni wiele w Tobie zmieni. 😍',
+      '',
+      'Twój dostęp do aplikacji jest gotowy — oto Twoje dane 👇',
+      '',
+      `📧 E-mail: ${email}`,
+      `🔑 Hasło: ${code}`,
+      '',
+      'Zachowaj to hasło — to nim będziesz się logować do aplikacji. 🔒',
+      '',
+      `Kliknij tutaj, żeby wejść od razu: 👉 ${link}`,
+      '',
+      '(Po kliknięciu aplikacja otworzy się sama i nie musisz nawet wpisywać hasła — Twoje wyzwanie już czeka!) 💪',
+      '',
+      '📌 Jak zalogować się następnym razem?',
+      `👉 Wejdź na ${homeUrl} i zaloguj się swoim e-mailem oraz hasłem podanym wyżej.`,
+      'Jeśli chcesz, w aplikacji możesz zmienić je na własne hasło.',
+      'Nie pamiętasz hasła? Kliknij „Nie pamiętasz hasła?” na ekranie logowania.',
+      '',
+      '📱 Opcjonalnie: dodaj aplikację do telefonu',
+      'RiseMe™️ działa na telefonie jak prawdziwa aplikacja 👇',
+      '',
+      `📲 iPhone: otwórz ${homeUrl} w SAFARI → przycisk „Udostępnij” (kwadrat ze strzałką) → „Do ekranu początkowego” → „Dodaj”`,
+      '⚠️ Właściwa opcja to „Do ekranu początkowego” (NIE „Dodaj do ulubionych”)',
+      '',
+      `📲 Android: otwórz ${homeUrl} w CHROME → menu ⋮ → „Zainstaluj aplikację” (lub „Dodaj do ekranu głównego”) → „Zainstaluj”`,
+      '',
+      '✅ Ikona RiseMe pojawi się na ekranie głównym. Nie widzisz jej? Przewiń do ostatnich ekranów telefonu — czasem ląduje na samym końcu. 😉',
+      '',
+      'Dzięki temu Twoje wyzwanie będzie zawsze na wyciągnięcie ręki! 🚀',
+      '(Jeśli się nie uda, nic nie szkodzi: aplikacja świetnie działa też w przeglądarce.)',
+      '',
+      'Jeśli potrzebujesz pomocy, po prostu do mnie napisz. Jestem tu, żeby wszystko poszło jak najlepiej. 😄 ❤️',
     ].join('\n'),
   'pt-BR': ({ email, code, link, homeUrl }) =>
     [
@@ -182,7 +220,7 @@ const COPY: Record<string, AccessCopy> = {
     ].join('\n'),
 }
 
-const SUPPORT: Record<string, SupportCopy> = {
+const SUPPORT: Record<AppLocale, SupportCopy> = {
   es: ({ playlist }) =>
     [
       '💛 Un último mensaje importante:',
@@ -218,6 +256,24 @@ const SUPPORT: Record<string, SupportCopy> = {
         : []),
       '',
       'Meydan okumada görüşürüz! 💪',
+    ].join('\n'),
+  pl: ({ playlist }) =>
+    [
+      '💛 Jeszcze jedna ważna wiadomość:',
+      '',
+      'Jeśli wykonałaś wszystkie kroki, a nadal masz problem z wejściem do aplikacji, napisz do mnie — nasz zespół wsparcia pomoże Ci to rozwiązać. 😉',
+      ...(playlist
+        ? [
+            '',
+            'Zanim to rozwiążemy, żebyś nie opuściła ani jednego dnia wyzwania, możesz oglądać lekcje na specjalnej playliście w YouTube:',
+            '',
+            `👉 ${playlist}`,
+            '',
+            '🙏 Ten link jest tylko dla uczestniczek wyzwania — prosimy, nie udostępniaj go dalej.',
+          ]
+        : []),
+      '',
+      'Widzimy się na treningu! 💪',
     ].join('\n'),
   'pt-BR': ({ playlist }) =>
     [
@@ -298,12 +354,13 @@ export async function sendWhatsAppAccess(params: {
 
 /** As 2 mensagens da sequência, prontas — exportado também pra pré-visualizar/testar o texto. */
 export function mensagensDeAcesso(p: { locale: string; email: string; code: string; link: string }): [string, string] {
-  const copy = COPY[p.locale] ?? COPY.es
-  const support = SUPPORT[p.locale] ?? SUPPORT.es
+  const locale = p.locale as AppLocale
+  const copy = COPY[locale] ?? COPY.es
+  const support = SUPPORT[locale] ?? SUPPORT.es
   // Raiz do app no idioma dela (mesmo prefixo do link de acesso: /tr, /pl…; es sem prefixo).
   const homeUrl = p.link.split('/entrar')[0]
   return [
     copy({ email: p.email, code: p.code, link: p.link, homeUrl }),
-    support({ playlist: PLAYLIST[p.locale] }),
+    support({ playlist: PLAYLIST[locale] }),
   ]
 }
