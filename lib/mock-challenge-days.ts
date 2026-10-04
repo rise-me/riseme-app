@@ -1,18 +1,30 @@
 import { mockChallenges } from './mock-challenges'
 import { VIDEO_DURATIONS_SECONDS } from './video-durations'
+import streamLessons from './stream-lessons.json'
 
 export type LevelKey = 'beginner' | 'intermediate' | 'advanced'
+
+export interface LessonVideo {
+  provider: 'youtube' | 'stream'
+  id: string
+}
 
 export interface MockDay {
   day_number: number
   title: string
-  // Duração REAL do vídeo (de lib/video-durations.ts, gerado por script).
-  // Ausente se o vídeo não estiver no mapa — a UI esconde o tempo em vez de mentir.
+  // Duração REAL do vídeo (YouTube: lib/video-durations.ts; Stream: lib/stream-lessons.json,
+  // ambos gerados por script). Ausente se não houver — a UI esconde o tempo em vez de mentir.
   duration_seconds?: number
   duration_minutes?: number
-  youtube_id?: string
+  video?: LessonVideo
   completed?: boolean
 }
+
+// Aulas no Cloudflare Stream, por idioma → desafio → dia. GERADO por
+// scripts/publish-lessons.py. Tem prioridade sobre os IDs do YouTube abaixo.
+type StreamEntry = { uid: string; seconds: number | null }
+const STREAM_LESSONS = streamLessons.lessons as Record<string, Record<string, Record<string, StreamEntry>>>
+export const STREAM_CUSTOMER_HOST = streamLessons.customerHost as string | null
 
 const VIDEOS_BY_CHALLENGE: Record<string, string[]> = {
   '1': [
@@ -70,27 +82,38 @@ const VIDEO_OVERRIDES_BY_LOCALE: Record<string, Record<string, (string | undefin
 }
 
 // true quando as aulas do desafio tocam no idioma da usuária (es é o áudio
-// original; outros idiomas dependem de dublagem em VIDEO_OVERRIDES_BY_LOCALE)
+// original; outros idiomas dependem de dublagem no Stream ou em VIDEO_OVERRIDES_BY_LOCALE)
 export function hasLocalizedVideos(challengeId: string, locale: string): boolean {
-  return locale === 'es' || Boolean(VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId])
+  return (
+    locale === 'es' ||
+    Boolean(STREAM_LESSONS[locale]?.[challengeId]) ||
+    Boolean(VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId])
+  )
 }
 
 export function getMockDays(challengeId: string, dayTitles: string[], locale?: string): MockDay[] {
   const videos = VIDEOS_BY_CHALLENGE[challengeId] ?? []
   const overrides = locale ? VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId] : undefined
+  const streamDays = locale ? STREAM_LESSONS[locale]?.[challengeId] : undefined
   const challenge = mockChallenges.find((c) => c.id === challengeId)
   const daysCount = challenge?.days_count ?? 28
 
   return Array.from({ length: daysCount }, (_, i) => {
     // O tempo segue o vídeo que a aluna VAI assistir (dublagem tem duração própria)
-    const youtube_id = overrides?.[i] ?? videos[i]
-    const secs = youtube_id ? VIDEO_DURATIONS_SECONDS[youtube_id] : undefined
+    const stream = streamDays?.[String(i + 1)]
+    const youtubeId = overrides?.[i] ?? videos[i]
+    const video: LessonVideo | undefined = stream
+      ? { provider: 'stream', id: stream.uid }
+      : youtubeId
+        ? { provider: 'youtube', id: youtubeId }
+        : undefined
+    const secs = stream ? (stream.seconds ?? undefined) : youtubeId ? VIDEO_DURATIONS_SECONDS[youtubeId] : undefined
     return {
       day_number: i + 1,
       title: dayTitles[i] ?? `Day ${i + 1}`,
       duration_seconds: secs,
       duration_minutes: secs ? Math.max(1, Math.round(secs / 60)) : undefined,
-      youtube_id,
+      video,
     }
   })
 }

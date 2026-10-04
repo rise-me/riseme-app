@@ -1,0 +1,121 @@
+{
+  "customerHost": "customer-wdfqz5bqbh0fb046.cloudflarestream.com",
+  "lessons": {
+    "pl": {
+      "1": {
+        "1": {
+          "uid": "cda11b2415f6f1ec1da2f104f53b0312",
+          "seconds": 590
+        },
+        "2": {
+          "uid": "48ac6f5d02014bf97aaccd0fc10293df",
+          "seconds": 620
+        },
+        "3": {
+          "uid": "2536337a13fa4431262ca687d0a51008",
+          "seconds": 620
+        },
+        "4": {
+          "uid": "be2b7a76151f8c98aac67250c878cc13",
+          "seconds": 625
+        },
+        "5": {
+          "uid": "84d24f3d152596ea396e4737c116e832",
+          "seconds": 625
+        },
+        "6": {
+          "uid": "4f85afb76b4adb5d5b2b2e061a60414b",
+          "seconds": 625
+        },
+        "7": {
+          "uid": "f3c6fddfd1a98edc01ad127b65dbc08d",
+          "seconds": 615
+        },
+        "8": {
+          "uid": "1f21456eba6d7ff67c855da943494a5f",
+          "seconds": 605
+        },
+        "9": {
+          "uid": "a6339326f4e672db2e4d4c47fb0a1c8a",
+          "seconds": 625
+        },
+        "10": {
+          "uid": "0873e1240c5634ae8a1924f8b8953ed0",
+          "seconds": 610
+        },
+        "11": {
+          "uid": "577dd2bb97429d0f43f46e26db4d5fdc",
+          "seconds": 925
+        },
+        "12": {
+          "uid": "157826da5f15f9ef0d3f102db7bb4b62",
+          "seconds": 895
+        },
+        "13": {
+          "uid": "d9acee4d39ff903887303820c93e7b1a",
+          "seconds": 875
+        },
+        "14": {
+          "uid": "c1cb07a68a820bc1acdff5b638f93e0c",
+          "seconds": 905
+        },
+        "15": {
+          "uid": "f3a82d6b5d07e81783cbcff665e0391d",
+          "seconds": 870
+        },
+        "16": {
+          "uid": "7c0666a5c00d0c0d685156131349b9b6",
+          "seconds": 910
+        },
+        "17": {
+          "uid": "af554d9714590acfe861e247e7892774",
+          "seconds": 915
+        },
+        "18": {
+          "uid": "d49cd6abfae6f8fe53a49141b7d3cb6b",
+          "seconds": 900
+        },
+        "19": {
+          "uid": "016e830c5ada0e5b15802d8914aa06cd",
+          "seconds": 910
+        },
+        "20": {
+          "uid": "d25001083160bc47fa53d60ef85a9568",
+          "seconds": 905
+        },
+        "21": {
+          "uid": "340b200b1b84dda998abefb958192a21",
+          "seconds": 1220
+        },
+        "22": {
+          "uid": "ce64f6ea2479a8b4e2f59cf37d9d8ad5",
+          "seconds": 1190
+        },
+        "23": {
+          "uid": "9c9d707a3f5a8de2d2e4b055eb49ae8f",
+          "seconds": 1200
+        },
+        "24": {
+          "uid": "dc17ba4a7209d11880900a55be29093b",
+          "seconds": 1195
+        },
+        "25": {
+          "uid": "a4121550bcad2d7b4ec0b1eb0921a7ba",
+          "seconds": 1175
+        },
+        "26": {
+          "uid": "617e9405a5f7dadcb3cf8fbb112f41dd",
+          "seconds": 1215
+        },
+        "27": {
+          "uid": "2a03e58fa8ebb2bc9776086fb3d6905f",
+          "seconds": 1205
+        },
+        "28": {
+          "uid": "a7adaa632700f97a92e9418901db5cff",
+          "seconds": 1205
+        }
+      }
+    }
+  }
+}
