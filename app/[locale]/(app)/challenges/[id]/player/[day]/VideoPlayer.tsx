@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { markDayComplete } from '@/lib/progress'
 import { track } from '@/lib/posthog/track'
 import type { MockChallenge } from '@/lib/mock-challenges'
-import type { MockDay } from '@/lib/mock-challenge-days'
+import { STREAM_CUSTOMER_HOST, type LessonVideo, type MockDay } from '@/lib/mock-challenge-days'
 import { CastTvHelp } from '@/components/challenges/CastTvHelp'
 
 interface Props {
@@ -18,11 +18,20 @@ interface Props {
   locale: string
 }
 
-type YTPlayer = {
+// O que o poll de progresso precisa, igual pros dois provedores
+type PlayerHandle = {
   getCurrentTime: () => number
   getDuration: () => number
   destroy: () => void
 }
+
+type YTPlayer = {
+  getCurrentTime?: () => number
+  getDuration?: () => number
+  destroy: () => void
+}
+
+type StreamSdkPlayer = { currentTime: number; duration: number }
 
 declare global {
   interface Window {
@@ -31,6 +40,63 @@ declare global {
       PlayerState: { PLAYING: number; ENDED: number }
     }
     onYouTubeIframeAPIReady?: () => void
+    Stream?: (el: HTMLIFrameElement) => StreamSdkPlayer
+  }
+}
+
+let streamSdkPromise: Promise<void> | null = null
+function loadStreamSDK(): Promise<void> {
+  if (window.Stream) return Promise.resolve()
+  if (streamSdkPromise) return streamSdkPromise
+  streamSdkPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = 'https://embed.cloudflarestream.com/embed/sdk.latest.js'
+    script.onload = () => resolve()
+    script.onerror = () => {
+      streamSdkPromise = null
+      reject(new Error('Stream SDK failed to load'))
+    }
+    document.head.appendChild(script)
+  })
+  return streamSdkPromise
+}
+
+async function mountPlayer(host: HTMLDivElement, video: LessonVideo): Promise<PlayerHandle | null> {
+  if (video.provider === 'stream') {
+    if (!STREAM_CUSTOMER_HOST) return null
+    await loadStreamSDK()
+    const iframe = document.createElement('iframe')
+    iframe.src = `https://${STREAM_CUSTOMER_HOST}/${video.id}/iframe?autoplay=true&preload=auto`
+    iframe.allow = 'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen'
+    iframe.allowFullscreen = true
+    iframe.style.border = 'none'
+    host.appendChild(iframe)
+    const p = window.Stream!(iframe)
+    return {
+      // duration é NaN até o metadata carregar
+      getCurrentTime: () => p.currentTime || 0,
+      getDuration: () => p.duration || 0,
+      destroy: () => iframe.remove(),
+    }
+  }
+
+  await loadYouTubeAPI()
+  if (!window.YT) return null
+  const p = new window.YT.Player(host, {
+    videoId: video.id,
+    playerVars: {
+      autoplay: 1,
+      rel: 0,
+      modestbranding: 1,
+      playsinline: 1,
+      controls: 1,
+    },
+  })
+  return {
+    // os métodos do YT só existem depois do onReady
+    getCurrentTime: () => p.getCurrentTime?.() ?? 0,
+    getDuration: () => p.getDuration?.() ?? 0,
+    destroy: () => p.destroy(),
   }
 }
 
@@ -60,9 +126,11 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
   const currentDay = days.find((d) => d.day_number === currentDayNumber)!
   const nextDay = days.find((d) => d.day_number === currentDayNumber + 1)
   const prevDay = days.find((d) => d.day_number === currentDayNumber - 1)
-  const videoId = currentDay.youtube_id
+  const video = currentDay.video
+  const videoProvider = video?.provider
+  const videoId = video?.id
 
-  const playerRef = useRef<YTPlayer | null>(null)
+  const playerRef = useRef<PlayerHandle | null>(null)
   const iframeHostRef = useRef<HTMLDivElement | null>(null)
   const savedRef = useRef(false)
   const [elapsed, setElapsed] = useState(0)
@@ -72,29 +140,18 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
   useEffect(() => {
     savedRef.current = false
     setElapsed(0)
-    if (!videoId || !iframeHostRef.current) return
+    if (!videoProvider || !videoId || !iframeHostRef.current) return
 
     let pollId: ReturnType<typeof setInterval> | null = null
     let cancelled = false
 
-    loadYouTubeAPI().then(() => {
-      if (cancelled || !window.YT || !iframeHostRef.current) return
-      playerRef.current = new window.YT.Player(iframeHostRef.current, {
-        videoId,
-        playerVars: {
-          autoplay: 1,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          controls: 1,
-        },
-        events: {
-          onReady: (e: { target: YTPlayer }) => {
-            const d = e.target.getDuration()
-            if (d > 0) setDuration(d)
-          },
-        },
-      })
+    mountPlayer(iframeHostRef.current, { provider: videoProvider, id: videoId }).then((handle) => {
+      if (cancelled) {
+        handle?.destroy()
+        return
+      }
+      if (!handle) return
+      playerRef.current = handle
 
       pollId = setInterval(() => {
         const p = playerRef.current
@@ -149,7 +206,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
       } catch {}
       playerRef.current = null
     }
-  }, [videoId, challenge.id, currentDayNumber])
+  }, [videoProvider, videoId, challenge.id, currentDayNumber])
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60)
