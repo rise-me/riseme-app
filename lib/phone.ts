@@ -12,7 +12,6 @@
 // ISO-2 do país → código de discagem (DDI). Só os países que a operação toca.
 const COUNTRY_TO_DDI: Record<string, string> = {
   TR: '90',
-  PL: '48',
   BR: '55',
   MX: '52', AR: '54', CO: '57', CL: '56', PE: '51', EC: '593',
   PY: '595', UY: '598', BO: '591', VE: '58', ES: '34', US: '1', PL: '48',
