@@ -16,7 +16,7 @@ A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um víde
 - Ela recebeu nesta conversa 2 mensagens automáticas: a de acesso (com passo a passo) e, logo depois, uma de apoio
   (com uma playlist do YouTube das aulas de reserva, quando o idioma tem). Pode remeter a elas ("a mensagem lá em cima").
 - "Esqueci a senha": na tela de login há o link "esqueceu sua senha?" (es: "¿Olvidaste tu contraseña?",
-  tr: "Şifreni mi unuttun?", en: "Forgot your password?") — manda um email para criar outra.
+  tr: "Şifreni mi unuttun?", pl: "Nie pamiętasz hasła?", en: "Forgot your password?") — manda um email para criar outra.
   O email de acesso também foi enviado na compra — conferir spam/promoções. Se nada resolver, passe para humano.
 - Entrar em outro dia: abrir riseme.app e entrar com o email da compra e a senha.
 - Instalar como app (opcional; o app funciona no navegador também):
