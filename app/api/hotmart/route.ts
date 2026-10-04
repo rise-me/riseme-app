@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { sendWhatsAppAccess } from '@/lib/whatsapp-access'
 import { sendAccessEmail } from '@/lib/email'
+import { toE164 } from '@/lib/phone'
 
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
 
@@ -32,7 +33,13 @@ interface HotmartPayload {
   event: HotmartEvent
   data: {
     product: { id: number; ucode: string; name: string }
-    buyer: { email: string; name: string; checkout_phone?: string; phone?: string }
+    buyer: {
+      email: string
+      name: string
+      checkout_phone?: string
+      phone?: string
+      address?: { country_iso?: string } // ISO-2 do país do comprador → DDI
+    }
     purchase: {
       transaction: string
       status: string
@@ -100,7 +107,15 @@ export async function POST(request: NextRequest) {
     // Hotmart = público Latam → espanhol. Grava o locale explícito pra o app/email
     // saírem no idioma certo (antes não gravava e caía sempre em es por acaso).
     const locale = 'es'
-    const phone = data.buyer.checkout_phone ?? data.buyer.phone ?? undefined
+    // Normaliza pra E.164 com o DDI do país (mesmo motivo da Perfect Pay: sem "+DDI"
+    // o WhatsApp não sai). Sem país conhecido, segue só com os dígitos e loga.
+    const rawPhone = data.buyer.checkout_phone ?? data.buyer.phone ?? undefined
+    const { phone, hadCountry } = toE164(rawPhone, { countryIso: data.buyer.address?.country_iso, locale })
+    if (rawPhone && !hadCountry) {
+      console.warn(
+        `[hotmart] telefone sem país definido (venda ${data.purchase.transaction}, country_iso=${data.buyer.address?.country_iso ?? 'vazio'}) — enviado sem +DDI: ${phone}`
+      )
+    }
 
     let userId: string
     if (existingUsers && existingUsers.length > 0) {

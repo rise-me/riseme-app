@@ -13,7 +13,7 @@ const COUNTRY_TO_DDI: Record<string, string> = {
   TR: '90',
   BR: '55',
   MX: '52', AR: '54', CO: '57', CL: '56', PE: '51', EC: '593',
-  PY: '595', UY: '598', BO: '591', VE: '58', ES: '34', US: '1',
+  PY: '595', UY: '598', BO: '591', VE: '58', ES: '34', US: '1', PL: '48',
   GT: '502', CR: '506', PA: '507', DO: '1',
 }
 
@@ -21,6 +21,7 @@ const COUNTRY_TO_DDI: Record<string, string> = {
 // 'es' fica de fora de propósito: espanhol cobre vários países (DDI ambíguo).
 const LOCALE_TO_DDI: Record<string, string> = {
   tr: '90',
+  pl: '48',
   'pt-BR': '55',
 }
 
