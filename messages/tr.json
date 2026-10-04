@@ -244,7 +244,9 @@
     "enLabel": "English",
     "enRegion": "Amerika Birleşik Devletleri",
     "trLabel": "Türkçe",
-    "trRegion": "Türkiye"
+    "trRegion": "Türkiye",
+    "plLabel": "Polski",
+    "plRegion": "Polonya"
   },
   "help": {
     "title": "Yardım",

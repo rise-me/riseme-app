@@ -5,10 +5,12 @@ import { routing } from './i18n/routing'
 
 const intlMiddleware = createIntlMiddleware(routing)
 
+const LOCALE_PREFIX = new RegExp(`^/(${routing.locales.join('|')})`)
+
 const APP_PATHS = ['/home', '/challenges', '/workouts', '/progress', '/more', '/menu']
 
 function isAppPath(pathname: string): boolean {
-  const withoutLocale = pathname.replace(/^\/(pt-BR|es|en|tr)/, '')
+  const withoutLocale = pathname.replace(LOCALE_PREFIX, '')
   return APP_PATHS.some((p) => withoutLocale === p || withoutLocale.startsWith(p + '/'))
 }
 
@@ -42,7 +44,7 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    const localeMatch = request.nextUrl.pathname.match(/^\/(pt-BR|es|en|tr)/)
+    const localeMatch = request.nextUrl.pathname.match(LOCALE_PREFIX)
     const locale = localeMatch ? localeMatch[1] : ''
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = locale ? `/${locale}/login` : '/login'

@@ -7,6 +7,7 @@
 // limite de taxa e fica lento). Tolerante a falha parcial: 1 momento ruim não
 // derruba o cardápio; só falha se TODOS falharem.
 import Anthropic from '@anthropic-ai/sdk'
+import type { AppLocale } from '@/i18n/routing'
 import {
   MOMENTOS,
   type Momento,
@@ -54,18 +55,19 @@ export function momentosDoCardapio(numRefeicoes: number, incluiCafe: boolean): M
 }
 
 /** Rótulos por momento no idioma da aluna (pro prompt; a tela usa i18n). */
-const MOMENTO_LABEL: Record<Momento, Record<string, string>> = {
-  cafe_da_manha: { es: 'Desayuno', tr: 'Kahvaltı', 'pt-BR': 'Café da manhã', en: 'Breakfast' },
-  lanche_da_manha: { es: 'Merienda de la mañana', tr: 'Kuşluk ara öğünü', 'pt-BR': 'Lanche da manhã', en: 'Morning snack' },
-  almoco: { es: 'Almuerzo', tr: 'Öğle yemeği', 'pt-BR': 'Almoço', en: 'Lunch' },
-  lanche_da_tarde: { es: 'Merienda de la tarde', tr: 'İkindi ara öğünü', 'pt-BR': 'Lanche da tarde', en: 'Afternoon snack' },
-  jantar: { es: 'Cena', tr: 'Akşam yemeği', 'pt-BR': 'Jantar', en: 'Dinner' },
-  ceia: { es: 'Colación nocturna', tr: 'Gece ara öğünü', 'pt-BR': 'Ceia', en: 'Evening snack' },
+const MOMENTO_LABEL: Record<Momento, Record<AppLocale, string>> = {
+  cafe_da_manha: { es: 'Desayuno', tr: 'Kahvaltı', pl: 'Śniadanie', 'pt-BR': 'Café da manhã', en: 'Breakfast' },
+  lanche_da_manha: { es: 'Merienda de la mañana', tr: 'Kuşluk ara öğünü', pl: 'Drugie śniadanie', 'pt-BR': 'Lanche da manhã', en: 'Morning snack' },
+  almoco: { es: 'Almuerzo', tr: 'Öğle yemeği', pl: 'Obiad', 'pt-BR': 'Almoço', en: 'Lunch' },
+  lanche_da_tarde: { es: 'Merienda de la tarde', tr: 'İkindi ara öğünü', pl: 'Podwieczorek', 'pt-BR': 'Lanche da tarde', en: 'Afternoon snack' },
+  jantar: { es: 'Cena', tr: 'Akşam yemeği', pl: 'Kolacja', 'pt-BR': 'Jantar', en: 'Dinner' },
+  ceia: { es: 'Colación nocturna', tr: 'Gece ara öğünü', pl: 'Przekąska wieczorna', 'pt-BR': 'Ceia', en: 'Evening snack' },
 }
 
-const IDIOMA: Record<string, string> = {
+const IDIOMA: Record<AppLocale, string> = {
   es: 'español',
   tr: 'Türkçe (turco)',
+  pl: 'polski (polonês)',
   'pt-BR': 'português do Brasil',
   en: 'English (inglês)',
 }
@@ -122,8 +124,8 @@ async function gerarMomento(
   kcalDia: number,
   locale: string,
 ): Promise<RefeicaoPlano> {
-  const idioma = IDIOMA[locale] ?? IDIOMA.es
-  const rotulo = MOMENTO_LABEL[momento][locale] ?? MOMENTO_LABEL[momento].es
+  const idioma = IDIOMA[locale as AppLocale] ?? IDIOMA.es
+  const rotulo = MOMENTO_LABEL[momento][locale as AppLocale] ?? MOMENTO_LABEL[momento].es
   const macros = macrosDoDia(kcalDia, perfil.weightKg, perfil.objective)
 
   const FREQ_DESC: Record<string, string> = {

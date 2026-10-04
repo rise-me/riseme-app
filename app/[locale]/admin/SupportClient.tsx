@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Search, Mail, KeyRound, Plus, Trash2, UserPlus, CheckCircle2, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { mockBonuses } from '@/lib/mock-bonuses'
+import { routing, type AppLocale } from '@/i18n/routing'
 import {
   searchUser,
   sendPasswordLink,
@@ -33,12 +34,14 @@ const MATERIAIS = mockBonuses
 const CONCEDIVEIS = [...CHALLENGES, ...MATERIAIS]
 const challengeName = (id: string) => CONCEDIVEIS.find((c) => c.id === id)?.name ?? `Desafio ${id}`
 
-const LOCALES = [
-  { code: 'es', label: 'Espanhol' },
-  { code: 'tr', label: 'Turco' },
-  { code: 'pt-BR', label: 'Português' },
-  { code: 'en', label: 'Inglês' },
-]
+const LOCALE_LABEL: Record<AppLocale, string> = {
+  es: 'Espanhol',
+  tr: 'Turco',
+  pl: 'Polonês',
+  'pt-BR': 'Português',
+  en: 'Inglês',
+}
+const LOCALES = routing.locales.map((code) => ({ code, label: LOCALE_LABEL[code] }))
 
 function subStatusLabel(status: string | null | undefined): string {
   if (status === 'active') return 'Ativa'

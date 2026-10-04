@@ -5,6 +5,7 @@ import { ArrowLeft, Check } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { routing } from '@/i18n/routing'
 
 export default function LanguagePage() {
   const t = useTranslations('languagePage')
@@ -12,12 +13,11 @@ export default function LanguagePage() {
   const router = useRouter()
   const locale = params.locale as string
 
-  const LANGUAGES = [
-    { code: 'pt-BR', label: t('ptBRLabel'), region: t('ptBRRegion') },
-    { code: 'es', label: t('esLabel'), region: t('esRegion') },
-    { code: 'en', label: t('enLabel'), region: t('enRegion') },
-    { code: 'tr', label: t('trLabel'), region: t('trRegion') },
-  ]
+  // Chaves no i18n: <locale sem hífen>Label / Region (pt-BR → ptBRLabel)
+  const LANGUAGES = routing.locales.map((code) => {
+    const key = code.replace('-', '')
+    return { code, label: t(`${key}Label`), region: t(`${key}Region`) }
+  })
 
   function selectLanguage(code: string) {
     router.push(`/${code}/more`)

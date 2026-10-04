@@ -7,6 +7,8 @@
 // se faltar RESEND_API_KEY, apenas loga e segue — a criação da conta NUNCA
 // depende disso. Domínio riseme.app já verificado no Resend (mesmo do SMTP).
 
+import type { AppLocale } from '@/i18n/routing'
+
 interface Copy {
   subject: string
   preview: string
@@ -20,7 +22,7 @@ interface Copy {
   footer: string
 }
 
-const COPY: Record<string, Copy> = {
+const COPY: Record<AppLocale, Copy> = {
   es: {
     subject: '¡Estás dentro! Tu acceso a RiseMe 💛',
     preview: 'Tu email y tu contraseña de acceso están aquí.',
@@ -44,6 +46,18 @@ const COPY: Record<string, Copy> = {
     cta: 'Şimdi gir',
     changeNote: 'İstersen sonra uygulama içinden kendi şifrenle değiştirebilirsin.',
     footer: 'Bu satın alımı sen yapmadıysan bu mesajı yok say.',
+  },
+  pl: {
+    subject: 'Witaj w RiseMe! Oto Twój dostęp 💛',
+    preview: 'W środku znajdziesz swój e-mail i hasło do logowania.',
+    greeting: 'Witaj w RiseMe! 💛',
+    intro: 'Twoje konto jest już gotowe. Oto Twoje dane dostępu:',
+    emailLabel: 'E-mail',
+    passwordLabel: 'Hasło',
+    keepNote: 'Zachowaj to hasło — to nim będziesz się zawsze logować.',
+    cta: 'Zaloguj się teraz',
+    changeNote: 'Później, jeśli chcesz, możesz zmienić je na własne hasło w aplikacji.',
+    footer: 'Jeśli to nie Ty dokonałaś tego zakupu, zignoruj tę wiadomość.',
   },
   'pt-BR': {
     subject: 'Você está dentro! Seu acesso ao RiseMe 💛',
@@ -147,7 +161,7 @@ export async function sendAccessEmail(params: {
     return
   }
   const from = process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>'
-  const c = COPY[params.locale ?? 'es'] ?? COPY.es
+  const c = COPY[params.locale as AppLocale] ?? COPY.es
 
   try {
     const res = await fetch('https://api.resend.com/emails', {

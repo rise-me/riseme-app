@@ -1,9 +1,8 @@
 'use server'
 
+import { hasLocale } from 'next-intl'
 import { requireAdmin, createServiceClient } from '@/lib/admin-server'
-
-const KNOWN_LOCALES = ['es', 'tr', 'pt-BR', 'en'] as const
-export type SupportLocale = (typeof KNOWN_LOCALES)[number]
+import { routing } from '@/i18n/routing'
 
 export interface UserLookup {
   found: boolean
@@ -71,7 +70,7 @@ export async function searchUser(rawEmail: string): Promise<UserLookup | { error
 export async function sendPasswordLink(rawEmail: string, locale: string): Promise<{ ok: boolean; error?: string }> {
   await requireAdmin()
   const email = rawEmail.trim().toLowerCase()
-  const safeLocale = (KNOWN_LOCALES as readonly string[]).includes(locale) ? locale : 'es'
+  const safeLocale = hasLocale(routing.locales, locale) ? locale : 'es'
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://riseme.app'
 
   const supabase = createServiceClient()
@@ -116,7 +115,7 @@ export async function createAccount(params: {
   const admin = await requireAdmin()
   const email = params.email.trim().toLowerCase()
   if (!email.includes('@')) return { ok: false, error: 'Email inválido' }
-  const safeLocale = (KNOWN_LOCALES as readonly string[]).includes(params.locale) ? params.locale : 'es'
+  const safeLocale = hasLocale(routing.locales, params.locale) ? params.locale : 'es'
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://riseme.app'
 
   const supabase = createServiceClient()

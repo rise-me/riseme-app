@@ -1,9 +1,10 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { hasLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { routing } from '@/i18n/routing'
 
 type Status = 'loading' | 'error'
 
@@ -47,11 +48,10 @@ export function ConfirmClient({ locale }: { locale: string }) {
       // O link do email não carrega locale (template é compartilhado), então a URL
       // cai no default (es). O locale real da usuária vem do metadata da conta —
       // gravado pelo webhook na compra (ex: 'tr' pra Perfect Pay Turquia).
-      const KNOWN_LOCALES = ['pt-BR', 'es', 'en', 'tr']
       let dest = locale
       const { data: { user } } = await supabase.auth.getUser()
       const metaLocale = user?.user_metadata?.locale as string | undefined
-      if (metaLocale && KNOWN_LOCALES.includes(metaLocale)) {
+      if (hasLocale(routing.locales, metaLocale)) {
         dest = metaLocale
       }
 
