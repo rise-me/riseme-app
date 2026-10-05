@@ -144,27 +144,39 @@ export async function POST(request: NextRequest) {
         user_metadata: { name: buyer.name, locale },
       })
       if (createError || !created.user) {
-        console.error('[hotmart] Failed to create user:', createError)
-        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
-      }
-      userId = created.user.id
-      if (phone) await supabase.from('users').update({ phone }).eq('id', userId)
+        // Order bump: a compra principal e o bump são aprovados no mesmo instante e os dois
+        // webhooks chegam juntos — o outro pode ter criado a conta entre a busca acima e este
+        // createUser. Se a conta já existe, só concede (quem criou a conta já enviou o acesso).
+        const { data: createdMeanwhile } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', buyerEmail)
+          .limit(1)
+        if (!createdMeanwhile || createdMeanwhile.length === 0) {
+          console.error('[hotmart] Failed to create user:', createError)
+          return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
+        }
+        userId = createdMeanwhile[0].id
+      } else {
+        userId = created.user.id
+        if (phone) await supabase.from('users').update({ phone }).eq('id', userId)
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-      const link = buildAccessLink(appUrl, locale, buyerEmail, code)
-      // Entrega dupla, best-effort: WhatsApp (Z-API ou Voxuy, pela env WHATSAPP_PROVIDER) + email (Resend, contingência
-      // que não depende de telefone). Se um falhar, o outro cobre.
-      await sendWhatsAppAccess({
-        productCode: productId,
-        transactionId: purchase.transaction,
-        name: buyer.name,
-        email: buyerEmail,
-        phone,
-        code,
-        link,
-        locale,
-      })
-      await sendAccessEmail({ email: buyerEmail, code, link, locale })
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+        const link = buildAccessLink(appUrl, locale, buyerEmail, code)
+        // Entrega dupla, best-effort: WhatsApp (Z-API ou Voxuy, pela env WHATSAPP_PROVIDER) + email (Resend, contingência
+        // que não depende de telefone). Se um falhar, o outro cobre.
+        await sendWhatsAppAccess({
+          productCode: productId,
+          transactionId: purchase.transaction,
+          name: buyer.name,
+          email: buyerEmail,
+          phone,
+          code,
+          link,
+          locale,
+        })
+        await sendAccessEmail({ email: buyerEmail, code, link, locale })
+      }
     }
 
     if (isSubscription) {
@@ -202,6 +214,12 @@ export async function POST(request: NextRequest) {
           challenge_id: challengeId,
           access_type: 'lifetime',
         }, { onConflict: 'user_id,challenge_id', ignoreDuplicates: true })
+      } else {
+        // Produto fora do mapa (ex.: order bump novo): antes passava em silêncio, sem liberar nada.
+        console.error(
+          `[hotmart] Produto NÃO MAPEADO: ${productId} (venda ${purchase.transaction}, ${buyerEmail}). ` +
+            'Adicionar ao HOTMART_CHALLENGE_MAP e reenviar o webhook.'
+        )
       }
     }
   }
