@@ -33,15 +33,17 @@ type HotmartEvent =
 interface HotmartPayload {
   event: HotmartEvent
   data: {
-    product: { id: number; ucode: string; name: string }
-    buyer: {
+    product?: { id: number; ucode: string; name: string }
+    buyer?: {
       email: string
       name: string
       checkout_phone?: string
       phone?: string
       address?: { country_iso?: string } // ISO-2 do país do comprador → DDI
     }
-    purchase: {
+    // SUBSCRIPTION_CANCELLATION não traz buyer/purchase: vem subscriber (email + code).
+    subscriber?: { code?: string; email?: string }
+    purchase?: {
       transaction: string
       status: string
       offer?: { code: string }
@@ -92,12 +94,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, skipped: true })
   }
 
-  const buyerEmail = data.buyer.email.toLowerCase()
-  const offerCode = data.purchase.offer?.code
-  const productId = String(data.product.id)
+  const buyerEmail = (data.buyer?.email ?? data.subscriber?.email)?.toLowerCase()
+  if (!buyerEmail) {
+    // Sem email não há de quem conceder/revogar. 200 pra Hotmart não reenviar pra sempre.
+    console.error(`[hotmart] ${event} sem email do comprador — ignorado`)
+    return NextResponse.json({ ok: true, skipped: 'no buyer email' })
+  }
+  const offerCode = data.purchase?.offer?.code
+  const productId = String(data.product?.id ?? '')
   const isSubscription = offerCode ? SUBSCRIPTION_OFFERS.has(offerCode) : false
 
   if (event === 'PURCHASE_APPROVED' || event === 'PURCHASE_COMPLETE') {
+    const { buyer, purchase } = data
+    if (!buyer || !purchase) {
+      console.error(`[hotmart] ${event} sem buyer/purchase — ignorado`)
+      return NextResponse.json({ ok: true, skipped: 'incomplete purchase payload' })
+    }
     // Find or create auth user
     const { data: existingUsers } = await supabase
       .from('users')
@@ -110,11 +122,11 @@ export async function POST(request: NextRequest) {
     const locale = 'es'
     // Normaliza pra E.164 com o DDI do país (mesmo motivo da Perfect Pay: sem "+DDI"
     // o WhatsApp não sai). Sem país conhecido, segue só com os dígitos e loga.
-    const rawPhone = data.buyer.checkout_phone ?? data.buyer.phone ?? undefined
-    const { phone, hadCountry } = toE164(rawPhone, { countryIso: data.buyer.address?.country_iso, locale })
+    const rawPhone = buyer.checkout_phone ?? buyer.phone ?? undefined
+    const { phone, hadCountry } = toE164(rawPhone, { countryIso: buyer.address?.country_iso, locale })
     if (rawPhone && !hadCountry) {
       console.warn(
-        `[hotmart] telefone sem país definido (venda ${data.purchase.transaction}, country_iso=${data.buyer.address?.country_iso ?? 'vazio'}) — enviado sem +DDI: ${phone}`
+        `[hotmart] telefone sem país definido (venda ${purchase.transaction}, country_iso=${buyer.address?.country_iso ?? 'vazio'}) — enviado sem +DDI: ${phone}`
       )
     }
 
@@ -129,7 +141,7 @@ export async function POST(request: NextRequest) {
         email: buyerEmail,
         password: code,
         email_confirm: true,
-        user_metadata: { name: data.buyer.name, locale },
+        user_metadata: { name: buyer.name, locale },
       })
       if (createError || !created.user) {
         console.error('[hotmart] Failed to create user:', createError)
@@ -144,8 +156,8 @@ export async function POST(request: NextRequest) {
       // que não depende de telefone). Se um falhar, o outro cobre.
       await sendWhatsAppAccess({
         productCode: productId,
-        transactionId: data.purchase.transaction,
-        name: data.buyer.name,
+        transactionId: purchase.transaction,
+        name: buyer.name,
         email: buyerEmail,
         phone,
         code,
@@ -160,7 +172,7 @@ export async function POST(request: NextRequest) {
         offerCode && (ANNUAL_OFFERS.has(offerCode) || TRIAL_ANNUAL_OFFERS.has(offerCode))
           ? 'annual'
           : 'monthly'
-      const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
+      const subCode = data.subscription?.subscriber?.code ?? purchase.transaction
 
       await supabase.from('subscriptions').upsert({
         user_id: userId,
@@ -211,8 +223,9 @@ export async function POST(request: NextRequest) {
       // Cancelar = desligar a renovação. A Hotmart dispara na hora do clique,
       // mas o período já foi pago: só marca 'canceled' e o getUserAccess
       // mantém o acesso até current_period_end. Nada é deletado aqui.
-      if (isSubscription) {
-        const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
+      // O payload de cancelamento não traz offer (isSubscription sai false): casa pelo código do assinante.
+      const subCode = data.subscriber?.code ?? data.subscription?.subscriber?.code ?? data.purchase?.transaction
+      if (subCode) {
         await supabase
           .from('subscriptions')
           .update({ status: 'canceled' })
@@ -224,7 +237,7 @@ export async function POST(request: NextRequest) {
 
     // Reembolso/chargeback: dinheiro devolvido — acesso cai na hora.
     if (isSubscription) {
-      const subCode = data.subscription?.subscriber?.code ?? data.purchase.transaction
+      const subCode = data.subscription?.subscriber?.code ?? data.purchase?.transaction
       await supabase
         .from('subscriptions')
         .update({ status: 'refunded' })
