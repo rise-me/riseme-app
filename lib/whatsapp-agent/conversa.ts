@@ -111,18 +111,18 @@ export async function abrirChat(phone: string): Promise<Chat> {
 
 /**
  * Número que não bate com conta (comprou com outro telefone): se ela já mandou o email
- * na conversa, acha a conta por ele e liga o chat à conta. Devolve o userId ou null.
+ * na conversa, acha a conta por ele. Devolve o userId ou null.
  */
-export async function vincularPorEmail(phone: string, conversa: MensagemConversa[]): Promise<string | null> {
+export async function vincularPorEmail(conversa: MensagemConversa[]): Promise<string | null> {
   const emails = conversa
     .filter((m) => m.autor === 'student')
     .flatMap((m) => m.texto.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) ?? [])
     .map((e) => e.toLowerCase())
   if (!emails.length) return null
   const { data } = await admin().from('users').select('id').in('email', emails).limit(1)
-  const userId = data?.[0]?.id ?? null
-  if (userId) await admin().from('whatsapp_chats').update({ user_id: userId }).eq('phone', phone)
-  return userId
+  // Não grava no chat: conta achada por email digitado não é confirmada (qualquer um digita
+  // um email). Re-deriva a cada mensagem e o perfil vai marcado como não confirmado.
+  return data?.[0]?.id ?? null
 }
 
 /** Cala o bot neste número por `horas` (pessoa assumiu ou o agente pediu handoff). */
@@ -138,9 +138,20 @@ export async function passarParaHumano(phone: string, horas: number, motivo: str
     })
 }
 
-export async function perfilDaAluna(userId: string): Promise<PerfilAluna | null> {
+// Nome do que pode estar liberado em user_challenges (ids de lib/mock-challenges.ts e
+// compras de lib/mock-bonuses.ts com access 'purchase'). Em espanhol — o agente traduz.
+const NOME_PRODUTO: Record<string, string> = {
+  '1': 'Calistenia en Casa',
+  '2': 'Pilates en la Pared',
+  '3': 'Yoga Facial',
+  '4': 'Yoga en la Silla',
+  '5': 'Cuerpo Sexy de Verano',
+  'protocolo-metabolico': 'Protocolo Metabólico',
+}
+
+export async function perfilDaAluna(userId: string, confirmadaPorTelefone = true): Promise<PerfilAluna | null> {
   const db = admin()
-  const [{ data: u }, { data: auth }, { data: progresso }] = await Promise.all([
+  const [{ data: u }, { data: auth }, { data: progresso }, { data: acessos }] = await Promise.all([
     db.from('users').select('name, created_at').eq('id', userId).maybeSingle(),
     db.auth.admin.getUserById(userId),
     db
@@ -148,6 +159,7 @@ export async function perfilDaAluna(userId: string): Promise<PerfilAluna | null>
       .select('completed_at')
       .eq('user_id', userId)
       .order('completed_at', { ascending: false }),
+    db.from('user_challenges').select('challenge_id').eq('user_id', userId),
   ])
   if (!u) return null
   return {
@@ -157,5 +169,7 @@ export async function perfilDaAluna(userId: string): Promise<PerfilAluna | null>
     ultimoLogin: auth?.user?.last_sign_in_at ?? null,
     diasFeitos: progresso?.length ?? 0,
     ultimoTreino: progresso?.[0]?.completed_at ?? null,
+    liberados: [...new Set((acessos ?? []).map((a) => NOME_PRODUTO[a.challenge_id] ?? a.challenge_id))],
+    confirmadaPorTelefone,
   }
 }

@@ -20,6 +20,9 @@ export interface PerfilAluna {
   ultimoLogin?: string | null // ISO; null = nunca entrou
   diasFeitos: number
   ultimoTreino?: string | null // ISO
+  liberados: string[] // produtos liberados na conta (desafios + compras como o Protocolo Metabólico)
+  // false = conta achada pelo EMAIL que ela digitou, não pelo telefone: pode não ser ela.
+  confirmadaPorTelefone: boolean
 }
 
 export interface MensagemConversa {
@@ -100,6 +103,11 @@ function descreverPerfil(p: PerfilAluna): string {
     `Último login no app: ${p.ultimoLogin ?? 'NUNCA ENTROU'}`,
     `Dias de treino concluídos: ${p.diasFeitos}`,
     `Último treino: ${p.ultimoTreino ?? 'nenhum'}`,
+    `Liberado na conta: ${p.liberados.length ? p.liberados.join(', ') : 'nada'}`,
+    p.confirmadaPorTelefone
+      ? 'Conta confirmada pelo telefone desta conversa.'
+      : 'ATENÇÃO: conta achada pelo email que ela digitou (não pelo telefone) — pode não ser dela. ' +
+        'Use só para orientar; não revele dados da conta (nome, datas, o que está liberado, progresso).',
   ].join('\n')
 }
 

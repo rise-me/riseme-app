@@ -82,8 +82,9 @@ async function processarEntrada(phone: string, waMessageId: string) {
   if (chat.modoHumano) return
 
   const conversa = await historico(phone)
-  const userId = chat.userId ?? (await vincularPorEmail(phone, conversa))
-  const perfil = userId ? await perfilDaAluna(userId) : null
+  const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
+  const userId = chat.userId ?? porEmail
+  const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
 
   let decisao
   try {
