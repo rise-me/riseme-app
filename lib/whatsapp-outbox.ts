@@ -48,10 +48,15 @@ interface Item {
   attempts: number
 }
 
+const INTERVALO_MIN_MS = 40_000 // entre msgs da mesma sequência, mesmo quando as duas venceram juntas
+
 async function dependenciaPendente(id: number): Promise<boolean> {
   const { data } = await admin().from('whatsapp_outbox').select('sent_at, attempts').eq('id', id).maybeSingle()
+  if (!data) return false
   // Dependência que desistiu (MAX_TENTATIVAS) não segura a fila pra sempre.
-  return Boolean(data && !data.sent_at && data.attempts < MAX_TENTATIVAS)
+  if (!data.sent_at) return data.attempts < MAX_TENTATIVAS
+  // Já saiu, mas agora há pouco: segura pra não chegar grudada na anterior.
+  return Date.now() - new Date(data.sent_at).getTime() < INTERVALO_MIN_MS
 }
 
 const travaVencida = () => new Date(Date.now() - TRAVA_EXPIRA_MS).toISOString()
