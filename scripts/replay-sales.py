@@ -53,7 +53,8 @@ SALE_STATUS_APPROVED = 2  # sale_status_enum da Perfect Pay
 # 'País' do relatório (PT) → ISO-2, que é o que o webhook espera pra achar o DDI
 PAIS_TO_ISO = {"turquia": "TR", "brasil": "BR", "brazil": "BR", "espanha": "ES",
                "méxico": "MX", "mexico": "MX", "argentina": "AR", "colômbia": "CO",
-               "colombia": "CO", "chile": "CL", "peru": "PE", "estados unidos": "US"}
+               "colombia": "CO", "chile": "CL", "peru": "PE", "estados unidos": "US",
+               "polônia": "PL", "polonia": "PL", "poland": "PL", "polska": "PL"}
 
 
 def read_xlsx(path: Path) -> list[dict]:
