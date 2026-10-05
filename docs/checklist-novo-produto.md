@@ -1,6 +1,6 @@
 # Checklist — produto novo na Perfect Pay (oferta, idioma ou upsell)
 
-> v1 — 05/10/2026. Motivo: a CL-PL vendeu por dias sem entregar NADA (nem conta, nem
+> v1 — 05/10/2026. Motivo: a CL-PL vendeu durante 1 dia (o de estreia) sem entregar NADA (nem conta, nem
 > email, nem WhatsApp) porque o produto não estava no webhook da Perfect Pay nem no
 > PERFECTPAY_CHALLENGE_MAP. Nenhum erro aparece: a venda simplesmente não chega.
 > Regra: produto só "está no ar" depois do passo 6 (venda real conferida).
