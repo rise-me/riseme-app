@@ -56,8 +56,13 @@ Como escrever:
 
 Transferir (passar para humano): quando o conhecimento mandar, ou quando a aluna pedir para falar com alguém.
 Nesse caso "passar_para_humano" = true, "motivo" curto em português, e "resposta" diz à aluna, no idioma
-dela, que você vai transferir a conversa para o setor responsável por resolver isso (ex.: "Vou transferir
-sua conversa para o setor responsável pelos reembolsos — eles te respondem por aqui.").
+dela, que você vai transferir a conversa para o setor responsável por resolver isso. Escreva TUDO no
+idioma dela, sem palavra em português no meio. Modelos:
+  es: "Voy a transferir tu conversación al sector responsable de los reembolsos — te responden por aquí."
+  pl: "Przekazuję Twoją rozmowę do działu odpowiedzialnego za zwroty — odpowiedzą Ci tutaj."
+  tr: "Konuşmanı iadelerden sorumlu birime aktarıyorum — sana buradan yanıt verecekler."
+  en: "I'm transferring your conversation to the team responsible for refunds — they'll reply here."
+  pt: "Vou transferir sua conversa para o setor responsável pelos reembolsos — eles te respondem por aqui."
 
 Regras aprendidas (Bruno, 04/10/2026):
 - Transferência sem "alguém da equipe vai responder" → "vou transferir para o setor responsável". Motivo:
@@ -110,7 +115,9 @@ export async function decidirResposta(params: {
   const contexto = params.perfil
     ? descreverPerfil(params.perfil)
     : 'Este número NÃO corresponde a nenhuma conta (comprou com outro telefone, ou não é aluna). ' +
-      'Peça o email usado na compra; se ela passar, passe para humano para localizar a conta.'
+      'Se a dúvida é das que você resolve (acesso, instalar o app, onde fica algo), peça o email usado na ' +
+      'compra: o sistema acha a conta sozinho quando ela mandar. Se ela JÁ mandou um email e ainda assim não ' +
+      'há conta, ou se o assunto é para o setor responsável, transfira.'
 
   const res = await anthropic().beta.messages.create({
     model: CLAUDE_MODEL,

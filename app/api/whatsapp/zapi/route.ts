@@ -9,6 +9,7 @@ import {
   perfilDaAluna,
   registrarMensagem,
   ultimaEntrada,
+  vincularPorEmail,
 } from '@/lib/whatsapp-agent/conversa'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
@@ -37,6 +38,9 @@ interface ZapiCallback {
   broadcast?: boolean
   isStatusReply?: boolean
   senderName?: string
+  senderLid?: string
+  chatLid?: string
+  participantLid?: string | null
   text?: { message?: string }
   audio?: unknown
   image?: { caption?: string }
@@ -77,8 +81,9 @@ async function processarEntrada(phone: string, waMessageId: string) {
   const chat = await abrirChat(phone)
   if (chat.modoHumano) return
 
-  const perfil = chat.userId ? await perfilDaAluna(chat.userId) : null
   const conversa = await historico(phone)
+  const userId = chat.userId ?? (await vincularPorEmail(phone, conversa))
+  const perfil = userId ? await perfilDaAluna(userId) : null
 
   let decisao
   try {
@@ -133,6 +138,13 @@ export async function POST(request: NextRequest) {
   const texto = textoDa(m)
   if (!phone || !m.messageId || !texto) return NextResponse.json({ ok: true, skipped: 'empty' })
   const waMessageId = m.messageId
+
+  // DIAGNÓSTICO (05/10): resposta de pessoa pelo celular às vezes chega com o LID do WhatsApp
+  // no lugar do telefone e não casa com o chat da aluna. Loga só os identificadores (sem texto)
+  // pra mapear LID → telefone antes de corrigir.
+  if (m.fromMe || phone.length > 13 || m.phone?.includes('@')) {
+    console.log('[zapi-ids]', JSON.stringify({ fromMe: m.fromMe, phone: m.phone, senderLid: m.senderLid, chatLid: m.chatLid, participantLid: m.participantLid, messageId: waMessageId }))
+  }
 
   if (m.fromMe) {
     after(() => processarSaida(phone, waMessageId, texto))

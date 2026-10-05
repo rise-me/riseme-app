@@ -76,9 +76,14 @@ export interface Chat {
 
 async function acharUsuario(phone: string): Promise<string | null> {
   // users.phone é gravado em E.164 ("+34…") pela Perfect Pay; a Hotmart pode ter gravado cru.
-  // Celular BR: o WhatsApp devolve o número SEM o 9 (55 31 8991-1328), a compra grava COM.
+  // O WhatsApp usa um formato de celular diferente do da compra em alguns países:
+  //   BR: sem o 9 (55 31 8991-1328) · MX: com 1 depois do 52 (521 55…) · AR: com 9 depois do 54 (549 …)
   const variantes = [phone]
   if (/^55\d{10}$/.test(phone)) variantes.push(`${phone.slice(0, 4)}9${phone.slice(4)}`)
+  if (/^521\d{10}$/.test(phone)) variantes.push(`52${phone.slice(3)}`)
+  if (/^52\d{10}$/.test(phone)) variantes.push(`521${phone.slice(2)}`)
+  if (/^549\d{10}$/.test(phone)) variantes.push(`54${phone.slice(3)}`)
+  if (/^54\d{10}$/.test(phone)) variantes.push(`549${phone.slice(2)}`)
   const candidatos = variantes.flatMap((v) => [`+${v}`, v])
   const { data } = await admin().from('users').select('id').in('phone', candidatos).limit(1)
   return data?.[0]?.id ?? null
@@ -102,6 +107,22 @@ export async function abrirChat(phone: string): Promise<Chat> {
     await admin().from('whatsapp_chats').update({ mode: 'bot', human_until: null, updated_at: new Date().toISOString() }).eq('phone', phone)
   }
   return { phone, userId: data.user_id ?? (await acharUsuario(phone)), modoHumano: pausado }
+}
+
+/**
+ * Número que não bate com conta (comprou com outro telefone): se ela já mandou o email
+ * na conversa, acha a conta por ele e liga o chat à conta. Devolve o userId ou null.
+ */
+export async function vincularPorEmail(phone: string, conversa: MensagemConversa[]): Promise<string | null> {
+  const emails = conversa
+    .filter((m) => m.autor === 'student')
+    .flatMap((m) => m.texto.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) ?? [])
+    .map((e) => e.toLowerCase())
+  if (!emails.length) return null
+  const { data } = await admin().from('users').select('id').in('email', emails).limit(1)
+  const userId = data?.[0]?.id ?? null
+  if (userId) await admin().from('whatsapp_chats').update({ user_id: userId }).eq('phone', phone)
+  return userId
 }
 
 /** Cala o bot neste número por `horas` (pessoa assumiu ou o agente pediu handoff). */
