@@ -114,8 +114,10 @@ function blocoMateriais(idioma: string, temProtocolo: boolean): string {
   const partes = Object.entries(BASE).map(([id, m]) => {
     const texto = m.textos[idioma] ?? m.textos.es ?? Object.values(m.textos)[0]
     if (m.acesso === 'compra' && !temProtocolo) {
-      return `### ${id} (PAGO — esta aluna NÃO tem)\nNão revele o conteúdo. Se ela perguntar sobre algo dele, diga que ` +
-        'faz parte do Protocolo Metabólico e transfira para o setor responsável.'
+      return `### ${id} (PAGO — esta aluna NÃO tem)\nO que é (pode dizer): o sistema de chás de 28 dias do RiseMe — ` +
+        'quais chás tomar, em que horário e em que fase. Não revele o conteúdo. Pergunta sobre chás (ou outra ' +
+        'coisa dele) → diga que isso está no Protocolo Metabólico, um material à parte, e transfira para o setor ' +
+        'responsável. Se algum bônus dela tiver algo relacionado, pode citar também.'
     }
     return `### ${id} (${m.acesso === 'compra' ? 'PAGO — liberado para ela' : 'bônus de todas as alunas'})\n${texto}`
   })
