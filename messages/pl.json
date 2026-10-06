@@ -232,7 +232,12 @@
     "fitnessLevel": "Poziom sprawności",
     "legal": "Informacje prawne i prywatność",
     "termsOfUse": "Regulamin",
-    "privacyPolicy": "Polityka prywatności"
+    "privacyPolicy": "Polityka prywatności",
+    "passwordSection": "Hasło",
+    "passwordHint": "Ustaw własne hasło, którym będziesz się zawsze logować.",
+    "savePassword": "ZAPISZ HASŁO",
+    "passwordSaved": "Gotowe! Twoje nowe hasło zostało zapisane.",
+    "passwordError": "Nie udało się zapisać. Spróbuj innego hasła (min. 6 znaków)."
   },
   "languagePage": {
     "title": "Język",

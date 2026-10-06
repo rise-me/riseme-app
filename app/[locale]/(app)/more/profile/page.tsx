@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { ArrowLeft, Camera } from 'lucide-react'
 import Link from 'next/link'
 import { getCurrentUser } from '@/lib/current-user-server'
+import { ChangePasswordForm } from './ChangePasswordForm'
 
 export default async function ProfilePage({
   params,
@@ -48,6 +49,13 @@ export default async function ProfilePage({
           <ProfileField label={tAuth('email')} value={user?.email ?? ''} />
           <ProfileField label={t('fitnessLevel')} value={tChallenges('beginner')} />
         </div>
+      </section>
+
+      <section id="contrasena" className="space-y-2 scroll-mt-6">
+        <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest px-1">
+          {t('passwordSection')}
+        </p>
+        <ChangePasswordForm />
       </section>
 
       <section className="space-y-2">

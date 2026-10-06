@@ -39,7 +39,7 @@ export function FirstAccessNotice({ locale }: { locale: string }) {
 
         <div className="space-y-2 pt-2">
           <a
-            href={`/${locale}/more/profile`}
+            href={`/${locale}/more/profile#contrasena`}
             className="block w-full py-3.5 rounded-2xl bg-foreground text-background text-sm font-bold tracking-wide"
           >
             {t('changeCta')}

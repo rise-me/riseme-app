@@ -232,7 +232,12 @@
     "fitnessLevel": "Fitness seviyesi",
     "legal": "Yasal ve gizlilik",
     "termsOfUse": "Kullanım koşulları",
-    "privacyPolicy": "Gizlilik politikası"
+    "privacyPolicy": "Gizlilik politikası",
+    "passwordSection": "Şifre",
+    "passwordHint": "Her zaman giriş yapmak için kendi şifreni oluştur.",
+    "savePassword": "ŞİFREYİ KAYDET",
+    "passwordSaved": "Tamam! Yeni şifren kaydedildi.",
+    "passwordError": "Kaydedilemedi. Başka bir şifre dene (en az 6 karakter)."
   },
   "languagePage": {
     "title": "Dil",

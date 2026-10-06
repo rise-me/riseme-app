@@ -232,7 +232,12 @@
     "fitnessLevel": "Fitness level",
     "legal": "Legal and privacy",
     "termsOfUse": "Terms of use",
-    "privacyPolicy": "Privacy policy"
+    "privacyPolicy": "Privacy policy",
+    "passwordSection": "Password",
+    "passwordHint": "Create your own password to always log in.",
+    "savePassword": "SAVE PASSWORD",
+    "passwordSaved": "Done! Your new password is saved.",
+    "passwordError": "Couldn't save. Try another password (at least 6 characters)."
   },
   "languagePage": {
     "title": "Language",

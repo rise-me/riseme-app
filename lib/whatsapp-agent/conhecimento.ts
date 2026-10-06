@@ -22,9 +22,9 @@ A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um víde
   Android: riseme.app no CHROME → menu de três pontos → "Instalar app". Ícone sumido: últimas telas do celular.
 
 # Senha
-- NÃO existe hoje tela para trocar a senha dentro do app (o perfil só mostra nome e email). O botão
-  "Crear mi contraseña" do aviso de primeiro acesso leva ao perfil e lá não há como trocar — não mande ela lá.
-- Para criar uma senha própria OU recuperar a esquecida: na tela de login, "¿Olvidaste tu contraseña?"
+- Trocar a senha (criar uma própria): Más → Mi perfil → seção "Contraseña" → digita a nova duas vezes →
+  "GUARDAR CONTRASEÑA". O botão "Crear mi contraseña" do aviso de primeiro acesso leva direto para lá.
+- Esqueceu a senha (não consegue entrar): na tela de login, "¿Olvidaste tu contraseña?"
   (pl: "Nie pamiętasz hasła?", tr: "Şifreni mi unuttun?", en: "Forgot your password?") → digita o email da
   compra → "ENVIAR ENLACE" → abre o email e cria a nova senha em "GUARDAR NUEVA CONTRASEÑA". No formulário do
   link de acesso o mesmo caminho se chama "No recibí mi acceso". Email não chegou: spam/promoções.
@@ -50,7 +50,7 @@ Início · Treinos · Desafios · Cardápio · Extras · Mais (→ Ajuda)
 - Cardápio (Menú): cardápio personalizado gerado no app. Compra vitalícia: 2 cardápios no total; depois disso o app
   oferece assinatura. Assinatura mensal: 3 por mês; anual: 1 por semana.
 - Ayuno (jejum): ainda não existe ("Próximamente").
-- Más → Mi perfil: só mostra nome e email (não dá para editar, nem foto). Más → Idioma: troca o idioma do app.
+- Más → Mi perfil: mostra nome e email (não dá para editar nem pôr foto) e tem a troca de senha. Más → Idioma: troca o idioma do app.
 - Más → Gestionar suscripción: compra vitalícia aparece como "Vitalicio · Activo". Assinante vê o plano e o link
   "Gestionar mi suscripción en Hotmart" — cancelar a assinatura é SÓ por lá; o acesso continua até o fim do período
   pago. Assunto de cobrança/cancelamento além de mostrar o caminho → transfira.

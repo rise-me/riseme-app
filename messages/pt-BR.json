@@ -232,7 +232,12 @@
     "fitnessLevel": "Nível físico",
     "legal": "Legal e privacidade",
     "termsOfUse": "Termos de uso",
-    "privacyPolicy": "Política de privacidade"
+    "privacyPolicy": "Política de privacidade",
+    "passwordSection": "Senha",
+    "passwordHint": "Crie uma senha sua para entrar sempre.",
+    "savePassword": "SALVAR SENHA",
+    "passwordSaved": "Pronto! Sua nova senha já está salva.",
+    "passwordError": "Não foi possível salvar. Tente outra senha (mínimo 6 caracteres)."
   },
   "languagePage": {
     "title": "Idioma",
