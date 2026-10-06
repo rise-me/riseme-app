@@ -52,10 +52,14 @@ com fontes: `docs/pesquisa-video-multiaudio.md`.
 - **Pré-parto e pós-parto** entram no app já nesse modelo (não sobem no Stream).
 - Stream fica só para o que já está lá (Calistenia PL) até a migração; Mux é o plano B.
 
-**Checklist — parte do Bruno (bloqueia o piloto)**
-- [ ] Ok para criar o bucket R2 na conta Cloudflare.
-- [ ] Token da Cloudflare com permissão de R2 (passo a passo igual ao do Stream) no `.env.local`.
-- [ ] Testar a aula piloto no seu iPhone e num Android.
+**Checklist — parte do Bruno (~5 min; bloqueia só a subida para o R2)**
+- [ ] Ativar o R2: painel Cloudflare → **R2 Object Storage** → ativar (aceitar os termos). Grátis até 10 GB.
+- [ ] Token: **My Profile → API Tokens → Create Custom Token**, nome `riseme-r2`, permissões:
+  - `Account` → `Workers R2 Storage` → `Edit`
+  - `Account` → `Workers Scripts` → `Edit`
+  - `Zone` → `DNS` → `Edit`, `Zone` → `Workers Routes` → `Edit`, `Zone` → `Cache Rules` → `Edit` (zona `riseme.app`)
+- [ ] Colar no `.env.local` do riseme: `CLOUDFLARE_R2_TOKEN=<o token>` (não colar no chat) e avisar "pronto".
+- [ ] Quando a aula piloto estiver no ar: abrir o link no iPhone (e num Android) e dizer se tocou no idioma certo.
 
 **Checklist — parte técnica**
 - [ ] Piloto: 1 aula da Calistenia com o mesmo vídeo + áudio ES, TR e PL, empacotada e no R2.
