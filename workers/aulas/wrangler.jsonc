@@ -6,6 +6,6 @@
   "compatibility_date": "2026-10-01",
   "r2_buckets": [{ "binding": "AULAS", "bucket_name": "riseme-aulas" }],
   "routes": [{ "pattern": "aulas.riseme.app", "custom_domain": true }],
-  "vars": { "ALLOWED_ORIGINS": "https://riseme.app,https://www.riseme.app,http://localhost:3000" },
+  "vars": { "ALLOWED_ORIGINS": "https://riseme.app,https://www.riseme.app,http://localhost:3000,https://riseme-git-feat-video-r2-risemes-projects.vercel.app" },
   "observability": { "enabled": true }
 }
