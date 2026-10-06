@@ -209,11 +209,13 @@ export async function POST(request: NextRequest) {
       // Lifetime purchase — map Hotmart product ID to challenge via env var
       const challengeId = getChallengeIdForProduct(productId)
       if (challengeId) {
+        // Sem ignoreDuplicates: assinante que compra o avulso já tem a linha 'subscription'
+        // deste desafio — ela precisa virar 'lifetime', senão a compra some quando a assinatura acabar.
         await supabase.from('user_challenges').upsert({
           user_id: userId,
           challenge_id: challengeId,
           access_type: 'lifetime',
-        }, { onConflict: 'user_id,challenge_id', ignoreDuplicates: true })
+        }, { onConflict: 'user_id,challenge_id' })
       } else {
         // Produto fora do mapa (ex.: order bump novo): antes passava em silêncio, sem liberar nada.
         console.error(
