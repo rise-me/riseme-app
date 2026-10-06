@@ -62,18 +62,18 @@ com fontes: `docs/pesquisa-video-multiaudio.md`.
 - [ ] Quando a aula piloto estiver no ar: abrir o link no iPhone (e num Android) e dizer se tocou no idioma certo.
 
 **Checklist — parte técnica**
-- [ ] Piloto: 1 aula da Calistenia com o mesmo vídeo + áudio ES, TR e PL, empacotada e no R2.
+- [x] Piloto empacotado (06/10): Calistenia dia 1, vídeo único + áudio EN e PL (vídeo PL = EN quadro a quadro).
+      21,9 MB/min de vídeo nas 4 qualidades + 4–7 MB de áudio por idioma. Falta subir no R2.
+      Código no ramo `feat/video-r2` (worktree `../riseme-r2`).
 - [ ] Testes decisivos: áudio certo no iPhone (Safari e app na tela inicial, iOS 26/27, AirPlay),
       Android (Chrome e Samsung Internet), qualidade e MB reais por minuto, sincronia da dublagem.
-- [ ] Script de publicação (evolui `scripts/publish-lessons.py`): confere se o vídeo é idêntico
-      entre idiomas, codifica a escada uma vez, codifica o áudio de cada idioma, escreve as
-      playlists e sobe para o R2. Idioma novo = só subir o áudio.
-- [ ] Player próprio (hls.js no Android, HLS nativo no iPhone) no lugar do player do Stream,
-      mantendo a regra dos 80%.
-- [ ] Proteção: Worker que valida um token assinado pelo app (bloqueia também o link direto,
-      que o allowedOrigins do Stream não bloqueia).
-- [ ] Fábrica de dublagem: cartão de descanso sem texto + pergunta "publicar no app?" apontando
-      para o novo script.
+- [x] `scripts/package-lesson.py` (empacota; `--add` põe idioma sem recodificar) e
+      `scripts/publish-hls.py` (`--setup` cria bucket + porteiro; depois sobe a aula e registra).
+- [x] Player (HLS nativo no iPhone, hls.js no resto), regra dos 80% mantida — falta testar no celular.
+- [x] Porteiro (`workers/aulas`): passe assinado pelo servidor; testado local (válido 200; vencido,
+      de outra aula ou adulterado 403). Falta: publicar (`--setup`) e `HLS_TOKEN_SECRET` no Vercel.
+- [x] Fábrica: cartão de descanso sem texto por padrão (06/10).
+- [ ] Fábrica: pergunta "publicar no app?" apontando para package-lesson + publish-hls.
 - [ ] Subir pré e pós-parto (ES e EN, depois PT) e criar os desafios no app.
 - [ ] Migrar Calistenia PL do Stream e, quando houver os originais, ES e TR do YouTube.
 - [ ] Conferir o custo real depois de um mês e cancelar o Stream quando nada mais depender dele.
