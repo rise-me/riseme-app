@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server'
 import { VideoPlayer } from './VideoPlayer'
 import { canAccessChallenge, getUserAccess } from '@/lib/user-access-server'
 import { getProgressForChallenge } from '@/lib/progress-server'
+import { signLessonPath } from '@/lib/hls-token'
 
 export default async function PlayerPage({
   params,
@@ -38,12 +39,16 @@ export default async function PlayerPage({
     }
   }
 
+  // Aula no R2: passe assinado só depois das travas de acesso acima
+  const hlsPath = currentDay.video?.provider === 'hls' ? signLessonPath(currentDay.video.id) : null
+
   return (
     <VideoPlayer
       challenge={challenge}
       days={days}
       currentDayNumber={dayNumber}
       locale={locale}
+      hlsPath={hlsPath}
     />
   )
 }

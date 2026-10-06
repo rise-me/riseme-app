@@ -1,0 +1,11 @@
+// Porteiro das aulas (vídeo único + áudio por idioma). Deploy: ver scripts/publish-hls.py --setup.
+// Segredo: npx wrangler secret put TOKEN_SECRET (o mesmo HLS_TOKEN_SECRET do app no Vercel).
+{
+  "name": "riseme-aulas",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "r2_buckets": [{ "binding": "AULAS", "bucket_name": "riseme-aulas" }],
+  "routes": [{ "pattern": "aulas.riseme.app", "custom_domain": true }],
+  "vars": { "ALLOWED_ORIGINS": "https://riseme.app,https://www.riseme.app,http://localhost:3000" },
+  "observability": { "enabled": true }
+}

@@ -16,6 +16,7 @@ interface Props {
   days: MockDay[]
   currentDayNumber: number
   locale: string
+  hlsPath?: string | null
 }
 
 // O que o poll de progresso precisa, igual pros dois provedores
@@ -162,7 +163,7 @@ function loadYouTubeAPI(): Promise<void> {
   return apiLoadingPromise
 }
 
-export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props) {
+export function VideoPlayer({ challenge, days, currentDayNumber, locale, hlsPath }: Props) {
   const router = useRouter()
   const t = useTranslations('challenges')
   const tTv = useTranslations('castTv')
@@ -171,7 +172,8 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale }: Props
   const prevDay = days.find((d) => d.day_number === currentDayNumber - 1)
   const video = currentDay.video
   const videoProvider = video?.provider
-  const videoId = video?.id
+  // Aula no R2: o caminho já vem com o passe assinado pelo servidor (page.tsx)
+  const videoId = videoProvider === 'hls' ? (hlsPath ?? undefined) : video?.id
 
   const playerRef = useRef<PlayerHandle | null>(null)
   const iframeHostRef = useRef<HTMLDivElement | null>(null)
