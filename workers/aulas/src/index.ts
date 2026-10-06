@@ -34,6 +34,33 @@ async function validPass(secret: string, pass: string, lessonDir: string): Promi
   return diff === 0
 }
 
+// Mesma lógica do player do app: HLS nativo no iPhone/iPad, hls.js no resto
+function playerPage(src: string): string {
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Teste de aula</title><script src="https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js"></script></head>
+<body style="margin:0;background:#000;color:#fff;font:15px -apple-system,sans-serif">
+<video id="v" controls playsinline style="width:100%;max-height:70vh;background:#000"></video>
+<div id="s" style="padding:12px;line-height:1.6"></div>
+<script>
+const v = document.getElementById('v'), s = document.getElementById('s'), src = ${JSON.stringify(src)}
+const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+let modo = 'nativo', erro = ''
+if (!ios && window.Hls && Hls.isSupported()) {
+  modo = 'hls.js'
+  const h = new Hls({ capLevelToPlayerSize: true }); h.loadSource(src); h.attachMedia(v)
+  h.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) erro = d.details })
+  window.h = h
+} else { v.src = src }
+v.addEventListener('error', () => { erro = 'erro do player nativo' })
+setInterval(() => {
+  const q = window.h && h.levels[h.currentLevel] ? h.levels[h.currentLevel].height + 'p' : (v.videoHeight ? v.videoHeight + 'p' : '-')
+  s.innerHTML = 'Idioma: <b>' + src.replace('master_', '').replace('.m3u8', '') + '</b> · player: ' + modo +
+    '<br>Tempo: ' + v.currentTime.toFixed(1) + ' / ' + (v.duration ? v.duration.toFixed(0) : '-') + ' s · qualidade: ' + q +
+    (erro ? '<br><b style="color:#f66">Erro: ' + erro + '</b>' : '')
+}, 1000)
+</script></body></html>`
+}
+
 function cors(req: Request, env: Env): Record<string, string> {
   const origin = req.headers.get('Origin')
   const allowed = env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
@@ -54,6 +81,15 @@ export default {
     }
     if (!(await validPass(env.TOKEN_SECRET, pass, `${curso}/${aula}`))) {
       return new Response('forbidden', { status: 403, headers: cors(req, env) })
+    }
+
+    // Página de teste (QA no celular): /<passe>/<curso>/<aula>/player.html?lang=pl
+    // Mesmo domínio das playlists, então não depende de CORS nem de deploy do app.
+    if (rest.join('/') === 'player.html') {
+      const lang = (url.searchParams.get('lang') ?? 'pl').replace(/[^a-zA-Z-]/g, '')
+      return new Response(playerPage(`master_${lang}.m3u8`), {
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+      })
     }
 
     const key = [curso, aula, ...rest].join('/')

@@ -1,4 +1,15 @@
 {
-  "baseUrl": null,
-  "lessons": {}
+  "baseUrl": "https://aulas.riseme.app",
+  "lessons": {
+    "1": {
+      "1": {
+        "path": "c1/d01-202610061844",
+        "seconds": 591,
+        "languages": [
+          "en",
+          "pl"
+        ]
+      }
+    }
+  }
 }
