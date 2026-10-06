@@ -57,6 +57,7 @@ com fontes: `docs/pesquisa-video-multiaudio.md`.
 - [ ] Token: **My Profile → API Tokens → Create Custom Token**, nome `riseme-r2`, permissões:
   - `Account` → `Workers R2 Storage` → `Edit`
   - `Account` → `Workers Scripts` → `Edit`
+  - `Account` → `Account Analytics` → `Read` (monitor de custo: ler o uso de R2, Workers e Stream)
   - `Zone` → `DNS` → `Edit`, `Zone` → `Workers Routes` → `Edit`, `Zone` → `Cache Rules` → `Edit` (zona `riseme.app`)
 - [ ] Colar no `.env.local` do riseme: `CLOUDFLARE_R2_TOKEN=<o token>` (não colar no chat) e avisar "pronto".
 - [ ] Quando a aula piloto estiver no ar: abrir o link no iPhone (e num Android) e dizer se tocou no idioma certo.
