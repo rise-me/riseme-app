@@ -110,6 +110,7 @@ def main() -> None:
     ap.add_argument("--challenge", help="id do desafio (lib/mock-challenges.ts)")
     ap.add_argument("--day", type=int, help="dia/aula do desafio")
     ap.add_argument("--new-version", action="store_true", help="vídeo foi recodificado: novo caminho")
+    ap.add_argument("--languages", help="idiomas liberados no app (ex.: pl,en); padrão: todos os empacotados")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -149,7 +150,11 @@ def main() -> None:
     if r.returncode != 0:
         sys.exit("[erro] upload falhou — rode de novo (o rclone só envia o que faltou)")
 
-    days[str(args.day)] = {"path": path, "seconds": round(meta["duration"]), "languages": meta["languages"]}
+    langs = [l.strip() for l in args.languages.split(",")] if args.languages else meta["languages"]
+    missing = [l for l in langs if l not in meta["languages"]]
+    if missing:
+        sys.exit(f"[erro] idiomas não empacotados nessa aula: {missing}")
+    days[str(args.day)] = {"path": path, "seconds": round(meta["duration"]), "languages": langs}
     data["baseUrl"] = data.get("baseUrl") or BASE_URL
     DATA_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
     print(f"\n✅ publicado em {BASE_URL}/<passe>/{path}/ — commitar {DATA_PATH.relative_to(ROOT)}")
