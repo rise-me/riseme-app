@@ -125,6 +125,17 @@ export async function vincularPorEmail(conversa: MensagemConversa[]): Promise<st
   return data?.[0]?.id ?? null
 }
 
+/** Guarda o LID da conversa (só dá pra saber quando o webhook traz telefone E LID juntos). */
+export async function salvarLid(phone: string, lid: string): Promise<void> {
+  await admin().from('whatsapp_chats').upsert({ phone, lid }, { onConflict: 'phone' })
+}
+
+/** Telefone da conversa que tem esse LID (pra casar a resposta de uma pessoa pelo celular). */
+export async function telefoneDoLid(lid: string): Promise<string | null> {
+  const { data } = await admin().from('whatsapp_chats').select('phone').eq('lid', lid).limit(1)
+  return data?.[0]?.phone ?? null
+}
+
 /** Cala o bot neste número por `horas` (pessoa assumiu ou o agente pediu handoff). */
 export async function passarParaHumano(phone: string, horas: number, motivo: string): Promise<void> {
   await admin()

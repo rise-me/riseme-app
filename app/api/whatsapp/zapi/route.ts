@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse, after } from 'next/server'
-import { sendZapiText } from '@/lib/zapi'
+import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
 import { decidirResposta } from '@/lib/whatsapp-agent/responder'
 import {
   abrirChat,
@@ -8,6 +8,8 @@ import {
   passarParaHumano,
   perfilDaAluna,
   registrarMensagem,
+  salvarLid,
+  telefoneDoLid,
   ultimaEntrada,
   vincularPorEmail,
 } from '@/lib/whatsapp-agent/conversa'
@@ -26,6 +28,10 @@ export const maxDuration = 60
 const ESPERA_AGRUPAR_MS = 6000 // aluna manda 3 mensagens seguidas → 1 resposta só
 const HORAS_PESSOA = 12 // pessoa respondeu pelo celular → bot calado por 12h
 const HORAS_HANDOFF = 24 // agente pediu humano → bot calado por 24h
+// Etiquetas do WhatsApp Business no celular do suporte (ids da conta; ver lib/zapi.ts → etiquetar).
+// Respondeu = filtro pra revisar o que o Claude falou; transferiu = pendente (vai também como NÃO LIDA).
+const TAG_RESPONDEU = process.env.ZAPI_TAG_CLAUDE_RESPONDEU
+const TAG_TRANSFERIU = process.env.ZAPI_TAG_CLAUDE_TRANSFERIU
 
 interface ZapiCallback {
   type?: string
@@ -68,7 +74,7 @@ async function avisarHumano(phone: string, nome: string | undefined, motivo: str
     console.warn(`[whatsapp] handoff sem WHATSAPP_HANDOFF_PHONE — ${phone}: ${motivo}`)
     return
   }
-  const message = `⚠️ RiseMe — conversa precisa de uma pessoa\n${nome ?? 'Aluna'} (+${phone})\nMotivo: ${motivo}\nhttps://wa.me/${phone}`
+  const message = `⚠️ RiseMe — conversa precisa de uma pessoa\n${nome ?? 'Aluna'} (+${phone})\nMotivo: ${motivo}${phone.endsWith('@lid') ? '' : `\nhttps://wa.me/${phone}`}`
   const r = await sendZapiText({ phone: destino, message })
   if (!r.ok) console.error('[whatsapp] aviso de handoff falhou:', r.error)
   else await registrarMensagem({ phone: destino.replace(/\D/g, ''), direction: 'out', author: 'system', body: message, waMessageId: r.messageId })
@@ -108,14 +114,22 @@ async function processarEntrada(phone: string, waMessageId: string) {
   if (decisao.tipo === 'humano') {
     await passarParaHumano(phone, HORAS_HANDOFF, decisao.motivo)
     await avisarHumano(phone, perfil?.nome, decisao.motivo)
+    if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU)
+    if (TAG_RESPONDEU) await etiquetar(phone, TAG_RESPONDEU, 'remove')
+    await marcarNaoLida(phone)
+  } else if (TAG_RESPONDEU) {
+    await etiquetar(phone, TAG_RESPONDEU)
+    if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU, 'remove')
   }
 }
 
 // Mensagem "enviada por mim" que NÃO foi o sistema (nem o agente, nem o acesso)
 // = uma pessoa digitou no celular. Espera um pouco porque o webhook do envio do
 // próprio sistema pode chegar antes de a gente gravar o messageId.
-async function processarSaida(phone: string, waMessageId: string, texto: string) {
+async function processarSaida(chave: string, lid: string | null, waMessageId: string, texto: string) {
   await esperar(4000)
+  // Resposta pelo celular costuma vir com o LID no lugar do telefone: casa com o chat da aluna.
+  const phone = (lid && (await telefoneDoLid(lid))) || chave
   if (await mensagemJaRegistrada(waMessageId)) return
   await registrarMensagem({ phone, direction: 'out', author: 'human', body: texto, waMessageId })
   await passarParaHumano(phone, HORAS_PESSOA, 'pessoa respondeu pelo celular')
@@ -135,23 +149,20 @@ export async function POST(request: NextRequest) {
   if (m.type !== 'ReceivedCallback' || m.isGroup || m.isNewsletter || m.broadcast || m.isStatusReply) {
     return NextResponse.json({ ok: true, skipped: 'not a direct message' })
   }
-  const phone = (m.phone ?? '').replace(/\D/g, '')
+  // phone pode vir como telefone ("5511…") ou como LID ("1453…@lid"); chatLid é o LID estável.
+  const ehLid = (m.phone ?? '').includes('@lid')
+  const lid = (m.chatLid ?? (ehLid ? m.phone : '') ?? '').replace(/\D/g, '') || null
+  const phone = ehLid ? `${lid}@lid` : (m.phone ?? '').replace(/\D/g, '')
   const texto = textoDa(m)
   if (!phone || !m.messageId || !texto) return NextResponse.json({ ok: true, skipped: 'empty' })
   const waMessageId = m.messageId
 
-  // DIAGNÓSTICO (05/10): resposta de pessoa pelo celular às vezes chega com o LID do WhatsApp
-  // no lugar do telefone e não casa com o chat da aluna. Loga só os identificadores (sem texto)
-  // pra mapear LID → telefone antes de corrigir.
-  if (m.fromMe || phone.length > 13 || m.phone?.includes('@')) {
-    console.log('[zapi-ids]', JSON.stringify({ fromMe: m.fromMe, phone: m.phone, senderLid: m.senderLid, chatLid: m.chatLid, participantLid: m.participantLid, messageId: waMessageId }))
-  }
-
   if (m.fromMe) {
-    after(() => processarSaida(phone, waMessageId, texto))
+    after(() => processarSaida(phone, lid, waMessageId, texto))
     return NextResponse.json({ ok: true })
   }
 
+  if (lid && !ehLid) await salvarLid(phone, lid)
   const nova = await registrarMensagem({ phone, direction: 'in', author: 'student', body: texto, waMessageId })
   if (nova) after(() => processarEntrada(phone, waMessageId))
   return NextResponse.json({ ok: true })
