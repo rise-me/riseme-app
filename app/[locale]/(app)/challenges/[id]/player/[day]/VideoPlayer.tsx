@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { markDayComplete } from '@/lib/progress'
 import { track } from '@/lib/posthog/track'
 import type { MockChallenge } from '@/lib/mock-challenges'
-import { STREAM_CUSTOMER_HOST, type LessonVideo, type MockDay } from '@/lib/mock-challenge-days'
+import { HLS_BASE_URL, STREAM_CUSTOMER_HOST, type LessonVideo, type MockDay } from '@/lib/mock-challenge-days'
 import { CastTvHelp } from '@/components/challenges/CastTvHelp'
 
 interface Props {
@@ -77,6 +77,49 @@ async function mountPlayer(host: HTMLDivElement, video: LessonVideo): Promise<Pl
       getCurrentTime: () => p.currentTime || 0,
       getDuration: () => p.duration || 0,
       destroy: () => iframe.remove(),
+    }
+  }
+
+  if (video.provider === 'hls') {
+    if (!HLS_BASE_URL) return null
+    // A playlist já é a do idioma da aluna (só tem esse áudio): o player nunca escolhe faixa
+    const src = `${HLS_BASE_URL}/${video.id}`
+    const el = document.createElement('video')
+    el.controls = true
+    el.playsInline = true
+    el.autoplay = true
+    el.preload = 'auto'
+    el.style.width = '100%'
+    el.style.height = '100%'
+    el.style.background = '#000'
+    host.appendChild(el)
+    // iPhone/iPad: HLS nativo (mantém AirPlay e gasta menos bateria). Resto: hls.js —
+    // o Chrome do Android diz "maybe" pro HLS nativo e depois falha.
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    let hls: import('hls.js').default | null = null
+    if (!isIOS) {
+      const { default: Hls } = await import('hls.js')
+      if (Hls.isSupported()) {
+        // não baixa 1080p pra uma tela de celular
+        hls = new Hls({ capLevelToPlayerSize: true })
+        hls.loadSource(src)
+        hls.attachMedia(el)
+      }
+    }
+    if (!hls) el.src = src
+    // autoplay com som costuma ser bloqueado no celular; aí a aluna toca no play
+    el.play().catch(() => {})
+    return {
+      getCurrentTime: () => el.currentTime || 0,
+      getDuration: () => (Number.isFinite(el.duration) ? el.duration : 0),
+      destroy: () => {
+        hls?.destroy()
+        el.removeAttribute('src')
+        el.load()
+        el.remove()
+      },
     }
   }
 
