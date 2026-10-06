@@ -66,6 +66,8 @@ com fontes: `docs/pesquisa-video-multiaudio.md`.
 - [x] Piloto empacotado (06/10): Calistenia dia 1, vídeo único + áudio EN e PL (vídeo PL = EN quadro a quadro).
       21,9 MB/min de vídeo nas 4 qualidades + 4–7 MB de áudio por idioma. Falta subir no R2.
       Código no ramo `feat/video-r2` (worktree `../riseme-r2`).
+- [x] 06/10: R2 ativo, porteiro no ar em aulas.riseme.app, aula piloto publicada; tocou no desktop e no
+      iPhone (Safari) com áudio PL. Falta: Android, app na tela inicial do iPhone, AirPlay.
 - [ ] Testes decisivos: áudio certo no iPhone (Safari e app na tela inicial, iOS 26/27, AirPlay),
       Android (Chrome e Samsung Internet), qualidade e MB reais por minuto, sincronia da dublagem.
 - [x] `scripts/package-lesson.py` (empacota; `--add` põe idioma sem recodificar) e
