@@ -8,6 +8,7 @@ import {
   passarParaHumano,
   perfilDaAluna,
   registrarMensagem,
+  respostasRecentes,
   salvarLid,
   telefoneDoLid,
   ultimaEntrada,
@@ -90,6 +91,15 @@ async function processarEntrada(phone: string, waMessageId: string | null) {
 
   const chat = await abrirChat(phone)
   if (chat.modoHumano) return
+
+  // Trava anti-loop: do outro lado pode haver OUTRO robô (resposta automática com IA que devolve
+  // o nosso texto — caso real em 10/10/2026). Gente não recebe 2 respostas e escreve de novo em
+  // 3 minutos; robô sim. Para em silêncio, sem mandar mais nada.
+  if ((await respostasRecentes(phone, 3)) >= 2) {
+    await passarParaHumano(phone, HORAS_PESSOA, 'possível robô do outro lado (respostas em rajada) — bot parou sozinho')
+    if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU)
+    return
+  }
 
   const conversa = await historico(phone)
   const porEmail = chat.userId ? null : await vincularPorEmail(conversa)

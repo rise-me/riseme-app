@@ -136,6 +136,17 @@ export async function telefoneDoLid(lid: string): Promise<string | null> {
   return data?.[0]?.phone ?? null
 }
 
+/** Quantas respostas o agente mandou para este número nos últimos `minutos`. */
+export async function respostasRecentes(phone: string, minutos: number): Promise<number> {
+  const { count } = await admin()
+    .from('whatsapp_messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('phone', phone)
+    .eq('author', 'agent')
+    .gte('created_at', new Date(Date.now() - minutos * 60_000).toISOString())
+  return count ?? 0
+}
+
 /** Devolve a conversa ao bot (fim de handoff/pane, ou resposta aprovada já enviada). */
 export async function voltarParaBot(phone: string): Promise<void> {
   await admin()
