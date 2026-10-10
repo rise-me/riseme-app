@@ -93,9 +93,9 @@ async function processarEntrada(phone: string, waMessageId: string | null) {
   if (chat.modoHumano) return
 
   // Trava anti-loop: do outro lado pode haver OUTRO robô (resposta automática com IA que devolve
-  // o nosso texto — caso real em 10/10/2026). Gente não recebe 2 respostas e escreve de novo em
-  // 3 minutos; robô sim. Para em silêncio, sem mandar mais nada.
-  if ((await respostasRecentes(phone, 3)) >= 2) {
+  // o nosso texto — caso real em 10/10/2026). Aluna conversando rápido chega a 2–3 respostas em
+  // poucos minutos; 4 respostas em 5 minutos é robô. Para em silêncio, sem mandar mais nada.
+  if ((await respostasRecentes(phone, 5)) >= 4) {
     await passarParaHumano(phone, HORAS_PESSOA, 'possível robô do outro lado (respostas em rajada) — bot parou sozinho')
     if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU)
     return
