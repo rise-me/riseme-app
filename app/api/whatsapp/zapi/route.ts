@@ -12,6 +12,7 @@ import {
   telefoneDoLid,
   ultimaEntrada,
   vincularPorEmail,
+  voltarParaBot,
 } from '@/lib/whatsapp-agent/conversa'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
@@ -80,9 +81,12 @@ async function avisarHumano(phone: string, nome: string | undefined, motivo: str
   else await registrarMensagem({ phone: destino.replace(/\D/g, ''), direction: 'out', author: 'system', body: message, waMessageId: r.messageId })
 }
 
-async function processarEntrada(phone: string, waMessageId: string) {
-  await esperar(ESPERA_AGRUPAR_MS)
-  if ((await ultimaEntrada(phone)) !== waMessageId) return // chegou outra depois: ela responde tudo
+// waMessageId null = reprocessar (sem esperar agrupamento): conversa que ficou sem resposta.
+async function processarEntrada(phone: string, waMessageId: string | null) {
+  if (waMessageId) {
+    await esperar(ESPERA_AGRUPAR_MS)
+    if ((await ultimaEntrada(phone)) !== waMessageId) return // chegou outra depois: ela responde tudo
+  }
 
   const chat = await abrirChat(phone)
   if (chat.modoHumano) return
@@ -142,6 +146,16 @@ export async function POST(request: NextRequest) {
   const segredo = process.env.ZAPI_WEBHOOK_SECRET
   if (!segredo || request.nextUrl.searchParams.get('s') !== segredo) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // ?acao=reprocessar + { phone }: devolve a conversa ao bot e faz o agente responder o que ficou
+  // parado (pane do agente, pendentes antigos). Mesmo segredo do webhook; uso manual/scripts.
+  if (request.nextUrl.searchParams.get('acao') === 'reprocessar') {
+    const alvo = ((await request.json().catch(() => null)) as { phone?: string } | null)?.phone
+    if (!alvo) return NextResponse.json({ error: 'phone obrigatório' }, { status: 400 })
+    await voltarParaBot(alvo)
+    after(() => processarEntrada(alvo, null))
+    return NextResponse.json({ ok: true, reprocessando: alvo })
   }
 
   const m = (await request.json().catch(() => null)) as ZapiCallback | null

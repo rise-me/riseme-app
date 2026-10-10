@@ -136,6 +136,14 @@ export async function telefoneDoLid(lid: string): Promise<string | null> {
   return data?.[0]?.phone ?? null
 }
 
+/** Devolve a conversa ao bot (fim de handoff/pane, ou resposta aprovada já enviada). */
+export async function voltarParaBot(phone: string): Promise<void> {
+  await admin()
+    .from('whatsapp_chats')
+    .update({ mode: 'bot', human_until: null, updated_at: new Date().toISOString() })
+    .eq('phone', phone)
+}
+
 /** Cala o bot neste número por `horas` (pessoa assumiu ou o agente pediu handoff). */
 export async function passarParaHumano(phone: string, horas: number, motivo: string): Promise<void> {
   await admin()
