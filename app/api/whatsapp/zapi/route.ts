@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
-import { decidirResposta } from '@/lib/whatsapp-agent/responder'
+import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
   abrirChat,
+  aprendizadosAtivos,
+  consultaPorAlerta,
+  consultasPendentes,
+  criarConsulta,
+  fecharConsulta,
+  marcarAlertaDaConsulta,
+  salvarAprendizado,
+  type ConsultaAberta,
   historico,
   mensagemJaRegistrada,
   passarParaHumano,
@@ -51,7 +59,8 @@ interface ZapiCallback {
   participantLid?: string | null
   text?: { message?: string }
   audio?: unknown
-  image?: { caption?: string }
+  image?: { caption?: string; imageUrl?: string }
+  referenceMessageId?: string // mensagem que esta responde (citação)
   video?: { caption?: string }
   document?: { fileName?: string }
   sticker?: unknown
@@ -63,11 +72,117 @@ const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
 function textoDa(m: ZapiCallback): string | null {
   if (m.text?.message) return m.text.message
   if (m.audio) return '[a aluna mandou um ÁUDIO — você não consegue ouvir; peça com carinho para escrever]'
-  if (m.image) return `[a aluna mandou uma IMAGEM${m.image.caption ? ` com a legenda: ${m.image.caption}` : ''}]`
+  // Com URL a imagem vai anexada pro agente VER (responder.ts lê "[IMAGEM: url]"); sem URL, só o aviso.
+  if (m.image) {
+    const legenda = m.image.caption ? ` Legenda: ${m.image.caption}` : ''
+    return m.image.imageUrl ? `[IMAGEM: ${m.image.imageUrl}]${legenda}` : `[a aluna mandou uma IMAGEM]${legenda}`
+  }
   if (m.video) return `[a aluna mandou um VÍDEO${m.video.caption ? ` com a legenda: ${m.video.caption}` : ''}]`
   if (m.document) return `[a aluna mandou um DOCUMENTO: ${m.document.fileName ?? 'sem nome'}]`
   if (m.sticker) return '[a aluna mandou uma figurinha]'
   return null
+}
+
+// Mensagem do sistema para o responsável (registrada como 'system' pra não virar "pessoa respondeu").
+async function dizerAoResponsavel(message: string): Promise<string | null> {
+  const destino = process.env.WHATSAPP_HANDOFF_PHONE
+  if (!destino) return null
+  const r = await sendZapiText({ phone: destino, message })
+  if (!r.ok) {
+    console.error('[whatsapp] mensagem ao responsável falhou:', r.error)
+    return null
+  }
+  await registrarMensagem({ phone: destino.replace(/\D/g, ''), direction: 'out', author: 'system', body: message, waMessageId: r.messageId })
+  return r.messageId
+}
+
+// O número do responsável chega do WhatsApp sem o 9 (BR): compara só o final.
+function ehResponsavel(phone: string): boolean {
+  const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
+  return Boolean(destino) && !phone.endsWith('@lid') && phone.slice(-8) === destino.slice(-8) && phone.slice(0, 4) === destino.slice(0, 4)
+}
+
+// Transferência = CONSULTA: quem é, o que disse, o resumo e 2 respostas possíveis. O responsável
+// responde citando a mensagem (A, B, texto livre ou "pular") — ver responderConsulta.
+async function consultarResponsavel(phone: string, nome: string | undefined, idioma: string, ultimaFala: string, motivo: string, c: Consulta) {
+  const id = await criarConsulta({ ...c, phone, nome, motivo })
+  if (!id) return avisarHumano(phone, nome, motivo) // tabela indisponível → aviso simples, como antes
+  const fala = ultimaFala.replace(/\[IMAGEM: [^\]]+\]/g, '[imagem]').slice(0, 400)
+  const msg = [
+    `🟡 *Consulta #${id}* — ${nome ?? 'Aluna sem conta'} (${idioma}) +${phone.replace('@lid', ' · sem número')}`,
+    '',
+    `*Ela disse:* «${fala}»`,
+    `*Resumo:* ${c.resumo}`,
+    '',
+    c.opcaoA ? `*A)* ${c.opcaoA}` : '',
+    c.opcaoA ? '' : null,
+    c.opcaoB ? `*B)* ${c.opcaoB}` : '',
+    c.opcaoB ? '' : null,
+    'Responda *citando esta mensagem*: *A*, *B* ou escreva o que responder (eu mando no idioma dela). *pular* = você responde direto no celular do suporte.',
+  ].filter((l) => l !== null).join('\n')
+  const alertId = await dizerAoResponsavel(msg)
+  if (alertId) await marcarAlertaDaConsulta(id, alertId)
+}
+
+// O responsável respondeu no WhatsApp dele. Descobre a consulta (citação → #id → única pendente),
+// manda a resposta para a aluna no idioma dela, aprende quando a orientação é geral e devolve o chat ao bot.
+async function responderConsulta(texto: string, citada: string | undefined) {
+  const pendentes = await consultasPendentes()
+  const porId = texto.match(/^#?(\d+)\b[\s:.-]*/)
+  let consulta: ConsultaAberta | null = (citada && (await consultaPorAlerta(citada))) || null
+  let corpo = texto.trim()
+  if (!consulta && porId) {
+    consulta = pendentes.find((p) => p.id === Number(porId[1])) ?? null
+    if (consulta) corpo = corpo.slice(porId[0].length).trim()
+  }
+  if (!consulta && pendentes.length === 1) consulta = pendentes[0]
+  if (!consulta) {
+    await dizerAoResponsavel(
+      pendentes.length
+        ? `Não sei de qual consulta é essa resposta — há ${pendentes.length} pendentes (${pendentes.map((p) => `#${p.id}`).join(', ')}). Responda *citando* a mensagem da consulta, ou comece com o número: "#${pendentes[0].id} A".`
+        : 'Não há consulta pendente agora.'
+    )
+    return
+  }
+
+  const cmd = corpo.toLowerCase().replace(/[.!\s]+$/g, '')
+  if (cmd === 'pular' || cmd === 'pula') {
+    await fecharConsulta(consulta.id, { status: 'pulada' })
+    await dizerAoResponsavel(`⏭️ Consulta #${consulta.id} pulada — a conversa fica com você no celular do suporte.`)
+    return
+  }
+  const orientacao = cmd === 'a' ? consulta.opcaoA : cmd === 'b' ? consulta.opcaoB : corpo
+  if (!orientacao) {
+    await dizerAoResponsavel(`A consulta #${consulta.id} não tem essa opção. Escreva o que responder.`)
+    return
+  }
+
+  try {
+    const chat = await abrirChat(consulta.phone)
+    const conversa = await historico(consulta.phone)
+    const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
+    const userId = chat.userId ?? porEmail
+    const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
+    const { mensagem, aprendizado } = await redigirRespostaAprovada({ perfil, conversa, resumo: consulta.resumo, orientacao })
+    const envio = await sendZapiText({ phone: consulta.phone, message: mensagem, delayTyping: 2 })
+    if (!envio.ok) throw new Error(`envio à aluna falhou: ${envio.error}`)
+    await registrarMensagem({ phone: consulta.phone, direction: 'out', author: 'agent', body: mensagem, waMessageId: envio.messageId })
+    await fecharConsulta(consulta.id, { status: 'respondida', orientacao, respostaEnviada: mensagem })
+    if (aprendizado) await salvarAprendizado(aprendizado, consulta.id)
+    await voltarParaBot(consulta.phone)
+    if (TAG_RESPONDEU) await etiquetar(consulta.phone, TAG_RESPONDEU)
+    if (TAG_TRANSFERIU) await etiquetar(consulta.phone, TAG_TRANSFERIU, 'remove')
+    await dizerAoResponsavel(
+      `✅ Consulta #${consulta.id} — enviado para ${consulta.nome ?? 'a aluna'}:\n\n«${mensagem}»\n\n` +
+        (aprendizado
+          ? `📚 Aprendi (vou responder sozinho da próxima vez):\n*Pergunta:* ${aprendizado.pergunta}\n*Resposta:* ${aprendizado.resposta}`
+          : '📌 Não virou regra: entendi que vale só para este caso.')
+    )
+  } catch (err) {
+    const detalhe = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, ' ').slice(0, 250)
+    console.error(`[consulta] #${consulta.id} falhou:`, err)
+    await dizerAoResponsavel(`❌ Não consegui enviar a resposta da consulta #${consulta.id}: ${detalhe}. Ela continua pendente.`)
+  }
 }
 
 async function avisarHumano(phone: string, nome: string | undefined, motivo: string) {
@@ -108,7 +223,7 @@ async function processarEntrada(phone: string, waMessageId: string | null) {
 
   let decisao
   try {
-    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString() })
+    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos() })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
     // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).
@@ -130,7 +245,8 @@ async function processarEntrada(phone: string, waMessageId: string | null) {
 
   if (decisao.tipo === 'humano') {
     await passarParaHumano(phone, HORAS_HANDOFF, decisao.motivo)
-    await avisarHumano(phone, perfil?.nome, decisao.motivo)
+    const ultimaFala = [...conversa].reverse().find((x) => x.autor === 'student')?.texto ?? ''
+    await consultarResponsavel(phone, perfil?.nome, perfil?.idioma ?? '?', ultimaFala, decisao.motivo, decisao.consulta)
     if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU)
     if (TAG_RESPONDEU) await etiquetar(phone, TAG_RESPONDEU, 'remove')
     await marcarNaoLida(phone)
@@ -187,6 +303,16 @@ export async function POST(request: NextRequest) {
   if (m.fromMe) {
     after(() => processarSaida(phone, lid, waMessageId, texto))
     return NextResponse.json({ ok: true })
+  }
+
+  // Mensagem do RESPONSÁVEL (WhatsApp pessoal dele → número do suporte) = resposta a uma consulta,
+  // nunca conversa de aluna.
+  if (ehResponsavel(phone)) {
+    if (m.text?.message) {
+      const fala = m.text.message
+      after(() => responderConsulta(fala, m.referenceMessageId))
+    }
+    return NextResponse.json({ ok: true, responsavel: true })
   }
 
   if (lid && !ehLid) await salvarLid(phone, lid)
