@@ -198,7 +198,9 @@ async function avisarHumano(phone: string, nome: string | undefined, motivo: str
 }
 
 // waMessageId null = reprocessar (sem esperar agrupamento): conversa que ficou sem resposta.
-async function processarEntrada(phone: string, waMessageId: string | null) {
+// silencioso = pendente antigo: se o agente for transferir, NÃO manda de novo "vou transferir" pra aluna
+// (ela já ouviu isso) — só abre a consulta pro responsável. Se ele souber responder, responde.
+async function processarEntrada(phone: string, waMessageId: string | null, silencioso = false) {
   if (waMessageId) {
     await esperar(ESPERA_AGRUPAR_MS)
     if ((await ultimaEntrada(phone)) !== waMessageId) return // chegou outra depois: ela responde tudo
@@ -234,7 +236,7 @@ async function processarEntrada(phone: string, waMessageId: string | null) {
     return
   }
 
-  if (decisao.texto) {
+  if (decisao.texto && !(silencioso && decisao.tipo === 'humano')) {
     const envio = await sendZapiText({ phone, message: decisao.texto, delayTyping: 2 })
     if (envio.ok) {
       await registrarMensagem({ phone, direction: 'out', author: 'agent', body: decisao.texto, waMessageId: envio.messageId })
@@ -277,10 +279,11 @@ export async function POST(request: NextRequest) {
   // ?acao=reprocessar + { phone }: devolve a conversa ao bot e faz o agente responder o que ficou
   // parado (pane do agente, pendentes antigos). Mesmo segredo do webhook; uso manual/scripts.
   if (request.nextUrl.searchParams.get('acao') === 'reprocessar') {
-    const alvo = ((await request.json().catch(() => null)) as { phone?: string } | null)?.phone
+    const corpo = (await request.json().catch(() => null)) as { phone?: string; silencioso?: boolean } | null
+    const alvo = corpo?.phone
     if (!alvo) return NextResponse.json({ error: 'phone obrigatório' }, { status: 400 })
     await voltarParaBot(alvo)
-    after(() => processarEntrada(alvo, null))
+    after(() => processarEntrada(alvo, null, Boolean(corpo?.silencioso)))
     return NextResponse.json({ ok: true, reprocessando: alvo })
   }
 
