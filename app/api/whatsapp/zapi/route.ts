@@ -96,9 +96,12 @@ async function processarEntrada(phone: string, waMessageId: string) {
   try {
     decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString() })
   } catch (err) {
+    // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
+    // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).
+    const detalhe = (err instanceof Error ? err.message : String(err)).replace(/\s+/g, ' ').slice(0, 300)
     console.error(`[whatsapp] agente falhou (${phone}):`, err)
-    await passarParaHumano(phone, HORAS_HANDOFF, 'erro no agente')
-    await avisarHumano(phone, perfil?.nome, 'o agente deu erro ao responder')
+    await passarParaHumano(phone, HORAS_HANDOFF, `erro no agente: ${detalhe}`)
+    await avisarHumano(phone, perfil?.nome, `o agente deu erro ao responder — ${detalhe}`)
     return
   }
 
