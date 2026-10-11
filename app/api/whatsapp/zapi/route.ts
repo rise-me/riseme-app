@@ -163,7 +163,12 @@ async function responderConsulta(texto: string, citada: string | undefined) {
     const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
     const userId = chat.userId ?? porEmail
     const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
-    const { mensagem, aprendizado } = await redigirRespostaAprovada({ perfil, conversa, resumo: consulta.resumo, orientacao })
+    const { enviar, nota, mensagem, aprendizado } = await redigirRespostaAprovada({ perfil, conversa, resumo: consulta.resumo, orientacao })
+    if (!enviar) {
+      // Orientação era pergunta/pedido de ação: nada vai para a aluna, a consulta segue pendente.
+      await dizerAoResponsavel(`✋ Consulta #${consulta.id} — não enviei nada para a aluna.\n${nota || 'Não ficou claro o que responder a ela.'}\n\nQuando decidir, responda de novo citando a consulta.`)
+      return
+    }
     const envio = await sendZapiText({ phone: consulta.phone, message: mensagem, delayTyping: 2 })
     if (!envio.ok) throw new Error(`envio à aluna falhou: ${envio.error}`)
     await registrarMensagem({ phone: consulta.phone, direction: 'out', author: 'agent', body: mensagem, waMessageId: envio.messageId })

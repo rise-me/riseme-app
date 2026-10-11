@@ -272,12 +272,14 @@ const FORMATO_REDACAO = {
   schema: {
     type: 'object',
     properties: {
+      enviar: { type: 'boolean' },
+      nota_ao_responsavel: { type: 'string' },
       mensagem: { type: 'string' },
       salvar_aprendizado: { type: 'boolean' },
       aprendizado_pergunta: { type: 'string' },
       aprendizado_resposta: { type: 'string' },
     },
-    required: ['mensagem', 'salvar_aprendizado', 'aprendizado_pergunta', 'aprendizado_resposta'],
+    required: ['enviar', 'nota_ao_responsavel', 'mensagem', 'salvar_aprendizado', 'aprendizado_pergunta', 'aprendizado_resposta'],
     additionalProperties: false,
   },
 }
@@ -287,7 +289,7 @@ export async function redigirRespostaAprovada(params: {
   conversa: MensagemConversa[]
   resumo: string
   orientacao: string // o que o responsável mandou responder (português)
-}): Promise<{ mensagem: string; aprendizado: Aprendizado | null }> {
+}): Promise<{ enviar: boolean; nota: string; mensagem: string; aprendizado: Aprendizado | null }> {
   const transcricao = params.conversa.map((m) => `[${m.em}] ${ROTULO[m.autor]}: ${m.texto}`).join('\n')
   const res = await anthropic().beta.messages.create({
     model: CLAUDE_MODEL,
@@ -298,6 +300,12 @@ export async function redigirRespostaAprovada(params: {
     system:
       'Você é o atendimento do RiseMe no WhatsApp. O responsável pela operação decidiu o que responder a uma ' +
       'aluna; sua tarefa é transformar a orientação dele na mensagem para ela.\n' +
+      '- ANTES: a orientação é mesmo algo para dizer à aluna? Se ela traz uma PERGUNTA para você/para o sistema ' +
+      '("você consegue fazer isso?"), um pedido de AÇÃO que só uma pessoa faz (liberar acesso, reembolsar, trocar ' +
+      'email, conferir pagamento) ainda não feita, ou está ambígua — então "enviar" = false, "mensagem" = "" e em ' +
+      '"nota_ao_responsavel" responda a ele em português, curto: o que você não faz sozinho ou o que falta decidir ' +
+      '(você só escreve mensagens; não libera produto, não reembolsa, não altera conta). Só marque "enviar" = true ' +
+      'quando dá para mandar à aluna exatamente o que ele decidiu; aí "nota_ao_responsavel" = "".\n' +
       '- "mensagem": no idioma em que ELA escreve (nunca misture idiomas), tom de atendente calorosa e direta, ' +
       'blocos curtos separados por linha em branco, no máximo um emoji, sem saudação se a conversa já está em ' +
       'andamento. Diga exatamente o que ele orientou — não acrescente promessa, prazo, valor ou regra que ele não ' +
@@ -322,12 +330,16 @@ export async function redigirRespostaAprovada(params: {
     throw new Error(`redação sem texto (stop_reason ${res.stop_reason})`)
   }
   const out = JSON.parse(bloco.text) as {
+    enviar: boolean
+    nota_ao_responsavel: string
     mensagem: string
     salvar_aprendizado: boolean
     aprendizado_pergunta: string
     aprendizado_resposta: string
   }
   return {
+    enviar: out.enviar && Boolean(out.mensagem.trim()),
+    nota: out.nota_ao_responsavel.trim(),
     mensagem: out.mensagem.trim(),
     aprendizado:
       out.salvar_aprendizado && out.aprendizado_pergunta && out.aprendizado_resposta
