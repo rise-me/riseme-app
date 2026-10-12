@@ -16,7 +16,11 @@
 export const LINKS: Record<string, string[]> = {
   // '*' vale para qualquer idioma sem lista própria (ex.: post-manifesto em inglês no Instagram).
   // '*': ['https://www.instagram.com/p/XXXXXXXX/'],
-  // es: ['https://www.facebook.com/.../posts/...'],
+  // CL-ES — V42, a campeã (post que roda na BidCap). Facebook e Instagram alternados.
+  es: [
+    'https://www.facebook.com/365563009981105/posts/122203707488483220',
+    'https://www.instagram.com/p/DeIs5uJAIfW/',
+  ],
 }
 
 const CONVITE: Record<string, (link: string) => string> = {
