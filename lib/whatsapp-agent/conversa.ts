@@ -201,6 +201,9 @@ export async function perfilDaAluna(userId: string, confirmadaPorTelefone = true
     ultimoTreino: progresso?.[0]?.completed_at ?? null,
     liberados: [...new Set((acessos ?? []).map((a) => NOME_PRODUTO[a.challenge_id] ?? a.challenge_id))],
     confirmadaPorTelefone,
+    brindeDepoimentoEntregue: Boolean(
+      (auth?.user?.app_metadata?.menu_bonus_motivos as Record<string, string> | undefined)?.depoimento
+    ),
   }
 }
 

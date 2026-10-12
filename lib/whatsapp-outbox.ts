@@ -38,6 +38,16 @@ export async function enfileirar(m: {
   return data.id as number
 }
 
+/** Já existe mensagem desse tipo (enviada ou na fila) para este número? Ex.: pedido de depoimento, 1x por aluna. */
+export async function jaEnfileirou(phone: string, kind: string): Promise<boolean> {
+  const { count } = await admin()
+    .from('whatsapp_outbox')
+    .select('id', { count: 'exact', head: true })
+    .eq('phone', phone)
+    .eq('kind', kind)
+  return (count ?? 0) > 0
+}
+
 interface Item {
   id: number
   phone: string

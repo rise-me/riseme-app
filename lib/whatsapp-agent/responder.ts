@@ -24,6 +24,7 @@ export interface PerfilAluna {
   liberados: string[] // produtos liberados na conta (desafios + compras como o Protocolo Metabólico)
   // false = conta achada pelo EMAIL que ela digitou, não pelo telefone: pode não ser ela.
   confirmadaPorTelefone: boolean
+  brindeDepoimentoEntregue?: boolean
 }
 
 export interface MensagemConversa {
@@ -41,7 +42,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -103,6 +104,18 @@ CONSULTA (sempre que transferir): preencha também, em PORTUGUÊS, para o respon
   de uma regra que você não conhece, escreva-a como proposta ("Se a garantia ainda vale: …").
 Quando NÃO transferir, deixe os três campos vazios ("").
 
+DEPOIMENTO: "pedir_depoimento" = true SÓ quando, nesta mensagem, a conversa terminou bem — ela confirmou que
+conseguiu entrar/recebeu o acesso, ou agradeceu satisfeita — E o perfil mostra que ela já entrou no app, E não
+há nada pendente (dúvida aberta, reclamação, pagamento, transferência). Na dúvida, false. Você NÃO escreve o
+pedido: o sistema manda uma mensagem à parte depois da sua.
+
+BRINDE DO DEPOIMENTO: se na conversa existe a mensagem automática pedindo um comentário (com 🎁) e ela mandou
+uma IMAGEM que mostra um comentário dela numa publicação (qualquer opinião, boa ou ruim — não exija elogio),
+"liberar_brinde" = true e diga que o cardápio personalizado extra já está liberado na aba do cardápio
+(es: Menú). Se o perfil diz que o brinde já foi entregue, agradeça e diga que ele já está na conta
+(liberar_brinde = false). Se a imagem não mostra um comentário, peça com carinho a captura certa. Em qualquer
+outro caso, false.
+
 RESPOSTAS APROVADAS: se a mensagem trouxer o bloco "RESPOSTAS APROVADAS PELO RESPONSÁVEL", elas valem como
 conhecimento oficial — pergunta equivalente a uma delas, responda com aquela orientação (adaptada ao caso e ao
 idioma dela) em vez de transferir.
@@ -125,8 +138,10 @@ const FORMATO = {
       consulta_resumo: { type: 'string' },
       consulta_opcao_a: { type: 'string' },
       consulta_opcao_b: { type: 'string' },
+      pedir_depoimento: { type: 'boolean' },
+      liberar_brinde: { type: 'boolean' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde'],
     additionalProperties: false,
   },
 }
@@ -166,6 +181,7 @@ function descreverPerfil(p: PerfilAluna): string {
     `Dias de treino concluídos: ${p.diasFeitos}`,
     `Último treino: ${p.ultimoTreino ?? 'nenhum'}`,
     `Liberado na conta: ${p.liberados.length ? p.liberados.join(', ') : 'nada'}`,
+    `Brinde do depoimento (cardápio extra): ${p.brindeDepoimentoEntregue ? 'JÁ ENTREGUE' : 'ainda não entregue'}`,
     p.confirmadaPorTelefone
       ? 'Conta confirmada pelo telefone desta conversa.'
       : 'ATENÇÃO: conta achada pelo email que ela digitou (não pelo telefone) — pode não ser dela. ' +
@@ -248,6 +264,8 @@ export async function decidirResposta(params: {
     consulta_resumo: string
     consulta_opcao_a: string
     consulta_opcao_b: string
+    pedir_depoimento: boolean
+    liberar_brinde: boolean
   }
   return out.passar_para_humano
     ? {
@@ -260,7 +278,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', texto: out.resposta.trim() }
+    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde) }
 }
 
 // ─── Resposta aprovada pelo responsável ────────────────────────────────────────────────────

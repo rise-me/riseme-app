@@ -88,6 +88,10 @@ export async function cotaDaUsuaria(userId: string): Promise<Cota> {
 
   if (limite === 0) return { plano, limite: 0, usados: 0, restantes: 0, renova: false }
 
+  // Cardápios de brinde (ex.: depoimento) somam à cota. Ficam em app_metadata.menu_bonus —
+  // só o servidor escreve ali (user_metadata a própria usuária consegue alterar).
+  limite += await bonusDeCardapio(userId)
+
   let query = admin()
     .from('diet_menus')
     .select('id', { count: 'exact', head: true })
@@ -97,4 +101,31 @@ export async function cotaDaUsuaria(userId: string): Promise<Cota> {
 
   const usados = count ?? 0
   return { plano, limite, usados, restantes: Math.max(0, limite - usados), renova }
+}
+
+async function bonusDeCardapio(userId: string): Promise<number> {
+  const { data } = await admin().auth.admin.getUserById(userId)
+  const n = Number(data?.user?.app_metadata?.menu_bonus ?? 0)
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0
+}
+
+/**
+ * Dá 1 cardápio extra de brinde, uma única vez por `motivo` (ex.: 'depoimento').
+ * Retorna false se a conta já recebeu esse brinde.
+ */
+export async function darCardapioBonus(userId: string, motivo: string): Promise<boolean> {
+  const sb = admin()
+  const { data } = await sb.auth.admin.getUserById(userId)
+  const meta = (data?.user?.app_metadata ?? {}) as Record<string, unknown>
+  const dados = (meta.menu_bonus_motivos ?? {}) as Record<string, string>
+  if (dados[motivo]) return false
+  const { error } = await sb.auth.admin.updateUserById(userId, {
+    app_metadata: {
+      ...meta,
+      menu_bonus: Number(meta.menu_bonus ?? 0) + 1,
+      menu_bonus_motivos: { ...dados, [motivo]: new Date().toISOString() },
+    },
+  })
+  if (error) throw new Error(`brinde de cardápio falhou: ${error.message}`)
+  return true
 }

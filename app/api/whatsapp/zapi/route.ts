@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
+import { enfileirar, jaEnfileirou } from '@/lib/whatsapp-outbox'
+import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
+import { darCardapioBonus } from '@/lib/diet/quota'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
   abrirChat,
@@ -228,7 +231,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   const userId = chat.userId ?? porEmail
   const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
 
-  let decisao
+  let decisao: Awaited<ReturnType<typeof decidirResposta>>
   try {
     decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos() })
   } catch (err) {
@@ -239,6 +242,33 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     await passarParaHumano(phone, HORAS_HANDOFF, `erro no agente: ${detalhe}`)
     await avisarHumano(phone, perfil?.nome, `o agente deu erro ao responder — ${detalhe}`)
     return
+  }
+
+  // Brinde do depoimento: o agente viu o print do comentário. Libera ANTES de mandar a resposta (que
+  // diz "já está liberado"). Só para conta confirmada pelo telefone e que recebeu o convite; se não der
+  // para liberar, vira consulta em vez de prometer o que não foi entregue.
+  if (decisao.tipo === 'responder' && decisao.liberarBrinde) {
+    let liberou = false
+    try {
+      if (userId && !porEmail && (await jaEnfileirou(phone, 'depoimento'))) {
+        await darCardapioBonus(userId, 'depoimento') // false = já tinha; a resposta do agente cobre os dois casos
+        liberou = true
+      }
+    } catch (err) {
+      console.error(`[depoimento] brinde falhou (${phone}):`, err)
+    }
+    if (!liberou) {
+      decisao = {
+        tipo: 'humano',
+        texto: '',
+        motivo: 'aluna mandou o print do depoimento mas o brinde não pôde ser liberado sozinho',
+        consulta: {
+          resumo: 'Ela comentou e mandou o print para ganhar o cardápio extra, mas o sistema não liberou (conta não confirmada pelo telefone, convite não registrado ou erro).',
+          opcaoA: 'Obrigada pelo comentário! Já liberei seu cardápio extra, está na aba do cardápio no app.',
+          opcaoB: 'Obrigada pelo comentário! Me passa o email da sua compra para eu liberar seu cardápio extra.',
+        },
+      }
+    }
   }
 
   if (decisao.texto && !(silencioso && decisao.tipo === 'humano')) {
@@ -257,9 +287,19 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU)
     if (TAG_RESPONDEU) await etiquetar(phone, TAG_RESPONDEU, 'remove')
     await marcarNaoLida(phone)
-  } else if (TAG_RESPONDEU) {
-    await etiquetar(phone, TAG_RESPONDEU)
-    if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU, 'remove')
+  } else {
+    if (TAG_RESPONDEU) {
+      await etiquetar(phone, TAG_RESPONDEU)
+      if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU, 'remove')
+    }
+    // Onboarding terminou bem → pedido de depoimento, 1x por aluna, ~1 min depois da resposta
+    // (mensagem à parte; links e texto em lib/whatsapp-agent/depoimentos.ts).
+    if (decisao.pedirDepoimento && !silencioso) {
+      const convite = conviteDepoimento(perfil?.idioma ?? 'es', phone)
+      if (convite && !(await jaEnfileirou(phone, 'depoimento'))) {
+        await enfileirar({ phone, kind: 'depoimento', body: convite, sendAfter: new Date(Date.now() + 60_000) })
+      }
+    }
   }
 }
 
