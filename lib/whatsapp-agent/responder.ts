@@ -155,6 +155,22 @@ const ROTULO: Record<MensagemConversa['autor'], string> = {
   system: 'MENSAGEM AUTOMÁTICA',
 }
 
+type TipoImagem = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
+const TIPOS_IMAGEM: TipoImagem[] = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+
+async function baixarImagem(url: string): Promise<{ tipo: TipoImagem; dados: string } | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) })
+    if (!res.ok) return null
+    const tipo = (res.headers.get('content-type') ?? '').split(';')[0].trim() as TipoImagem
+    const bytes = Buffer.from(await res.arrayBuffer())
+    if (!TIPOS_IMAGEM.includes(tipo) || bytes.length > 4_500_000) return null
+    return { tipo, dados: bytes.toString('base64') }
+  } catch {
+    return null
+  }
+}
+
 type Material = { acesso: 'brinde' | 'compra'; textos: Record<string, string> }
 const BASE = MATERIAIS as Record<string, Material>
 
@@ -209,7 +225,10 @@ export async function decidirResposta(params: {
       return `[${m.em}] ${ROTULO[m.autor]}: ${texto}`
     })
     .join('\n')
-  const imagens = urls.slice(-3)
+  // A Anthropic não consegue buscar a imagem pela URL da Z-API (bloqueada por robots.txt — derrubava
+  // o agente em toda conversa com print, 12–13/10/2026). O servidor baixa e manda em base64; imagem
+  // que não der para baixar simplesmente não vai (o texto continua dizendo que ela mandou uma).
+  const imagens = (await Promise.all(urls.slice(-3).map(baixarImagem))).filter((i) => i !== null)
   const aprovadas = (params.aprendizados ?? []).length
     ? '\n\nRESPOSTAS APROVADAS PELO RESPONSÁVEL:\n' +
       params.aprendizados!.map((a, i) => `${i + 1}. Pergunta: ${a.pergunta}\n   Resposta: ${a.resposta}`).join('\n')
@@ -240,7 +259,10 @@ export async function decidirResposta(params: {
       {
         role: 'user',
         content: [
-          ...imagens.map((url) => ({ type: 'image' as const, source: { type: 'url' as const, url } })),
+          ...imagens.map((img) => ({
+            type: 'image' as const,
+            source: { type: 'base64' as const, media_type: img.tipo, data: img.dados },
+          })),
           {
             type: 'text' as const,
             text:
@@ -308,7 +330,9 @@ export async function redigirRespostaAprovada(params: {
   perfil: PerfilAluna | null
   conversa: MensagemConversa[]
   resumo: string
-  orientacao: string // o que o responsável mandou responder (português)
+  opcaoA: string
+  opcaoB: string
+  orientacao: string // o que o responsável escreveu (português), do jeito dele: "A", "B)", "A, mas…", texto livre
 }): Promise<{ enviar: boolean; nota: string; mensagem: string; aprendizado: Aprendizado | null }> {
   const transcricao = params.conversa.map((m) => `[${m.em}] ${ROTULO[m.autor]}: ${m.texto}`).join('\n')
   const res = await anthropic().beta.messages.create({
@@ -320,6 +344,10 @@ export async function redigirRespostaAprovada(params: {
     system:
       'Você é o atendimento do RiseMe no WhatsApp. O responsável pela operação decidiu o que responder a uma ' +
       'aluna; sua tarefa é transformar a orientação dele na mensagem para ela.\n' +
+      '- A resposta dele pode vir de vários jeitos: só a letra ("A", "B)", "resposta B", "opção a") = use a ' +
+      'opção correspondente da lista abaixo; letra + ajuste ("A, mas pede o email", "B) porém com um emoji no ' +
+      'final") = a opção com o ajuste aplicado; ou texto próprio = o que ele escreveu. As opções A e B estão ' +
+      'sempre na mensagem: nunca diga que não sabe qual é a opção A ou B.\n' +
       '- ANTES: a orientação é mesmo algo para dizer à aluna? Se ela traz uma PERGUNTA para você/para o sistema ' +
       '("você consegue fazer isso?"), um pedido de AÇÃO que só uma pessoa faz (liberar acesso, reembolsar, trocar ' +
       'email, conferir pagamento) ainda não feita, ou está ambígua — então "enviar" = false, "mensagem" = "" e em ' +
@@ -341,7 +369,9 @@ export async function redigirRespostaAprovada(params: {
         content:
           `Idioma do perfil dela: ${params.perfil?.idioma ?? 'desconhecido (use o da conversa)'}\n` +
           `Nome: ${params.perfil?.nome ?? 'desconhecido'}\n\nConversa:\n${transcricao}\n\n` +
-          `Dúvida dela (resumo): ${params.resumo}\n\nOrientação do responsável: ${params.orientacao}`,
+          `Dúvida dela (resumo): ${params.resumo}\n\n` +
+          `Opções que foram oferecidas ao responsável:\nA) ${params.opcaoA || '(sem opção A)'}\nB) ${params.opcaoB || '(sem opção B)'}\n\n` +
+          `Resposta do responsável: ${params.orientacao}`,
       },
     ],
   })

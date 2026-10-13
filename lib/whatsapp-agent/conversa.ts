@@ -243,14 +243,29 @@ const paraAberta = (r: Record<string, unknown>): ConsultaAberta => ({
   opcaoB: (r.opcao_b as string) ?? '',
 })
 
-/** Pendentes, da mais antiga para a mais nova. */
+/**
+ * Pendentes das últimas 48 h, da mais antiga para a mais nova. Mais velhas que isso não entram no
+ * "qual consulta é essa?" (acumulavam e toda resposta sem citação virava ambígua); continuam
+ * respondíveis citando a mensagem ou pelo #id.
+ */
 export async function consultasPendentes(): Promise<ConsultaAberta[]> {
   const { data } = await admin()
     .from('whatsapp_consultas')
     .select('id, phone, nome, resumo, opcao_a, opcao_b')
     .eq('status', 'pendente')
+    .gte('created_at', new Date(Date.now() - 48 * 3600_000).toISOString())
     .order('created_at', { ascending: true })
   return (data ?? []).map(paraAberta)
+}
+
+export async function consultaPorId(id: number): Promise<ConsultaAberta | null> {
+  const { data } = await admin()
+    .from('whatsapp_consultas')
+    .select('id, phone, nome, resumo, opcao_a, opcao_b')
+    .eq('id', id)
+    .eq('status', 'pendente')
+    .limit(1)
+  return data?.[0] ? paraAberta(data[0]) : null
 }
 
 export async function consultaPorAlerta(alertMessageId: string): Promise<ConsultaAberta | null> {

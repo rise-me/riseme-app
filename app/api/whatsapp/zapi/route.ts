@@ -8,6 +8,7 @@ import {
   abrirChat,
   aprendizadosAtivos,
   consultaPorAlerta,
+  consultaPorId,
   consultasPendentes,
   criarConsulta,
   fecharConsulta,
@@ -135,14 +136,14 @@ async function responderConsulta(texto: string, citada: string | undefined) {
   let consulta: ConsultaAberta | null = (citada && (await consultaPorAlerta(citada))) || null
   let corpo = texto.trim()
   if (!consulta && porId) {
-    consulta = pendentes.find((p) => p.id === Number(porId[1])) ?? null
+    consulta = await consultaPorId(Number(porId[1])) // vale também para as antigas (fora das 48 h)
     if (consulta) corpo = corpo.slice(porId[0].length).trim()
   }
   if (!consulta && pendentes.length === 1) consulta = pendentes[0]
   if (!consulta) {
     await dizerAoResponsavel(
       pendentes.length
-        ? `Não sei de qual consulta é essa resposta — há ${pendentes.length} pendentes (${pendentes.map((p) => `#${p.id}`).join(', ')}). Responda *citando* a mensagem da consulta, ou comece com o número: "#${pendentes[0].id} A".`
+        ? `Não sei de qual consulta é essa resposta. Abertas agora:\n${pendentes.map((p) => `• #${p.id} — ${p.nome ?? 'aluna sem conta'}: ${p.resumo.slice(0, 70)}…`).join('\n')}\n\nResponda *citando* a mensagem da consulta, ou comece com o número: "#${pendentes[pendentes.length - 1].id} A".`
         : 'Não há consulta pendente agora.'
     )
     return
@@ -154,9 +155,11 @@ async function responderConsulta(texto: string, citada: string | undefined) {
     await dizerAoResponsavel(`⏭️ Consulta #${consulta.id} pulada — a conversa fica com você no celular do suporte.`)
     return
   }
-  const orientacao = cmd === 'a' ? consulta.opcaoA : cmd === 'b' ? consulta.opcaoB : corpo
+  // Sem interpretar aqui: "A", "B)", "resposta B", "A, mas pede o email"… quem entende é o redator,
+  // que recebe as duas opções junto (13/10/2026: comparar com 'a'/'b' exatos falhava em quase tudo).
+  const orientacao = corpo
   if (!orientacao) {
-    await dizerAoResponsavel(`A consulta #${consulta.id} não tem essa opção. Escreva o que responder.`)
+    await dizerAoResponsavel(`Não entendi a resposta da consulta #${consulta.id}. Escreva A, B ou o que responder.`)
     return
   }
 
@@ -166,7 +169,14 @@ async function responderConsulta(texto: string, citada: string | undefined) {
     const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
     const userId = chat.userId ?? porEmail
     const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
-    const { enviar, nota, mensagem, aprendizado } = await redigirRespostaAprovada({ perfil, conversa, resumo: consulta.resumo, orientacao })
+    const { enviar, nota, mensagem, aprendizado } = await redigirRespostaAprovada({
+      perfil,
+      conversa,
+      resumo: consulta.resumo,
+      opcaoA: consulta.opcaoA,
+      opcaoB: consulta.opcaoB,
+      orientacao,
+    })
     if (!enviar) {
       // Orientação era pergunta/pedido de ação: nada vai para a aluna, a consulta segue pendente.
       await dizerAoResponsavel(`✋ Consulta #${consulta.id} — não enviei nada para a aluna.\n${nota || 'Não ficou claro o que responder a ela.'}\n\nQuando decidir, responda de novo citando a consulta.`)
