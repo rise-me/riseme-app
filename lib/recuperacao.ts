@@ -11,10 +11,16 @@
 
 // Produto e ofertas do front da CL-ES (Hotmart H101419289G = produto 6087092).
 export const PRODUTO_ID = 6087092
-export const OFERTAS = new Set(['j3m3v9m3'])
+const OFERTA_FRONT = 'j3m3v9m3'
+// Oferta PRÓPRIA da recuperação (decisão do Bruno 14/10/2026): mesmo produto e preço, código diferente, para o dashboard
+// separar "venda recuperada" pelo código da oferta — sem tocar em src/sck/xcod. Vazia = o link usa a oferta do front.
+// Antes de preencher: a oferta nova precisa estar na página de checkout personalizada, no order bump e no Funil de Vendas.
+export const OFERTA_RECUPERACAO = process.env.RECUPERACAO_OFERTA ?? ''
+// Tentativas que disparam a recuperação e aprovações que a cancelam: o front e a própria oferta de recuperação.
+export const OFERTAS = new Set([OFERTA_FRONT, OFERTA_RECUPERACAO].filter(Boolean))
 const CHECKOUT = 'https://pay.hotmart.com/H101419289G'
 // Mesmos parâmetros do atalho oficial do funil (hotm.io/checkout-calistenia-es-sem-boleto), conferido 14/10/2026.
-const PARAMS_FIXOS = { off: 'j3m3v9m3', checkoutMode: '10', hideBillet: '1', hideMultipleCards: '1' }
+const PARAMS_FIXOS = { off: OFERTA_RECUPERACAO || OFERTA_FRONT, checkoutMode: '10', hideBillet: '1', hideMultipleCards: '1' }
 
 export const ESPERA_MS = 15 * 60_000
 export const JANELA_MS = 48 * 3600_000
