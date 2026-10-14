@@ -22,8 +22,7 @@ const CHECKOUT = 'https://pay.hotmart.com/H101419289G'
 // Mesmos parâmetros do atalho oficial do funil (hotm.io/checkout-calistenia-es-sem-boleto), conferido 14/10/2026.
 const PARAMS_FIXOS = { off: OFERTA_RECUPERACAO || OFERTA_FRONT, checkoutMode: '10', hideBillet: '1', hideMultipleCards: '1' }
 
-export const ESPERA_MS = 15 * 60_000
-export const JANELA_MS = 48 * 3600_000
+// Regras de tempo/dedupe: lib/recuperacao-fila.ts (comum à CL-PL).
 
 // Nome do meio de pagamento como a compradora conhece.
 const MEIO: Record<string, string> = {
