@@ -74,17 +74,26 @@ export interface Chat {
   modoHumano: boolean // true = bot calado (pessoa assumiu ou handoff)
 }
 
+/**
+ * Formas do mesmo celular: o WhatsApp entrega em um formato e a compra grava em outro.
+ * BR: sem o 9 (55 31 8991-1328) · MX: com 1 depois do 52 (521 55…) · AR: com 9 depois do 54 (549 …).
+ * Devolve só dígitos (sem "+").
+ */
+export function variantesTelefone(phone: string): string[] {
+  const d = phone.replace(/\D/g, '')
+  const v = [d]
+  if (/^55\d{10}$/.test(d)) v.push(`${d.slice(0, 4)}9${d.slice(4)}`)
+  if (/^55\d{11}$/.test(d)) v.push(`${d.slice(0, 4)}${d.slice(5)}`)
+  if (/^521\d{10}$/.test(d)) v.push(`52${d.slice(3)}`)
+  if (/^52\d{10}$/.test(d)) v.push(`521${d.slice(2)}`)
+  if (/^549\d{10}$/.test(d)) v.push(`54${d.slice(3)}`)
+  if (/^54\d{10}$/.test(d)) v.push(`549${d.slice(2)}`)
+  return v
+}
+
 async function acharUsuario(phone: string): Promise<string | null> {
   // users.phone é gravado em E.164 ("+34…") pela Perfect Pay; a Hotmart pode ter gravado cru.
-  // O WhatsApp usa um formato de celular diferente do da compra em alguns países:
-  //   BR: sem o 9 (55 31 8991-1328) · MX: com 1 depois do 52 (521 55…) · AR: com 9 depois do 54 (549 …)
-  const variantes = [phone]
-  if (/^55\d{10}$/.test(phone)) variantes.push(`${phone.slice(0, 4)}9${phone.slice(4)}`)
-  if (/^521\d{10}$/.test(phone)) variantes.push(`52${phone.slice(3)}`)
-  if (/^52\d{10}$/.test(phone)) variantes.push(`521${phone.slice(2)}`)
-  if (/^549\d{10}$/.test(phone)) variantes.push(`54${phone.slice(3)}`)
-  if (/^54\d{10}$/.test(phone)) variantes.push(`549${phone.slice(2)}`)
-  const candidatos = variantes.flatMap((v) => [`+${v}`, v])
+  const candidatos = variantesTelefone(phone).flatMap((v) => [`+${v}`, v])
   const { data } = await admin().from('users').select('id').in('phone', candidatos).limit(1)
   return data?.[0]?.id ?? null
 }

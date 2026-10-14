@@ -42,7 +42,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -96,6 +96,17 @@ idioma dela, sem palavra em português no meio. Modelos:
   en: "I'm transferring your conversation to the team responsible for refunds — they'll reply here."
   pt: "Vou transferir sua conversa para o setor responsável pelos reembolsos — eles te respondem por aqui."
 
+RECUPERAÇÃO DE COMPRA: se na conversa há uma MENSAGEM AUTOMÁTICA nossa sobre uma compra que não foi concluída
+(pagamento recusado, pendente ou expirado), quem escreve é alguém que TENTOU comprar e não terminou. Ajude a
+concluir: reenvie o MESMO link que está nessa mensagem, explique o pagamento local que ela citou (Nequi, Yape,
+PSE, Servipag: abrir o app do banco/carteira, pagar o código gerado, voltar), sugira outro cartão ou outro meio.
+Nunca prometa acesso nem diga que a compra existe. Se ela diz que JÁ pagou: confira "Liberado na conta" no
+perfil; sem conta ou sem o produto liberado → transfira (precisa conferir o pagamento).
+
+NÃO QUER MAIS MENSAGENS: se ela pede para parar ("no", "stop", "salir", "no me escribas", "no quiero", "baja"),
+"parar_mensagens" = true: responda curto e educado que não vamos mais escrever, sem insistir nem oferecer nada.
+Em qualquer outro caso, false. (Um "no" que é resposta a uma pergunta sua NÃO é pedido para parar.)
+
 DEPOIS DE TRANSFERIR: a conversa continua com você. Se ela manda outra coisa, responda tudo o que você souber
 (acesso, app, materiais, regras) — nunca a deixe sem resposta. Se é o MESMO assunto já transferido e ainda
 sem resposta do setor, diga em uma frase que já está com o setor responsável e que respondem por aqui — sem
@@ -147,8 +158,9 @@ const FORMATO = {
       consulta_opcao_b: { type: 'string' },
       pedir_depoimento: { type: 'boolean' },
       liberar_brinde: { type: 'boolean' },
+      parar_mensagens: { type: 'boolean' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens'],
     additionalProperties: false,
   },
 }
@@ -295,6 +307,7 @@ export async function decidirResposta(params: {
     consulta_opcao_b: string
     pedir_depoimento: boolean
     liberar_brinde: boolean
+    parar_mensagens: boolean
   }
   return out.passar_para_humano
     ? {
@@ -307,7 +320,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde) }
+    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens) }
 }
 
 // ─── Resposta aprovada pelo responsável ────────────────────────────────────────────────────

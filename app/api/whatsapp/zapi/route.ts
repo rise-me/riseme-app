@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
-import { enfileirar, jaEnfileirou } from '@/lib/whatsapp-outbox'
+import { enfileirar, jaEnfileirou, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
@@ -309,7 +309,8 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
       await etiquetar(phone, TAG_RESPONDEU)
       if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU, 'remove')
     }
-    if (decisao.pedirDepoimento && !silencioso) await ofertasPosConversa(phone, perfil?.idioma ?? 'es', userId, Boolean(porEmail))
+    if (decisao.pararMensagens) await registrarPedidoParaParar(phone)
+    else if (decisao.pedirDepoimento && !silencioso) await ofertasPosConversa(phone, perfil?.idioma ?? 'es', userId, Boolean(porEmail))
   }
 }
 
@@ -317,6 +318,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
 // pedido de depoimento (links/texto em lib/whatsapp-agent/depoimentos.ts) e, no mesmo gatilho, a oferta
 // do teste grátis do Pase (regras em lib/whatsapp-agent/pase.ts). Cada um 1x por aluna; nunca juntos.
 async function ofertasPosConversa(phone: string, idioma: string, userId: string | null, porEmail: boolean) {
+  if (await pediuParaParar(phone)) return
   let depoimentoAgora = false
   const convite = conviteDepoimento(idioma, phone)
   if (convite && !(await jaEnfileirou(phone, 'depoimento'))) {

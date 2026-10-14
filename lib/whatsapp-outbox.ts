@@ -3,7 +3,7 @@
 // venceu, registra no histórico como 'system' e apaga a senha do body depois do envio.
 
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
-import { admin, registrarMensagem } from '@/lib/whatsapp-agent/conversa'
+import { admin, registrarMensagem, variantesTelefone } from '@/lib/whatsapp-agent/conversa'
 
 const MAX_TENTATIVAS = 5
 const REPROGRAMAR_MS = 2 * 60_000
@@ -46,6 +46,29 @@ export async function jaEnfileirou(phone: string, kind: string): Promise<boolean
     .eq('phone', phone)
     .eq('kind', kind)
   return (count ?? 0) > 0
+}
+
+/**
+ * A pessoa pediu para não receber mais mensagens (o agente registra com registrarPedidoParaParar).
+ * Marcador = linha 'optout' já marcada como enviada (a fila ignora). Confere todas as formas do número.
+ * QUEM MANDA MENSAGEM ATIVA (recuperação, depoimento, Pase, reenvio) DEVE checar isto antes.
+ */
+export async function pediuParaParar(phone: string): Promise<boolean> {
+  const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
+  const { count } = await admin()
+    .from('whatsapp_outbox')
+    .select('id', { count: 'exact', head: true })
+    .in('phone', formas)
+    .eq('kind', 'optout')
+  return (count ?? 0) > 0
+}
+
+export async function registrarPedidoParaParar(phone: string): Promise<void> {
+  if (await pediuParaParar(phone)) return
+  const agora = new Date().toISOString()
+  await admin()
+    .from('whatsapp_outbox')
+    .insert({ phone: phone.replace(/\D/g, ''), kind: 'optout', body: '', send_after: agora, sent_at: agora })
 }
 
 interface Item {
