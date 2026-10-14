@@ -216,7 +216,7 @@ async function resumoDoDia(): Promise<string> {
   const desde = inicio.toISOString()
   const n = (r: { count: number | null }) => r.count ?? 0
   const c = { count: 'exact' as const, head: true }
-  const [contas, acessos, respostas, depoimentos, pases, optouts] = (
+  const [contas, acessos, respostas, depoimentos, pases, optouts, brindes] = (
     await Promise.all([
       db.from('users').select('id', c).gte('created_at', desde),
       db.from('whatsapp_outbox').select('id', c).eq('kind', 'acesso').gte('sent_at', desde),
@@ -224,6 +224,7 @@ async function resumoDoDia(): Promise<string> {
       db.from('whatsapp_outbox').select('id', c).eq('kind', 'depoimento').gte('sent_at', desde),
       db.from('whatsapp_outbox').select('id', c).eq('kind', 'pase').gte('sent_at', desde),
       db.from('whatsapp_outbox').select('id', c).eq('kind', 'optout').gte('created_at', desde),
+      db.from('whatsapp_outbox').select('id', c).eq('kind', 'brinde-depoimento').gte('created_at', desde),
     ])
   ).map(n)
   const { data: abertas } = await db
@@ -237,7 +238,8 @@ async function resumoDoDia(): Promise<string> {
     `• Contas novas: ${contas}`,
     `• Acessos enviados no WhatsApp: ${acessos}`,
     `• Respostas do Claude: ${respostas}`,
-    `• Convites de depoimento: ${depoimentos} · ofertas do Pase: ${pases}`,
+    `• Depoimento: ${depoimentos} convites · ${brindes} mandaram o print e ganharam o brinde`,
+    `• Ofertas do Pase: ${pases}`,
     `• Pediram para não receber mais: ${optouts}`,
     `• Consultas abertas (48 h): ${abertas?.length ?? 0}${abertas?.length ? ` — ${abertas.map((c) => `#${c.id} ${c.nome ?? 'sem conta'}`).join(', ')}` : ''}`,
   ].join('\n')

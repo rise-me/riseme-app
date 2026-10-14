@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
-import { enfileirar, jaEnfileirou, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
+import { enfileirar, jaEnfileirou, marcarNaFila, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
@@ -267,8 +267,10 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     let liberou = false
     try {
       if (userId && !porEmail && (await jaEnfileirou(phone, 'depoimento'))) {
-        await darCardapioBonus(userId, 'depoimento') // false = já tinha; a resposta do agente cobre os dois casos
+        const novo = await darCardapioBonus(userId, 'depoimento') // false = já tinha; a resposta do agente cobre os dois casos
         liberou = true
+        // Métrica do depoimento: print conferido + brinde entregue (linha inerte na fila, só para contar).
+        if (novo) await marcarNaFila(phone, 'brinde-depoimento')
       }
     } catch (err) {
       console.error(`[depoimento] brinde falhou (${phone}):`, err)

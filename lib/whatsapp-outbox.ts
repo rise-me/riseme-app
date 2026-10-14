@@ -65,10 +65,15 @@ export async function pediuParaParar(phone: string): Promise<boolean> {
 
 export async function registrarPedidoParaParar(phone: string): Promise<void> {
   if (await pediuParaParar(phone)) return
+  await marcarNaFila(phone, 'optout')
+}
+
+/** Linha inerte (já "enviada") que só registra um fato: opt-out, brinde entregue… — a fila ignora. */
+export async function marcarNaFila(phone: string, kind: string): Promise<void> {
   const agora = new Date().toISOString()
   await admin()
     .from('whatsapp_outbox')
-    .insert({ phone: phone.replace(/\D/g, ''), kind: 'optout', body: '', send_after: agora, sent_at: agora })
+    .insert({ phone: phone.replace(/\D/g, ''), kind, body: '', send_after: agora, sent_at: agora })
 }
 
 // Não manda convite/oferta para quem pediu para parar, já recebeu um igual (por qualquer forma do número),
