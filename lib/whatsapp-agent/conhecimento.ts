@@ -43,7 +43,7 @@ A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um víde
 - Trocar a senha (criar uma própria): Más → Mi perfil → seção "Contraseña" → digita a nova duas vezes →
   "GUARDAR CONTRASEÑA". O botão "Crear mi contraseña" do aviso de primeiro acesso leva direto para lá.
 - Esqueceu a senha (não consegue entrar): na tela de login, "¿Olvidaste tu contraseña?"
-  (pl: "Nie pamiętasz hasła?", tr: "Şifreni mi unuttun?", en: "Forgot your password?") → digita o email da
+  (pl: "Nie pamiętasz hasła?", cs: "Zapomněla jsi heslo?", tr: "Şifreni mi unuttun?", en: "Forgot your password?") → digita o email da
   compra → "ENVIAR ENLACE" → abre o email e cria a nova senha em "GUARDAR NUEVA CONTRASEÑA". No formulário do
   link de acesso o mesmo caminho se chama "No recibí mi acceso". Email não chegou: spam/promoções.
 - Se nada disso resolver → transfira.
@@ -53,6 +53,7 @@ Nomes das abas no idioma do app da aluna (use os do idioma dela), na ordem:
 Início · Treinos · Desafios · Cardápio · Extras · Mais (→ Ajuda)
 - es: Inicio · Entrenamientos · Desafíos · Menú · Extras · Más (→ Ayuda)
 - pl: Start · Treningi · Wyzwania · Jadłospis · Dodatki · Więcej (→ Pomoc)
+- cs: Domů · Tréninky · Výzvy · Jídelníček · Bonusy · Více (→ Nápověda)
 - tr: Ana Sayfa · Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla (→ Yardım)
 - en: Home · Workouts · Challenges · Menu · Extras · More (→ Help)
 - Desafios: os comprados aparecem liberados ("Empezar desafío" / "Continuar — Día N"). Os dias abrem EM ORDEM:

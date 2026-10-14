@@ -30,6 +30,10 @@ const COMMON = {
     fallback: 'Jeśli przycisk nie działa, skopiuj ten link i wklej go w przeglądarce:',
     signoff: 'Serdecznie,<br />Zespół RiseMe',
   },
+  cs: {
+    fallback: 'Pokud tlačítko nefunguje, zkopíruj tento odkaz a vlož ho do prohlížeče:',
+    signoff: 'S láskou,<br />Tým RiseMe',
+  },
 }
 
 const NEW_EMAIL = '<strong style="color:#171717;">{{ .NewEmail }}</strong>'
@@ -59,6 +63,13 @@ const TEXT = {
       button: 'Ustaw moje hasło',
       note: 'Masz pytania? Odpowiedz na tę wiadomość, a chętnie pomożemy.',
     },
+    cs: {
+      title: 'Vítej v RiseMe',
+      h1: 'Vítej v RiseMe!',
+      body: 'Tvůj nákup byl potvrzen a účet je připravený. Zbývá jen jeden krok: nastav si heslo, abys mohla vstoupit do aplikace.',
+      button: 'Nastavit heslo',
+      note: 'Máš otázky? Odpověz na tento e-mail a rádi ti pomůžeme.',
+    },
   },
   recovery: {
     type: 'recovery',
@@ -82,6 +93,13 @@ const TEXT = {
       body: 'Otrzymałyśmy prośbę o zresetowanie Twojego hasła. Kliknij przycisk poniżej, aby utworzyć nowe.',
       button: 'Zresetuj hasło',
       note: 'Jeśli to nie Ty wysłałaś tę prośbę, możesz zignorować tę wiadomość. Twoje obecne hasło nadal będzie działać.',
+    },
+    cs: {
+      title: 'Obnov si heslo',
+      h1: 'Obnov si heslo',
+      body: 'Dostali jsme žádost o obnovení tvého hesla. Klikni na tlačítko níže a vytvoř si nové.',
+      button: 'Obnovit heslo',
+      note: 'Pokud jsi o změnu nežádala ty, tento e-mail můžeš ignorovat. Tvoje současné heslo bude dál fungovat.',
     },
   },
   confirmation: {
@@ -107,6 +125,13 @@ const TEXT = {
       button: 'Potwierdź moje konto',
       note: 'Jeśli nie zakładałaś tego konta, możesz zignorować tę wiadomość.',
     },
+    cs: {
+      title: 'Potvrď svůj účet',
+      h1: 'Potvrď svůj účet',
+      body: 'Vítej v RiseMe! Potvrď svou e-mailovou adresu kliknutím na tlačítko níže a pusť se do své první výzvy.',
+      button: 'Potvrdit účet',
+      note: 'Pokud sis tento účet nezakládala, tento e-mail můžeš ignorovat.',
+    },
   },
   'email-change': {
     type: 'email_change',
@@ -130,6 +155,13 @@ const TEXT = {
       body: `Poprosiłaś o zmianę adresu e-mail konta na ${NEW_EMAIL}. Potwierdź tę zmianę, klikając przycisk poniżej.`,
       button: 'Potwierdź nowy e-mail',
       note: 'Jeśli to nie Ty prosiłaś o tę zmianę, zignoruj tę wiadomość i rozważ zmianę hasła.',
+    },
+    cs: {
+      title: 'Potvrď novou e-mailovou adresu',
+      h1: 'Potvrď novou e-mailovou adresu',
+      body: `Požádala jsi o změnu e-mailu svého účtu na ${NEW_EMAIL}. Potvrď tuto změnu kliknutím na tlačítko níže.`,
+      button: 'Potvrdit nový e-mail',
+      note: 'Pokud jsi o tuto změnu nežádala ty, tento e-mail ignoruj a zvaž změnu hesla.',
     },
   },
 }

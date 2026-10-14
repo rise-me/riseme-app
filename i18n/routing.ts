@@ -5,7 +5,7 @@ import { defineRouting } from 'next-intl/routing'
 // TypeScript aponta o resto que precisa de texto (email e WhatsApp de acesso,
 // rótulos do cardápio, admin), porque essas tabelas são Record<AppLocale, …>.
 export const routing = defineRouting({
-  locales: ['pt-BR', 'es', 'en', 'tr', 'pl'],
+  locales: ['pt-BR', 'es', 'en', 'tr', 'pl', 'cs'],
   defaultLocale: 'es',
   localePrefix: 'as-needed',
 })

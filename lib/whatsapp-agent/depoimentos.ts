@@ -49,6 +49,16 @@ const CONVITE: Record<string, (link: string) => string> = {
       '',
       '🎁 W podziękowaniu: wyślij mi tutaj zrzut ekranu swojego komentarza, a dostaniesz w aplikacji *dodatkowy spersonalizowany jadłospis*.',
     ].join('\n'),
+  cs: (link) =>
+    [
+      'Můžu tě poprosit o malou laskavost? 💛',
+      '',
+      'Jestli můžeš, napiš pod tento příspěvek komentář a vlastními slovy popiš, že ti přístup přišel bez problémů a jak proběhl nákup. Ostatním ženám, které váhají, to moc pomáhá.',
+      '',
+      `👉 ${link}`,
+      '',
+      '🎁 Jako poděkování mi sem pošli snímek obrazovky svého komentáře a dostaneš v aplikaci *jídelníček na míru navíc*.',
+    ].join('\n'),
   tr: (link) =>
     [
       'Senden küçük bir ricam olabilir mi? 💛',

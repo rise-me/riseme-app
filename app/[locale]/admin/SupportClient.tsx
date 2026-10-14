@@ -38,6 +38,7 @@ const LOCALE_LABEL: Record<AppLocale, string> = {
   es: 'Espanhol',
   tr: 'Turco',
   pl: 'Polonês',
+  cs: 'Tcheco',
   'pt-BR': 'Português',
   en: 'Inglês',
 }

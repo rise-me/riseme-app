@@ -6,7 +6,7 @@
 //
 // Estratégia: DDI vem do ISO do país do comprador (payload.country) quando existe;
 // senão de um DDI padrão do produto (localeDdi) — pros produtos de país único, como
-// o turco (CL-TR, +90) e o polonês (CL-PL, +48), isso garante o DDI mesmo se o
+// o turco (CL-TR, +90), o polonês (CL-PL, +48) e o tcheco (CL-CZ, +420), isso garante o DDI mesmo se o
 // `country` faltar.
 
 // ISO-2 do país → código de discagem (DDI). Só os países que a operação toca.
@@ -16,6 +16,8 @@ const COUNTRY_TO_DDI: Record<string, string> = {
   MX: '52', AR: '54', CO: '57', CL: '56', PE: '51', EC: '593',
   PY: '595', UY: '598', BO: '591', VE: '58', ES: '34', US: '1', PL: '48',
   GT: '502', SV: '503', HN: '504', NI: '505', CR: '506', PA: '507', DO: '1', PR: '1',
+  // CL-CZ (Hotmart, euro): Tchéquia + países da diáspora que o funil oferece na tela 4.
+  CZ: '420', SK: '421', DE: '49', AT: '43', GB: '44', IE: '353',
 }
 
 // Locales de país ÚNICO → DDI (fallback quando o payload não traz `country`).
@@ -23,6 +25,7 @@ const COUNTRY_TO_DDI: Record<string, string> = {
 const LOCALE_TO_DDI: Record<string, string> = {
   tr: '90',
   pl: '48',
+  cs: '420',
   'pt-BR': '55',
 }
 

@@ -8,6 +8,8 @@
     <title>Hesabını onayla</title>
 {{ else if eq $l "pl" }}
     <title>Potwierdź swoje konto</title>
+{{ else if eq $l "cs" }}
+    <title>Potvrď svůj účet</title>
 {{ else }}
     <title>Confirma tu cuenta</title>
 {{ end }}
@@ -99,6 +101,46 @@
                 </p>
                 <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
                   Serdecznie,<br />Zespół RiseMe
+                </p>
+              </td>
+            </tr>
+{{ else if eq $l "cs" }}
+            <tr>
+              <td style="padding:8px 40px 8px 40px;">
+                <h1 style="margin:0; font-size:28px; line-height:1.2; font-weight:800; color:#171717;">Potvrď svůj účet</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 8px 40px;">
+                <p style="margin:0; font-size:16px; line-height:1.6; color:#262626;">
+                  Vítej v RiseMe! Potvrď svou e-mailovou adresu kliknutím na tlačítko níže a pusť se do své první výzvy.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 8px 40px;">
+                <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup" style="display:inline-block; background-color:#171717; color:#FFFFFF; text-decoration:none; font-weight:700; font-size:16px; padding:16px 32px; border-radius:999px;">
+                  Potvrdit účet
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 24px 40px;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  Pokud tlačítko nefunguje, zkopíruj tento odkaz a vlož ho do prohlížeče:
+                </p>
+                <p style="margin:8px 0 0 0; font-size:12px; line-height:1.5; color:#171717; word-break:break-all;">
+                  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup" style="color:#171717; text-decoration:underline;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 40px 40px; border-top:1px solid #E8E2D5;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  Pokud sis tento účet nezakládala, tento e-mail můžeš ignorovat.
+                </p>
+                <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  S láskou,<br />Tým RiseMe
                 </p>
               </td>
             </tr>

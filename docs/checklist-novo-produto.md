@@ -1,5 +1,6 @@
 # Checklist — produto novo na Perfect Pay ou na Hotmart (oferta, idioma, upsell ou order bump)
 
+> v3 — 14/10/2026. Motivo: CL-CZ, 1ª oferta Hotmart fora do espanhol → `HOTMART_CHALLENGE_MAP` aceita idioma.
 > v2 — 06/10/2026. Motivo: mesma falha na Hotmart — o Pilates en La Pared 2.0, vendido como order bump
 > do Desafío de Calistenia, nunca liberava o desafio no app porque o produto do bump não tinha webhook
 > para o app. Entrou a seção "Hotmart" no fim.
@@ -27,6 +28,10 @@
 - [ ] DDI do país em `lib/phone.ts` (COUNTRY_TO_DDI + LOCALE_TO_DDI) — sem DDI o WhatsApp não sai.
 - [ ] Nomes das abas no idioma em `lib/whatsapp-agent/conhecimento.ts`.
 - [ ] País no `PAIS_TO_ISO` de `scripts/replay-sales.py`.
+- [ ] Rótulo do idioma: `<loc>Label`/`<loc>Region` em TODOS os `messages/*.json` (o seletor lê de todos; o TypeScript não acusa).
+- [ ] Textos fora do TypeScript (tabelas `Record<string>`, caem em espanhol sem avisar): `lib/whatsapp-agent/pase.ts`,
+      `depoimentos.ts`, modelos de transferência e opt-out em `responder.ts`, `scripts/reenviar-acesso.ts`.
+- [ ] E-mails do Supabase: bloco do idioma em `supabase/email-templates/build.mjs` → `node …/build.mjs` → colar no painel DEPOIS do deploy.
 - [ ] Aulas no Stream (`scripts/publish-lessons.py`) e, se houver, playlist em `PLAYLIST` (lib/whatsapp-access.ts).
 
 ## 5. Vendas que entraram antes de ligar tudo
@@ -55,7 +60,9 @@ deles gera um evento próprio, e sem webhook para aquele produto o app nunca fic
       produção e o app cria uma conta fantasma.
 
 ## H2. Vercel — ligar produto → desafio
-- [ ] `HOTMART_CHALLENGE_MAP` += `ID:idDoDesafio` (ex.: `4784921:2`). Sem idioma: Hotmart = `es` fixo no código.
+- [ ] `HOTMART_CHALLENGE_MAP` += `ID:idDoDesafio[:idioma]` (ex.: `4784921:2`, ou `<ID>:1:cs` para a CL-CZ).
+      Sem idioma = `es` (todas as entradas antigas). Desde 14/10/2026 o idioma vem do mapa, igual à Perfect Pay;
+      idioma que o app ainda não tem cai em `es` com erro no log.
       Produto fora do mapa = webhook loga "[hotmart] Produto NÃO MAPEADO" e não libera nada.
 - [ ] **Republicar** o app depois de mudar a env.
 

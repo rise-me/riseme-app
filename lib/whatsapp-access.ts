@@ -141,6 +141,43 @@ const COPY: Record<AppLocale, AccessCopy> = {
       '',
       'Jeśli potrzebujesz pomocy, po prostu do mnie napisz. Jestem tu, żeby wszystko poszło jak najlepiej. 😄 ❤️',
     ].join('\n'),
+  cs: ({ email, code, link, homeUrl }) =>
+    [
+      'Vítej ve výzvě RiseMe™️ – Kalistenika doma! 🎉',
+      '',
+      'Gratuluji ti ke skvělému rozhodnutí! Jsem si jistá, že těchto 28 dní v tobě hodně změní. 😍',
+      '',
+      'Tvůj přístup do aplikace je připravený — tady jsou tvoje údaje 👇',
+      '',
+      `📧 E-mail: ${email}`,
+      `🔑 Heslo: ${code}`,
+      '',
+      'Toto heslo si ulož — budeš se jím přihlašovat do aplikace. 🔒',
+      '',
+      `Klikni sem a hned se dostaneš dovnitř: 👉 ${link}`,
+      '',
+      '(Po kliknutí se aplikace otevře sama a heslo ani nemusíš psát — tvoje výzva už na tebe čeká!) 💪',
+      '',
+      '📌 Jak se přihlásit příště?',
+      `👉 Jdi na ${homeUrl} a přihlas se svým e-mailem a heslem, které máš výše.`,
+      'Jestli chceš, můžeš si ho v aplikaci změnit na vlastní heslo.',
+      'Zapomněla jsi heslo? Na přihlašovací obrazovce klikni na „Zapomněla jsi heslo?“.',
+      '',
+      '📱 Nepovinné: přidej si aplikaci do telefonu',
+      'RiseMe™️ funguje v telefonu jako opravdová aplikace 👇',
+      '',
+      `📲 iPhone: otevři ${homeUrl} v SAFARI → tlačítko „Sdílet“ (čtverec se šipkou) → „Přidat na plochu“ → „Přidat“`,
+      '⚠️ Správná volba je „Přidat na plochu“ (NE „Přidat do oblíbených“)',
+      '',
+      `📲 Android: otevři ${homeUrl} v CHROMU → menu ⋮ → „Instalovat aplikaci“ (nebo „Přidat na plochu“) → „Instalovat“`,
+      '',
+      '✅ Ikona RiseMe se objeví na ploše. Nevidíš ji? Posuň se na poslední obrazovky telefonu — někdy se schová úplně na konec. 😉',
+      '',
+      'Díky tomu budeš mít svou výzvu vždycky po ruce! 🚀',
+      '(Pokud se to nepovede, nevadí: aplikace funguje skvěle i v prohlížeči.)',
+      '',
+      'Kdybys potřebovala pomoct, prostě mi napiš. Jsem tu, aby všechno šlo co nejlíp. 😄 ❤️',
+    ].join('\n'),
   'pt-BR': ({ email, code, link, homeUrl }) =>
     [
       'Bem-vinda ao Desafio de Calistenia RiseMe™️! 🎉',
@@ -272,6 +309,24 @@ const SUPPORT: Record<AppLocale, SupportCopy> = {
       '',
       'Widzimy się na treningu! 💪',
     ].join('\n'),
+  cs: ({ playlist }) =>
+    [
+      '💛 Ještě jedna důležitá zpráva:',
+      '',
+      'Pokud jsi udělala všechny kroky a pořád se ti nedaří dostat se do aplikace, napiš mi — náš tým podpory ti to pomůže vyřešit. 😉',
+      ...(playlist
+        ? [
+            '',
+            'Než to vyřešíme, abys nepřišla ani o jeden den výzvy, můžeš sledovat lekce ve speciálním playlistu na YouTube:',
+            '',
+            `👉 ${playlist}`,
+            '',
+            '🙏 Tento odkaz je jen pro účastnice výzvy — prosíme, nesdílej ho dál.',
+          ]
+        : []),
+      '',
+      'Uvidíme se na tréninku! 💪',
+    ].join('\n'),
   'pt-BR': ({ playlist }) =>
     [
       '💛 Uma última mensagem importante:',
@@ -388,6 +443,7 @@ export function mensagensDeAcesso(p: { locale: string; email: string; code: stri
 const ABERTURA_REENVIO: Record<string, string> = {
   es: '¡Hola! 💛 Te reenviamos por aquí tu acceso a RiseMe. Tu contraseña fue renovada: usa la que aparece en este mensaje.',
   pl: 'Cześć! 💛 Przesyłamy Ci tutaj dostęp do RiseMe. Twoje hasło zostało odnowione: użyj tego z tej wiadomości.',
+  cs: 'Ahoj! 💛 Posíláme ti sem znovu přístup do RiseMe. Tvoje heslo bylo obnoveno: použij to, které je v této zprávě.',
   tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. Şifren yenilendi: bu mesajdaki şifreyi kullan.',
   en: 'Hi! 💛 We are resending your RiseMe access here. Your password was renewed: use the one in this message.',
   'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. Sua senha foi renovada: use a que está nesta mensagem.',

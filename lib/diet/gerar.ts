@@ -56,18 +56,19 @@ export function momentosDoCardapio(numRefeicoes: number, incluiCafe: boolean): M
 
 /** Rótulos por momento no idioma da aluna (pro prompt; a tela usa i18n). */
 const MOMENTO_LABEL: Record<Momento, Record<AppLocale, string>> = {
-  cafe_da_manha: { es: 'Desayuno', tr: 'Kahvaltı', pl: 'Śniadanie', 'pt-BR': 'Café da manhã', en: 'Breakfast' },
-  lanche_da_manha: { es: 'Merienda de la mañana', tr: 'Kuşluk ara öğünü', pl: 'Drugie śniadanie', 'pt-BR': 'Lanche da manhã', en: 'Morning snack' },
-  almoco: { es: 'Almuerzo', tr: 'Öğle yemeği', pl: 'Obiad', 'pt-BR': 'Almoço', en: 'Lunch' },
-  lanche_da_tarde: { es: 'Merienda de la tarde', tr: 'İkindi ara öğünü', pl: 'Podwieczorek', 'pt-BR': 'Lanche da tarde', en: 'Afternoon snack' },
-  jantar: { es: 'Cena', tr: 'Akşam yemeği', pl: 'Kolacja', 'pt-BR': 'Jantar', en: 'Dinner' },
-  ceia: { es: 'Colación nocturna', tr: 'Gece ara öğünü', pl: 'Przekąska wieczorna', 'pt-BR': 'Ceia', en: 'Evening snack' },
+  cafe_da_manha: { es: 'Desayuno', tr: 'Kahvaltı', pl: 'Śniadanie', cs: 'Snídaně', 'pt-BR': 'Café da manhã', en: 'Breakfast' },
+  lanche_da_manha: { es: 'Merienda de la mañana', tr: 'Kuşluk ara öğünü', pl: 'Drugie śniadanie', cs: 'Dopolední svačina', 'pt-BR': 'Lanche da manhã', en: 'Morning snack' },
+  almoco: { es: 'Almuerzo', tr: 'Öğle yemeği', pl: 'Obiad', cs: 'Oběd', 'pt-BR': 'Almoço', en: 'Lunch' },
+  lanche_da_tarde: { es: 'Merienda de la tarde', tr: 'İkindi ara öğünü', pl: 'Podwieczorek', cs: 'Odpolední svačina', 'pt-BR': 'Lanche da tarde', en: 'Afternoon snack' },
+  jantar: { es: 'Cena', tr: 'Akşam yemeği', pl: 'Kolacja', cs: 'Večeře', 'pt-BR': 'Jantar', en: 'Dinner' },
+  ceia: { es: 'Colación nocturna', tr: 'Gece ara öğünü', pl: 'Przekąska wieczorna', cs: 'Večerní svačina', 'pt-BR': 'Ceia', en: 'Evening snack' },
 }
 
 const IDIOMA: Record<AppLocale, string> = {
   es: 'español',
   tr: 'Türkçe (turco)',
   pl: 'polski (polonês)',
+  cs: 'čeština (tcheco)',
   'pt-BR': 'português do Brasil',
   en: 'English (inglês)',
 }

@@ -98,6 +98,7 @@ dela, que você vai transferir a conversa para o setor responsável por resolver
 idioma dela, sem palavra em português no meio. Modelos:
   es: "Voy a transferir tu conversación al sector responsable de los reembolsos — te responden por aquí."
   pl: "Przekazuję Twoją rozmowę do działu odpowiedzialnego za zwroty — odpowiedzą Ci tutaj."
+  cs: "Předávám tvou konverzaci oddělení, které má na starosti vrácení peněz — odpoví ti tady."
   tr: "Konuşmanı iadelerden sorumlu birime aktarıyorum — sana buradan yanıt verecekler."
   en: "I'm transferring your conversation to the team responsible for refunds — they'll reply here."
   pt: "Vou transferir sua conversa para o setor responsável pelos reembolsos — eles te respondem por aqui."
@@ -112,7 +113,7 @@ Nunca prometa acesso nem diga que a compra existe. Se ela diz que JÁ pagou: con
 perfil; sem conta ou sem o produto liberado → transfira (precisa conferir o pagamento).
 
 NÃO QUER MAIS MENSAGENS: se ela pede para parar ("no", "stop", "salir", "no me escribas", "no quiero", "baja";
-pl: "NIE", "nie piszcie", "wypisz", "nie chcę"; tr: "hayır", "istemiyorum", "yazmayın"; en: "stop", "unsubscribe"),
+pl: "NIE", "nie piszcie", "wypisz", "nie chcę"; cs: "NE", "nepište mi", "odhlásit", "nechci"; tr: "hayır", "istemiyorum", "yazmayın"; en: "stop", "unsubscribe"),
 "parar_mensagens" = true: responda curto e educado que não vamos mais escrever, sem insistir nem oferecer nada.
 Em qualquer outro caso, false. (Um "no" que é resposta a uma pergunta sua NÃO é pedido para parar.)
 

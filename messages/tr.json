@@ -264,7 +264,9 @@
     "trLabel": "Türkçe",
     "trRegion": "Türkiye",
     "plLabel": "Polski",
-    "plRegion": "Polonya"
+    "plRegion": "Polonya",
+    "csLabel": "Čeština",
+    "csRegion": "Çekya"
   },
   "help": {
     "title": "Yardım",

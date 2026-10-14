@@ -264,7 +264,9 @@
     "trLabel": "Türkçe",
     "trRegion": "Turcja",
     "plLabel": "Polski",
-    "plRegion": "Polska"
+    "plRegion": "Polska",
+    "csLabel": "Čeština",
+    "csRegion": "Czechy"
   },
   "help": {
     "title": "Pomoc",

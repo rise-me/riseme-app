@@ -32,6 +32,15 @@ const TEXTO: Record<string, (link: string) => string> = {
       '',
       `👉 ${link}`,
     ].join('\n'),
+  cs: (link) =>
+    [
+      'Jo, a ještě jedna věc 💛',
+      '',
+      'Když ti výzva jde tak dobře: můžeš si *7 dní zdarma* vyzkoušet *všechny výzvy RiseMe™* (pilates, jógu a další).',
+      'Dnes nic neplatíš. Pokud zůstaneš, od 8. dne je to 27 USD za celý rok; když to zrušíš dřív, nic se ti nestrhne.',
+      '',
+      `👉 ${link}`,
+    ].join('\n'),
   tr: (link) =>
     [
       'Bir şey daha 💛',

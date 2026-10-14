@@ -59,6 +59,18 @@ const COPY: Record<AppLocale, Copy> = {
     changeNote: 'Później, jeśli chcesz, możesz zmienić je na własne hasło w aplikacji.',
     footer: 'Jeśli to nie Ty dokonałaś tego zakupu, zignoruj tę wiadomość.',
   },
+  cs: {
+    subject: 'Vítej v RiseMe! Tady je tvůj přístup 💛',
+    preview: 'Uvnitř najdeš svůj e-mail a heslo pro přihlášení.',
+    greeting: 'Vítej v RiseMe! 💛',
+    intro: 'Tvůj účet je připravený. Tady jsou tvoje přihlašovací údaje:',
+    emailLabel: 'E-mail',
+    passwordLabel: 'Heslo',
+    keepNote: 'Toto heslo si ulož — budeš se jím přihlašovat pokaždé.',
+    cta: 'Přihlásit se',
+    changeNote: 'Později si ho v aplikaci můžeš změnit na vlastní heslo, pokud budeš chtít.',
+    footer: 'Pokud jsi tento nákup neprovedla ty, tuto zprávu ignoruj.',
+  },
   'pt-BR': {
     subject: 'Você está dentro! Seu acesso ao RiseMe 💛',
     preview: 'Seu email e sua senha de acesso estão aqui.',
