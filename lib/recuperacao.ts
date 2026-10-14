@@ -45,12 +45,17 @@ export function casoDoEvento(evento: string, tipoPagamento: string | undefined):
   return null
 }
 
-export function linkCheckout(p: { email?: string; nome?: string; sck?: string }): string {
+// Os TRÊS campos de rastreio da tentativa original voltam no link (purchase.origin.{src,sck,xcod}): o dashboard lê a
+// cadeia do anúncio do `src` (FB|campanha|id|…|placement, formato fixo de 6 ou 8 partes) e do `xcod`; só o `sck` não
+// basta — a venda recuperada chegaria "sem anúncio" (sintoma BC-EN 08/10, regra L0). Conferido 14/10/2026 em vendas reais.
+export function linkCheckout(p: { email?: string; nome?: string; sck?: string; src?: string; xcod?: string }): string {
   const u = new URL(CHECKOUT)
   for (const [k, v] of Object.entries(PARAMS_FIXOS)) u.searchParams.set(k, v)
   if (p.email) u.searchParams.set('email', p.email)
   if (p.nome) u.searchParams.set('name', p.nome)
+  if (p.src) u.searchParams.set('src', p.src)
   if (p.sck) u.searchParams.set('sck', p.sck)
+  if (p.xcod) u.searchParams.set('xcod', p.xcod)
   return u.toString()
 }
 

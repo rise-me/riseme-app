@@ -22,7 +22,7 @@ interface Payload {
       transaction?: string
       offer?: { code?: string }
       payment?: { type?: string }
-      origin?: { sck?: string }
+      origin?: { sck?: string; src?: string; xcod?: string }
       is_funnel?: boolean
       order_bump?: { is_order_bump?: boolean }
       checkout_country?: { iso?: string }
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
   const caso = casoDoEvento(event, compra?.payment?.type)
   if (!caso) return NextResponse.json({ ok: true, skipped: 'caso' })
-  const link = linkCheckout({ email, nome: buyer?.name, sck: compra?.origin?.sck })
+  const link = linkCheckout({ email, nome: buyer?.name, src: compra?.origin?.src, sck: compra?.origin?.sck, xcod: compra?.origin?.xcod })
   const body = mensagem(caso, { nome: buyer?.name, tipoPagamento: compra?.payment?.type, link })
   await enfileirar({ phone, kind: 'recuperacao', body, sendAfter: new Date(Date.now() + ESPERA_MS) })
   console.log(`[recuperacao] enfileirada (${caso}, ${compra?.payment?.type}, venda ${compra?.transaction})`)
