@@ -68,7 +68,7 @@ const TEXT = {
       h1: 'Vítej v RiseMe!',
       body: 'Tvůj nákup byl potvrzen a účet je připravený. Zbývá jen jeden krok: nastav si heslo, abys mohla vstoupit do aplikace.',
       button: 'Nastavit heslo',
-      note: 'Máš otázky? Odpověz na tento e-mail a rádi ti pomůžeme.',
+      note: 'Máš otázky? Odpověz na tento e-mail a rády ti pomůžeme.',
     },
   },
   recovery: {
@@ -97,7 +97,7 @@ const TEXT = {
     cs: {
       title: 'Obnov si heslo',
       h1: 'Obnov si heslo',
-      body: 'Dostali jsme žádost o obnovení tvého hesla. Klikni na tlačítko níže a vytvoř si nové.',
+      body: 'Dostaly jsme žádost o obnovení tvého hesla. Klikni na tlačítko níže a vytvoř si nové.',
       button: 'Obnovit heslo',
       note: 'Pokud jsi o změnu nežádala ty, tento e-mail můžeš ignorovat. Tvoje současné heslo bude dál fungovat.',
     },

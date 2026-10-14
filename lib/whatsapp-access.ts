@@ -143,7 +143,7 @@ const COPY: Record<AppLocale, AccessCopy> = {
     ].join('\n'),
   cs: ({ email, code, link, homeUrl }) =>
     [
-      'Vítej ve výzvě RiseMe™️ – Kalistenika doma! 🎉',
+      'Vítej v Kalistenické výzvě RiseMe™️! 🎉',
       '',
       'Gratuluji ti ke skvělému rozhodnutí! Jsem si jistá, že těchto 28 dní v tobě hodně změní. 😍',
       '',

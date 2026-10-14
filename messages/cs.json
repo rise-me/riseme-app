@@ -93,9 +93,9 @@
     "continueDay": "Pokračovat — Den {day}",
     "completed": "Dokončeno",
     "inProgress": "Probíhá",
-    "beginner": "Začátečník",
-    "intermediate": "Středně pokročilý",
-    "advanced": "Pokročilý",
+    "beginner": "Začátečnice",
+    "intermediate": "Středně pokročilá",
+    "advanced": "Pokročilá",
     "all": "Vše",
     "focusAreas": "Partie těla",
     "equipment": "Vybavení",
@@ -360,7 +360,7 @@
     ],
     "2": [
       "Seznámení se zdí",
-      "Držení těla a postavení",
+      "Držení těla a správná osa",
       "Hýždě u zdi",
       "Nohy a boky",
       "Core a stabilita",
@@ -549,7 +549,7 @@
     },
     "protocolo-metabolico": {
       "title": "Metabolický protokol",
-      "description": "28denní systém čajů, který pohání tvou výzvu. Čtyři fáze: zážeh, očista, zrychlení a stabilizace."
+      "description": "28denní systém čajů, který pohání tvou Výzvu. Čtyři fáze: Zážeh, Očista, Zrychlení a Stabilizace."
     },
     "linha-suporte": {
       "title": "Linka podpory na WhatsAppu",
@@ -561,7 +561,7 @@
     }
   },
   "firstAccess": {
-    "title": "Jsi tam! 🎉",
+    "title": "Jsi přihlášená! 🎉",
     "body": "Tvoje přístupové heslo najdeš na WhatsAppu. Uschovej si ho, ať se můžeš kdykoli přihlásit — nebo si teď nastav vlastní heslo.",
     "changeCta": "Nastavit vlastní heslo",
     "keepCta": "Ponechat stávající"
