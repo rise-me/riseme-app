@@ -1,0 +1,184 @@
+/* Componentes só do guia de acesso ao app (entregável da oferta, não bônus):
+ * roteiro de 6 passos, telas de celular simuladas em CSS (WhatsApp, e-mail,
+ * login, aviso de 1º acesso, barra de navegação, grade de dias) e FAQ.
+ * O resto vem de ../_tema/riseme.css. Os textos das telas copiam o app real
+ * (messages/cs.json, lib/whatsapp-access.ts, lib/email.ts) — mudou lá, muda aqui. */
+
+.cover .hero { top: 300pt; }
+.cover h1 { font-size: 44pt; }
+.cover .hero p { max-width: 300pt; }
+.keep { text-transform: none; }
+.url { font-family: var(--mono); font-size: 0.9em; font-weight: 700; color: var(--orange); white-space: nowrap; }
+code { font-family: var(--mono); font-size: 0.92em; font-weight: 700; color: var(--ink); background: var(--line-soft); border-radius: 3pt; padding: 0 3pt; }
+
+/* ---------- roteiro (visão geral) ---------- */
+.road { list-style: none; counter-reset: road; margin-top: 4pt; }
+.road li {
+  counter-increment: road;
+  display: grid;
+  grid-template-columns: 36pt 1fr;
+  gap: 0 12pt;
+  padding: 10pt 0;
+  border-bottom: 0.75pt solid var(--line-soft);
+}
+.road li:last-child { border-bottom: 0; }
+.road li::before {
+  content: counter(road, decimal-leading-zero);
+  grid-row: span 2;
+  width: 32pt; height: 32pt; border-radius: 50%;
+  background: var(--night); color: var(--orange-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-weight: 700; font-size: 10pt;
+}
+.road b { font-family: var(--display); font-weight: 800; font-size: 12.4pt; line-height: 1.3; }
+.road span { font-size: 10.1pt; line-height: 1.5; color: var(--muted); }
+
+/* ---------- layout texto + celular ---------- */
+.split { display: grid; grid-template-columns: 1fr 190pt; gap: 22pt; align-items: start; margin-top: 4pt; }
+.split .dots li { font-size: 10.5pt; line-height: 1.55; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; margin-top: 6pt; }
+.pair .way h4 { font-family: var(--display); font-weight: 800; font-size: 12.4pt; color: var(--ink); margin: 10pt 0 4pt; }
+.pair .way .tag { margin-bottom: 5pt; font-family: var(--mono); font-size: 7.2pt; letter-spacing: 0.24em; text-transform: uppercase; color: var(--rose); }
+.pair .way p { font-size: 10.1pt; line-height: 1.55; color: var(--body); }
+
+/* ---------- celular ---------- */
+.phone {
+  width: 190pt;
+  margin: 0 auto;
+  border-radius: 26pt;
+  background: var(--night);
+  padding: 7pt;
+  box-shadow: 0 10pt 24pt rgba(23, 17, 14, 0.18);
+}
+.phone .screen { border-radius: 20pt; overflow: hidden; background: #fbf8f3; position: relative; }
+.phone .notch { height: 16pt; display: flex; justify-content: center; align-items: center; }
+.phone .notch i { width: 46pt; height: 9pt; border-radius: 6pt; background: var(--night); }
+.phone.sm { width: 172pt; }
+.phone.sm .screen { height: 268pt; }
+
+/* WhatsApp */
+.wa-head { display: flex; align-items: center; gap: 7pt; background: #075e54; color: #fff; padding: 8pt 10pt; }
+.wa-head .av { width: 20pt; height: 20pt; border-radius: 50%; background: var(--orange-soft); display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 900; font-size: 9pt; }
+.wa-head b { color: #fff; font-size: 9pt; display: block; }
+.wa-head span { font-size: 6.5pt; opacity: 0.8; }
+.wa-chat { background: #efeae2; padding: 9pt 8pt 12pt; }
+.bubble {
+  background: #fff; border-radius: 8pt; border-top-left-radius: 2pt;
+  padding: 7pt 8pt 6pt; font-size: 7.4pt; line-height: 1.42; color: #1f1f1f;
+  box-shadow: 0 0.75pt 0.75pt rgba(0, 0, 0, 0.08);
+}
+.bubble p + p { margin-top: 5pt; }
+.bubble .lnk { color: #027eb5; text-decoration: underline; white-space: nowrap; }
+.bubble .time { text-align: right; font-size: 6pt; color: #8a8a8a; margin-top: 3pt; }
+.hl { background: #fff2b8; border-radius: 2pt; padding: 0 1.5pt; font-weight: 700; }
+
+/* e-mail */
+.mail { background: var(--card); border: 0.75pt solid var(--line); border-radius: 12pt; overflow: hidden; }
+.mail .bar { padding: 9pt 14pt; border-bottom: 0.75pt solid var(--line-soft); font-size: 9pt; color: var(--muted); }
+.mail .bar b { color: var(--ink); }
+.mail .top { background: var(--night); color: #fff; font-family: var(--display); font-weight: 900; font-size: 15pt; letter-spacing: -0.03em; padding: 12pt 18pt; }
+.mail .body { padding: 14pt 18pt 16pt; }
+.mail h5 { font-family: var(--display); font-weight: 800; font-size: 14pt; color: var(--ink); margin-bottom: 4pt; }
+.mail .intro { font-size: 9.7pt; color: var(--muted); margin-bottom: 10pt; }
+.mail .creds { background: #f4f1ec; border-radius: 10pt; padding: 10pt 12pt; }
+.mail .creds small { display: block; font-size: 7pt; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; color: #999; }
+.mail .creds div { font-size: 10.5pt; font-weight: 600; color: var(--ink); margin-bottom: 7pt; }
+.mail .creds .code { font-family: var(--mono); font-size: 14pt; font-weight: 700; letter-spacing: 0.12em; margin-bottom: 0; }
+.mail .btn { margin-top: 12pt; background: var(--night); color: #fff; text-align: center; font-weight: 700; font-size: 10.5pt; border-radius: 10pt; padding: 10pt; }
+
+/* marcadores numerados sobre os mockups */
+.pin {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 15pt; height: 15pt; border-radius: 50%;
+  background: var(--rose); color: #fff;
+  font-family: var(--mono); font-size: 7.5pt; font-weight: 700;
+  vertical-align: middle; flex: none;
+}
+.legend { list-style: none; margin-top: 14pt; }
+.legend li { display: flex; gap: 10pt; align-items: flex-start; font-size: 10.5pt; line-height: 1.55; margin-bottom: 9pt; }
+.legend li .pin { margin-top: 2pt; }
+.mail .pin, .phone .pin { margin-left: 4pt; }
+
+/* tela do app (login, 1º acesso, carregando) */
+.app { padding: 14pt 12pt 16pt; font-size: 8pt; color: #1a1a1a; }
+.app .logo { text-align: center; font-family: var(--display); font-weight: 900; font-size: 15pt; letter-spacing: -0.03em; margin: 4pt 0 2pt; }
+.app .sub { text-align: center; font-size: 7pt; color: #777; margin-bottom: 12pt; }
+.app label { display: block; font-size: 7pt; font-weight: 700; margin-bottom: 3pt; }
+.app .in { height: 20pt; border-radius: 6pt; background: #fff; border: 0.75pt solid #e2dbd0; margin-bottom: 8pt; padding: 0 7pt; display: flex; align-items: center; font-size: 7.5pt; color: #333; }
+.app .in.code { font-family: var(--mono); letter-spacing: 0.08em; }
+.app .go { height: 22pt; border-radius: 6pt; background: #1a1a1a; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 7.5pt; letter-spacing: 0.06em; margin-top: 4pt; }
+.app .link { text-align: center; font-size: 6.8pt; color: #777; margin-top: 8pt; text-decoration: underline; }
+.app .spin { width: 22pt; height: 22pt; border-radius: 50%; border: 2pt solid #1a1a1a; border-top-color: transparent; margin: 70pt auto 10pt; }
+.app .wait { text-align: center; font-size: 8pt; color: #777; margin-bottom: 58pt; }
+
+.modal-bg { background: rgba(23, 17, 14, 0.62); padding: 40pt 12pt 46pt; }
+.modal { background: #fbf8f3; border-radius: 14pt; padding: 14pt 12pt 10pt; text-align: center; }
+.modal .key { width: 26pt; height: 26pt; border-radius: 8pt; background: #efe9df; margin: 0 auto 8pt; display: flex; align-items: center; justify-content: center; }
+.modal .key .ic { width: 12pt; height: 12pt; color: var(--ink); }
+.modal b { display: block; font-family: var(--display); font-weight: 900; font-size: 11pt; margin-bottom: 5pt; }
+.modal p { font-size: 7pt; line-height: 1.45; color: #777; margin-bottom: 9pt; }
+.modal .go { height: 21pt; border-radius: 7pt; background: #1a1a1a; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 7.3pt; }
+.modal .alt { font-size: 7.3pt; font-weight: 600; color: #777; padding: 7pt 0 2pt; }
+
+/* ---------- instalação ---------- */
+.os { background: var(--card); border: 0.75pt solid var(--line); border-radius: 10pt; padding: 13pt 15pt 6pt; }
+.os .name { display: flex; align-items: center; gap: 8pt; font-family: var(--display); font-weight: 800; font-size: 13pt; color: var(--ink); margin-bottom: 4pt; }
+.os .name small { font-family: var(--mono); font-weight: 500; font-size: 7pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--meta); }
+.os .steps { margin-top: 10pt; }
+.os .steps li { font-size: 10.1pt; line-height: 1.5; margin-bottom: 9pt; min-height: 27pt; padding-top: 2pt; }
+.chip {
+  display: inline-flex; align-items: center; gap: 3pt;
+  background: var(--paper); border: 0.75pt solid var(--line);
+  border-radius: 5pt; padding: 0 5pt;
+  font-weight: 700; color: var(--ink); white-space: nowrap;
+}
+.chip .ic { width: 9pt; height: 9pt; }
+
+/* ---------- barra de navegação + dias ---------- */
+.nav { display: grid; grid-template-columns: repeat(5, 1fr); background: #fbf8f3; border: 0.75pt solid var(--line); border-radius: 12pt; padding: 9pt 4pt 8pt; margin: 6pt 0 14pt; }
+.nav div { text-align: center; font-size: 8pt; color: var(--muted); }
+.nav .ic { display: block; width: 14pt; height: 14pt; margin: 0 auto 4pt; color: var(--muted); }
+.nav .on { color: var(--ink); font-weight: 700; }
+.nav .on .ic { color: var(--rose); }
+.where { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt 14pt; }
+.where > div { background: var(--card); border: 0.75pt solid var(--line); border-radius: 9pt; padding: 10pt 12pt; }
+.where > div > b { display: flex; align-items: center; gap: 6pt; font-family: var(--display); font-weight: 800; font-size: 11.2pt; margin-bottom: 3pt; }
+.where > div > b .ic { color: var(--rose); width: 11pt; height: 11pt; }
+.where span { display: block; font-size: 9.4pt; line-height: 1.5; color: var(--muted); }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4pt; margin: 10pt 0 4pt; }
+.days i {
+  font-style: normal; text-align: center;
+  font-family: var(--mono); font-size: 6.6pt; font-weight: 700; letter-spacing: 0.04em;
+  padding: 5pt 0; border-radius: 5pt;
+  background: var(--card); border: 0.75pt solid var(--line); color: var(--meta);
+}
+.days i.now { background: var(--night); border-color: var(--night); color: var(--orange-soft); }
+
+/* ---------- FAQ ---------- */
+.faq { margin-top: 2pt; }
+.faq dt { display: flex; gap: 8pt; align-items: center; font-family: var(--display); font-weight: 800; font-size: 11.6pt; line-height: 1.3; color: var(--ink); margin-bottom: 4pt; }
+.faq dt .ic { color: var(--rose); width: 12pt; height: 12pt; }
+.faq dd { font-size: 10.1pt; line-height: 1.58; color: var(--body); margin: 0 0 13pt 20pt; }
+.faq dd ol { margin: 4pt 0 0 14pt; }
+.faq dd li { margin-bottom: 2pt; }
+
+/* assinatura */
+.sign { margin-top: 16pt; }
+.sign .bye { font-family: var(--display); font-weight: 800; font-size: 11.2pt; color: var(--muted); }
+.sign .name { font-family: var(--display); font-weight: 900; font-size: 15pt; color: var(--ink); margin-top: 10pt; }
+.sign .role { font-family: var(--mono); font-size: 7.9pt; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rose); margin-top: 5pt; }
+
+/* ícones extras (lucide) */
+.ic-key { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z'/><circle cx='16.5' cy='7.5' r='.5' fill='black'/></svg>"); }
+.ic-share { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2v13'/><path d='m16 6-4-4-4 4'/><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'/></svg>"); }
+.ic-dots { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='5' r='1'/><circle cx='12' cy='12' r='1'/><circle cx='12' cy='19' r='1'/></svg>"); }
+.ic-plus-sq { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='18' height='18' x='3' y='3' rx='2'/><path d='M8 12h8'/><path d='M12 8v8'/></svg>"); }
+.ic-house { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8'/><path d='M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/></svg>"); }
+.ic-swords { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14.5 17.5 3 6V3h3l11.5 11.5'/><path d='m13 19 6-6'/><path d='m16 16 4 4'/><path d='m19 21 2-2'/><path d='M14.5 6.5 18 3h3v3l-3.5 3.5'/><path d='m5 14 4 4'/><path d='m7 17-3 3'/><path d='m3 19 2 2'/></svg>"); }
+.ic-apple { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z'/><path d='M10 2c1 .5 2 2 2 5'/></svg>"); }
+.ic-sparkles { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z'/></svg>"); }
+.ic-more { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/><circle cx='5' cy='12' r='1'/></svg>"); }
+.ic-mail { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='20' height='16' x='2' y='4' rx='2'/><path d='m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'/></svg>"); }
+.ic-message { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7.9 20A9 9 0 1 0 4 16.1L2 22Z'/></svg>"); }
+.ic-lock { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='18' height='11' x='3' y='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>"); }
+.ic-phone { --svg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='14' height='20' x='5' y='2' rx='2' ry='2'/><path d='M12 18h.01'/></svg>"); }
