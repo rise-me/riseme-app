@@ -16,8 +16,9 @@
 
 import type { AppLocale } from '@/i18n/routing'
 import { sendVoxuyAccess } from '@/lib/voxuy'
-import { isZapiConfigured } from '@/lib/zapi'
+import { isZapiConfigured, toZapiPhone } from '@/lib/zapi'
 import { enfileirar } from '@/lib/whatsapp-outbox'
+import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 
 type AccessCopy = (p: { email: string; code: string; link: string; homeUrl: string }) => string
 type SupportCopy = (p: { playlist?: string }) => string
@@ -25,6 +26,7 @@ type SupportCopy = (p: { playlist?: string }) => string
 // Atraso do acesso: tempo da VSL do upsell (~15 min). Ajustável sem deploy de código.
 const ATRASO_ACESSO_MIN = Number(process.env.WHATSAPP_ACCESS_DELAY_MIN ?? 15)
 const ESPERA_MSG2_MS = 45_000
+const ESPERA_DEPOIMENTO_MS = 3 * 3600_000
 
 // Playlist (não listada) das aulas por idioma — reserva pra ela não perder o dia
 // se o app der problema. Idioma sem playlist → a msg 2 sai sem esse trecho.
@@ -350,6 +352,22 @@ export async function sendWhatsAppAccess(params: {
     sendAfter: new Date(sendAt.getTime() + ESPERA_MSG2_MS),
     dependsOn: idAcesso,
   })
+
+  // 3ª mensagem: convite de depoimento para TODA compradora, ~3 h depois do acesso (decisão do Bruno,
+  // 14/10/2026: 85% nunca escreve, então o convite só pela conversa quase não saía). Na hora de enviar,
+  // a fila pula quem pediu para parar, já recebeu convite, está com pessoa/consulta aberta (whatsapp-outbox).
+  // Só idiomas com link em lib/whatsapp-agent/depoimentos.ts.
+  const chave = toZapiPhone(phone)
+  const convite = conviteDepoimento(params.locale, chave)
+  if (convite) {
+    await enfileirar({
+      phone: chave,
+      kind: 'depoimento',
+      body: convite,
+      sendAfter: new Date(sendAt.getTime() + ESPERA_DEPOIMENTO_MS),
+      dependsOn: idAcesso,
+    })
+  }
 }
 
 /** As 2 mensagens da sequência, prontas — exportado também pra pré-visualizar/testar o texto. */
