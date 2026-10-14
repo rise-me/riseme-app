@@ -4,6 +4,7 @@ import { enfileirar, jaEnfileirou, pediuParaParar, registrarPedidoParaParar } fr
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
+import { tratarComando } from '@/lib/whatsapp-agent/comandos'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
   abrirChat,
@@ -411,7 +412,20 @@ export async function POST(request: NextRequest) {
   if (ehResponsavel(phone)) {
     if (m.text?.message) {
       const fala = m.text.message
-      after(() => responderConsulta(fala, m.referenceMessageId))
+      const citada = m.referenceMessageId
+      after(async () => {
+        // Citou uma consulta ou começou com "#id" → é resposta de consulta. Senão, pode ser COMANDO
+        // ("libera o Pilates para…", "resumo de hoje", "sim"); se não for, segue como resposta de consulta.
+        const ehConsulta = (citada && (await consultaPorAlerta(citada))) || /^#\d+/.test(fala.trim())
+        if (!ehConsulta) {
+          try {
+            if (await tratarComando(fala, dizerAoResponsavel)) return
+          } catch (err) {
+            console.error('[comando] falhou:', err)
+          }
+        }
+        await responderConsulta(fala, citada)
+      })
     }
     return NextResponse.json({ ok: true, responsavel: true })
   }

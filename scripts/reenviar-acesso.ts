@@ -14,7 +14,7 @@
 // (reembolso) e quem já tem mensagem na fila/histórico.
 
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
-import { mensagensDeAcesso } from '@/lib/whatsapp-access'
+import { aberturaReenvio, mensagensDeAcesso } from '@/lib/whatsapp-access'
 import { enfileirar } from '@/lib/whatsapp-outbox'
 import { admin } from '@/lib/whatsapp-agent/conversa'
 import { toZapiPhone } from '@/lib/zapi'
@@ -22,14 +22,6 @@ import { toZapiPhone } from '@/lib/zapi'
 const APP_URL = 'https://riseme.app'
 const WHATSAPP_NO_AR = '2026-10-04T15:00:00Z'
 
-// Sem a palavra "anterior": a msg de acesso diz "la contraseña anterior" no sentido de "a de cima".
-const ABERTURA: Record<string, string> = {
-  es: '¡Hola! 💛 Te reenviamos por aquí tu acceso a RiseMe. Tu contraseña fue renovada: usa la que aparece en este mensaje.',
-  pl: 'Cześć! 💛 Przesyłamy Ci tutaj dostęp do RiseMe. Twoje hasło zostało odnowione: użyj tego z tej wiadomości.',
-  tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. Şifren yenilendi: bu mesajdaki şifreyi kullan.',
-  en: 'Hi! 💛 We are resending your RiseMe access here. Your password was renewed: use the one in this message.',
-  'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. Sua senha foi renovada: use a que está nesta mensagem.',
-}
 
 // Número mal formado (DDI duplicado, dígito sobrando) não pode receber senha: pergunta à Z-API.
 async function temWhatsApp(phone: string): Promise<boolean> {
@@ -105,7 +97,7 @@ async function main() {
       code: 'xxxxxxxx',
       link: buildAccessLink(APP_URL, exemplo.locale, exemplo.email, 'xxxxxxxx'),
     })
-    console.log('\n──── prévia (1ª da lista) ────\n' + (ABERTURA[exemplo.locale] ?? ABERTURA.es) + '\n\n' + m1 + '\n\n──── 2ª mensagem ────\n' + m2)
+    console.log('\n──── prévia (1ª da lista) ────\n' + aberturaReenvio(exemplo.locale) + '\n\n' + m1 + '\n\n──── 2ª mensagem ────\n' + m2)
   }
 
   if (!go) {
@@ -121,7 +113,7 @@ async function main() {
     const link = buildAccessLink(APP_URL, a.locale, a.email, code)
     const [m1, m2] = mensagensDeAcesso({ locale: a.locale, email: a.email, code, link })
     const sendAt = new Date(inicio.getTime() + i * intervaloMin * 60_000)
-    const corpo = (ABERTURA[a.locale] ?? ABERTURA.es) + '\n\n' + m1
+    const corpo = aberturaReenvio(a.locale) + '\n\n' + m1
     const idAcesso = await enfileirar({ phone: a.phone, kind: 'acesso-retro', body: corpo, mask: code, sendAfter: sendAt })
     if (!idAcesso) { console.error(`  ✗ ${a.email}: não entrou na fila`); continue }
     await enfileirar({ phone: a.phone, kind: 'apoio', body: m2, sendAfter: new Date(sendAt.getTime() + 45_000), dependsOn: idAcesso })

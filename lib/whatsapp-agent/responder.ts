@@ -373,7 +373,10 @@ export async function redigirRespostaAprovada(params: {
       '("você consegue fazer isso?"), um pedido de AÇÃO que só uma pessoa faz (liberar acesso, reembolsar, trocar ' +
       'email, conferir pagamento) ainda não feita, ou está ambígua — então "enviar" = false, "mensagem" = "" e em ' +
       '"nota_ao_responsavel" responda a ele em português, curto: o que você não faz sozinho ou o que falta decidir ' +
-      '(você só escreve mensagens; não libera produto, não reembolsa, não altera conta). Só marque "enviar" = true ' +
+      '(você só escreve mensagens; não libera produto, não reembolsa, não altera conta). Na nota diga QUAL ação ' +
+      'falta e sugira o comando que o responsável pode mandar para o sistema fazer, entre estes: "libera o <produto> ' +
+      'para <email>", "reenvia o acesso de <email>", "troca o email de <email> para <novo>", "dá um cardápio extra para ' +
+      '<email>" — e que depois responda a consulta de novo. Nunca deixe a nota vazia. Só marque "enviar" = true ' +
       'quando dá para mandar à aluna exatamente o que ele decidiu; aí "nota_ao_responsavel" = "".\n' +
       '- "mensagem": no idioma em que ELA escreve (nunca misture idiomas), tom de atendente calorosa e direta, ' +
       'blocos curtos separados por linha em branco, no máximo um emoji, sem saudação se a conversa já está em ' +
@@ -417,4 +420,64 @@ export async function redigirRespostaAprovada(params: {
         ? { pergunta: out.aprendizado_pergunta.trim(), resposta: out.aprendizado_resposta.trim() }
         : null,
   }
+}
+
+// ─── Comandos do responsável ──────────────────────────────────────────────────────────────
+// Ele escreve em português ("libera o Protocolo para fulana@gmail.com"); aqui só se ENTENDE o pedido.
+// Quem executa (depois do "sim") é lib/whatsapp-agent/comandos.ts.
+
+export const ACOES_COMANDO = ['liberar_produto', 'reenviar_acesso', 'trocar_email', 'cardapio_extra', 'pausar_bot', 'resumo', 'nenhuma'] as const
+export type AcaoComando = (typeof ACOES_COMANDO)[number]
+export const PRODUTOS_COMANDO = ['', '1', '2', '3', '4', '5', 'protocolo-metabolico'] as const
+
+export interface PedidoComando {
+  acao: AcaoComando
+  email: string
+  nome: string
+  produto: (typeof PRODUTOS_COMANDO)[number]
+  novoEmail: string
+}
+
+export async function interpretarComando(texto: string): Promise<PedidoComando> {
+  const res = await anthropic().beta.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 2000,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    output_config: {
+      effort: 'low',
+      format: {
+        type: 'json_schema',
+        schema: {
+          type: 'object',
+          properties: {
+            acao: { type: 'string', enum: [...ACOES_COMANDO] },
+            email: { type: 'string' },
+            nome: { type: 'string' },
+            produto: { type: 'string', enum: [...PRODUTOS_COMANDO] },
+            novo_email: { type: 'string' },
+          },
+          required: ['acao', 'email', 'nome', 'produto', 'novo_email'],
+          additionalProperties: false,
+        },
+      },
+    },
+    system:
+      'Você interpreta mensagens que o dono do RiseMe manda pelo WhatsApp. Identifique se é um PEDIDO DE AÇÃO:\n' +
+      '- liberar_produto: liberar um desafio/produto na conta de uma aluna ("libera o Pilates para…").\n' +
+      '- reenviar_acesso: gerar senha nova e mandar o acesso de novo ("reenvia o acesso da…").\n' +
+      '- trocar_email: trocar o email da conta (precisa do email atual ou nome, e do novo email).\n' +
+      '- cardapio_extra: dar 1 cardápio extra / menu a mais.\n' +
+      '- pausar_bot: parar o bot na conversa de uma aluna.\n' +
+      '- resumo: pedir o resumo do dia / como estão as coisas.\n' +
+      '- nenhuma: qualquer outra coisa (ex.: resposta a uma consulta como "A", "B", ou instrução do que dizer a uma aluna).\n' +
+      'Produtos: 1 = Calistenia en Casa; 2 = Pilates en la Pared; 3 = Yoga Facial; 4 = Yoga en la Silla; ' +
+      '5 = Cuerpo Sexy de Verano; protocolo-metabolico = Protocolo Metabólico (chás). Sem produto: "".\n' +
+      'email/nome: da aluna citada (o que estiver na mensagem; vazio se não houver). novo_email: só em trocar_email.',
+    messages: [{ role: 'user', content: texto }],
+  })
+  const bloco = res.content.find((b) => b.type === 'text')
+  if (!bloco || bloco.type !== 'text') return { acao: 'nenhuma', email: '', nome: '', produto: '', novoEmail: '' }
+  const o = JSON.parse(bloco.text) as { acao: AcaoComando; email: string; nome: string; produto: PedidoComando['produto']; novo_email: string }
+  return { acao: o.acao, email: o.email.trim().toLowerCase(), nome: o.nome.trim(), produto: o.produto, novoEmail: o.novo_email.trim().toLowerCase() }
 }

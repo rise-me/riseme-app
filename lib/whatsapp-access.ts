@@ -364,3 +364,18 @@ export function mensagensDeAcesso(p: { locale: string; email: string; code: stri
     support({ playlist: PLAYLIST[locale] }),
   ]
 }
+
+// Abertura do REENVIO de acesso (senha nova) — usada pelo script de reenvio em lote e pelo comando
+// "reenvia o acesso" do responsável. Sem a palavra "anterior": a msg de acesso diz "la contraseña
+// anterior" no sentido de "a de cima".
+const ABERTURA_REENVIO: Record<string, string> = {
+  es: '¡Hola! 💛 Te reenviamos por aquí tu acceso a RiseMe. Tu contraseña fue renovada: usa la que aparece en este mensaje.',
+  pl: 'Cześć! 💛 Przesyłamy Ci tutaj dostęp do RiseMe. Twoje hasło zostało odnowione: użyj tego z tej wiadomości.',
+  tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. Şifren yenilendi: bu mesajdaki şifreyi kullan.',
+  en: 'Hi! 💛 We are resending your RiseMe access here. Your password was renewed: use the one in this message.',
+  'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. Sua senha foi renovada: use a que está nesta mensagem.',
+}
+
+export function aberturaReenvio(locale: string): string {
+  return ABERTURA_REENVIO[locale] ?? ABERTURA_REENVIO.es
+}
