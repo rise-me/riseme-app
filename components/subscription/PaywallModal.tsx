@@ -2,52 +2,40 @@
 
 import { CheckCircle2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { track } from '@/lib/posthog/track'
+import { createClient } from '@/lib/supabase/client'
 import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog'
 
-type Plan = 'monthly' | 'annual'
+// Oferta única: teste grátis do Pase Completo (14/10/2026, decisão do Bruno). Substitui o seletor
+// US$ 39/ano × US$ 29/mês, que nunca vendeu (docs/roadmap.md).
+// Checkout: Pase Completo K100401831L, oferta v4lltj3v = 7 dias grátis, depois US$ 27/ano (cartão ou PayPal).
+// checkoutMode=10 = página personalizada da oferta (banner "HOY PAGAS US$0", 14/10/2026); sem ele a Hotmart mostra o checkout cru.
+const TRIAL_CHECKOUT =
+  process.env.NEXT_PUBLIC_HOTMART_CHECKOUT_TRIAL ?? 'https://pay.hotmart.com/K100401831L?off=v4lltj3v&checkoutMode=10'
 
 interface PaywallModalProps {
   open: boolean
   onClose: () => void
   challengeTitle?: string
+  // Ponto de contato, gravado pela Hotmart no `src` da venda e lido pelo dashboard (pase-app, pase-aula1, ...).
+  src?: string
 }
 
-export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProps) {
+export function PaywallModal({ open, onClose, challengeTitle, src = 'pase-app' }: PaywallModalProps) {
   const t = useTranslations('subscription')
-  const [selectedPlan, setSelectedPlan] = useState<Plan>('annual')
+  const [email, setEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    if (open) {
-      track('paywall_viewed', { source: 'modal', challenge_title: challengeTitle ?? null })
-    }
-  }, [open, challengeTitle])
-
-  const plans = {
-    annual: {
-      key: 'annual' as Plan,
-      label: t('annual'),
-      price: '$39',
-      period: t('perYear'),
-      renewsAt: '$39',
-      badge: t('save', { percent: 89 }),
-      badgeColor: 'bg-green-100 text-green-700',
-    },
-    monthly: {
-      key: 'monthly' as Plan,
-      label: t('monthly'),
-      price: '$29',
-      period: t('perMonth'),
-      renewsAt: '$29',
-      badge: null,
-      badgeColor: '',
-    },
-  }
+    if (!open) return
+    track('paywall_viewed', { source: 'modal', challenge_title: challengeTitle ?? null, src })
+    // Email da conta pré-preenchido no checkout: a Hotmart avisa o app pelo email do comprador; outro email
+    // criaria uma conta nova e a aluna não veria o acesso na conta dela.
+    createClient().auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null))
+  }, [open, challengeTitle, src])
 
   const benefits = [
     t('benefit1'),
@@ -55,6 +43,13 @@ export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProp
     t('benefit3'),
     t('benefit4'),
   ]
+
+  function checkoutUrl() {
+    const u = new URL(TRIAL_CHECKOUT)
+    u.searchParams.set('src', src)
+    if (email) u.searchParams.set('email', email)
+    return u.toString()
+  }
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -70,59 +65,12 @@ export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProp
         <div className="p-6 space-y-5">
           {/* Header */}
           <div className="pr-8">
-            <h2 className="text-xl font-bold leading-tight">{t('exclusiveOffer')}</h2>
+            <h2 className="text-xl font-bold leading-tight">{t('trialTitle')}</h2>
             {challengeTitle && (
               <p className="text-sm text-muted-foreground mt-1">
                 {t('unlockBlock', { title: challengeTitle })}
               </p>
             )}
-          </div>
-
-          {/* Plan selector */}
-          <div className="space-y-2">
-            {Object.values(plans).map((plan) => (
-              <button
-                key={plan.key}
-                onClick={() => setSelectedPlan(plan.key)}
-                className={cn(
-                  'w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left',
-                  selectedPlan === plan.key
-                    ? 'border-foreground bg-foreground/5'
-                    : 'border-border bg-card'
-                )}
-              >
-                {/* Radio */}
-                <div className={cn(
-                  'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
-                  selectedPlan === plan.key ? 'border-foreground' : 'border-border'
-                )}>
-                  {selectedPlan === plan.key && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-foreground" />
-                  )}
-                </div>
-
-                {/* Plan info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm">{plan.label}</span>
-                    {plan.badge && (
-                      <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded-full', plan.badgeColor)}>
-                        {plan.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {t('renewsAt', { price: plan.renewsAt })}
-                  </p>
-                </div>
-
-                {/* Price */}
-                <div className="text-right">
-                  <span className="font-bold text-base">{plan.price}</span>
-                  <span className="text-xs text-muted-foreground">{plan.period}</span>
-                </div>
-              </button>
-            ))}
           </div>
 
           {/* Benefits */}
@@ -135,23 +83,27 @@ export function PaywallModal({ open, onClose, challengeTitle }: PaywallModalProp
             ))}
           </div>
 
+          {/* O que é cobrado, sem letra miúda */}
+          <div className="rounded-2xl border-2 border-foreground bg-foreground/5 p-4 space-y-1">
+            <p className="font-bold text-base">{t('trialToday')}</p>
+            <p className="text-sm">{t('trialAfter')}</p>
+            <p className="text-xs text-muted-foreground">{t('trialCancel')}</p>
+          </div>
+
           {/* CTA */}
           <button
             onClick={() => {
-              const url = selectedPlan === 'annual'
-                ? process.env.NEXT_PUBLIC_HOTMART_CHECKOUT_ANNUAL
-                : process.env.NEXT_PUBLIC_HOTMART_CHECKOUT_MONTHLY
-              track('subscription_clicked', { plan: selectedPlan, source: 'modal' })
-              if (url) window.location.href = url
+              track('subscription_clicked', { plan: 'trial_annual', source: 'modal', src })
+              window.location.href = checkoutUrl()
             }}
             className="w-full py-4 bg-foreground text-background rounded-2xl text-sm font-bold tracking-wide"
           >
-            {t('unlockAccess')}
+            {t('trialCta')}
           </button>
 
           {/* Footer */}
           <div className="text-center">
-            <p className="text-xs text-muted-foreground">{t('cancelAnytime')}</p>
+            <p className="text-xs text-muted-foreground">{t('trialCardNote')}</p>
           </div>
         </div>
       </DialogContent>

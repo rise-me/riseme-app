@@ -133,7 +133,13 @@
     "benefit2": "Kalistenika, pilates, joga i więcej",
     "benefit3": "Pełne śledzenie postępów",
     "benefit4": "Ponad 140 lekcji wideo z instruktorką",
-    "unlockAccess": "Odblokuj mój dostęp"
+    "unlockAccess": "Odblokuj mój dostęp",
+    "trialTitle": "Wypróbuj wszystkie wyzwania przez 7 dni za darmo",
+    "trialToday": "Dziś płacisz 0 USD",
+    "trialAfter": "Od 8. dnia: 27 USD za cały rok",
+    "trialCancel": "Anuluj przed 8. dniem, a nic nie zapłacisz",
+    "trialCta": "Zacznij moje 7 darmowych dni",
+    "trialCardNote": "Aby rozpocząć okres próbny, potrzebujesz karty lub PayPala."
   },
   "subscriptionPage": {
     "title": "Subskrypcja",
