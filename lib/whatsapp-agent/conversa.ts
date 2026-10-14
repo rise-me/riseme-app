@@ -258,6 +258,17 @@ export async function consultasPendentes(): Promise<ConsultaAberta[]> {
   return (data ?? []).map(paraAberta)
 }
 
+/** Consulta pendente desta conversa nas últimas 24 h (para não abrir outra a cada mensagem). */
+export async function consultaPendenteDoChat(phone: string): Promise<boolean> {
+  const { count } = await admin()
+    .from('whatsapp_consultas')
+    .select('id', { count: 'exact', head: true })
+    .eq('phone', phone)
+    .eq('status', 'pendente')
+    .gte('created_at', new Date(Date.now() - 24 * 3600_000).toISOString())
+  return (count ?? 0) > 0
+}
+
 export async function consultaPorId(id: number): Promise<ConsultaAberta | null> {
   const { data } = await admin()
     .from('whatsapp_consultas')

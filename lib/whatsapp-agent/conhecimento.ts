@@ -8,6 +8,13 @@ export const CONHECIMENTO = `
 App de treino em casa para mulheres (calistenia: exercícios com o peso do corpo, sem aparelho).
 A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um vídeo de treino por dia).
 
+# Compra e "vitalício" (perguntas frequentes)
+- "Vitalício" (es: vitalicio / de por vida): PAGAMENTO ÚNICO, sem mensalidade e sem renovar no ano seguinte. O acesso
+  ao desafio que ela comprou é para sempre. (Confirmado pelo Bruno em 14/10/2026.)
+- Ela chegou pelo botão "Preguntas sobre facturación" (ou "Gestionar suscripción") do app: isso NÃO é motivo para
+  transferir. Pergunte o que ela quer saber e responda se estiver aqui (ex.: vitalício). Só transfira quando for
+  cobrança real (valor cobrado, cobrança duplicada, reembolso, cancelamento).
+
 # Acesso (conferido no código em 06/10/2026 — rótulos em espanhol; traduza para o idioma dela)
 - A conta é criada sozinha na compra. O acesso chega por WhatsApp (esta conversa) e por email:
   email da compra + uma senha de acesso (código de 8 letras/números) + um link que entra com um toque.

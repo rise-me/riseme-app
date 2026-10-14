@@ -10,6 +10,7 @@ import {
   aprendizadosAtivos,
   consultaPorAlerta,
   consultaPorId,
+  consultaPendenteDoChat,
   consultasPendentes,
   criarConsulta,
   fecharConsulta,
@@ -66,6 +67,7 @@ interface ZapiCallback {
   audio?: unknown
   image?: { caption?: string; imageUrl?: string }
   referenceMessageId?: string // mensagem que esta responde (citação)
+  reaction?: { value?: string; referencedMessage?: { messageId?: string; fromMe?: boolean } }
   video?: { caption?: string }
   document?: { fileName?: string }
   sticker?: unknown
@@ -110,6 +112,8 @@ function ehResponsavel(phone: string): boolean {
 // Transferência = CONSULTA: quem é, o que disse, o resumo e 2 respostas possíveis. O responsável
 // responde citando a mensagem (A, B, texto livre ou "pular") — ver responderConsulta.
 async function consultarResponsavel(phone: string, nome: string | undefined, idioma: string, ultimaFala: string, motivo: string, c: Consulta) {
+  // Já há consulta aberta desta conversa (últimas 24 h): não manda outro alerta a cada mensagem dela.
+  if (await consultaPendenteDoChat(phone)) return
   const id = await criarConsulta({ ...c, phone, nome, motivo })
   if (!id) return avisarHumano(phone, nome, motivo) // tabela indisponível → aviso simples, como antes
   const fala = ultimaFala.replace(/\[IMAGEM: [^\]]+\]/g, '[imagem]').slice(0, 400)
@@ -292,7 +296,9 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   }
 
   if (decisao.tipo === 'humano') {
-    await passarParaHumano(phone, HORAS_HANDOFF, decisao.motivo)
+    // NÃO cala o bot: transferir é abrir a consulta, não deixar a aluna no vácuo. Se ela mandar outra
+    // coisa, o agente responde o que souber (caso real 14/10: "¿qué es vitalicio?" ficou 12 min sem
+    // resposta porque o bot tinha transferido). Só pessoa respondendo pelo celular cala o bot.
     const ultimaFala = [...conversa].reverse().find((x) => x.autor === 'student')?.texto ?? ''
     await consultarResponsavel(phone, perfil?.nome, perfil?.idioma ?? '?', ultimaFala, decisao.motivo, decisao.consulta)
     if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU)
@@ -303,30 +309,42 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
       await etiquetar(phone, TAG_RESPONDEU)
       if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU, 'remove')
     }
-    // Onboarding terminou bem → pedido de depoimento, 1x por aluna, ~1 min depois da resposta
-    // (mensagem à parte; links e texto em lib/whatsapp-agent/depoimentos.ts).
-    if (decisao.pedirDepoimento && !silencioso) {
-      let depoimentoAgora = false
-      const convite = conviteDepoimento(perfil?.idioma ?? 'es', phone)
-      if (convite && !(await jaEnfileirou(phone, 'depoimento'))) {
-        await enfileirar({ phone, kind: 'depoimento', body: convite, sendAfter: new Date(Date.now() + 60_000) })
-        depoimentoAgora = true
-      }
-      // Mesmo gatilho → oferta do teste grátis do Pase, 1x por aluna, só sem Pase e conta confirmada pelo
-      // telefone. Nunca junto com o depoimento (regras em lib/whatsapp-agent/pase.ts).
-      try {
-        if (userId && !porEmail && !(await jaEnfileirou(phone, 'pase'))) {
-          const oferta = await ofertaPase(userId, perfil?.idioma ?? 'es')
-          if (oferta) {
-            const espera = depoimentoAgora ? 24 * 3600_000 : 2 * 60_000
-            await enfileirar({ phone, kind: 'pase', body: oferta, sendAfter: new Date(Date.now() + espera) })
-          }
-        }
-      } catch (err) {
-        console.error(`[pase] oferta do suporte falhou (${phone}):`, err)
+    if (decisao.pedirDepoimento && !silencioso) await ofertasPosConversa(phone, perfil?.idioma ?? 'es', userId, Boolean(porEmail))
+  }
+}
+
+// Conversa terminou bem (agente marcou, ou ela reagiu com ❤️/👍 a uma mensagem nossa):
+// pedido de depoimento (links/texto em lib/whatsapp-agent/depoimentos.ts) e, no mesmo gatilho, a oferta
+// do teste grátis do Pase (regras em lib/whatsapp-agent/pase.ts). Cada um 1x por aluna; nunca juntos.
+async function ofertasPosConversa(phone: string, idioma: string, userId: string | null, porEmail: boolean) {
+  let depoimentoAgora = false
+  const convite = conviteDepoimento(idioma, phone)
+  if (convite && !(await jaEnfileirou(phone, 'depoimento'))) {
+    await enfileirar({ phone, kind: 'depoimento', body: convite, sendAfter: new Date(Date.now() + 60_000) })
+    depoimentoAgora = true
+  }
+  try {
+    if (userId && !porEmail && !(await jaEnfileirou(phone, 'pase'))) {
+      const oferta = await ofertaPase(userId, idioma)
+      if (oferta) {
+        const espera = depoimentoAgora ? 24 * 3600_000 : 2 * 60_000
+        await enfileirar({ phone, kind: 'pase', body: oferta, sendAfter: new Date(Date.now() + espera) })
       }
     }
+  } catch (err) {
+    console.error(`[pase] oferta do suporte falhou (${phone}):`, err)
   }
+}
+
+// Reação a uma mensagem NOSSA. Positiva (❤️ 👍 🙏 😍 …) = ela ficou de boa → mesmas ofertas do
+// "terminou bem", sem chamar o agente. Só se nada estiver pendente (pessoa no atendimento ou consulta aberta).
+const REACOES_POSITIVAS = ['❤', '♥', '💛', '💖', '💕', '💗', '😍', '🥰', '😘', '👍', '🙏', '👏', '😊', '☺', '🙌', '💪', '🔥', '✨', '😁', '😀', '🤩', '💯', '✅']
+async function processarReacao(phone: string, emoji: string) {
+  if (!REACOES_POSITIVAS.some((r) => emoji.includes(r))) return
+  const chat = await abrirChat(phone)
+  if (chat.modoHumano || (await consultaPendenteDoChat(phone))) return
+  const perfil = chat.userId ? await perfilDaAluna(chat.userId) : null
+  await ofertasPosConversa(phone, perfil?.idioma ?? 'es', chat.userId, false)
 }
 
 // Mensagem "enviada por mim" que NÃO foi o sistema (nem o agente, nem o acesso)
@@ -370,6 +388,13 @@ export async function POST(request: NextRequest) {
   const ehLid = (m.phone ?? '').includes('@lid')
   const lid = (m.chatLid ?? (ehLid ? m.phone : '') ?? '').replace(/\D/g, '') || null
   const phone = ehLid ? `${lid}@lid` : (m.phone ?? '').replace(/\D/g, '')
+  // Reação dela a uma mensagem nossa (não tem texto): só interessa se for positiva.
+  if (!m.fromMe && m.reaction?.value && m.reaction.referencedMessage?.fromMe && phone && !ehResponsavel(phone)) {
+    const emoji = m.reaction.value
+    after(() => processarReacao(phone, emoji))
+    return NextResponse.json({ ok: true, reacao: true })
+  }
+
   const texto = textoDa(m)
   if (!phone || !m.messageId || !texto) return NextResponse.json({ ok: true, skipped: 'empty' })
   const waMessageId = m.messageId
