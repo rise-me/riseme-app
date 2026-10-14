@@ -46,8 +46,9 @@ export async function POST(request: NextRequest) {
   const { event, data } = p
   if (!FALHAS.has(event) && !APROVADA.has(event)) return NextResponse.json({ ok: true, skipped: 'evento' })
   const compra = data?.purchase
-  // Só o front da CL-ES: nem upsell do funil, nem order bump, nem outros produtos.
-  if (data?.product?.id !== PRODUTO_ID || !OFERTAS.has(compra?.offer?.code ?? '') || compra?.is_funnel || compra?.order_bump?.is_order_bump) {
+  // Só o front da CL-ES: pela oferta (upsell e downsell são outros produtos/ofertas) e sem order bump. NÃO filtrar por
+  // is_funnel: a Hotmart marca true também a compra principal de um produto com Funil de Vendas (visto 14/10/2026).
+  if (data?.product?.id !== PRODUTO_ID || !OFERTAS.has(compra?.offer?.code ?? '') || compra?.order_bump?.is_order_bump) {
     return NextResponse.json({ ok: true, skipped: 'fora do front CL-ES' })
   }
 
