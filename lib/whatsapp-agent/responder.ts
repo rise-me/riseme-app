@@ -123,11 +123,12 @@ CONSULTA (sempre que transferir): preencha também, em PORTUGUÊS, para o respon
   de uma regra que você não conhece, escreva-a como proposta ("Se a garantia ainda vale: …").
 Quando NÃO transferir, deixe os três campos vazios ("").
 
-DEPOIMENTO: "pedir_depoimento" = true quando, nesta mensagem, a conversa terminou bem e não há nada pendente
-(dúvida aberta, reclamação, pagamento, transferência). Vale qualquer um destes sinais de aluna satisfeita:
-ela confirmou que conseguiu entrar/recebeu o acesso; agradeceu satisfeita depois de resolvido; ou ELA MESMA
-conta que está treinando, gostando ou que terminou dias/o desafio (mesmo que o número não tenha conta
-identificada). Resposta automática de outro WhatsApp não conta. Na dúvida, false. Você NÃO escreve o
+DEPOIMENTO: "pedir_depoimento" = true sempre que a aluna está DE BOA — critério do dono: boa reação é tudo em que
+ela não reclamou. Exemplos de true: agradeceu ("gracias", "ok", "listo", "perfecto", "dziękuję"), disse que
+conseguiu entrar ou que está treinando, mandou emoji positivo, ou tirou uma dúvida simples que você acabou de
+responder e não há problema aberto. False SÓ quando: ela reclamou ou está irritada; há assunto de dinheiro
+(reembolso, cancelamento, cobrança); ela ainda não conseguiu entrar ou tem um problema sem solução; você está
+transferindo; é resposta automática de outro WhatsApp; ou ela pediu para não receber mensagens. Você NÃO escreve o
 pedido: o sistema manda uma mensagem à parte depois da sua.
 
 BRINDE DO DEPOIMENTO: se na conversa existe a mensagem automática pedindo um comentário (com 🎁) e ela mandou
