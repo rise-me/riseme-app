@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, after } from 'next/server'
 import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
 import { enfileirar, jaEnfileirou } from '@/lib/whatsapp-outbox'
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
+import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
@@ -305,9 +306,24 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     // Onboarding terminou bem → pedido de depoimento, 1x por aluna, ~1 min depois da resposta
     // (mensagem à parte; links e texto em lib/whatsapp-agent/depoimentos.ts).
     if (decisao.pedirDepoimento && !silencioso) {
+      let depoimentoAgora = false
       const convite = conviteDepoimento(perfil?.idioma ?? 'es', phone)
       if (convite && !(await jaEnfileirou(phone, 'depoimento'))) {
         await enfileirar({ phone, kind: 'depoimento', body: convite, sendAfter: new Date(Date.now() + 60_000) })
+        depoimentoAgora = true
+      }
+      // Mesmo gatilho → oferta do teste grátis do Pase, 1x por aluna, só sem Pase e conta confirmada pelo
+      // telefone. Nunca junto com o depoimento (regras em lib/whatsapp-agent/pase.ts).
+      try {
+        if (userId && !porEmail && !(await jaEnfileirou(phone, 'pase'))) {
+          const oferta = await ofertaPase(userId, perfil?.idioma ?? 'es')
+          if (oferta) {
+            const espera = depoimentoAgora ? 24 * 3600_000 : 2 * 60_000
+            await enfileirar({ phone, kind: 'pase', body: oferta, sendAfter: new Date(Date.now() + espera) })
+          }
+        }
+      } catch (err) {
+        console.error(`[pase] oferta do suporte falhou (${phone}):`, err)
       }
     }
   }

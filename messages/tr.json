@@ -139,7 +139,11 @@
     "trialAfter": "8. günden itibaren: tam bir yıl için US$27",
     "trialCancel": "8. günden önce iptal edersen hiçbir ücret alınmaz",
     "trialCta": "7 günlük ücretsiz denememi başlat",
-    "trialCardNote": "Denemeyi başlatmak için kart veya PayPal gerekir."
+    "trialCardNote": "Denemeyi başlatmak için kart veya PayPal gerekir.",
+    "trialDay1Title": "1. gün tamamlandı! 🎉",
+    "trialDay1Sub": "Meydan okumana devam et ve diğer tüm RiseMe™ meydan okumalarını da 7 gün ücretsiz dene.",
+    "trialFinishTitle": "Meydan okumayı bitirdin! 🏆",
+    "trialFinishSub": "Sıradaki meydan okuman seni bekliyor: hepsini 7 gün ücretsiz dene."
   },
   "subscriptionPage": {
     "title": "Abonelik",

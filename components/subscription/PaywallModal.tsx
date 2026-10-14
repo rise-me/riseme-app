@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { track } from '@/lib/posthog/track'
 import { createClient } from '@/lib/supabase/client'
+import { marcaOfertaMostrada } from '@/lib/pase-oferta'
 import {
   Dialog,
   DialogContent,
@@ -23,14 +24,18 @@ interface PaywallModalProps {
   challengeTitle?: string
   // Ponto de contato, gravado pela Hotmart no `src` da venda e lido pelo dashboard (pase-app, pase-aula1, ...).
   src?: string
+  // Título/subtítulo próprios do ponto de contato (ex.: "¡Día 1 completado!"); sem eles, o título padrão do teste.
+  title?: string
+  subtitle?: string
 }
 
-export function PaywallModal({ open, onClose, challengeTitle, src = 'pase-app' }: PaywallModalProps) {
+export function PaywallModal({ open, onClose, challengeTitle, src = 'pase-app', title, subtitle }: PaywallModalProps) {
   const t = useTranslations('subscription')
   const [email, setEmail] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
+    marcaOfertaMostrada()
     track('paywall_viewed', { source: 'modal', challenge_title: challengeTitle ?? null, src })
     // Email da conta pré-preenchido no checkout: a Hotmart avisa o app pelo email do comprador; outro email
     // criaria uma conta nova e a aluna não veria o acesso na conta dela.
@@ -65,10 +70,10 @@ export function PaywallModal({ open, onClose, challengeTitle, src = 'pase-app' }
         <div className="p-6 space-y-5">
           {/* Header */}
           <div className="pr-8">
-            <h2 className="text-xl font-bold leading-tight">{t('trialTitle')}</h2>
-            {challengeTitle && (
+            <h2 className="text-xl font-bold leading-tight">{title ?? t('trialTitle')}</h2>
+            {(subtitle || challengeTitle) && (
               <p className="text-sm text-muted-foreground mt-1">
-                {t('unlockBlock', { title: challengeTitle })}
+                {subtitle ?? t('unlockBlock', { title: challengeTitle! })}
               </p>
             )}
           </div>

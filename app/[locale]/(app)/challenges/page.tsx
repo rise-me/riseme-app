@@ -32,5 +32,14 @@ export default async function ChallengesPage({
     }
   })
 
-  return <ChallengesList challenges={challenges} locale={locale} />
+  const didAnyDay = [...progressByChallenge.values()].some((n) => n > 0)
+
+  return (
+    <ChallengesList
+      challenges={challenges}
+      locale={locale}
+      hasPase={access.hasActiveSubscription}
+      didAnyDay={didAnyDay}
+    />
+  )
 }

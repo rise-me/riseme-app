@@ -139,7 +139,11 @@
     "trialAfter": "Desde el día 8: US$27 por un año completo",
     "trialCancel": "Si cancelas antes del día 8, no se cobra nada",
     "trialCta": "Empezar mis 7 días gratis",
-    "trialCardNote": "Para activar la prueba necesitas tarjeta o PayPal."
+    "trialCardNote": "Para activar la prueba necesitas tarjeta o PayPal.",
+    "trialDay1Title": "¡Día 1 completado! 🎉",
+    "trialDay1Sub": "Sigue con tu desafío y prueba también todos los demás desafíos RiseMe™, gratis por 7 días.",
+    "trialFinishTitle": "¡Terminaste el desafío! 🏆",
+    "trialFinishSub": "Tu próximo desafío te espera: pruébalos todos gratis por 7 días."
   },
   "subscriptionPage": {
     "title": "Suscripción",
