@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { enfileirar } from '@/lib/whatsapp-outbox'
-import { admin } from '@/lib/whatsapp-agent/conversa'
+import { enfileirar, jaEnfileirou, pediuParaParar } from '@/lib/whatsapp-outbox'
+import { admin, variantesTelefone } from '@/lib/whatsapp-agent/conversa'
 import { toE164 } from '@/lib/phone'
+import { toZapiPhone } from '@/lib/zapi'
 import { ESPERA_MS, JANELA_MS, OFERTAS, PRODUTO_ID, casoDoEvento, linkCheckout, mensagem } from '@/lib/recuperacao'
 
 // Webhook Hotmart EXCLUSIVO da recuperação de compra (14/10/2026). Separado de /api/hotmart (que cria conta e
@@ -52,14 +53,19 @@ export async function POST(request: NextRequest) {
 
   const buyer = data?.buyer
   const email = buyer?.email?.toLowerCase()
-  const { phone, hadCountry } = toE164(buyer?.checkout_phone ?? buyer?.phone, {
+  const { phone: e164, hadCountry } = toE164(buyer?.checkout_phone ?? buyer?.phone, {
     countryIso: buyer?.address?.country_iso ?? compra?.checkout_country?.iso,
   })
+  // Telefone na fila = só dígitos com DDI (toZapiPhone): é a chave da conversa, e o bot acha a mensagem por ela.
+  const phone = e164 ? toZapiPhone(e164) : undefined
   const db = admin()
 
   if (APROVADA.has(event)) {
     // Pagou: apaga a recuperação que ainda não saiu (pelo telefone ou pelo email que está no link).
-    const filtros = [phone ? `phone.eq.${phone}` : null, email ? `body.ilike.%${encodeURIComponent(email)}%` : null].filter(Boolean)
+    const filtros = [
+      ...(phone ? variantesTelefone(phone).map((v) => `phone.eq.${v}`) : []),
+      email ? `body.ilike.%${encodeURIComponent(email)}%` : null,
+    ].filter(Boolean)
     if (filtros.length) {
       await db.from('whatsapp_outbox').delete().eq('kind', 'recuperacao').is('sent_at', null).or(filtros.join(','))
     }
@@ -69,6 +75,11 @@ export async function POST(request: NextRequest) {
   if (!phone || !hadCountry) {
     console.warn(`[recuperacao] sem telefone internacional (venda ${compra?.transaction}) — ignorado`)
     return NextResponse.json({ ok: true, skipped: 'telefone' })
+  }
+
+  // Pediu para não receber mais (marcador gravado pelo bot do suporte) ou já recebeu acesso: não manda.
+  if ((await pediuParaParar(phone)) || (await jaEnfileirou(phone, 'acesso'))) {
+    return NextResponse.json({ ok: true, skipped: 'optout ou ja aluna' })
   }
 
   // Já é compradora (tem conta no app): não recebe recuperação.
@@ -82,7 +93,7 @@ export async function POST(request: NextRequest) {
     .from('whatsapp_outbox')
     .select('id', { count: 'exact', head: true })
     .eq('kind', 'recuperacao')
-    .eq('phone', phone)
+    .in('phone', variantesTelefone(phone))
     .gte('created_at', new Date(Date.now() - JANELA_MS).toISOString())
   if ((recentes ?? 0) > 0) return NextResponse.json({ ok: true, skipped: 'ja enfileirada' })
 
