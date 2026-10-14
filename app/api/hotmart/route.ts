@@ -4,6 +4,8 @@ import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { sendWhatsAppAccess } from '@/lib/whatsapp-access'
 import { sendAccessEmail } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
+import { routing } from '@/i18n/routing'
+import { hasLocale } from 'next-intl'
 
 
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
@@ -118,9 +120,10 @@ export async function POST(request: NextRequest) {
       .eq('email', buyerEmail)
       .limit(1)
 
-    // Hotmart = público Latam → espanhol. Grava o locale explícito pra o app/email
-    // saírem no idioma certo (antes não gravava e caía sempre em es por acaso).
-    const locale = 'es'
+    // Idioma da conta: vem do HOTMART_CHALLENGE_MAP (`ID:desafio:idioma`), como na Perfect Pay.
+    // Sem idioma no mapa (entradas antigas `ID:desafio`) ou produto fora do mapa (assinatura) = 'es',
+    // o comportamento de antes (Hotmart era só Latam). CL-CZ (14/10/2026) foi a 1ª oferta Hotmart fora do espanhol.
+    const locale = getMappingForProduct(productId)?.locale ?? 'es'
     // Normaliza pra E.164 com o DDI do país (mesmo motivo da Perfect Pay: sem "+DDI"
     // o WhatsApp não sai). Sem país conhecido, segue só com os dígitos e loga.
     const rawPhone = buyer.checkout_phone ?? buyer.phone ?? undefined
@@ -305,11 +308,25 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ ok: true })
 }
 
-function getChallengeIdForProduct(productId: string): string | null {
+// HOTMART_CHALLENGE_MAP="ID:challengeId[:locale],..." — locale opcional (default es), igual ao
+// PERFECTPAY_CHALLENGE_MAP. Ex.: "4784921:2,<ID_HOTMART_CZ>:1:cs". Idioma que o app não tem (ex.: mapa
+// trocado antes do deploy do idioma) cai em 'es' com erro no log — senão o link de acesso daria página
+// não encontrada.
+function getMappingForProduct(productId: string): { challengeId: string; locale: string } | null {
   const map = process.env.HOTMART_CHALLENGE_MAP ?? ''
   for (const entry of map.split(',')) {
-    const [pid, cid] = entry.split(':')
-    if (pid?.trim() === productId) return cid?.trim() ?? null
+    const [pid, cid, loc] = entry.split(':').map((x) => x?.trim())
+    if (!pid || pid !== productId) continue
+    let locale = loc || 'es'
+    if (!hasLocale(routing.locales, locale)) {
+      console.error(`[hotmart] HOTMART_CHALLENGE_MAP: idioma '${locale}' do produto ${productId} não existe no app — usando 'es'`)
+      locale = 'es'
+    }
+    return { challengeId: cid ?? '', locale }
   }
   return null
+}
+
+function getChallengeIdForProduct(productId: string): string | null {
+  return getMappingForProduct(productId)?.challengeId || null
 }
