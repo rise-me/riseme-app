@@ -1,3 +1,12 @@
 {
-  "crons": [{ "path": "/api/whatsapp/outbox", "schedule": "* * * * *" }]
+  "crons": [
+    {
+      "path": "/api/whatsapp/outbox",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/custos",
+      "schedule": "0 12 * * *"
+    }
+  ]
 }
