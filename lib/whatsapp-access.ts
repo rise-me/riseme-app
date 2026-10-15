@@ -27,6 +27,7 @@ type SupportCopy = (p: { playlist?: string }) => string
 const ATRASO_ACESSO_MIN = Number(process.env.WHATSAPP_ACCESS_DELAY_MIN ?? 15)
 const ESPERA_MSG2_MS = 45_000
 const ESPERA_DEPOIMENTO_MS = 3 * 3600_000
+const CONVITE_PARA_TODAS = false
 
 // Playlist (não listada) das aulas por idioma — reserva pra ela não perder o dia
 // se o app der problema. Idioma sem playlist → a msg 2 sai sem esse trecho.
@@ -357,8 +358,10 @@ export async function sendWhatsAppAccess(params: {
   // 14/10/2026: 85% nunca escreve, então o convite só pela conversa quase não saía). Na hora de enviar,
   // a fila pula quem pediu para parar, já recebeu convite, está com pessoa/consulta aberta (whatsapp-outbox).
   // Só idiomas com link em lib/whatsapp-agent/depoimentos.ts.
+  // DESLIGADO em 14/10/2026 (Bruno: "não quero que o chip caia") — o convite volta a sair só dentro
+  // de uma conversa (route.ts → ofertasPosConversa). Para religar: CONVITE_PARA_TODAS = true.
   const chave = toZapiPhone(phone)
-  const convite = conviteDepoimento(params.locale, chave)
+  const convite = CONVITE_PARA_TODAS ? conviteDepoimento(params.locale, chave) : null
   if (convite) {
     await enfileirar({
       phone: chave,
