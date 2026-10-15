@@ -133,7 +133,17 @@
     "benefit2": "Kalistenika, pilates, joga i więcej",
     "benefit3": "Pełne śledzenie postępów",
     "benefit4": "Ponad 140 lekcji wideo z instruktorką",
-    "unlockAccess": "Odblokuj mój dostęp"
+    "unlockAccess": "Odblokuj mój dostęp",
+    "trialTitle": "Wypróbuj wszystkie wyzwania przez 7 dni za darmo",
+    "trialToday": "Dziś płacisz 0 USD",
+    "trialAfter": "Od 8. dnia: 27 USD za cały rok",
+    "trialCancel": "Anuluj przed 8. dniem, a nic nie zapłacisz",
+    "trialCta": "Zacznij moje 7 darmowych dni",
+    "trialCardNote": "Aby rozpocząć okres próbny, potrzebujesz karty lub PayPala.",
+    "trialDay1Title": "Dzień 1 ukończony! 🎉",
+    "trialDay1Sub": "Kontynuuj swoje wyzwanie i wypróbuj też wszystkie inne wyzwania RiseMe™ za darmo przez 7 dni.",
+    "trialFinishTitle": "Ukończyłaś wyzwanie! 🏆",
+    "trialFinishSub": "Twoje kolejne wyzwanie czeka: wypróbuj wszystkie za darmo przez 7 dni."
   },
   "subscriptionPage": {
     "title": "Subskrypcja",

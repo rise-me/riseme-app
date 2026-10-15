@@ -133,7 +133,17 @@
     "benefit2": "Kalistenik, pilates, yoga ve daha fazlası",
     "benefit3": "Eksiksiz ilerleme takibi",
     "benefit4": "140'tan fazla rehberli video ders",
-    "unlockAccess": "Erişimimin kilidini aç"
+    "unlockAccess": "Erişimimin kilidini aç",
+    "trialTitle": "Tüm meydan okumaları 7 gün ücretsiz dene",
+    "trialToday": "Bugün ödediğin: US$0",
+    "trialAfter": "8. günden itibaren: tam bir yıl için US$27",
+    "trialCancel": "8. günden önce iptal edersen hiçbir ücret alınmaz",
+    "trialCta": "7 günlük ücretsiz denememi başlat",
+    "trialCardNote": "Denemeyi başlatmak için kart veya PayPal gerekir.",
+    "trialDay1Title": "1. gün tamamlandı! 🎉",
+    "trialDay1Sub": "Meydan okumana devam et ve diğer tüm RiseMe™ meydan okumalarını da 7 gün ücretsiz dene.",
+    "trialFinishTitle": "Meydan okumayı bitirdin! 🏆",
+    "trialFinishSub": "Sıradaki meydan okuman seni bekliyor: hepsini 7 gün ücretsiz dene."
   },
   "subscriptionPage": {
     "title": "Abonelik",

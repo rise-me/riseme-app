@@ -133,7 +133,17 @@
     "benefit2": "Calisthenics, Pilates, Yoga and more",
     "benefit3": "Complete progress tracking",
     "benefit4": "140+ guided video classes",
-    "unlockAccess": "Unlock my access"
+    "unlockAccess": "Unlock my access",
+    "trialTitle": "Try every challenge free for 7 days",
+    "trialToday": "Today you pay US$0",
+    "trialAfter": "From day 8: US$27 for a full year",
+    "trialCancel": "Cancel before day 8 and you won't be charged",
+    "trialCta": "Start my 7 free days",
+    "trialCardNote": "You need a card or PayPal to start the trial.",
+    "trialDay1Title": "Day 1 done! 🎉",
+    "trialDay1Sub": "Keep going with your challenge and try every other RiseMe™ challenge too, free for 7 days.",
+    "trialFinishTitle": "You finished the challenge! 🏆",
+    "trialFinishSub": "Your next challenge is waiting: try them all free for 7 days."
   },
   "subscriptionPage": {
     "title": "Subscription",

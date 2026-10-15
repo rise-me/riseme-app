@@ -48,6 +48,7 @@ interface HotmartPayload {
       status: string
       offer?: { code: string }
       recurrence_number?: number
+      date_next_charge?: number // epoch ms da próxima cobrança (no teste grátis = fim do teste)
     }
     subscription?: {
       subscriber: { code: string }
@@ -186,12 +187,31 @@ export async function POST(request: NextRequest) {
           : 'monthly'
       const subCode = data.subscription?.subscriber?.code ?? purchase.transaction
 
+      // Acesso vale até a PRÓXIMA COBRANÇA que a Hotmart informa (+ folga pras novas tentativas de cobrança).
+      // Antes: sempre hoje + 365/30 dias — o teste grátis (aprovação de US$ 0, cobrança no dia 8) ganhava 1 ano,
+      // e quem cancelava no teste (PURCHASE_CANCELED) ou não pagava no dia 8 (PURCHASE_DELAYED) ficava com ele.
+      // Medido nos webhooks da oferta v4lltj3v em 14/10/2026: 30 cancelamentos no teste, 12 cobranças atrasadas.
+      // Quem paga recebe novo PURCHASE_APPROVED (recurrence_number 2+) com a data seguinte.
+      const DAY = 24 * 60 * 60 * 1000
+      const GRACE_DAYS = 3
+      const nextCharge = purchase.date_next_charge
+      const newEnd = nextCharge
+        ? nextCharge + GRACE_DAYS * DAY
+        : Date.now() + (planType === 'annual' ? 365 : 30) * DAY
+      // Nunca anda pra trás: o PURCHASE_COMPLETE da 1ª cobrança pode chegar depois da renovação.
+      const { data: current } = await supabase
+        .from('subscriptions')
+        .select('current_period_end')
+        .eq('stripe_sub_id', subCode)
+        .maybeSingle()
+      const currentEnd = current?.current_period_end ? new Date(current.current_period_end).getTime() : 0
+
       await supabase.from('subscriptions').upsert({
         user_id: userId,
         stripe_sub_id: subCode,
         status: 'active',
         plan_type: planType,
-        current_period_end: new Date(Date.now() + (planType === 'annual' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
+        current_period_end: new Date(Math.max(newEnd, currentEnd)).toISOString(),
       }, { onConflict: 'stripe_sub_id' })
 
       // Grant access to all non-free mock challenges (IDs from lib/mock-challenges.ts).
@@ -209,11 +229,13 @@ export async function POST(request: NextRequest) {
       // Lifetime purchase — map Hotmart product ID to challenge via env var
       const challengeId = getChallengeIdForProduct(productId)
       if (challengeId) {
+        // Sem ignoreDuplicates: assinante que compra o avulso já tem a linha 'subscription'
+        // deste desafio — ela precisa virar 'lifetime', senão a compra some quando a assinatura acabar.
         await supabase.from('user_challenges').upsert({
           user_id: userId,
           challenge_id: challengeId,
           access_type: 'lifetime',
-        }, { onConflict: 'user_id,challenge_id', ignoreDuplicates: true })
+        }, { onConflict: 'user_id,challenge_id' })
       } else {
         // Produto fora do mapa (ex.: order bump novo): antes passava em silêncio, sem liberar nada.
         console.error(

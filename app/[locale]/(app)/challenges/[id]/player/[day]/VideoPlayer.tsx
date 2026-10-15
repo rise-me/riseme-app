@@ -10,12 +10,15 @@ import { track } from '@/lib/posthog/track'
 import type { MockChallenge } from '@/lib/mock-challenges'
 import { HLS_BASE_URL, STREAM_CUSTOMER_HOST, type LessonVideo, type MockDay } from '@/lib/mock-challenge-days'
 import { CastTvHelp } from '@/components/challenges/CastTvHelp'
+import { PaywallModal } from '@/components/subscription/PaywallModal'
+import { marcaOfertaDaAula, ofertaDaAulaJaMostrada } from '@/lib/pase-oferta'
 
 interface Props {
   challenge: MockChallenge
   days: MockDay[]
   currentDayNumber: number
   locale: string
+  hasPase: boolean
   hlsPath?: string | null
 }
 
@@ -163,10 +166,11 @@ function loadYouTubeAPI(): Promise<void> {
   return apiLoadingPromise
 }
 
-export function VideoPlayer({ challenge, days, currentDayNumber, locale, hlsPath }: Props) {
+export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase, hlsPath }: Props) {
   const router = useRouter()
   const t = useTranslations('challenges')
   const tTv = useTranslations('castTv')
+  const tSub = useTranslations('subscription')
   const currentDay = days.find((d) => d.day_number === currentDayNumber)!
   const nextDay = days.find((d) => d.day_number === currentDayNumber + 1)
   const prevDay = days.find((d) => d.day_number === currentDayNumber - 1)
@@ -182,8 +186,39 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hlsPath
   const [duration, setDuration] = useState(currentDay.duration_seconds ?? 15 * 60)
   const [tvOpen, setTvOpen] = useState(false)
 
+  // Oferta do teste grátis ao CONCLUIR a aula 1 e a última aula (14/10/2026) — nunca no meio do treino: o dia é
+  // marcado aos 80% (ainda no desaquecimento), então a oferta espera a aluna sair do player (X / Siguiente)
+  // ou o vídeo chegar ao fim. Uma vez por aula, só pra quem não tem o Pase.
+  const isFinalDay = currentDayNumber >= days.length
+  const offerDay = !hasPase && (currentDayNumber === 1 || isFinalDay)
+  const [dayDone, setDayDone] = useState(false)
+  const [offerOpen, setOfferOpen] = useState(false)
+  const pendingNavRef = useRef<(() => void) | null>(null)
+
+  function canOffer() {
+    return offerDay && dayDone && !ofertaDaAulaJaMostrada(challenge.id, currentDayNumber)
+  }
+
+  function openOffer(after: (() => void) | null) {
+    marcaOfertaDaAula(challenge.id, currentDayNumber)
+    pendingNavRef.current = after
+    setOfferOpen(true)
+  }
+
+  // Sair do player passa por aqui: se a oferta da aula está pendente, ela aparece antes de seguir.
+  function leave(go: () => void) {
+    if (canOffer()) openOffer(go)
+    else go()
+  }
+
+  useEffect(() => {
+    if (offerDay && dayDone && !offerOpen && duration > 0 && elapsed / duration >= 0.98 && canOffer()) openOffer(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elapsed, duration, dayDone, offerDay, offerOpen])
+
   useEffect(() => {
     savedRef.current = false
+    setDayDone(false)
     setElapsed(0)
     if (!videoProvider || !videoId || !iframeHostRef.current) return
 
@@ -207,6 +242,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hlsPath
         setElapsed(t)
         if (d > 0 && t / d >= 0.8 && !savedRef.current) {
           savedRef.current = true
+          setDayDone(true)
           const watchedPct = Math.round((t / d) * 100)
           markDayComplete({
             challengeId: challenge.id,
@@ -263,7 +299,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hlsPath
 
   function navigate(day: MockDay | undefined) {
     if (!day) return
-    router.push(`/${locale}/challenges/${challenge.id}/player/${day.day_number}`)
+    leave(() => router.push(`/${locale}/challenges/${challenge.id}/player/${day.day_number}`))
   }
 
   const SEGMENTS = 20
@@ -293,7 +329,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hlsPath
           <Tv size={18} className="text-white" />
         </button>
         <button
-          onClick={() => router.push(`/${locale}/challenges/${challenge.id}`)}
+          onClick={() => leave(() => router.push(`/${locale}/challenges/${challenge.id}`))}
           className="absolute top-12 right-4 z-20 w-9 h-9 rounded-full bg-black/60 backdrop-blur flex items-center justify-center"
         >
           <X size={18} className="text-white" />
@@ -370,6 +406,18 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hlsPath
       </div>
 
       <CastTvHelp open={tvOpen} onClose={() => setTvOpen(false)} />
+      <PaywallModal
+        open={offerOpen}
+        onClose={() => {
+          setOfferOpen(false)
+          const go = pendingNavRef.current
+          pendingNavRef.current = null
+          go?.()
+        }}
+        src={isFinalDay ? 'pase-fim-desafio' : 'pase-aula1'}
+        title={isFinalDay ? tSub('trialFinishTitle') : tSub('trialDay1Title')}
+        subtitle={isFinalDay ? tSub('trialFinishSub') : tSub('trialDay1Sub')}
+      />
     </div>
   )
 }

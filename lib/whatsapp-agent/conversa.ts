@@ -1,7 +1,7 @@
 // Estado e histórico das conversas de WhatsApp (migration_008). Só servidor:
 // usa a service role — as tabelas não têm policy nenhuma.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import type { MensagemConversa, PerfilAluna } from './responder'
+import type { Aprendizado, Consulta, MensagemConversa, PerfilAluna } from './responder'
 
 let _admin: SupabaseClient | null = null
 export function admin(): SupabaseClient {
@@ -74,17 +74,26 @@ export interface Chat {
   modoHumano: boolean // true = bot calado (pessoa assumiu ou handoff)
 }
 
+/**
+ * Formas do mesmo celular: o WhatsApp entrega em um formato e a compra grava em outro.
+ * BR: sem o 9 (55 31 8991-1328) · MX: com 1 depois do 52 (521 55…) · AR: com 9 depois do 54 (549 …).
+ * Devolve só dígitos (sem "+").
+ */
+export function variantesTelefone(phone: string): string[] {
+  const d = phone.replace(/\D/g, '')
+  const v = [d]
+  if (/^55\d{10}$/.test(d)) v.push(`${d.slice(0, 4)}9${d.slice(4)}`)
+  if (/^55\d{11}$/.test(d)) v.push(`${d.slice(0, 4)}${d.slice(5)}`)
+  if (/^521\d{10}$/.test(d)) v.push(`52${d.slice(3)}`)
+  if (/^52\d{10}$/.test(d)) v.push(`521${d.slice(2)}`)
+  if (/^549\d{10}$/.test(d)) v.push(`54${d.slice(3)}`)
+  if (/^54\d{10}$/.test(d)) v.push(`549${d.slice(2)}`)
+  return v
+}
+
 async function acharUsuario(phone: string): Promise<string | null> {
   // users.phone é gravado em E.164 ("+34…") pela Perfect Pay; a Hotmart pode ter gravado cru.
-  // O WhatsApp usa um formato de celular diferente do da compra em alguns países:
-  //   BR: sem o 9 (55 31 8991-1328) · MX: com 1 depois do 52 (521 55…) · AR: com 9 depois do 54 (549 …)
-  const variantes = [phone]
-  if (/^55\d{10}$/.test(phone)) variantes.push(`${phone.slice(0, 4)}9${phone.slice(4)}`)
-  if (/^521\d{10}$/.test(phone)) variantes.push(`52${phone.slice(3)}`)
-  if (/^52\d{10}$/.test(phone)) variantes.push(`521${phone.slice(2)}`)
-  if (/^549\d{10}$/.test(phone)) variantes.push(`54${phone.slice(3)}`)
-  if (/^54\d{10}$/.test(phone)) variantes.push(`549${phone.slice(2)}`)
-  const candidatos = variantes.flatMap((v) => [`+${v}`, v])
+  const candidatos = variantesTelefone(phone).flatMap((v) => [`+${v}`, v])
   const { data } = await admin().from('users').select('id').in('phone', candidatos).limit(1)
   return data?.[0]?.id ?? null
 }
@@ -136,6 +145,25 @@ export async function telefoneDoLid(lid: string): Promise<string | null> {
   return data?.[0]?.phone ?? null
 }
 
+/** Quantas respostas o agente mandou para este número nos últimos `minutos`. */
+export async function respostasRecentes(phone: string, minutos: number): Promise<number> {
+  const { count } = await admin()
+    .from('whatsapp_messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('phone', phone)
+    .eq('author', 'agent')
+    .gte('created_at', new Date(Date.now() - minutos * 60_000).toISOString())
+  return count ?? 0
+}
+
+/** Devolve a conversa ao bot (fim de handoff/pane, ou resposta aprovada já enviada). */
+export async function voltarParaBot(phone: string): Promise<void> {
+  await admin()
+    .from('whatsapp_chats')
+    .update({ mode: 'bot', human_until: null, updated_at: new Date().toISOString() })
+    .eq('phone', phone)
+}
+
 /** Cala o bot neste número por `horas` (pessoa assumiu ou o agente pediu handoff). */
 export async function passarParaHumano(phone: string, horas: number, motivo: string): Promise<void> {
   await admin()
@@ -182,5 +210,123 @@ export async function perfilDaAluna(userId: string, confirmadaPorTelefone = true
     ultimoTreino: progresso?.[0]?.completed_at ?? null,
     liberados: [...new Set((acessos ?? []).map((a) => NOME_PRODUTO[a.challenge_id] ?? a.challenge_id))],
     confirmadaPorTelefone,
+    brindeDepoimentoEntregue: Boolean(
+      (auth?.user?.app_metadata?.menu_bonus_motivos as Record<string, string> | undefined)?.depoimento
+    ),
   }
+}
+
+// ─── Consultas ao responsável e aprendizados (migration_011) ────────────────────────────────
+
+export interface ConsultaAberta extends Consulta {
+  id: number
+  phone: string
+  nome: string | null
+}
+
+export async function criarConsulta(c: Consulta & { phone: string; nome?: string; motivo: string }): Promise<number | null> {
+  // Uma consulta pendente por conversa: a nova substitui a antiga (ela já traz o contexto todo).
+  await admin().from('whatsapp_consultas').update({ status: 'pulada' }).eq('phone', c.phone).eq('status', 'pendente')
+  const { data, error } = await admin()
+    .from('whatsapp_consultas')
+    .insert({ phone: c.phone, nome: c.nome ?? null, motivo: c.motivo, resumo: c.resumo, opcao_a: c.opcaoA, opcao_b: c.opcaoB })
+    .select('id')
+    .single()
+  if (error) {
+    console.error('[consulta] falha ao criar:', error.message)
+    return null
+  }
+  return data.id as number
+}
+
+export async function marcarAlertaDaConsulta(id: number, alertMessageId: string): Promise<void> {
+  await admin().from('whatsapp_consultas').update({ alert_message_id: alertMessageId }).eq('id', id)
+}
+
+const paraAberta = (r: Record<string, unknown>): ConsultaAberta => ({
+  id: r.id as number,
+  phone: r.phone as string,
+  nome: (r.nome as string) ?? null,
+  resumo: r.resumo as string,
+  opcaoA: (r.opcao_a as string) ?? '',
+  opcaoB: (r.opcao_b as string) ?? '',
+})
+
+/**
+ * Pendentes das últimas 48 h, da mais antiga para a mais nova. Mais velhas que isso não entram no
+ * "qual consulta é essa?" (acumulavam e toda resposta sem citação virava ambígua); continuam
+ * respondíveis citando a mensagem ou pelo #id.
+ */
+export async function consultasPendentes(): Promise<ConsultaAberta[]> {
+  const { data } = await admin()
+    .from('whatsapp_consultas')
+    .select('id, phone, nome, resumo, opcao_a, opcao_b')
+    .eq('status', 'pendente')
+    .gte('created_at', new Date(Date.now() - 48 * 3600_000).toISOString())
+    .order('created_at', { ascending: true })
+  return (data ?? []).map(paraAberta)
+}
+
+/** Consulta pendente desta conversa nas últimas 24 h (para não abrir outra a cada mensagem). */
+export async function consultaPendenteDoChat(phone: string): Promise<boolean> {
+  const { count } = await admin()
+    .from('whatsapp_consultas')
+    .select('id', { count: 'exact', head: true })
+    .eq('phone', phone)
+    .eq('status', 'pendente')
+    .gte('created_at', new Date(Date.now() - 24 * 3600_000).toISOString())
+  return (count ?? 0) > 0
+}
+
+export async function consultaPorId(id: number): Promise<ConsultaAberta | null> {
+  const { data } = await admin()
+    .from('whatsapp_consultas')
+    .select('id, phone, nome, resumo, opcao_a, opcao_b')
+    .eq('id', id)
+    .eq('status', 'pendente')
+    .limit(1)
+  return data?.[0] ? paraAberta(data[0]) : null
+}
+
+export async function consultaPorAlerta(alertMessageId: string): Promise<ConsultaAberta | null> {
+  const { data } = await admin()
+    .from('whatsapp_consultas')
+    .select('id, phone, nome, resumo, opcao_a, opcao_b')
+    .eq('alert_message_id', alertMessageId)
+    .eq('status', 'pendente')
+    .limit(1)
+  return data?.[0] ? paraAberta(data[0]) : null
+}
+
+export async function fecharConsulta(
+  id: number,
+  f: { status: 'respondida' | 'pulada'; orientacao?: string; respostaEnviada?: string }
+): Promise<void> {
+  await admin()
+    .from('whatsapp_consultas')
+    .update({
+      status: f.status,
+      orientacao: f.orientacao ?? null,
+      resposta_enviada: f.respostaEnviada ?? null,
+      answered_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+}
+
+export async function salvarAprendizado(a: Aprendizado, consultaId: number): Promise<void> {
+  const { error } = await admin()
+    .from('whatsapp_aprendizados')
+    .insert({ pergunta: a.pergunta, resposta: a.resposta, consulta_id: consultaId })
+  if (error) console.error('[aprendizado] falha ao salvar:', error.message)
+}
+
+/** Respostas aprovadas em vigor — entram no prompt do agente a cada mensagem. */
+export async function aprendizadosAtivos(): Promise<Aprendizado[]> {
+  const { data } = await admin()
+    .from('whatsapp_aprendizados')
+    .select('pergunta, resposta')
+    .eq('ativo', true)
+    .order('created_at', { ascending: true })
+    .limit(200)
+  return (data ?? []) as Aprendizado[]
 }

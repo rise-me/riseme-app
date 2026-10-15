@@ -16,8 +16,9 @@
 
 import type { AppLocale } from '@/i18n/routing'
 import { sendVoxuyAccess } from '@/lib/voxuy'
-import { isZapiConfigured } from '@/lib/zapi'
+import { isZapiConfigured, toZapiPhone } from '@/lib/zapi'
 import { enfileirar } from '@/lib/whatsapp-outbox'
+import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 
 type AccessCopy = (p: { email: string; code: string; link: string; homeUrl: string }) => string
 type SupportCopy = (p: { playlist?: string }) => string
@@ -25,6 +26,8 @@ type SupportCopy = (p: { playlist?: string }) => string
 // Atraso do acesso: tempo da VSL do upsell (~15 min). Ajustável sem deploy de código.
 const ATRASO_ACESSO_MIN = Number(process.env.WHATSAPP_ACCESS_DELAY_MIN ?? 15)
 const ESPERA_MSG2_MS = 45_000
+const ESPERA_DEPOIMENTO_MS = 30 * 60_000 // "aproveitar que a pessoa está quente" (Bruno, 14/10)
+const CONVITE_PARA_TODAS = true
 
 // Playlist (não listada) das aulas por idioma — reserva pra ela não perder o dia
 // se o app der problema. Idioma sem playlist → a msg 2 sai sem esse trecho.
@@ -350,6 +353,24 @@ export async function sendWhatsAppAccess(params: {
     sendAfter: new Date(sendAt.getTime() + ESPERA_MSG2_MS),
     dependsOn: idAcesso,
   })
+
+  // 3ª mensagem: convite de depoimento para TODA compradora, ~30 min depois do acesso (decisão do Bruno,
+  // 14/10/2026: 85% nunca escreve, então o convite só pela conversa quase não saía). Na hora de enviar,
+  // a fila pula quem pediu para parar, já recebeu convite, está com pessoa/consulta aberta (whatsapp-outbox).
+  // Só idiomas com link em lib/whatsapp-agent/depoimentos.ts.
+  // Vale para toda COMPRA NOVA (Bruno, 14/10/2026). Compradoras antigas NÃO recebem por envio em lote
+  // ("não quero que o chip caia") — scripts/convidar-depoimento.ts fica parado. Desligar: CONVITE_PARA_TODAS = false.
+  const chave = toZapiPhone(phone)
+  const convite = CONVITE_PARA_TODAS ? conviteDepoimento(params.locale, chave) : null
+  if (convite) {
+    await enfileirar({
+      phone: chave,
+      kind: 'depoimento',
+      body: convite,
+      sendAfter: new Date(sendAt.getTime() + ESPERA_DEPOIMENTO_MS),
+      dependsOn: idAcesso,
+    })
+  }
 }
 
 /** As 2 mensagens da sequência, prontas — exportado também pra pré-visualizar/testar o texto. */
@@ -363,4 +384,19 @@ export function mensagensDeAcesso(p: { locale: string; email: string; code: stri
     copy({ email: p.email, code: p.code, link: p.link, homeUrl }),
     support({ playlist: PLAYLIST[locale] }),
   ]
+}
+
+// Abertura do REENVIO de acesso (senha nova) — usada pelo script de reenvio em lote e pelo comando
+// "reenvia o acesso" do responsável. Sem a palavra "anterior": a msg de acesso diz "la contraseña
+// anterior" no sentido de "a de cima".
+const ABERTURA_REENVIO: Record<string, string> = {
+  es: '¡Hola! 💛 Te reenviamos por aquí tu acceso a RiseMe. Tu contraseña fue renovada: usa la que aparece en este mensaje.',
+  pl: 'Cześć! 💛 Przesyłamy Ci tutaj dostęp do RiseMe. Twoje hasło zostało odnowione: użyj tego z tej wiadomości.',
+  tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. Şifren yenilendi: bu mesajdaki şifreyi kullan.',
+  en: 'Hi! 💛 We are resending your RiseMe access here. Your password was renewed: use the one in this message.',
+  'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. Sua senha foi renovada: use a que está nesta mensagem.',
+}
+
+export function aberturaReenvio(locale: string): string {
+  return ABERTURA_REENVIO[locale] ?? ABERTURA_REENVIO.es
 }

@@ -48,6 +48,7 @@ export default async function PlayerPage({
       days={days}
       currentDayNumber={dayNumber}
       locale={locale}
+      hasPase={access.hasActiveSubscription}
       hlsPath={hlsPath}
     />
   )

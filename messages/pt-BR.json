@@ -133,7 +133,17 @@
     "benefit2": "Calistenia, pilates, yoga e mais",
     "benefit3": "Rastreamento de progresso completo",
     "benefit4": "Mais de 140 aulas guiadas em vídeo",
-    "unlockAccess": "Desbloquear meu acesso"
+    "unlockAccess": "Desbloquear meu acesso",
+    "trialTitle": "Teste todos os desafios 7 dias grátis",
+    "trialToday": "Hoje você paga US$0",
+    "trialAfter": "A partir do dia 8: US$27 por um ano inteiro",
+    "trialCancel": "Se cancelar antes do dia 8, nada é cobrado",
+    "trialCta": "Começar meus 7 dias grátis",
+    "trialCardNote": "Para ativar o teste você precisa de cartão ou PayPal.",
+    "trialDay1Title": "Dia 1 concluído! 🎉",
+    "trialDay1Sub": "Continue seu desafio e experimente também todos os outros desafios RiseMe™, grátis por 7 dias.",
+    "trialFinishTitle": "Você terminou o desafio! 🏆",
+    "trialFinishSub": "Seu próximo desafio te espera: teste todos grátis por 7 dias."
   },
   "subscriptionPage": {
     "title": "Assinatura",

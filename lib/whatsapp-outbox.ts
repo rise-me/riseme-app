@@ -3,7 +3,7 @@
 // venceu, registra no histórico como 'system' e apaga a senha do body depois do envio.
 
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
-import { admin, registrarMensagem } from '@/lib/whatsapp-agent/conversa'
+import { admin, registrarMensagem, variantesTelefone } from '@/lib/whatsapp-agent/conversa'
 
 const MAX_TENTATIVAS = 5
 const REPROGRAMAR_MS = 2 * 60_000
@@ -36,6 +36,61 @@ export async function enfileirar(m: {
     return null
   }
   return data.id as number
+}
+
+/** Já existe mensagem desse tipo (enviada ou na fila) para este número? Ex.: pedido de depoimento, 1x por aluna. */
+export async function jaEnfileirou(phone: string, kind: string): Promise<boolean> {
+  const { count } = await admin()
+    .from('whatsapp_outbox')
+    .select('id', { count: 'exact', head: true })
+    .eq('phone', phone)
+    .eq('kind', kind)
+  return (count ?? 0) > 0
+}
+
+/**
+ * A pessoa pediu para não receber mais mensagens (o agente registra com registrarPedidoParaParar).
+ * Marcador = linha 'optout' já marcada como enviada (a fila ignora). Confere todas as formas do número.
+ * QUEM MANDA MENSAGEM ATIVA (recuperação, depoimento, Pase, reenvio) DEVE checar isto antes.
+ */
+export async function pediuParaParar(phone: string): Promise<boolean> {
+  const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
+  const { count } = await admin()
+    .from('whatsapp_outbox')
+    .select('id', { count: 'exact', head: true })
+    .in('phone', formas)
+    .eq('kind', 'optout')
+  return (count ?? 0) > 0
+}
+
+export async function registrarPedidoParaParar(phone: string): Promise<void> {
+  if (await pediuParaParar(phone)) return
+  await marcarNaFila(phone, 'optout')
+}
+
+/** Linha inerte (já "enviada") que só registra um fato: opt-out, brinde entregue… — a fila ignora. */
+export async function marcarNaFila(phone: string, kind: string): Promise<void> {
+  const agora = new Date().toISOString()
+  await admin()
+    .from('whatsapp_outbox')
+    .insert({ phone: phone.replace(/\D/g, ''), kind, body: '', send_after: agora, sent_at: agora })
+}
+
+// Não manda convite/oferta para quem pediu para parar, já recebeu um igual (por qualquer forma do número),
+// está sendo atendida por uma pessoa ou tem consulta aberta (reclamação, reembolso…).
+async function motivoParaPular(phone: string, kind: string, id: number): Promise<string | null> {
+  if (await pediuParaParar(phone)) return 'pediu para não receber mensagens'
+  const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
+  const db = admin()
+  const [{ count: jaFoi }, { data: chats }, { count: consultas }] = await Promise.all([
+    db.from('whatsapp_outbox').select('id', { count: 'exact', head: true }).in('phone', formas).eq('kind', kind).not('sent_at', 'is', null).neq('id', id),
+    db.from('whatsapp_chats').select('mode, human_until').in('phone', formas),
+    db.from('whatsapp_consultas').select('id', { count: 'exact', head: true }).in('phone', formas).eq('status', 'pendente'),
+  ])
+  if (jaFoi) return 'já recebeu'
+  if ((chats ?? []).some((c) => c.mode === 'human' && (!c.human_until || new Date(c.human_until) > new Date()))) return 'pessoa atendendo'
+  if (consultas) return 'consulta aberta'
+  return null
 }
 
 interface Item {
@@ -94,6 +149,18 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
         .update({ claimed_at: null, send_after: new Date(Date.now() + 60_000).toISOString() })
         .eq('id', item.id)
       continue
+    }
+
+    // Convite de depoimento/oferta agendado: confere na hora de enviar se ainda faz sentido.
+    if (item.kind === 'depoimento' || item.kind === 'pase') {
+      const motivo = await motivoParaPular(item.phone, item.kind, item.id)
+      if (motivo) {
+        await db
+          .from('whatsapp_outbox')
+          .update({ attempts: MAX_TENTATIVAS, last_error: `pulado: ${motivo}`, claimed_at: null })
+          .eq('id', item.id)
+        continue
+      }
     }
 
     const r = await sendZapiText({ phone: item.phone, message: item.body, delayTyping: 3 })

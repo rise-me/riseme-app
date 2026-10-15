@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Reenvia vendas antigas de uma planilha da Perfect Pay pro webhook do app.
+"""Reenvia vendas antigas de um relatório da Perfect Pay ou da Hotmart pro webhook do app.
 
 PRA QUE SERVE: quando um webhook entra no ar DEPOIS de já ter havido vendas, essas
 compradoras nunca ganharam conta. Este script remonta o payload da venda a partir do
-relatório e reenvia pro /api/perfectpay — o MESMO caminho de código que roda em
-produção. Nada de lógica duplicada: quem cria conta, gera código, manda WhatsApp
-(Voxuy) e e-mail (Resend) continua sendo o webhook.
+relatório e reenvia pro /api/perfectpay (ou /api/hotmart) — o MESMO caminho de código
+que roda em produção. Nada de lógica duplicada: quem cria conta, gera código, manda
+WhatsApp (Voxuy) e e-mail (Resend) continua sendo o webhook.
 
 O webhook é idempotente: se a conta já existe, ele só concede o acesso e NÃO
 reenvia mensagem. Por isso a ordem importa quando há mais de um produto:
@@ -27,12 +27,19 @@ Uso:
     # valendo, 5 primeiras
     python3 scripts/replay-sales.py ... --only-missing --limit 5 --go
 
-Requer PERFECTPAY_WEBHOOK_TOKEN no ambiente (ou --token).
+    # Hotmart: relatório .csv de Vendas; o produto é filtrado pelo CÓDIGO (sem --product-name).
+    # Só produto avulso (order bump/upsell/desafio) — assinatura não é reenviada por aqui.
+    python3 scripts/replay-sales.py --platform hotmart --file sales_history.csv \
+        --product-code 4784921 --only-existing
+
+Requer PERFECTPAY_WEBHOOK_TOKEN (Hotmart: HOTMART_WEBHOOK_TOKEN) no ambiente (ou --token).
 """
 
 from __future__ import annotations  # Python 3.9 do Mac: permite `str | None` nas anotações
 
 import argparse
+import csv
+import io
 import json
 import os
 import re
@@ -54,7 +61,32 @@ SALE_STATUS_APPROVED = 2  # sale_status_enum da Perfect Pay
 PAIS_TO_ISO = {"turquia": "TR", "brasil": "BR", "brazil": "BR", "espanha": "ES",
                "méxico": "MX", "mexico": "MX", "argentina": "AR", "colômbia": "CO",
                "colombia": "CO", "chile": "CL", "peru": "PE", "estados unidos": "US",
-               "polônia": "PL", "polonia": "PL", "poland": "PL", "polska": "PL"}
+               "polônia": "PL", "polonia": "PL", "poland": "PL", "polska": "PL",
+               "equador": "EC", "paraguai": "PY", "uruguai": "UY", "bolívia": "BO",
+               "venezuela": "VE", "guatemala": "GT", "el salvador": "SV", "honduras": "HN",
+               "nicarágua": "NI", "costa rica": "CR", "panamá": "PA",
+               "república dominicana": "DO", "porto rico": "PR"}
+
+# Relatório de Vendas da Hotmart (.csv com ';') → mesmos nomes de coluna do relatório da
+# Perfect Pay, pra filtro, dedupe e fila serem um só.
+HOTMART_COLUNAS = {
+    "Código da transação": "CódigoTransação", "Status da transação": "Status",
+    "Data da transação": "DataVenda", "Código do produto": "CódigoProduto",
+    "Produto": "Produto", "Comprador(a)": "NomeCliente",
+    "Email do(a) Comprador(a)": "EmailCliente", "País": "País", "Telefone": "TelefoneCliente",
+}
+HOTMART_STATUS_PAGOS = {"Aprovado", "Completo"}
+
+
+def read_hotmart_csv(path: Path) -> list[dict]:
+    linhas = csv.DictReader(io.StringIO(path.read_bytes().decode("utf-8-sig")), delimiter=";")
+    rows = []
+    for r in linhas:
+        d = {nosso: (r.get(deles) or "") for deles, nosso in HOTMART_COLUNAS.items()}
+        if d["Status"] in HOTMART_STATUS_PAGOS:
+            d["Status"] = STATUS_APROVADO
+        rows.append(d)
+    return rows
 
 
 def read_xlsx(path: Path) -> list[dict]:
@@ -141,12 +173,35 @@ def build_payload(sale: dict, token: str, product_code: str) -> dict:
     }
 
 
+def build_payload_hotmart(sale: dict, product_code: str) -> dict:
+    """Espelha o PURCHASE_APPROVED da Hotmart (ver HotmartPayload). O token vai no cabeçalho.
+    Sem purchase.offer de propósito: o webhook trata como compra avulsa (vitalícia)."""
+    pais = (sale.get("País") or "").strip().lower()
+    return {
+        "event": "PURCHASE_APPROVED",
+        "data": {
+            "product": {"id": int(product_code), "name": sale.get("Produto")},
+            "buyer": {
+                "email": sale["EmailCliente"].strip().lower(),
+                "name": (sale.get("NomeCliente") or "").strip(),
+                # telefone do relatório vem com DDI mas sem '+' → o país deixa o toE164 reconhecer
+                "checkout_phone": (sale.get("TelefoneCliente") or "").strip() or None,
+                "address": {"country_iso": PAIS_TO_ISO.get(pais)},
+            },
+            "purchase": {"transaction": sale.get("CódigoTransação") or "REPLAY", "status": "APPROVED"},
+        },
+    }
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--xlsx", required=True, type=Path)
-    ap.add_argument("--product-name", required=True, help="valor exato da coluna Produto")
-    ap.add_argument("--product-code", required=True, help="código do produto na Perfect Pay")
-    ap.add_argument("--url", default="https://riseme.app/api/perfectpay")
+    ap.add_argument("--platform", choices=["perfectpay", "hotmart"], default="perfectpay")
+    ap.add_argument("--xlsx", "--file", dest="xlsx", required=True, type=Path,
+                    help="relatório de vendas: .xlsx da Perfect Pay ou .csv da Hotmart")
+    ap.add_argument("--product-name", default=None,
+                    help="valor exato da coluna Produto (Perfect Pay; na Hotmart o filtro é pelo código)")
+    ap.add_argument("--product-code", required=True, help="código do produto na plataforma")
+    ap.add_argument("--url", default=None, help="padrão: https://riseme.app/api/<plataforma>")
     ap.add_argument("--token", default=None)
     ap.add_argument("--only-missing", action="store_true", help="pula quem já tem conta")
     ap.add_argument("--only-existing", action="store_true",
@@ -159,13 +214,19 @@ def main() -> None:
     ap.add_argument("--go", action="store_true", help="ENVIA DE VERDADE (sem isto, só simula)")
     args = ap.parse_args()
 
-    token = args.token or load_env("PERFECTPAY_WEBHOOK_TOKEN")
+    hotmart = args.platform == "hotmart"
+    if not hotmart and not args.product_name:
+        sys.exit("[erro] --product-name é obrigatório na Perfect Pay")
+    url = args.url or f"https://riseme.app/api/{args.platform}"
+    token_env = "HOTMART_WEBHOOK_TOKEN" if hotmart else "PERFECTPAY_WEBHOOK_TOKEN"
+    token = args.token or load_env(token_env)
     if args.go and not token:
-        sys.exit("[erro] --go exige PERFECTPAY_WEBHOOK_TOKEN (env ou --token)")
+        sys.exit(f"[erro] --go exige {token_env} (env ou --token)")
 
-    rows = read_xlsx(args.xlsx)
+    rows = read_hotmart_csv(args.xlsx) if hotmart else read_xlsx(args.xlsx)
     aprovadas = [r for r in rows
-                 if r.get("Produto") == args.product_name
+                 if (r.get("CódigoProduto") == args.product_code if hotmart
+                     else r.get("Produto") == args.product_name)
                  and r.get("Status") == STATUS_APROVADO
                  and (r.get("EmailCliente") or "").strip()]
 
@@ -197,7 +258,8 @@ def main() -> None:
         fila = fila[:args.limit]
 
     print(f"planilha:        {args.xlsx.name}")
-    print(f"produto:         {args.product_name}  ({args.product_code})")
+    nome_produto = args.product_name or (aprovadas[0].get("Produto") if aprovadas else "?")
+    print(f"produto:         {nome_produto}  ({args.product_code})")
     print(f"linhas aprovadas: {len(aprovadas)}  →  pessoas únicas: {len(aprovadas) and len(set(r['EmailCliente'].strip().lower() for r in aprovadas))}")
     if pulados_excl:
         print(f"excluídas à mão:  {len(pulados_excl)}  ({', '.join(pulados_excl)})")
@@ -212,16 +274,22 @@ def main() -> None:
         print(">>> SIMULAÇÃO — nada será enviado. Use --go para valer.\n")
     ok = err = 0
     for i, sale in enumerate(fila, 1):
-        p = build_payload(sale, token or "SIMULACAO", args.product_code)
-        c = p["customer"]
-        linha = (f"{i:3}. {c['email']:36} {c['phone_formated'] or 'SEM TELEFONE':20} "
-                 f"{c['country'] or '??'}  {sale.get('DataVenda','')[:10]}")
+        pais = PAIS_TO_ISO.get((sale.get("País") or "").strip().lower())
+        linha = (f"{i:3}. {sale['EmailCliente'].strip().lower():36} "
+                 f"{(sale.get('TelefoneCliente') or '').strip() or 'SEM TELEFONE':20} "
+                 f"{pais or '??'}  {sale.get('DataVenda','')[:10]}")
         if not args.go:
             print(linha)
             continue
+        headers = {"Content-Type": "application/json"}
+        if hotmart:
+            p = build_payload_hotmart(sale, args.product_code)
+            headers["x-hotmart-hottok"] = token
+        else:
+            p = build_payload(sale, token, args.product_code)
         try:
-            req = urllib.request.Request(args.url, method="POST", data=json.dumps(p).encode(),
-                                         headers={"Content-Type": "application/json"})
+            req = urllib.request.Request(url, method="POST", data=json.dumps(p).encode(),
+                                         headers=headers)
             resp = json.load(urllib.request.urlopen(req))
             marca = "✅" if resp.get("ok") and not resp.get("skipped") else f"⚠️  {resp.get('skipped')}"
             print(f"{linha}  {marca}")

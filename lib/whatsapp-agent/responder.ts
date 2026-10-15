@@ -24,6 +24,7 @@ export interface PerfilAluna {
   liberados: string[] // produtos liberados na conta (desafios + compras como o Protocolo Metabólico)
   // false = conta achada pelo EMAIL que ela digitou, não pelo telefone: pode não ser ela.
   confirmadaPorTelefone: boolean
+  brindeDepoimentoEntregue?: boolean
 }
 
 export interface MensagemConversa {
@@ -32,9 +33,23 @@ export interface MensagemConversa {
   em: string // ISO
 }
 
+// Ao transferir, o agente já prepara a CONSULTA pro Bruno: o que ela quer + 2 respostas possíveis
+// (em português). O Bruno escolhe A/B ou escreve outra, e a resposta aprovada vira aprendizado.
+export interface Consulta {
+  resumo: string
+  opcaoA: string
+  opcaoB: string
+}
+
 export type Decisao =
-  | { tipo: 'responder'; texto: string }
-  | { tipo: 'humano'; texto: string; motivo: string }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean }
+  | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta }
+
+/** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
+export interface Aprendizado {
+  pergunta: string
+  resposta: string
+}
 
 const SYSTEM = `Você é o atendimento do RiseMe no WhatsApp, falando com alunas que acabaram de comprar.
 Você resolve: (1) acesso e uso do app (conhecimento abaixo) e (2) dúvidas sobre o CONTEÚDO dos materiais
@@ -51,8 +66,12 @@ Como escrever:
   contam como idioma dela.
 - Escreva como uma atendente escreve no WhatsApp: calorosa, direta, no máximo um emoji. Sem listas longas,
   sem markdown além de *negrito* do WhatsApp.
-- Quebre a mensagem em blocos curtos separados por uma LINHA EM BRANCO: a saudação sozinha no primeiro
-  bloco, depois cada ideia (orientação, pergunta) no seu bloco de 1 a 2 frases. Nunca um bloco único corrido.
+- Quebre a mensagem em blocos curtos separados por uma LINHA EM BRANCO, cada ideia (orientação, pergunta)
+  no seu bloco de 1 a 2 frases. Nunca um bloco único corrido.
+- Saudação ("Hola, Fulana") SÓ na sua primeira mensagem do dia para ela. Se você já falou com ela há pouco
+  na conversa, vá direto ao assunto, como numa conversa de verdade — repetir "Hola" a cada mensagem soa robô.
+- Imagens: quando ela manda print/foto, a imagem vem anexada — OLHE e use o que aparece (mensagem de erro,
+  tela em que ela está). Só peça para descrever se a imagem realmente não deixar entender.
 - Use só o que está nos MATERIAIS, no conhecimento e no perfil dela. Nunca invente quantidade, receita,
   horário, ingrediente ou regra que não esteja escrita no material. Se o material não fala do assunto, diga
   isso com honestidade e transfira. Errar para o lado de transferir é aceitável; inventar nunca é.
@@ -77,6 +96,52 @@ idioma dela, sem palavra em português no meio. Modelos:
   en: "I'm transferring your conversation to the team responsible for refunds — they'll reply here."
   pt: "Vou transferir sua conversa para o setor responsável pelos reembolsos — eles te respondem por aqui."
 
+RECUPERAÇÃO DE COMPRA: se na conversa há uma MENSAGEM AUTOMÁTICA nossa sobre uma compra que não foi concluída
+(pagamento recusado, pendente ou expirado), quem escreve é alguém que TENTOU comprar e não terminou. Ajude a
+concluir: reenvie o MESMO link que está nessa mensagem, explique o pagamento local que ela citou (Nequi, Yape,
+PSE, Servipag: abrir o app do banco/carteira, pagar o código gerado, voltar), sugira outro cartão ou outro meio.
+CL-PL (polonês, Perfect Pay): NÃO há BLIK; o que mais passa é Apple Pay / Google Pay, depois PayPal; cartão
+costuma ser recusado pelo banco polonês (o processador aparece como Portugal) → sugira Apple Pay, Google Pay ou PayPal.
+Nunca prometa acesso nem diga que a compra existe. Se ela diz que JÁ pagou: confira "Liberado na conta" no
+perfil; sem conta ou sem o produto liberado → transfira (precisa conferir o pagamento).
+
+NÃO QUER MAIS MENSAGENS: se ela pede para parar ("no", "stop", "salir", "no me escribas", "no quiero", "baja";
+pl: "NIE", "nie piszcie", "wypisz", "nie chcę"; tr: "hayır", "istemiyorum", "yazmayın"; en: "stop", "unsubscribe"),
+"parar_mensagens" = true: responda curto e educado que não vamos mais escrever, sem insistir nem oferecer nada.
+Em qualquer outro caso, false. (Um "no" que é resposta a uma pergunta sua NÃO é pedido para parar.)
+
+DEPOIS DE TRANSFERIR: a conversa continua com você. Se ela manda outra coisa, responda tudo o que você souber
+(acesso, app, materiais, regras) — nunca a deixe sem resposta. Se é o MESMO assunto já transferido e ainda
+sem resposta do setor, diga em uma frase que já está com o setor responsável e que respondem por aqui — sem
+repetir "vou transferir" a cada mensagem.
+
+CONSULTA (sempre que transferir): preencha também, em PORTUGUÊS, para o responsável decidir rápido:
+- "consulta_resumo": 1–2 frases — o que ela quer/qual o problema, com os dados úteis (email, produto, o que já tentou).
+- "consulta_opcao_a" e "consulta_opcao_b": duas respostas DIFERENTES que poderiam ser enviadas a ela (2–4 frases
+  cada, em português, como rascunho). Devem ser caminhos realmente distintos (ex.: resolver vs. pedir um dado;
+  conceder vs. tentar reter), nunca a mesma coisa com outras palavras. Não invente política: se a opção depende
+  de uma regra que você não conhece, escreva-a como proposta ("Se a garantia ainda vale: …").
+Quando NÃO transferir, deixe os três campos vazios ("").
+
+DEPOIMENTO: "pedir_depoimento" = true sempre que a aluna está DE BOA — critério do dono: boa reação é tudo em que
+ela não reclamou. Exemplos de true: agradeceu ("gracias", "ok", "listo", "perfecto", "dziękuję"), disse que
+conseguiu entrar ou que está treinando, mandou emoji positivo, ou tirou uma dúvida simples que você acabou de
+responder e não há problema aberto. False SÓ quando: ela reclamou ou está irritada; há assunto de dinheiro
+(reembolso, cancelamento, cobrança); ela ainda não conseguiu entrar ou tem um problema sem solução; você está
+transferindo; é resposta automática de outro WhatsApp; ou ela pediu para não receber mensagens. Você NÃO escreve o
+pedido: o sistema manda uma mensagem à parte depois da sua.
+
+BRINDE DO DEPOIMENTO: se na conversa existe a mensagem automática pedindo um comentário (com 🎁) e ela mandou
+uma IMAGEM que mostra um comentário dela numa publicação (qualquer opinião, boa ou ruim — não exija elogio),
+"liberar_brinde" = true e diga que o cardápio personalizado extra já está liberado na aba do cardápio
+(es: Menú). Se o perfil diz que o brinde já foi entregue, agradeça e diga que ele já está na conta
+(liberar_brinde = false). Se a imagem não mostra um comentário, peça com carinho a captura certa. Em qualquer
+outro caso, false.
+
+RESPOSTAS APROVADAS: se a mensagem trouxer o bloco "RESPOSTAS APROVADAS PELO RESPONSÁVEL", elas valem como
+conhecimento oficial — pergunta equivalente a uma delas, responda com aquela orientação (adaptada ao caso e ao
+idioma dela) em vez de transferir.
+
 Regras aprendidas (Bruno, 04/10/2026):
 - Transferência sem "alguém da equipe vai responder" → "vou transferir para o setor responsável". Motivo:
   a conversa deve soar como atendimento contínuo, não como um robô passando a vez para uma pessoa.
@@ -92,8 +157,14 @@ const FORMATO = {
       resposta: { type: 'string' },
       passar_para_humano: { type: 'boolean' },
       motivo: { type: 'string' },
+      consulta_resumo: { type: 'string' },
+      consulta_opcao_a: { type: 'string' },
+      consulta_opcao_b: { type: 'string' },
+      pedir_depoimento: { type: 'boolean' },
+      liberar_brinde: { type: 'boolean' },
+      parar_mensagens: { type: 'boolean' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens'],
     additionalProperties: false,
   },
 }
@@ -103,6 +174,22 @@ const ROTULO: Record<MensagemConversa['autor'], string> = {
   agent: 'VOCÊ',
   human: 'EQUIPE (pessoa)',
   system: 'MENSAGEM AUTOMÁTICA',
+}
+
+type TipoImagem = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
+const TIPOS_IMAGEM: TipoImagem[] = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+
+async function baixarImagem(url: string): Promise<{ tipo: TipoImagem; dados: string } | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) })
+    if (!res.ok) return null
+    const tipo = (res.headers.get('content-type') ?? '').split(';')[0].trim() as TipoImagem
+    const bytes = Buffer.from(await res.arrayBuffer())
+    if (!TIPOS_IMAGEM.includes(tipo) || bytes.length > 4_500_000) return null
+    return { tipo, dados: bytes.toString('base64') }
+  } catch {
+    return null
+  }
 }
 
 type Material = { acesso: 'brinde' | 'compra'; textos: Record<string, string> }
@@ -133,6 +220,7 @@ function descreverPerfil(p: PerfilAluna): string {
     `Dias de treino concluídos: ${p.diasFeitos}`,
     `Último treino: ${p.ultimoTreino ?? 'nenhum'}`,
     `Liberado na conta: ${p.liberados.length ? p.liberados.join(', ') : 'nada'}`,
+    `Brinde do depoimento (cardápio extra): ${p.brindeDepoimentoEntregue ? 'JÁ ENTREGUE' : 'ainda não entregue'}`,
     p.confirmadaPorTelefone
       ? 'Conta confirmada pelo telefone desta conversa.'
       : 'ATENÇÃO: conta achada pelo email que ela digitou (não pelo telefone) — pode não ser dela. ' +
@@ -144,10 +232,28 @@ export async function decidirResposta(params: {
   perfil: PerfilAluna | null // null = número que não bate com nenhuma conta
   conversa: MensagemConversa[] // ordem cronológica, termina na(s) mensagem(ns) da aluna
   agora: string
+  aprendizados?: Aprendizado[]
 }): Promise<Decisao> {
+  // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]": as 3 mais recentes vão
+  // anexadas pro modelo ver; no texto fica só a referência.
+  const urls: string[] = []
   const transcricao = params.conversa
-    .map((m) => `[${m.em}] ${ROTULO[m.autor]}: ${m.texto}`)
+    .map((m) => {
+      const texto = m.texto.replace(/\[IMAGEM: (https?:\/\/[^\]\s]+)\]/g, (_, url: string) => {
+        if (m.autor === 'student') urls.push(url)
+        return '[imagem anexada]'
+      })
+      return `[${m.em}] ${ROTULO[m.autor]}: ${texto}`
+    })
     .join('\n')
+  // A Anthropic não consegue buscar a imagem pela URL da Z-API (bloqueada por robots.txt — derrubava
+  // o agente em toda conversa com print, 12–13/10/2026). O servidor baixa e manda em base64; imagem
+  // que não der para baixar simplesmente não vai (o texto continua dizendo que ela mandou uma).
+  const imagens = (await Promise.all(urls.slice(-3).map(baixarImagem))).filter((i) => i !== null)
+  const aprovadas = (params.aprendizados ?? []).length
+    ? '\n\nRESPOSTAS APROVADAS PELO RESPONSÁVEL:\n' +
+      params.aprendizados!.map((a, i) => `${i + 1}. Pergunta: ${a.pergunta}\n   Resposta: ${a.resposta}`).join('\n')
+    : ''
 
   const contexto = params.perfil
     ? descreverPerfil(params.perfil)
@@ -173,21 +279,206 @@ export async function decidirResposta(params: {
     messages: [
       {
         role: 'user',
-        content:
-          `Agora: ${params.agora}\n\nPerfil da aluna:\n${contexto}\n\n` +
-          `Conversa até agora:\n${transcricao}\n\n` +
-          'Escreva a próxima mensagem para a aluna (respondendo o que ela mandou por último).',
+        content: [
+          ...imagens.map((img) => ({
+            type: 'image' as const,
+            source: { type: 'base64' as const, media_type: img.tipo, data: img.dados },
+          })),
+          {
+            type: 'text' as const,
+            text:
+              `Agora: ${params.agora}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
+              `Conversa até agora:\n${transcricao}\n\n` +
+              (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
+              'Escreva a próxima mensagem para a aluna (respondendo o que ela mandou por último).',
+          },
+        ],
       },
     ],
   })
 
   if (res.stop_reason === 'refusal') {
-    return { tipo: 'humano', texto: '', motivo: 'modelo recusou responder' }
+    return { tipo: 'humano', texto: '', motivo: 'modelo recusou responder', consulta: { resumo: 'o modelo recusou responder esta conversa', opcaoA: '', opcaoB: '' } }
   }
   const bloco = res.content.find((b) => b.type === 'text')
   if (!bloco || bloco.type !== 'text') throw new Error(`resposta sem texto (stop_reason ${res.stop_reason})`)
-  const out = JSON.parse(bloco.text) as { resposta: string; passar_para_humano: boolean; motivo: string }
+  const out = JSON.parse(bloco.text) as {
+    resposta: string
+    passar_para_humano: boolean
+    motivo: string
+    consulta_resumo: string
+    consulta_opcao_a: string
+    consulta_opcao_b: string
+    pedir_depoimento: boolean
+    liberar_brinde: boolean
+    parar_mensagens: boolean
+  }
   return out.passar_para_humano
-    ? { tipo: 'humano', texto: out.resposta.trim(), motivo: out.motivo || 'sem motivo' }
-    : { tipo: 'responder', texto: out.resposta.trim() }
+    ? {
+        tipo: 'humano',
+        texto: out.resposta.trim(),
+        motivo: out.motivo || 'sem motivo',
+        consulta: {
+          resumo: out.consulta_resumo.trim() || out.motivo,
+          opcaoA: out.consulta_opcao_a.trim(),
+          opcaoB: out.consulta_opcao_b.trim(),
+        },
+      }
+    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens) }
+}
+
+// ─── Resposta aprovada pelo responsável ────────────────────────────────────────────────────
+// O Bruno respondeu a consulta (escolheu A/B ou escreveu). Aqui o texto dele vira a mensagem
+// para a aluna, no idioma e no tom dela, e — se servir para outras alunas — um aprendizado.
+
+const FORMATO_REDACAO = {
+  type: 'json_schema' as const,
+  schema: {
+    type: 'object',
+    properties: {
+      enviar: { type: 'boolean' },
+      nota_ao_responsavel: { type: 'string' },
+      mensagem: { type: 'string' },
+      salvar_aprendizado: { type: 'boolean' },
+      aprendizado_pergunta: { type: 'string' },
+      aprendizado_resposta: { type: 'string' },
+    },
+    required: ['enviar', 'nota_ao_responsavel', 'mensagem', 'salvar_aprendizado', 'aprendizado_pergunta', 'aprendizado_resposta'],
+    additionalProperties: false,
+  },
+}
+
+export async function redigirRespostaAprovada(params: {
+  perfil: PerfilAluna | null
+  conversa: MensagemConversa[]
+  resumo: string
+  opcaoA: string
+  opcaoB: string
+  orientacao: string // o que o responsável escreveu (português), do jeito dele: "A", "B)", "A, mas…", texto livre
+}): Promise<{ enviar: boolean; nota: string; mensagem: string; aprendizado: Aprendizado | null }> {
+  const transcricao = params.conversa.map((m) => `[${m.em}] ${ROTULO[m.autor]}: ${m.texto}`).join('\n')
+  const res = await anthropic().beta.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 4000,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    output_config: { effort: 'low', format: FORMATO_REDACAO },
+    system:
+      'Você é o atendimento do RiseMe no WhatsApp. O responsável pela operação decidiu o que responder a uma ' +
+      'aluna; sua tarefa é transformar a orientação dele na mensagem para ela.\n' +
+      '- A resposta dele pode vir de vários jeitos: só a letra ("A", "B)", "resposta B", "opção a") = use a ' +
+      'opção correspondente da lista abaixo; letra + ajuste ("A, mas pede o email", "B) porém com um emoji no ' +
+      'final") = a opção com o ajuste aplicado; ou texto próprio = o que ele escreveu. As opções A e B estão ' +
+      'sempre na mensagem: nunca diga que não sabe qual é a opção A ou B.\n' +
+      '- ANTES: a orientação é mesmo algo para dizer à aluna? Se ela traz uma PERGUNTA para você/para o sistema ' +
+      '("você consegue fazer isso?"), um pedido de AÇÃO que só uma pessoa faz (liberar acesso, reembolsar, trocar ' +
+      'email, conferir pagamento) ainda não feita, ou está ambígua — então "enviar" = false, "mensagem" = "" e em ' +
+      '"nota_ao_responsavel" responda a ele em português, curto: o que você não faz sozinho ou o que falta decidir ' +
+      '(você só escreve mensagens; não libera produto, não reembolsa, não altera conta). Na nota diga QUAL ação ' +
+      'falta e sugira o comando que o responsável pode mandar para o sistema fazer, entre estes: "libera o <produto> ' +
+      'para <email>", "reenvia o acesso de <email>", "troca o email de <email> para <novo>", "dá um cardápio extra para ' +
+      '<email>" — e que depois responda a consulta de novo. Nunca deixe a nota vazia. Só marque "enviar" = true ' +
+      'quando dá para mandar à aluna exatamente o que ele decidiu; aí "nota_ao_responsavel" = "".\n' +
+      '- "mensagem": no idioma em que ELA escreve (nunca misture idiomas), tom de atendente calorosa e direta, ' +
+      'blocos curtos separados por linha em branco, no máximo um emoji, sem saudação se a conversa já está em ' +
+      'andamento. Diga exatamente o que ele orientou — não acrescente promessa, prazo, valor ou regra que ele não ' +
+      'deu, e não diga que "o responsável mandou dizer".\n' +
+      '- Aprendizado: se a orientação serve para QUALQUER aluna com a mesma dúvida (regra, política, como ' +
+      'funciona algo), salvar_aprendizado = true, "aprendizado_pergunta" = a dúvida em forma geral e ' +
+      '"aprendizado_resposta" = a orientação em forma geral, ambas em português, sem dados desta aluna. Se a ' +
+      'resposta só vale para o caso dela (ex.: "já liberei sua conta", "vou verificar seu pagamento"), ' +
+      'salvar_aprendizado = false e deixe os dois campos vazios.',
+    messages: [
+      {
+        role: 'user',
+        content:
+          `Idioma do perfil dela: ${params.perfil?.idioma ?? 'desconhecido (use o da conversa)'}\n` +
+          `Nome: ${params.perfil?.nome ?? 'desconhecido'}\n\nConversa:\n${transcricao}\n\n` +
+          `Dúvida dela (resumo): ${params.resumo}\n\n` +
+          `Opções que foram oferecidas ao responsável:\nA) ${params.opcaoA || '(sem opção A)'}\nB) ${params.opcaoB || '(sem opção B)'}\n\n` +
+          `Resposta do responsável: ${params.orientacao}`,
+      },
+    ],
+  })
+  const bloco = res.content.find((b) => b.type === 'text')
+  if (res.stop_reason === 'refusal' || !bloco || bloco.type !== 'text') {
+    throw new Error(`redação sem texto (stop_reason ${res.stop_reason})`)
+  }
+  const out = JSON.parse(bloco.text) as {
+    enviar: boolean
+    nota_ao_responsavel: string
+    mensagem: string
+    salvar_aprendizado: boolean
+    aprendizado_pergunta: string
+    aprendizado_resposta: string
+  }
+  return {
+    enviar: out.enviar && Boolean(out.mensagem.trim()),
+    nota: out.nota_ao_responsavel.trim(),
+    mensagem: out.mensagem.trim(),
+    aprendizado:
+      out.salvar_aprendizado && out.aprendizado_pergunta && out.aprendizado_resposta
+        ? { pergunta: out.aprendizado_pergunta.trim(), resposta: out.aprendizado_resposta.trim() }
+        : null,
+  }
+}
+
+// ─── Comandos do responsável ──────────────────────────────────────────────────────────────
+// Ele escreve em português ("libera o Protocolo para fulana@gmail.com"); aqui só se ENTENDE o pedido.
+// Quem executa (depois do "sim") é lib/whatsapp-agent/comandos.ts.
+
+export const ACOES_COMANDO = ['liberar_produto', 'reenviar_acesso', 'trocar_email', 'cardapio_extra', 'pausar_bot', 'resumo', 'nenhuma'] as const
+export type AcaoComando = (typeof ACOES_COMANDO)[number]
+export const PRODUTOS_COMANDO = ['', '1', '2', '3', '4', '5', 'protocolo-metabolico'] as const
+
+export interface PedidoComando {
+  acao: AcaoComando
+  email: string
+  nome: string
+  produto: (typeof PRODUTOS_COMANDO)[number]
+  novoEmail: string
+}
+
+export async function interpretarComando(texto: string): Promise<PedidoComando> {
+  const res = await anthropic().beta.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 2000,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    output_config: {
+      effort: 'low',
+      format: {
+        type: 'json_schema',
+        schema: {
+          type: 'object',
+          properties: {
+            acao: { type: 'string', enum: [...ACOES_COMANDO] },
+            email: { type: 'string' },
+            nome: { type: 'string' },
+            produto: { type: 'string', enum: [...PRODUTOS_COMANDO] },
+            novo_email: { type: 'string' },
+          },
+          required: ['acao', 'email', 'nome', 'produto', 'novo_email'],
+          additionalProperties: false,
+        },
+      },
+    },
+    system:
+      'Você interpreta mensagens que o dono do RiseMe manda pelo WhatsApp. Identifique se é um PEDIDO DE AÇÃO:\n' +
+      '- liberar_produto: liberar um desafio/produto na conta de uma aluna ("libera o Pilates para…").\n' +
+      '- reenviar_acesso: gerar senha nova e mandar o acesso de novo ("reenvia o acesso da…").\n' +
+      '- trocar_email: trocar o email da conta (precisa do email atual ou nome, e do novo email).\n' +
+      '- cardapio_extra: dar 1 cardápio extra / menu a mais.\n' +
+      '- pausar_bot: parar o bot na conversa de uma aluna.\n' +
+      '- resumo: pedir o resumo do dia / como estão as coisas.\n' +
+      '- nenhuma: qualquer outra coisa (ex.: resposta a uma consulta como "A", "B", ou instrução do que dizer a uma aluna).\n' +
+      'Produtos: 1 = Calistenia en Casa; 2 = Pilates en la Pared; 3 = Yoga Facial; 4 = Yoga en la Silla; ' +
+      '5 = Cuerpo Sexy de Verano; protocolo-metabolico = Protocolo Metabólico (chás). Sem produto: "".\n' +
+      'email/nome: da aluna citada (o que estiver na mensagem; vazio se não houver). novo_email: só em trocar_email.',
+    messages: [{ role: 'user', content: texto }],
+  })
+  const bloco = res.content.find((b) => b.type === 'text')
+  if (!bloco || bloco.type !== 'text') return { acao: 'nenhuma', email: '', nome: '', produto: '', novoEmail: '' }
+  const o = JSON.parse(bloco.text) as { acao: AcaoComando; email: string; nome: string; produto: PedidoComando['produto']; novo_email: string }
+  return { acao: o.acao, email: o.email.trim().toLowerCase(), nome: o.nome.trim(), produto: o.produto, novoEmail: o.novo_email.trim().toLowerCase() }
 }
