@@ -4,6 +4,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { CONHECIMENTO } from './conhecimento'
 import MATERIAIS from './materiais.json'
+import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 
 // Sonnet: segue regra com rigor (o risco aqui é inventar) a metade do custo do Opus.
 const CLAUDE_MODEL = 'claude-sonnet-5-5'
@@ -430,13 +431,14 @@ export async function redigirRespostaAprovada(params: {
 
 export const ACOES_COMANDO = ['liberar_produto', 'reenviar_acesso', 'trocar_email', 'cardapio_extra', 'pausar_bot', 'resumo', 'nenhuma'] as const
 export type AcaoComando = (typeof ACOES_COMANDO)[number]
-export const PRODUTOS_COMANDO = ['', '1', '2', '3', '4', '5', 'protocolo-metabolico'] as const
+// Desafios vêm do catálogo (lib/mock-challenges + lib/desafios): desafio novo entra aqui sozinho
+export const PRODUTOS_COMANDO: string[] = ['', ...mockChallenges.map((c) => c.id), 'protocolo-metabolico']
 
 export interface PedidoComando {
   acao: AcaoComando
   email: string
   nome: string
-  produto: (typeof PRODUTOS_COMANDO)[number]
+  produto: string
   novoEmail: string
 }
 
@@ -473,8 +475,8 @@ export async function interpretarComando(texto: string): Promise<PedidoComando> 
       '- pausar_bot: parar o bot na conversa de uma aluna.\n' +
       '- resumo: pedir o resumo do dia / como estão as coisas.\n' +
       '- nenhuma: qualquer outra coisa (ex.: resposta a uma consulta como "A", "B", ou instrução do que dizer a uma aluna).\n' +
-      'Produtos: 1 = Calistenia en Casa; 2 = Pilates en la Pared; 3 = Yoga Facial; 4 = Yoga en la Silla; ' +
-      '5 = Cuerpo Sexy de Verano; protocolo-metabolico = Protocolo Metabólico (chás). Sem produto: "".\n' +
+      `Produtos: ${mockChallenges.map((c) => `${c.id} = ${challengeNameEs(c.id)}`).join('; ')}; ` +
+      'protocolo-metabolico = Protocolo Metabólico (chás). Sem produto: "".\n' +
       'email/nome: da aluna citada (o que estiver na mensagem; vazio se não houver). novo_email: só em trocar_email.',
     messages: [{ role: 'user', content: texto }],
   })

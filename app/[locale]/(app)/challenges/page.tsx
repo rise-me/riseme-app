@@ -1,4 +1,4 @@
-import { mockChallenges, type MockChallenge } from '@/lib/mock-challenges'
+import { mockChallenges, isChallengeInLocale, type MockChallenge } from '@/lib/mock-challenges'
 import { getProgressSummary } from '@/lib/progress-server'
 import { getUserAccess, canAccessChallenge } from '@/lib/user-access-server'
 import { ChallengesList } from './ChallengesList'
@@ -14,7 +14,7 @@ export default async function ChallengesPage({
     getProgressSummary(),
   ])
 
-  const challenges: MockChallenge[] = mockChallenges.map((c) => {
+  const challenges: MockChallenge[] = mockChallenges.filter((c) => isChallengeInLocale(c.id, locale)).map((c) => {
     const unlocked = canAccessChallenge(c.id, access)
     const completed = progressByChallenge.get(c.id) ?? 0
 

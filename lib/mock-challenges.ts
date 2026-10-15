@@ -1,3 +1,6 @@
+import { FICHAS, diasDaFicha } from './desafios'
+import esMessages from '../messages/es.json'
+
 export type ChallengeStatus = 'free' | 'active' | 'locked' | 'completed'
 
 export interface MockChallenge {
@@ -45,4 +48,29 @@ export const mockChallenges: MockChallenge[] = [
     is_free: false,
     status: 'locked',
   },
+  // Do 6 em diante: lib/desafios (uma ficha por desafio)
+  ...FICHAS.map((f): MockChallenge => ({
+    id: f.id,
+    days_count: diasDaFicha(f),
+    thumbnail_emoji: f.emoji,
+    is_free: f.gratis,
+    status: 'locked',
+  })),
 ]
+
+// Desafio de ficha só aparece nos idiomas em que tem áudio; os 1–5 aparecem em todos.
+export function isChallengeInLocale(id: string, locale: string): boolean {
+  const ficha = FICHAS.find((f) => f.id === id)
+  return ficha ? ficha.idiomas.includes(locale) : mockChallenges.some((c) => c.id === id)
+}
+
+// Nome em espanhol, para as ferramentas internas (admin, agente do WhatsApp).
+// Fonte única: antes cada uma tinha a sua lista copiada.
+export function challengeNameEs(id: string, withEmoji = false): string | undefined {
+  const ficha = FICHAS.find((f) => f.id === id)
+  const legacy = (esMessages.challengeData as Record<string, { title: string }>)[id]
+  const title = ficha ? (ficha.titulo.es ?? ficha.titulo[ficha.idiomas[0]]) : legacy?.title
+  if (!title) return undefined
+  const emoji = mockChallenges.find((c) => c.id === id)?.thumbnail_emoji
+  return withEmoji && emoji ? `${emoji} ${title}` : title
+}
