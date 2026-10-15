@@ -26,7 +26,7 @@ type SupportCopy = (p: { playlist?: string }) => string
 // Atraso do acesso: tempo da VSL do upsell (~15 min). Ajustável sem deploy de código.
 const ATRASO_ACESSO_MIN = Number(process.env.WHATSAPP_ACCESS_DELAY_MIN ?? 15)
 const ESPERA_MSG2_MS = 45_000
-const ESPERA_DEPOIMENTO_MS = 3 * 3600_000
+const ESPERA_DEPOIMENTO_MS = 30 * 60_000 // "aproveitar que a pessoa está quente" (Bruno, 14/10)
 const CONVITE_PARA_TODAS = true
 
 // Playlist (não listada) das aulas por idioma — reserva pra ela não perder o dia
@@ -354,7 +354,7 @@ export async function sendWhatsAppAccess(params: {
     dependsOn: idAcesso,
   })
 
-  // 3ª mensagem: convite de depoimento para TODA compradora, ~3 h depois do acesso (decisão do Bruno,
+  // 3ª mensagem: convite de depoimento para TODA compradora, ~30 min depois do acesso (decisão do Bruno,
   // 14/10/2026: 85% nunca escreve, então o convite só pela conversa quase não saía). Na hora de enviar,
   // a fila pula quem pediu para parar, já recebeu convite, está com pessoa/consulta aberta (whatsapp-outbox).
   // Só idiomas com link em lib/whatsapp-agent/depoimentos.ts.
