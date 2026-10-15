@@ -260,16 +260,16 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     return
   }
 
-  // Brinde do depoimento: o agente viu o print do comentário. Libera ANTES de mandar a resposta (que
-  // diz "já está liberado"). Só para conta confirmada pelo telefone e que recebeu o convite; se não der
-  // para liberar, vira consulta em vez de prometer o que não foi entregue.
+  // Brinde do depoimento: ela mandou o print → libera na hora, ANTES de mandar a resposta (que diz "já
+  // está liberado"). Vale conta achada pelo telefone ou pelo email que ela mandou (Bruno, 15/10: "não trava").
+  // Sem conta o agente pede o email e não marca liberar_brinde. Se o sistema falhar, vira consulta.
   if (decisao.tipo === 'responder' && decisao.liberarBrinde) {
     let liberou = false
     try {
-      if (userId && !porEmail && (await jaEnfileirou(phone, 'depoimento'))) {
-        const novo = await darCardapioBonus(userId, 'depoimento') // false = já tinha; a resposta do agente cobre os dois casos
+      if (userId) {
+        const novo = await darCardapioBonus(userId, 'depoimento') // false = já tinha; a resposta cobre os dois casos
         liberou = true
-        // Métrica do depoimento: print conferido + brinde entregue (linha inerte na fila, só para contar).
+        // Métrica do depoimento: print + brinde entregue (linha inerte na fila, só para contar).
         if (novo) await marcarNaFila(phone, 'brinde-depoimento')
       }
     } catch (err) {
@@ -281,7 +281,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
         texto: '',
         motivo: 'aluna mandou o print do depoimento mas o brinde não pôde ser liberado sozinho',
         consulta: {
-          resumo: 'Ela comentou e mandou o print para ganhar o cardápio extra, mas o sistema não liberou (conta não confirmada pelo telefone, convite não registrado ou erro).',
+          resumo: 'Ela comentou e mandou o print para ganhar o cardápio extra, mas o sistema não conseguiu liberar (conta não encontrada ou erro).',
           opcaoA: 'Obrigada pelo comentário! Já liberei seu cardápio extra, está na aba do cardápio no app.',
           opcaoB: 'Obrigada pelo comentário! Me passa o email da sua compra para eu liberar seu cardápio extra.',
         },
