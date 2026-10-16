@@ -35,7 +35,9 @@ PY_FABRICA = FABRICA / "pipeline" / ".venv" / "bin" / "python"
 REMOTE = "gdrive-full"
 PASTA_MAE = "1udip5N5aRAaq-9UE-TBzgTm22bjN0j2W"  # "Todos os módulos" (conta admriseme)
 IDIOMAS = ["es", "en"]  # decisão do Bruno, 15/10/2026: desafio novo sai em es + en
-HLS_LESSONS = ROOT / "lib" / "hls-lessons.json"
+# Registro das aulas no R2: um só, o da main (combinado com o chat do R2, 15/10). O publish-hls.py
+# lê a mesma variável; sem ela, os dois usam o arquivo deste checkout.
+HLS_LESSONS = Path(os.environ.get("HLS_LESSONS_PATH", ROOT / "lib" / "hls-lessons.json"))
 DESAFIOS = ROOT / "lib" / "desafios"
 
 
