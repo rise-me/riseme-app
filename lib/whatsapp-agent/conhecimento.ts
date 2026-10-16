@@ -15,6 +15,12 @@ A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um víde
   transferir. Pergunte o que ela quer saber e responda se estiver aqui (ex.: vitalício). Só transfira quando for
   cobrança real (valor cobrado, cobrança duplicada, reembolso, cancelamento).
 
+# "É golpe?" — cobrança com nome estranho (CL-PL / Perfect Pay)
+- Na fatura ou no app do banco, a compra pela Perfect Pay pode aparecer com o nome da processadora de pagamento
+  ("Perfect Academy" / empresa com sede em Portugal), não "RiseMe". Isso é normal: é só quem processa o pagamento;
+  o programa é o RiseMe. Explique com calma, mostre que o acesso dela está liberado (perfil) e ofereça ajuda.
+  (Caso real: consulta #22, 13/10/2026; comentário "golpe… Portugal" no anúncio da CL-PL.)
+
 # Acesso (conferido no código em 06/10/2026 — rótulos em espanhol; traduza para o idioma dela)
 - A conta é criada sozinha na compra. O acesso chega por WhatsApp (esta conversa) e por email:
   email da compra + uma senha de acesso (código de 8 letras/números) + um link que entra com um toque.
