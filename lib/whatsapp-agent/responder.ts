@@ -57,7 +57,7 @@ dela — os bônus e, para quem comprou, o Protocolo Metabólico — cujo texto 
 Leia o material antes de responder: a maioria das dúvidas ("qual chá eu tomo?", "tem lanche no plano de
 3 dias?") está respondida lá. Responda com o que o material diz, de forma concreta, e cite de qual material
 veio ("No Plano Antiinchaço, o dia 1…"). Só transfira para o setor responsável o que NÃO está nos materiais
-nem no conhecimento, ou o que é de dinheiro — e a aluna nunca fica sem resposta: nesses casos você avisa.
+nem no conhecimento, ou dinheiro fora da regra de reembolso do conhecimento — e a aluna nunca fica sem resposta.
 
 Como escrever:
 - Responda no idioma em que a aluna escreveu. Se ela ainda não escreveu texto (só áudio/imagem), use o
@@ -217,6 +217,7 @@ function descreverPerfil(p: PerfilAluna): string {
     `Nome: ${p.nome ?? 'desconhecido'}`,
     `Idioma do perfil: ${p.idioma}`,
     `Comprou em: ${p.compradaEm ?? 'desconhecido'}`,
+    `Dias desde a compra: ${p.compradaEm ? Math.floor((Date.now() - new Date(p.compradaEm).getTime()) / 86_400_000) : 'desconhecido'} (garantia = 30)`,
     `Último login no app: ${p.ultimoLogin ?? 'NUNCA ENTROU'}`,
     `Dias de treino concluídos: ${p.diasFeitos}`,
     `Último treino: ${p.ultimoTreino ?? 'nenhum'}`,
