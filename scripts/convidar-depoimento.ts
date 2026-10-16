@@ -4,7 +4,7 @@
 // para parar, já recebeu, está com pessoa atendendo ou tem consulta aberta (lib/whatsapp-outbox.ts).
 //
 // Simula por padrão. Uso:
-//   npx tsx --env-file=.env.local scripts/convidar-depoimento.ts --limit 30
+//   npx tsx --env-file=.env.local scripts/convidar-depoimento.ts --limit 30 [--idioma pl]
 //   npx tsx --env-file=.env.local scripts/convidar-depoimento.ts --limit 30 --inicio 2026-10-15T13:00:00Z --intervalo 4 --go
 // Escolhe as compras mais recentes primeiro (quem acabou de entrar lembra melhor da compra).
 
@@ -23,6 +23,7 @@ async function main() {
   const limit = Number(arg('limit', '30'))
   const intervaloMin = Number(arg('intervalo', '4'))
   const inicio = new Date(arg('inicio') ?? Date.now() + 5 * 60_000)
+  const soIdioma = arg('idioma') // ex.: pl — só as compradoras desse idioma
   const db = admin()
 
   const { data: acessos } = await db
@@ -43,6 +44,7 @@ async function main() {
     vistos.add(phone)
     // Idioma pela mensagem de acesso (só idiomas com link recebem convite).
     const idioma = /¡Bienvenida/.test(a.body) ? 'es' : /Witaj/.test(a.body) ? 'pl' : /hoş geldin/.test(a.body) ? 'tr' : 'es'
+    if (soIdioma && idioma !== soIdioma) continue
     const convite = conviteDepoimento(idioma, phone)
     if (!convite || (await pediuParaParar(phone))) continue
     alvos.push({ phone, convite, quando: a.sent_at })
