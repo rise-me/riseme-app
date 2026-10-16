@@ -115,7 +115,8 @@
     "next": "DALEJ",
     "upNext": "NASTĘPNIE",
     "restart": "Powtórz wyzwanie",
-    "audioSpanish": "🎧 Audio po hiszpańsku"
+    "audioSpanish": "🎧 Audio po hiszpańsku",
+    "audioEnglish": "🎧 Audio po angielsku"
   },
   "subscription": {
     "exclusiveOffer": "Ekskluzywna oferta subskrypcji",

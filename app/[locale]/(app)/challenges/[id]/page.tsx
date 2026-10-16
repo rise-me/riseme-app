@@ -1,4 +1,4 @@
-import { mockChallenges, isChallengeInLocale, type MockChallenge } from '@/lib/mock-challenges'
+import { mockChallenges, type MockChallenge } from '@/lib/mock-challenges'
 import { getMockDays } from '@/lib/mock-challenge-days'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -13,7 +13,7 @@ export default async function ChallengeDetailPage({
 }) {
   const { locale, id } = await params
   const base = mockChallenges.find((c) => c.id === id)
-  if (!base || !isChallengeInLocale(id, locale)) notFound()
+  if (!base) notFound()
 
   const [access, progress] = await Promise.all([
     getUserAccess(),

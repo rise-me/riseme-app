@@ -115,7 +115,8 @@
     "next": "NEXT",
     "upNext": "UP NEXT",
     "restart": "Repeat challenge",
-    "audioSpanish": "🎧 Video audio in Spanish"
+    "audioSpanish": "🎧 Video audio in Spanish",
+    "audioEnglish": "🎧 Lessons with English audio"
   },
   "subscription": {
     "exclusiveOffer": "Exclusive subscription offer",

@@ -7,7 +7,9 @@
 //   modulo     pasta de origem no Drive (rastreio: de onde veio o desafio)
 //   emoji      ícone do card
 //   gratis     true = aberto para todas
-//   idiomas    locales do app onde o desafio APARECE (precisa ter áudio nesses idiomas)
+//   idiomas    idiomas com áudio e texto próprios. Padrão: ["es", "en"] (decisão do Bruno, 15/10/2026).
+//              Os outros locales do app veem o desafio em INGLÊS; idioma novo só entra quando
+//              uma oferta escalar naquele mercado.
 //   titulo, categoria   um texto por idioma de `idiomas`
 //   dias       { idioma: [título da aula 1, aula 2, …] } — o total de aulas sai daqui
 //
@@ -31,6 +33,9 @@ export interface FichaDesafio {
 
 export const FICHAS: FichaDesafio[] = [prePart, posPart]
 
+// Quem usa o app num idioma que a ficha não tem vê o desafio nele
+export const IDIOMA_PADRAO = 'en'
+
 // Ficha quebrada derruba o build em vez de chegar torta para a aluna.
 for (const f of FICHAS) {
   const total = f.dias[f.idiomas[0]]?.length ?? 0
@@ -42,7 +47,15 @@ for (const f of FICHAS) {
 }
 if (new Set(FICHAS.map((f) => f.id)).size !== FICHAS.length) throw new Error('Fichas com id repetido')
 
+for (const f of FICHAS) {
+  if (!f.idiomas.includes(IDIOMA_PADRAO)) throw new Error(`Ficha ${f.id}: precisa ter ${IDIOMA_PADRAO}`)
+}
+
 export const diasDaFicha = (f: FichaDesafio) => f.dias[f.idiomas[0]].length
+
+// Idioma em que a ficha aparece para o locale: o próprio, se ela tiver; senão inglês.
+export const idiomaDaFicha = (f: FichaDesafio, locale: string) =>
+  f.idiomas.includes(locale) ? locale : IDIOMA_PADRAO
 
 // Textos das fichas no formato de messages/ (challengeData / challengeDays), para o
 // i18n/request.ts juntar às mensagens do idioma. As telas leem por ali, como sempre.
@@ -50,9 +63,9 @@ export function mensagensDasFichas(locale: string) {
   const challengeData: Record<string, { title: string; category: string }> = {}
   const challengeDays: Record<string, string[]> = {}
   for (const f of FICHAS) {
-    if (!f.idiomas.includes(locale)) continue
-    challengeData[f.id] = { title: f.titulo[locale], category: f.categoria[locale] }
-    challengeDays[f.id] = f.dias[locale]
+    const idioma = idiomaDaFicha(f, locale)
+    challengeData[f.id] = { title: f.titulo[idioma], category: f.categoria[idioma] }
+    challengeDays[f.id] = f.dias[idioma]
   }
   return { challengeData, challengeDays }
 }

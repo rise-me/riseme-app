@@ -58,12 +58,6 @@ export const mockChallenges: MockChallenge[] = [
   })),
 ]
 
-// Desafio de ficha só aparece nos idiomas em que tem áudio; os 1–5 aparecem em todos.
-export function isChallengeInLocale(id: string, locale: string): boolean {
-  const ficha = FICHAS.find((f) => f.id === id)
-  return ficha ? ficha.idiomas.includes(locale) : mockChallenges.some((c) => c.id === id)
-}
-
 // Nome em espanhol, para as ferramentas internas (admin, agente do WhatsApp).
 // Fonte única: antes cada uma tinha a sua lista copiada.
 export function challengeNameEs(id: string, withEmoji = false): string | undefined {
