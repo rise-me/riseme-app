@@ -103,11 +103,11 @@ const VIDEO_OVERRIDES_BY_LOCALE: Record<string, Record<string, (string | undefin
   },
 }
 
-// true quando as aulas do desafio tocam no idioma da usuária (es é o áudio
-// original; outros idiomas dependem de dublagem no R2, no Stream ou em VIDEO_OVERRIDES_BY_LOCALE)
+// true quando as aulas do desafio tocam no idioma da usuária (es é o áudio original dos
+// desafios do YouTube; os demais dependem de dublagem no R2, no Stream ou em VIDEO_OVERRIDES_BY_LOCALE)
 export function hasLocalizedVideos(challengeId: string, locale: string): boolean {
   return (
-    locale === 'es' ||
+    (locale === 'es' && Boolean(VIDEOS_BY_CHALLENGE[challengeId])) ||
     Object.values(HLS_LESSONS[challengeId] ?? {}).some((e) => e.languages.includes(audioLang(locale))) ||
     Boolean(STREAM_LESSONS[locale]?.[challengeId]) ||
     Boolean(VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId])
