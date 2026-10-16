@@ -21,6 +21,11 @@ export const LINKS: Record<string, string[]> = {
     'https://www.facebook.com/365563009981105/posts/122203707488483220',
     'https://www.instagram.com/p/DeIs5uJAIfW/',
   ],
+  // CL-PL — AD07_H2-H1_CL_PL, o melhor anúncio da CL-PL (CA 2 - LATAM). Facebook e Instagram alternados.
+  pl: [
+    'https://www.facebook.com/365563009981105/posts/122203962470483220',
+    'https://www.instagram.com/p/DeN89o7glF-/',
+  ],
 }
 
 const CONVITE: Record<string, (link: string) => string> = {
