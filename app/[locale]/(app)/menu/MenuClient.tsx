@@ -32,6 +32,17 @@ type Tela = 'lista' | 'form' | 'gerando' | 'ver'
 const OBJETIVOS = ['lose', 'maintain', 'gain'] as const
 const CUSTOS = ['barata', 'moderada', 'cara'] as const
 
+// Na América Latina e na Polônia se escreve "65,5" e "1,60": Number("65,5") = NaN deixava o botão
+// "Crear mi menú" cinza sem explicação (caso Magela, 15/10/2026). Vírgula vale; altura em metros vira cm.
+function numero(v: string): number {
+  const n = Number(v.trim().replace(/\s/g, '').replace(',', '.'))
+  return Number.isFinite(n) ? n : 0
+}
+function alturaCm(v: string): number {
+  const n = numero(v)
+  return n > 0 && n < 3 ? Math.round(n * 100) : n
+}
+
 export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaInicial }: Props) {
   const t = useTranslations('menu')
   const router = useRouter()
@@ -93,9 +104,9 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sex,
-          age: Number(age),
-          weightKg: Number(weightKg),
-          heightCm: Number(heightCm),
+          age: numero(age),
+          weightKg: numero(weightKg),
+          heightCm: alturaCm(heightCm),
           freqTreino,
           minutosTreino,
           esforco,
@@ -226,7 +237,7 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
 
   // ---- formulário ----
   if (tela === 'form') {
-    const podeEnviar = Number(age) > 0 && Number(weightKg) > 0 && Number(heightCm) > 0
+    const podeEnviar = numero(age) > 0 && numero(weightKg) > 0 && alturaCm(heightCm) > 0
     const campo = 'w-full bg-card border border-border rounded-2xl px-4 py-3 text-sm'
     const chip = (ativo: boolean) =>
       cn(
@@ -249,8 +260,8 @@ export function MenuClient({ locale, unlocked, menus: menusIniciais, cota: cotaI
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-2">
             <input inputMode="numeric" placeholder={t('age')} value={age} onChange={(e) => setAge(e.target.value)} className={campo} />
-            <input inputMode="numeric" placeholder={t('weight')} value={weightKg} onChange={(e) => setWeightKg(e.target.value)} className={campo} />
-            <input inputMode="numeric" placeholder={t('height')} value={heightCm} onChange={(e) => setHeightCm(e.target.value)} className={campo} />
+            <input inputMode="decimal" placeholder={t('weight')} value={weightKg} onChange={(e) => setWeightKg(e.target.value)} className={campo} />
+            <input inputMode="decimal" placeholder={t('height')} value={heightCm} onChange={(e) => setHeightCm(e.target.value)} className={campo} />
           </div>
 
           <div>

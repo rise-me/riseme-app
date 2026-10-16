@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server'
-import { mockBonuses, bonusHasLocale, bonusPagePath, type MockBonus } from '@/lib/mock-bonuses'
+import { mockBonuses, bonusLocale, bonusPagePath, type MockBonus } from '@/lib/mock-bonuses'
 import { getUserAccess, canAccessBonuses, canAccessBonus } from '@/lib/user-access-server'
 import { createServiceClient } from '@/lib/admin-server'
 import { BonusList } from './BonusList'
@@ -18,8 +18,8 @@ export default async function BonusPage({
   const tData = await getTranslations('bonusData')
 
   const visiveis = mockBonuses
-    // só mostra material que tem PDF neste idioma
-    .filter((b) => bonusHasLocale(b, locale))
+    // só mostra material que tem PDF neste idioma (ou em espanhol, se não tiver neste)
+    .filter((b) => bonusLocale(b, locale))
     // produto de upsell só aparece pra quem comprou; brinde aparece sempre
     // (bloqueado pra quem ainda não tem acesso, convidando pro paywall)
     .filter((b) => b.access !== 'purchase' || canAccessBonus(b, access))
@@ -30,11 +30,11 @@ export default async function BonusPage({
   const capas = new Map<string, string>()
   if (comprados.length > 0) {
     const supabase = createServiceClient()
-    const paths = comprados.map((b) => bonusPagePath(b.id, locale, 1))
+    const paths = comprados.map((b) => bonusPagePath(b.id, bonusLocale(b, locale)!, 1))
     const { data } = await supabase.storage.from('bonuses').createSignedUrls(paths, COVER_TTL)
     const porPath = new Map((data ?? []).map((s) => [s.path, s.signedUrl]))
     for (const b of comprados) {
-      const url = porPath.get(bonusPagePath(b.id, locale, 1))
+      const url = porPath.get(bonusPagePath(b.id, bonusLocale(b, locale)!, 1))
       if (url) capas.set(b.id, url)
     }
   }
@@ -42,7 +42,7 @@ export default async function BonusPage({
   const toItem = (b: MockBonus) => ({
     id: b.id,
     emoji: b.emoji,
-    pageCount: b.pages[locale] ?? 0,
+    pageCount: b.pages[bonusLocale(b, locale) ?? locale] ?? 0,
     title: tData(`${b.id}.title`),
     description: tData(`${b.id}.description`),
     unlocked: canAccessBonus(b, access),

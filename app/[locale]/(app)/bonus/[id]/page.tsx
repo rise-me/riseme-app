@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { notFound, redirect } from 'next/navigation'
-import { getMockBonusById, bonusHasLocale, bonusPagePath, bonusOriginalPath } from '@/lib/mock-bonuses'
+import { getMockBonusById, bonusLocale, bonusPagePath, bonusOriginalPath } from '@/lib/mock-bonuses'
 import { getUserAccess, canAccessBonus } from '@/lib/user-access-server'
 import { createServiceClient } from '@/lib/admin-server'
 import { BonusReader } from './BonusReader'
@@ -15,7 +15,8 @@ export default async function BonusReaderPage({
   const { locale, id } = await params
 
   const bonus = getMockBonusById(id)
-  if (!bonus || !bonusHasLocale(bonus, locale)) notFound()
+  const lang = bonus ? bonusLocale(bonus, locale) : null
+  if (!bonus || !lang) notFound()
 
   // trava server-side: conteúdo pago (igual ao player de desafio). Por item —
   // produto de upsell exige a compra dele, não basta ter um desafio.
@@ -24,9 +25,9 @@ export default async function BonusReaderPage({
     redirect(`/${locale}/bonus`)
   }
 
-  const pageCount = bonus.pages[locale]
-  const pagePaths = Array.from({ length: pageCount }, (_, i) => bonusPagePath(id, locale, i + 1))
-  const originalPath = bonusOriginalPath(id, locale)
+  const pageCount = bonus.pages[lang]
+  const pagePaths = Array.from({ length: pageCount }, (_, i) => bonusPagePath(id, lang, i + 1))
+  const originalPath = bonusOriginalPath(id, lang)
 
   // signed URLs geradas com service_role (bucket privado — cliente nunca lê direto)
   const supabase = createServiceClient()

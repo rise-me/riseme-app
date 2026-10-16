@@ -47,6 +47,14 @@ export function bonusHasLocale(bonus: MockBonus, locale: string): boolean {
   return (bonus.pages[locale] ?? 0) > 0
 }
 
+// Idioma em que o material vai ser mostrado: o do app, ou espanhol quando não existe nele.
+// Sem isso, aluna hispânica com o celular em inglês via Extras VAZIO — até o Protocolo que comprou
+// (caso Araceli, 15/10/2026). null = não existe nem em espanhol.
+export function bonusLocale(bonus: MockBonus, locale: string): string | null {
+  if (bonusHasLocale(bonus, locale)) return locale
+  return bonusHasLocale(bonus, 'es') ? 'es' : null
+}
+
 // Caminhos no bucket privado 'bonuses'
 export function bonusPagePath(id: string, locale: string, page: number): string {
   return `${id}/${locale}/page-${String(page).padStart(2, '0')}.webp`

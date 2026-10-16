@@ -234,11 +234,13 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   if (chat.modoHumano) return
 
   // Trava anti-loop: do outro lado pode haver OUTRO robô (resposta automática com IA que devolve
-  // o nosso texto — caso real em 10/10/2026). Aluna conversando rápido chega a 2–3 respostas em
-  // poucos minutos; 4 respostas em 5 minutos é robô. Para em silêncio, sem mandar mais nada.
-  if ((await respostasRecentes(phone, 5)) >= 4) {
+  // o nosso texto — caso real em 10/10/2026). Com 4 em 5 min ela calou 10 alunas DE VERDADE em 13–16/10
+  // (gente que escreve em rajada: Lupe chamou "Hello?" 4x por 1h). Agora: 8 em 10 min, e quem trava
+  // avisa o responsável — nunca mais silêncio sem ninguém saber.
+  if ((await respostasRecentes(phone, 10)) >= 8) {
     await passarParaHumano(phone, HORAS_PESSOA, 'possível robô do outro lado (respostas em rajada) — bot parou sozinho')
     if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU)
+    await avisarHumano(phone, undefined, 'o bot parou nesta conversa (8 respostas em 10 min — robô do outro lado?). Confira; se for aluna, responda.')
     return
   }
 
@@ -260,6 +262,11 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     return
   }
 
+  // Ela mandou outra mensagem enquanto o agente pensava (10–20 s): esta resposta já nasceu velha e a
+  // da mensagem nova (que lê o histórico todo) vai sair também — 2 respostas seguidas, uma desatualizada.
+  // Descarta; a próxima rodada responde tudo. Casos reais: "Hola de nuevo…" + "Claro, te leo…" (15/10).
+  if (waMessageId && (await ultimaEntrada(phone)) !== waMessageId) return
+
   // Brinde do depoimento: ela mandou o print → libera na hora, ANTES de mandar a resposta (que diz "já
   // está liberado"). Vale conta achada pelo telefone ou pelo email que ela mandou (Bruno, 15/10: "não trava").
   // Sem conta o agente pede o email e não marca liberar_brinde. Se o sistema falhar, vira consulta.
@@ -275,7 +282,10 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     } catch (err) {
       console.error(`[depoimento] brinde falhou (${phone}):`, err)
     }
-    if (!liberou) {
+    if (!liberou && !userId) {
+      // Sem conta achada: pedir o email (antes virava consulta com texto vazio = aluna no vácuo, 6 casos em 13–16/10).
+      decisao = { tipo: 'responder', texto: pedirEmailDoBrinde(phone), pedirDepoimento: false, liberarBrinde: false, pararMensagens: false }
+    } else if (!liberou) {
       decisao = {
         tipo: 'humano',
         texto: '',
@@ -315,6 +325,13 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     if (decisao.pararMensagens) await registrarPedidoParaParar(phone)
     else if (decisao.pedirDepoimento && !silencioso) await ofertasPosConversa(phone, perfil?.idioma ?? 'es', userId, Boolean(porEmail))
   }
+}
+
+// Pedido do email quando o print chegou mas a conta não foi achada — idioma pelo DDI (sem perfil não há outro).
+function pedirEmailDoBrinde(phone: string): string {
+  if (phone.startsWith('48')) return 'Dziękuję za komentarz! 💛\n\nŻeby odblokować Ci dodatkowy jadłospis, napisz mi proszę e-mail, którego użyłaś przy zakupie.'
+  if (phone.startsWith('90')) return 'Yorumun için çok teşekkürler! 💛\n\nEkstra menünü açabilmem için satın alırken kullandığın e-postayı yazar mısın?'
+  return '¡Muchas gracias por tu comentario! 💛\n\nPara liberarte el menú extra, ¿me escribes el correo que usaste en la compra?'
 }
 
 // Conversa terminou bem (agente marcou, ou ela reagiu com ❤️/👍 a uma mensagem nossa):
@@ -392,7 +409,10 @@ export async function POST(request: NextRequest) {
   // phone pode vir como telefone ("5511…") ou como LID ("1453…@lid"); chatLid é o LID estável.
   const ehLid = (m.phone ?? '').includes('@lid')
   const lid = (m.chatLid ?? (ehLid ? m.phone : '') ?? '').replace(/\D/g, '') || null
-  const phone = ehLid ? `${lid}@lid` : (m.phone ?? '').replace(/\D/g, '')
+  // Aluna que escreve só pelo LID mas cujo telefone a gente já conhece (ela escreveu antes com os dois):
+  // usa o telefone — senão a conversa nasce "sem conta e sem convite" e o agente trava (13–16/10).
+  const conhecido = ehLid && lid && !m.fromMe ? await telefoneDoLid(lid) : null
+  const phone = conhecido ?? (ehLid ? `${lid}@lid` : (m.phone ?? '').replace(/\D/g, ''))
   // Reação dela a uma mensagem nossa (não tem texto): só interessa se for positiva.
   if (!m.fromMe && m.reaction?.value && m.reaction.referencedMessage?.fromMe && phone && !ehResponsavel(phone)) {
     const emoji = m.reaction.value
