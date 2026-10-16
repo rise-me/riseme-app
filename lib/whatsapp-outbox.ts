@@ -163,6 +163,26 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       }
     }
 
+    // 'reprocessar' não manda texto: faz o agente retomar a conversa (o que ficou sem resposta) pelo
+    // próprio servidor. Assim dá para destravar alunas sem a chave da Z-API sair da Vercel (16/10/2026).
+    if (item.kind === 'reprocessar') {
+      const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://riseme.app'
+      const res = await fetch(`${base}/api/whatsapp/zapi?acao=reprocessar&s=${process.env.ZAPI_WEBHOOK_SECRET}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: item.phone }),
+      }).catch((err) => ({ ok: false, status: String(err) }) as const)
+      await db
+        .from('whatsapp_outbox')
+        .update(res.ok
+          ? { sent_at: new Date().toISOString(), attempts: item.attempts + 1 }
+          : { claimed_at: null, attempts: item.attempts + 1, last_error: `reprocessar ${res.status}`, send_after: new Date(Date.now() + REPROGRAMAR_MS).toISOString() })
+        .eq('id', item.id)
+      if (res.ok) enviados++
+      else falhas++
+      continue
+    }
+
     const r = await sendZapiText({ phone: item.phone, message: item.body, delayTyping: 3 })
     if (!r.ok) {
       falhas++
