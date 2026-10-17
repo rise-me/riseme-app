@@ -30,7 +30,9 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_PATH = ROOT / "lib" / "hls-lessons.json"
+# Registro único das aulas no app. HLS_LESSONS_PATH aponta outro checkout (ex.: a esteira rodando de um
+# worktree grava no da main), para não existirem duas cópias divergentes.
+DATA_PATH = Path(os.environ.get("HLS_LESSONS_PATH") or ROOT / "lib" / "hls-lessons.json").expanduser()
 WORKER_DIR = ROOT / "workers" / "aulas"
 BUCKET = "riseme-aulas"
 BASE_URL = "https://aulas.riseme.app"
@@ -157,7 +159,7 @@ def main() -> None:
     days[str(args.day)] = {"path": path, "seconds": round(meta["duration"]), "languages": langs}
     data["baseUrl"] = data.get("baseUrl") or BASE_URL
     DATA_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
-    print(f"\n✅ publicado em {BASE_URL}/<passe>/{path}/ — commitar {DATA_PATH.relative_to(ROOT)}")
+    print(f"\n✅ publicado em {BASE_URL}/<passe>/{path}/ — commitar {DATA_PATH}")
 
 
 if __name__ == "__main__":
