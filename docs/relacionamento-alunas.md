@@ -44,28 +44,48 @@ queimar a relação nem o chip.
    candidato a aha é **completar o dia 3–5**.
 6. **Medir cada peça** contra o alvo; o que não move o número sai.
 
-## A jornada (versão 1)
+## O que a pesquisa externa mudou (16/10/2026)
+
+Fontes no fim do documento. Evidência sólida marcada com ✔; o resto é correlação ou dado de fornecedor.
+- ✔ **O que prediz que ela fica é o número de DIAS DE TREINO no 1º mês** (estudo com 389 mil usuários do
+  Fitbod), não um dia mágico. Então o alvo intermediário é "dias de treino", e a queda grande vem ANTES do dia 3
+  → o gatilho "2 dias sem começar" é o que mais move o número.
+- ✔ **Mensagem personalizada e com frequência decrescente funciona melhor que mensagem fixa** (meta-análise, 19 ensaios).
+- ✔ **WhatsApp tem 27 pontos a mais de resposta que SMS** em pesquisa (experimento randomizado na Colômbia).
+- **Pergunta do "por que começou" é melhor perto da compra** (entrevista de troca/JTBD), enquanto a decisão está fresca.
+- **Trial:** os dados públicos (RevenueCat) favorecem oferecer CEDO — quase todo trial começa no 1º dia. A
+  intuição "depois do valor" não tem prova pública. Só teste resolve para o RiseMe.
+- **Sem grupo de controle não dá para saber se as mensagens CAUSAM a assinatura** — toda evidência é correlação.
+- **Risco do chip:** disparo proativo em volume é exatamente o uso que mais derruba número na Z-API. API oficial:
+  responder em até 24h é grátis; mensagem iniciada por nós = template aprovado + pago (marketing ~US$0,013 na
+  Colômbia, ~US$0,06–0,07 na Argentina); limite inicial 250 pessoas/dia, sobe com qualidade.
+
+## A jornada (versão 1, revista com a pesquisa)
 
 | Gatilho (o que ela fez) | O que acontece | Para quê |
 |---|---|---|
 | Compra | Acesso + apoio (já existe) | entrar |
-| 2 dias sem fazer o dia 1 | "¿Pudiste empezar tu día 1? Si algo te frenó, cuéntame" | ativação |
-| Completou o dia 3 | Parabéns + **pergunta 1** (gatilho) | ouvir + encantar |
-| Completou o dia 5–7 | **Oferta do teste grátis** (todos os desafios, 7 dias) | oferecer no auge |
-| Sumiu 3 dias depois de começar | "Te extrañamos 💛 ¿Retomamos hoy? Son pocos minutos" | não perder |
-| Completou o dia 14 | **Pergunta 2** (o que mais resolver) | ouvir |
-| Completou o dia 28 | Celebração + **pergunta 3** (Sean Ellis) + o que vem depois | reter |
+| 2 dias sem fazer o dia 1 | "¿Pudiste empezar tu día 1? Si algo te frenó, cuéntame" | **ativação (maior alavanca)** |
+| Fez o dia 1 | Parabéns + **pergunta 1** (por que começou agora) | ouvir, com a decisão fresca |
+| Fez o dia 3 | Parabéns + **pergunta 2** (outros problemas) + oferta do teste (grupo A) | ouvir + oferecer |
+| Fez o dia 7 | Parabéns + oferta do teste (grupo B) | oferecer no hábito |
+| Sumiu 3 dias depois de começar | "¿Qué te frenó? Perder un día no arruina nada — ¿retomamos?" | não perder |
+| Dia 7+ ativa | **Pergunta 3** (Sean Ellis), só para quem usa | medir amor ao produto |
 
-## As perguntas (rascunho — es; o agente adapta ao idioma)
+**Regras de frequência:** no máximo 1 mensagem nossa a cada 48h por aluna; 2 sem resposta seguidas → para.
+**Grupo de controle:** ~10–15% das compradoras (sorteio fixo pelo telefone) não recebem nenhuma mensagem da
+jornada — é a comparação que prova o efeito. **A/B:** oferta do teste no dia 3 vs. no dia 7.
 
-1. **Gatilho (dia 3):** "¿Qué fue lo que te hizo decidir empezar justo ahora?" → revela o problema real
-   (casamento, pós-parto, médico, autoestima) — vira copy de anúncio e ideia de produto.
-2. **O que mais resolver (dia 14):** "Además del ejercicio, ¿qué es lo que más te gustaría cambiar o mejorar
-   en tu día a día?" → o agente pergunta um "¿y por qué eso?" e para. É a pergunta que o Bruno quer:
-   outros problemas que podemos resolver (menopausa, sono, alimentação, ansiedade…).
-3. **Valor (dia 28):** "Si mañana ya no pudieras usar RiseMe, ¿cómo te sentirías? (muy decepcionada / algo
-   decepcionada / no me importaría)" + "¿qué es lo que más te sirvió?" → mede se o produto é amado (teste
-   Sean Ellis: ≥40% "muy decepcionada" = produto que as pessoas amam).
+## As perguntas (es; o agente adapta ao idioma e aprofunda uma vez, com "¿y por qué?")
+
+1. **Dia 1 — gatilho:** "¿Qué pasó que te hizo decidir empezar justo ahora?"
+2. **Dia 3 — outros problemas (o que o Bruno quer descobrir):** "Además del ejercicio, ¿qué es lo que más te ha
+   estado molestando en tu cuerpo o tu salud? Cuéntame la última vez que te afectó." → depois: "¿Qué has probado
+   para eso?" (fatos passados, nunca "¿comprarías…?" — The Mom Test). Assim aparece menopausa, sono, alimentação…
+   sem a gente sugerir.
+3. **Dia 7+ ativa — valor (Sean Ellis):** "Si mañana ya no pudieras usar RiseMe, ¿cómo te sentirías? (muy
+   decepcionada / algo / nada)" + "¿qué es lo que más te sirvió?". Precisa de ~40 respostas; o corte de 40% é
+   referência, não lei.
 
 Respostas vão para uma tabela (aluna, pergunta, resposta, data) e entram no **relatório semanal**: temas mais
 citados, frases literais, pedidos de produto — junto da revisão das conversas.
@@ -87,7 +107,26 @@ citados, frases literais, pedidos de produto — junto da revisão das conversas
 
 ## Ordem de construção proposta
 
-1. Gatilhos por progresso (dia 3, dia 5–7, sumiu 3 dias, 2 dias sem começar) + tabela de respostas.
-2. Pergunta 1 e oferta do teste no dia 5–7; medir 2 semanas.
+1. Gatilhos por progresso + regras de frequência + grupo de controle + tabela de respostas.
+2. Perguntas 1 e 2; oferta do teste A/B (dia 3 vs. dia 7); medir 2 semanas contra os ~4%.
 3. Relatório semanal das respostas.
-4. Perguntas 2 e 3 quando a coorte chegar lá.
+4. Pergunta 3 quando houver ~40 alunas ativas no dia 7+.
+5. Se a jornada crescer: mover os disparos para a API oficial do WhatsApp (templates).
+
+## Fontes (pesquisa de 16/10/2026)
+
+- Dias de treino no 1º mês preveem adesão (Fitbod, n=389 mil): https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2026.1855668/full
+- Formação de hábito (Lally 2010, 18–254 dias): https://www.thebehavioralscientist.com/articles/how-long-to-form-a-habit
+- Retenção em fitness (D1 ~20–27%, D7 ~8–13%, D30 ~3–4%): https://www.braze.com/resources/articles/mobile-app-retention
+- Trials começam no 1º dia; paywall rígido 10,7% vs. freemium 2,1% (RevenueCat): https://www.revenuecat.com/blog/engineering/android-paywall-gap.md
+- State of Subscription Apps (trial→pago fitness ~40%): https://revenuecat.com/state-of-subscription-apps-2025
+- Mensagens personalizadas/frequência variável (meta-análise Head 2013): https://ideas.repec.org/a/eee/socmed/v97y2013icp41-48.html
+- SMS e atividade física (Smith 2020): https://pmc.ncbi.nlm.nih.gov/articles/PMC6956854
+- Intervenções just-in-time, evidência mista (Hardeman 2019): https://pmc.ncbi.nlm.nih.gov/articles/PMC6448257/
+- Lembretes do Duolingo (+2% retenção): https://research.duolingo.com/papers/yancey.kdd20.pdf
+- WhatsApp vs. SMS em pesquisa, Colômbia (IZA DP 15263): https://www.iza.org/publications/dp15263
+- Entrevista de troca / JTBD (Moesta): https://businessofsoftware.org/talks/live-jobs-to-be-done-case-studies/
+- Teste de Sean Ellis: https://learningloop.io/plays/product-market-fit-survey
+- Risco da Z-API (a própria Z-API): https://developer.z-api.io/en/tips/best-practices
+- Preços da API oficial do WhatsApp: https://developers.facebook.com/docs/whatsapp/pricing
+- Política de chatbots de IA no WhatsApp (2026): https://respond.io/blog/whatsapp-chatbot-policy-2026
