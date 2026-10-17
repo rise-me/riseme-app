@@ -143,7 +143,10 @@
     "trialDay1Title": "Dia 1 concluído! 🎉",
     "trialDay1Sub": "Continue seu desafio e experimente também todos os outros desafios RiseMe™, grátis por 7 dias.",
     "trialFinishTitle": "Você terminou o desafio! 🏆",
-    "trialFinishSub": "Seu próximo desafio te espera: teste todos grátis por 7 dias."
+    "trialFinishSub": "Seu próximo desafio te espera: teste todos grátis por 7 dias.",
+    "trialDay2Title": "Hoje é o dia 2 do seu desafio! 💪",
+    "trialUnlockOthers": "Sabia que você pode desbloquear mais {n} desafios de graça?",
+    "trialSmallPrice": "Grátis por 7 dias. Depois, US$27/ano. Cancele quando quiser."
   },
   "subscriptionPage": {
     "title": "Assinatura",

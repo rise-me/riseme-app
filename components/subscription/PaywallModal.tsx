@@ -27,9 +27,13 @@ interface PaywallModalProps {
   // Título/subtítulo próprios do ponto de contato (ex.: "¡Día 1 completado!"); sem eles, o título padrão do teste.
   title?: string
   subtitle?: string
+  // Os outros desafios, nomeados (16/10/2026): oferta genérica no fim do dia 1 converteu 0 de ~290 alunas
+  // em 7 dias; o pedido do Bruno é ser concreta — "você pode desbloquear 4 outros desafios". Com `outros`,
+  // a lista deles substitui os benefícios genéricos e o preço vai numa linha discreta sob o botão.
+  outros?: { emoji: string; title: string }[]
 }
 
-export function PaywallModal({ open, onClose, challengeTitle, src = 'pase-app', title, subtitle }: PaywallModalProps) {
+export function PaywallModal({ open, onClose, challengeTitle, src = 'pase-app', title, subtitle, outros }: PaywallModalProps) {
   const t = useTranslations('subscription')
   const [email, setEmail] = useState<string | null>(null)
 
@@ -78,22 +82,35 @@ export function PaywallModal({ open, onClose, challengeTitle, src = 'pase-app', 
             )}
           </div>
 
-          {/* Benefits */}
-          <div className="space-y-2">
-            {benefits.map((benefit) => (
-              <div key={benefit} className="flex items-center gap-2.5">
-                <CheckCircle2 size={16} className="text-green-600 flex-shrink-0" />
-                <span className="text-sm text-foreground">{benefit}</span>
+          {outros?.length ? (
+            <div className="grid grid-cols-2 gap-2">
+              {outros.map((o) => (
+                <div key={o.title} className="flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2.5">
+                  <span className="text-xl">{o.emoji}</span>
+                  <span className="text-xs font-semibold leading-tight">{o.title}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* Benefits */}
+              <div className="space-y-2">
+                {benefits.map((benefit) => (
+                  <div key={benefit} className="flex items-center gap-2.5">
+                    <CheckCircle2 size={16} className="text-green-600 flex-shrink-0" />
+                    <span className="text-sm text-foreground">{benefit}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* O que é cobrado, sem letra miúda */}
-          <div className="rounded-2xl border-2 border-foreground bg-foreground/5 p-4 space-y-1">
-            <p className="font-bold text-base">{t('trialToday')}</p>
-            <p className="text-sm">{t('trialAfter')}</p>
-            <p className="text-xs text-muted-foreground">{t('trialCancel')}</p>
-          </div>
+              {/* O que é cobrado, sem letra miúda */}
+              <div className="rounded-2xl border-2 border-foreground bg-foreground/5 p-4 space-y-1">
+                <p className="font-bold text-base">{t('trialToday')}</p>
+                <p className="text-sm">{t('trialAfter')}</p>
+                <p className="text-xs text-muted-foreground">{t('trialCancel')}</p>
+              </div>
+            </>
+          )}
 
           {/* CTA */}
           <button
@@ -107,7 +124,8 @@ export function PaywallModal({ open, onClose, challengeTitle, src = 'pase-app', 
           </button>
 
           {/* Footer */}
-          <div className="text-center">
+          <div className="text-center space-y-0.5">
+            {outros?.length ? <p className="text-xs text-muted-foreground">{t('trialSmallPrice')}</p> : null}
             <p className="text-xs text-muted-foreground">{t('trialCardNote')}</p>
           </div>
         </div>

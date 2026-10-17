@@ -143,7 +143,10 @@
     "trialDay1Title": "Dzień 1 ukończony! 🎉",
     "trialDay1Sub": "Kontynuuj swoje wyzwanie i wypróbuj też wszystkie inne wyzwania RiseMe™ za darmo przez 7 dni.",
     "trialFinishTitle": "Ukończyłaś wyzwanie! 🏆",
-    "trialFinishSub": "Twoje kolejne wyzwanie czeka: wypróbuj wszystkie za darmo przez 7 dni."
+    "trialFinishSub": "Twoje kolejne wyzwanie czeka: wypróbuj wszystkie za darmo przez 7 dni.",
+    "trialDay2Title": "Dziś 2. dzień Twojego wyzwania! 💪",
+    "trialUnlockOthers": "Wiesz, że możesz za darmo odblokować jeszcze {n} wyzwania?",
+    "trialSmallPrice": "Za darmo przez 7 dni. Potem 27 USD/rok. Anulujesz, kiedy chcesz."
   },
   "subscriptionPage": {
     "title": "Subskrypcja",

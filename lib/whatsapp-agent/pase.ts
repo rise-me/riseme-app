@@ -68,7 +68,12 @@ function admin() {
 }
 
 /** Mensagem do Pase para esta aluna, ou null se ela já tem o Pase (mesma regra do getUserAccess). */
+// DESLIGADA em 16/10/2026: 0 assinaturas em 32 ofertas, e a oferta foi para dentro do app (abrir a aula 2,
+// fim da aula 1 com os desafios nomeados) — onde não pesa no chip. Religar = true.
+const OFERTA_NO_WHATSAPP = false
+
 export async function ofertaPase(userId: string, idioma: string): Promise<string | null> {
+  if (!OFERTA_NO_WHATSAPP) return null
   const db = admin()
   const [{ data: subs }, { data: auth }] = await Promise.all([
     db.from('subscriptions').select('current_period_end').eq('user_id', userId).in('status', ['active', 'canceled']),

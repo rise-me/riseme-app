@@ -143,7 +143,10 @@
     "trialDay1Title": "Day 1 done! 🎉",
     "trialDay1Sub": "Keep going with your challenge and try every other RiseMe™ challenge too, free for 7 days.",
     "trialFinishTitle": "You finished the challenge! 🏆",
-    "trialFinishSub": "Your next challenge is waiting: try them all free for 7 days."
+    "trialFinishSub": "Your next challenge is waiting: try them all free for 7 days.",
+    "trialDay2Title": "Today is day 2 of your challenge! 💪",
+    "trialUnlockOthers": "Did you know you can unlock {n} more challenges for free?",
+    "trialSmallPrice": "Free for 7 days. Then US$27/year. Cancel anytime."
   },
   "subscriptionPage": {
     "title": "Subscription",

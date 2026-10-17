@@ -143,7 +143,10 @@
     "trialDay1Title": "1. gün tamamlandı! 🎉",
     "trialDay1Sub": "Meydan okumana devam et ve diğer tüm RiseMe™ meydan okumalarını da 7 gün ücretsiz dene.",
     "trialFinishTitle": "Meydan okumayı bitirdin! 🏆",
-    "trialFinishSub": "Sıradaki meydan okuman seni bekliyor: hepsini 7 gün ücretsiz dene."
+    "trialFinishSub": "Sıradaki meydan okuman seni bekliyor: hepsini 7 gün ücretsiz dene.",
+    "trialDay2Title": "Bugün meydan okumanın 2. günü! 💪",
+    "trialUnlockOthers": "{n} meydan okumanın daha kilidini ücretsiz açabileceğini biliyor muydun?",
+    "trialSmallPrice": "7 gün ücretsiz. Sonra yılda US$27. İstediğin zaman iptal et."
   },
   "subscriptionPage": {
     "title": "Abonelik",

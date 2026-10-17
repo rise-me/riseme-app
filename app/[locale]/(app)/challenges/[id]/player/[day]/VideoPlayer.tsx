@@ -7,11 +7,11 @@ import { X, SkipBack, SkipForward, Tv } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { markDayComplete } from '@/lib/progress'
 import { track } from '@/lib/posthog/track'
-import type { MockChallenge } from '@/lib/mock-challenges'
+import { mockChallenges, type MockChallenge } from '@/lib/mock-challenges'
 import { HLS_BASE_URL, STREAM_CUSTOMER_HOST, type LessonVideo, type MockDay } from '@/lib/mock-challenge-days'
 import { CastTvHelp } from '@/components/challenges/CastTvHelp'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
-import { marcaOfertaDaAula, ofertaDaAulaJaMostrada } from '@/lib/pase-oferta'
+import { marcaOfertaDaAula, ofertaDaAulaJaMostrada, ofertaMostradaHoje } from '@/lib/pase-oferta'
 
 interface Props {
   challenge: MockChallenge
@@ -171,6 +171,11 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   const t = useTranslations('challenges')
   const tTv = useTranslations('castTv')
   const tSub = useTranslations('subscription')
+  const tData = useTranslations('challengeData')
+  // Os outros desafios do app, nomeados na oferta ("desbloquear 4 desafios más").
+  const outros = mockChallenges
+    .filter((c) => c.id !== challenge.id)
+    .map((c) => ({ emoji: c.thumbnail_emoji, title: tData(`${c.id}.title`) }))
   const currentDay = days.find((d) => d.day_number === currentDayNumber)!
   const nextDay = days.find((d) => d.day_number === currentDayNumber + 1)
   const prevDay = days.find((d) => d.day_number === currentDayNumber - 1)
@@ -194,6 +199,17 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   const [dayDone, setDayDone] = useState(false)
   const [offerOpen, setOfferOpen] = useState(false)
   const pendingNavRef = useRef<(() => void) | null>(null)
+
+  // Oferta ao ABRIR a aula 2 (16/10/2026, ideia do Bruno): ela voltou no dia seguinte, ânimo no alto —
+  // "hoje é seu dia 2… sabia que pode desbloquear N desafios grátis?". Uma vez na vida, respeitando o
+  // limite de 1 oferta automática por dia (lib/pase-oferta).
+  const [day2Open, setDay2Open] = useState(false)
+  useEffect(() => {
+    if (hasPase || currentDayNumber !== 2) return
+    if (ofertaDaAulaJaMostrada(challenge.id, 2) || ofertaMostradaHoje()) return
+    marcaOfertaDaAula(challenge.id, 2)
+    setDay2Open(true)
+  }, [hasPase, currentDayNumber, challenge.id])
 
   function canOffer() {
     return offerDay && dayDone && !ofertaDaAulaJaMostrada(challenge.id, currentDayNumber)
@@ -416,7 +432,16 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
         }}
         src={isFinalDay ? 'pase-fim-desafio' : 'pase-aula1'}
         title={isFinalDay ? tSub('trialFinishTitle') : tSub('trialDay1Title')}
-        subtitle={isFinalDay ? tSub('trialFinishSub') : tSub('trialDay1Sub')}
+        subtitle={isFinalDay ? tSub('trialFinishSub') : tSub('trialUnlockOthers', { n: outros.length })}
+        outros={outros}
+      />
+      <PaywallModal
+        open={day2Open}
+        onClose={() => setDay2Open(false)}
+        src="pase-aula2"
+        title={tSub('trialDay2Title')}
+        subtitle={tSub('trialUnlockOthers', { n: outros.length })}
+        outros={outros}
       />
     </div>
   )
