@@ -80,8 +80,9 @@ citados, frases literais, pedidos de produto — junto da revisão das conversas
 
 ## Decisões em aberto (Bruno)
 
-- **Playlist do YouTube na mensagem de apoio:** tira quem treina de dentro do app. Manter, trocar por "se
-  o vídeo não abrir, me escreve", ou só mandar a quem tiver problema?
+- ~~Playlist do YouTube na mensagem de apoio~~ — **decidido 16/10/2026: sai.** Existia para tapar a falta de
+  suporte ("garantir que ela assistisse alguma coisa"); agora o suporte responde. Virou plano B do agente
+  (só para vídeo que não abre no app).
 - Ordem de construção (proposta abaixo).
 
 ## Ordem de construção proposta
