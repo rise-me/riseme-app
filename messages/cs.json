@@ -144,7 +144,10 @@
     "trialDay1Title": "Den 1 máš za sebou! 🎉",
     "trialDay1Sub": "Pokračuj ve své výzvě a vyzkoušej 7 dní zdarma i všechny ostatní výzvy RiseMe™.",
     "trialFinishTitle": "Dokončila jsi výzvu! 🏆",
-    "trialFinishSub": "Další výzva už na tebe čeká: vyzkoušej je všechny 7 dní zdarma."
+    "trialFinishSub": "Další výzva už na tebe čeká: vyzkoušej je všechny 7 dní zdarma.",
+    "trialDay2Title": "Dnes je tvůj 2. den výzvy! 💪",
+    "trialUnlockOthers": "Víš, že si můžeš zdarma odemknout ještě {n, plural, one {# další výzvu} few {# další výzvy} other {# dalších výzev}}?",
+    "trialSmallPrice": "7 dní zdarma. Potom 27 USD/rok. Zrušíš, kdy chceš."
   },
   "subscriptionPage": {
     "title": "Předplatné",
