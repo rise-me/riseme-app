@@ -254,6 +254,10 @@ ${body}
 `
 }
 
+// Emoji no fim do assunto — existia só no painel do Supabase (achado ao colar o tcheco, 17/10/2026).
+// Fica aqui para quem colar de novo não apagar sem perceber.
+const EMOJI_ASSUNTO = { invite: ' 💛', recovery: ' 🙌', confirmation: ' 🖤', 'email-change': ' ✨' }
+
 const dir = dirname(fileURLToPath(import.meta.url))
 for (const [name, spec] of Object.entries(TEXT)) {
   for (const l of Object.keys(COMMON)) {
@@ -262,5 +266,5 @@ for (const [name, spec] of Object.entries(TEXT)) {
   writeFileSync(join(dir, `${name}.html`), renderTemplate(spec))
   // O assunto é um campo à parte no painel ("Subject heading") — mesma lógica, numa linha
   const subject = byLocale((l) => spec[l].title).replace(/\n/g, '')
-  console.log(`ok ${name}.html\n   assunto: {{ $l := or .Data.locale "${DEFAULT_LOCALE}" }}${subject}`)
+  console.log(`ok ${name}.html\n   assunto: {{ $l := or .Data.locale "${DEFAULT_LOCALE}" }}${subject}${EMOJI_ASSUNTO[name] ?? ''}`)
 }
