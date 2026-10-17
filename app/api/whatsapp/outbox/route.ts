@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { processarFila } from '@/lib/whatsapp-outbox'
+import { verificarConexao } from '@/lib/whatsapp-alarme'
 
 // GET /api/whatsapp/outbox — cron da Vercel a cada minuto (vercel.json). Envia as
 // mensagens de WhatsApp que já venceram na fila (lib/whatsapp-outbox.ts).
@@ -13,6 +14,8 @@ export async function GET(request: NextRequest) {
   if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  // Alarme primeiro (falha dele nunca segura a fila): WhatsApp desconectado → email ao responsável.
+  await verificarConexao().catch((err) => console.error('[alarme] falhou:', err))
   const r = await processarFila()
   if (r.enviados || r.falhas) console.log(`[outbox] enviados=${r.enviados} falhas=${r.falhas}`)
   return NextResponse.json({ ok: true, ...r })
