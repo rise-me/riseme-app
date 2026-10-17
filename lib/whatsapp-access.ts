@@ -9,8 +9,8 @@
 // SEQUÊNCIA (herdada da Voxuy, texto que rodava desde o início — 04/10/2026):
 //   1) ACESSO, ~15 min após a compra (fim da VSL do upsell): email + senha + link de um
 //      toque + como entrar outro dia + instalar o app
-//   2) APOIO, ~45 s depois da 1ª: "se ainda não conseguiu, me escreve" + playlist das aulas
-//      no YouTube (só nos idiomas com playlist em PLAYLIST)
+//   2) APOIO, ~45 s depois da 1ª: "se ainda não conseguiu, me escreve" (sem a playlist do
+//      YouTube desde 16/10/2026 — ela tirava a aluna do app; virou plano B do agente)
 // A 3ª mensagem da Voxuy (grupo de WhatsApp das alunas) foi REMOVIDA de propósito:
 // grupo com 150–200 entradas/dia virou moderação/spam; dúvida agora é no privado (agente).
 
@@ -28,12 +28,6 @@ const ATRASO_ACESSO_MIN = Number(process.env.WHATSAPP_ACCESS_DELAY_MIN ?? 15)
 const ESPERA_MSG2_MS = 45_000
 const ESPERA_DEPOIMENTO_MS = 30 * 60_000 // "aproveitar que a pessoa está quente" (Bruno, 14/10)
 const CONVITE_PARA_TODAS = true
-
-// Playlist (não listada) das aulas por idioma — reserva pra ela não perder o dia
-// se o app der problema. Idioma sem playlist → a msg 2 sai sem esse trecho.
-const PLAYLIST: Partial<Record<AppLocale, string>> = {
-  es: 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d',
-}
 
 const COPY: Record<AppLocale, AccessCopy> = {
   es: ({ email, code, link, homeUrl }) =>
@@ -382,7 +376,9 @@ export function mensagensDeAcesso(p: { locale: string; email: string; code: stri
   const homeUrl = p.link.split('/entrar')[0]
   return [
     copy({ email: p.email, code: p.code, link: p.link, homeUrl }),
-    support({ playlist: PLAYLIST[locale] }),
+    // Sem playlist desde 16/10/2026: ela existia para tapar a falta de suporte, mas tirava a aluna do app
+    // (~60% nunca faziam o dia 1 lá). Agora o suporte responde; a playlist fica só como plano B do agente.
+    support({}),
   ]
 }
 

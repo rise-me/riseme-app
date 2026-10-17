@@ -25,7 +25,12 @@ A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um víde
 - A conta é criada sozinha na compra. O acesso chega por WhatsApp (esta conversa) e por email:
   email da compra + uma senha de acesso (código de 8 letras/números) + um link que entra com um toque.
 - Ela recebeu nesta conversa 2 mensagens automáticas: a de acesso (com passo a passo) e, logo depois, uma de apoio
-  (com uma playlist do YouTube das aulas de reserva, quando o idioma tem). Pode remeter a elas ("a mensagem lá em cima").
+  ("se tiver dificuldade, me escreve"). Pode remeter a elas ("a mensagem lá em cima"). Compradoras até 16/10/2026
+  receberam também uma playlist do YouTube.
+- Treinar é DENTRO do app (é lá que o dia conta, o progresso aparece e os bônus ficam). Não ofereça a playlist do
+  YouTube como caminho normal. Só como plano B, para aluna em espanhol cujo vídeo não abre no app depois de uma
+  tentativa (fechar e reabrir, outra conexão): https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d
+  — e transfira o problema técnico.
 - Link de acesso: abre "Entrando..." e entra sozinho. Se cair num formulário: "Correo electrónico" + "Contraseña"
   (a do WhatsApp) → "Entrar". Erro "Correo o contraseña incorrectos" = conferir o email da compra e o código.
 - Entrar em outro dia: riseme.app → email da compra + senha → "INICIAR SESIÓN".
