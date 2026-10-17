@@ -90,6 +90,16 @@ jornada — é a comparação que prova o efeito. **A/B:** oferta do teste no di
 Respostas vão para uma tabela (aluna, pergunta, resposta, data) e entram no **relatório semanal**: temas mais
 citados, frases literais, pedidos de produto — junto da revisão das conversas.
 
+## Oferta do teste grátis — o que os dados mostraram e o que mudou (17/10/2026)
+
+- 7 dias até 16/10: **41 assinaturas, todas pelo funil de compra** (20–30 min após a compra, antes do 1º treino;
+  conferido nome a nome com a Hotmart — o registro funciona). **Fim da aula 1 no app: ~290 viram, 0 assinaram.**
+  **WhatsApp no dia 0: 32 ofertas, 0.** Trial→pago já acontece (linhas "parc. 2" na Hotmart).
+- Mudança (ideia do Bruno): oferta **concreta** — "¿Sabías que puedes desbloquear 4 desafíos más, gratis?" com os
+  desafios nomeados e o preço numa linha discreta — **no fim da aula 1 e ao ABRIR a aula 2** (src `pase-aula2`).
+  Oferta do teste no WhatsApp **desligada** (lib/whatsapp-agent/pase.ts, OFERTA_NO_WHATSAPP).
+- Medir em 7 dias: vendas com src `pase-aula1` e `pase-aula2` (Hotmart → Vendas → Origem SRC) contra o zero de antes.
+
 ## Limites
 
 - **Chip:** a Z-API não é a API oficial; cada mensagem que NÓS iniciamos aumenta o risco. Versão 1 só dispara
