@@ -1,17 +1,14 @@
 import { redirect } from 'next/navigation'
 import { createServiceClient, getAdminUser } from '@/lib/admin-server'
+import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 
 // Ferramenta interna — texto fixo em português.
 
 export const dynamic = 'force-dynamic'
 
-const CHALLENGE_NAMES: Record<string, string> = {
-  '1': '💪 Calistenia en Casa',
-  '2': '🧘‍♀️ Pilates en la Pared',
-  '3': '✨ Yoga Facial',
-  '4': '🪑 Yoga en la Silla',
-  '5': '🔥 Cuerpo Sexy de Verano',
-}
+const CHALLENGE_NAMES: Record<string, string> = Object.fromEntries(
+  mockChallenges.map((c) => [c.id, challengeNameEs(c.id, true) ?? `Desafio ${c.id}`])
+)
 
 interface AuthUserRow {
   id: string

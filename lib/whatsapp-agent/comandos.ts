@@ -8,16 +8,13 @@ import { darCardapioBonus } from '@/lib/diet/quota'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { aberturaReenvio, mensagensDeAcesso } from '@/lib/whatsapp-access'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
+import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 
 const VALIDADE_MIN = 30 // um "sim" depois disso não executa nada
 const APP_URL = 'https://riseme.app'
 
 const NOME_PRODUTO: Record<string, string> = {
-  '1': 'Calistenia en Casa',
-  '2': 'Pilates en la Pared',
-  '3': 'Yoga Facial',
-  '4': 'Yoga en la Silla',
-  '5': 'Cuerpo Sexy de Verano',
+  ...Object.fromEntries(mockChallenges.map((c) => [c.id, challengeNameEs(c.id) ?? c.id])),
   'protocolo-metabolico': 'Protocolo Metabólico',
 }
 
@@ -96,7 +93,7 @@ function planejar(p: PedidoComando, a: Aluna): { resumo: string; params: Params 
   const base: Params = { userId: a.id, email: a.email, nome: a.nome, phone: a.phone }
   switch (p.acao) {
     case 'liberar_produto':
-      if (!p.produto) return 'Qual produto? (Calistenia, Pilates en la Pared, Yoga Facial, Yoga en la Silla, Cuerpo Sexy de Verano ou Protocolo Metabólico)'
+      if (!p.produto) return `Qual produto? (${Object.values(NOME_PRODUTO).join(', ')})`
       return { resumo: `Vou liberar *${NOME_PRODUTO[p.produto]}* (vitalício) para ${quem}.`, params: { ...base, produto: p.produto } }
     case 'reenviar_acesso':
       return {

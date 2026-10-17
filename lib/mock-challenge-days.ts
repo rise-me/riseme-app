@@ -22,9 +22,13 @@ function audioLang(locale: string): string {
   return locale.split('-')[0]
 }
 
-function hlsFor(challengeId: string, day: number, locale?: string): HlsEntry | undefined {
+// Áudio de quem não tem versão no próprio idioma (decisão do Bruno, 15/10/2026: desafio novo
+// sai em es+en e o inglês vale para qualquer outro país)
+export const AUDIO_PADRAO = 'en'
+
+function hlsFor(challengeId: string, day: number, lang: string): HlsEntry | undefined {
   const entry = HLS_LESSONS[challengeId]?.[String(day)]
-  return entry && locale && entry.languages.includes(audioLang(locale)) ? entry : undefined
+  return entry?.languages.includes(lang) ? entry : undefined
 }
 
 export interface MockDay {
@@ -99,15 +103,23 @@ const VIDEO_OVERRIDES_BY_LOCALE: Record<string, Record<string, (string | undefin
   },
 }
 
-// true quando as aulas do desafio tocam no idioma da usuária (es é o áudio
-// original; outros idiomas dependem de dublagem no R2, no Stream ou em VIDEO_OVERRIDES_BY_LOCALE)
+// true quando as aulas do desafio tocam no idioma da usuária (es é o áudio original dos
+// desafios do YouTube; os demais dependem de dublagem no R2, no Stream ou em VIDEO_OVERRIDES_BY_LOCALE)
 export function hasLocalizedVideos(challengeId: string, locale: string): boolean {
   return (
-    locale === 'es' ||
+    (locale === 'es' && Boolean(VIDEOS_BY_CHALLENGE[challengeId])) ||
     Object.values(HLS_LESSONS[challengeId] ?? {}).some((e) => e.languages.includes(audioLang(locale))) ||
     Boolean(STREAM_LESSONS[locale]?.[challengeId]) ||
     Boolean(VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId])
   )
+}
+
+// Idioma do áudio que a aluna ouve quando o desafio não tem o dela; null = tem o dela.
+// Desafio no R2 com inglês cai no inglês; os antigos caem no vídeo padrão em espanhol.
+export function fallbackAudio(challengeId: string, locale: string): string | null {
+  if (hasLocalizedVideos(challengeId, locale)) return null
+  const temPadrao = Object.values(HLS_LESSONS[challengeId] ?? {}).some((e) => e.languages.includes(AUDIO_PADRAO))
+  return temPadrao ? AUDIO_PADRAO : 'es'
 }
 
 export function getMockDays(challengeId: string, dayTitles: string[], locale?: string): MockDay[] {
@@ -118,12 +130,17 @@ export function getMockDays(challengeId: string, dayTitles: string[], locale?: s
   const daysCount = challenge?.days_count ?? 28
 
   return Array.from({ length: daysCount }, (_, i) => {
-    // O tempo segue o vídeo que a aluna VAI assistir (dublagem tem duração própria)
-    const hls = hlsFor(challengeId, i + 1, locale)
+    // O tempo segue o vídeo que a aluna VAI assistir (dublagem tem duração própria).
+    // Ordem: R2 no idioma dela > Stream/YouTube dublado do idioma dela > R2 em inglês > YouTube padrão
+    const lang = locale ? audioLang(locale) : undefined
     const stream = streamDays?.[String(i + 1)]
+    const own = lang ? hlsFor(challengeId, i + 1, lang) : undefined
+    const fallback = !own && !stream && !overrides?.[i] ? hlsFor(challengeId, i + 1, AUDIO_PADRAO) : undefined
+    const hls = own ?? fallback
+    const hlsLang = own ? lang : AUDIO_PADRAO
     const youtubeId = overrides?.[i] ?? videos[i]
     const video: LessonVideo | undefined = hls
-      ? { provider: 'hls', id: `${hls.path}/master_${audioLang(locale!)}.m3u8` }
+      ? { provider: 'hls', id: `${hls.path}/master_${hlsLang}.m3u8` }
       : stream
         ? { provider: 'stream', id: stream.uid }
         : youtubeId

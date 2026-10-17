@@ -1,0 +1,54 @@
+{
+  "id": "6",
+  "modulo": "21 - Módulo [Fitness Pré-Parto]",
+  "emoji": "🤰",
+  "gratis": false,
+  "idiomas": [
+    "es",
+    "en"
+  ],
+  "titulo": {
+    "es": "Fitness Prenatal",
+    "en": "Prenatal Fitness"
+  },
+  "categoria": {
+    "es": "Embarazo",
+    "en": "Pregnancy"
+  },
+  "dias": {
+    "es": [
+      "Explosión de Espalda",
+      "Tonificación de Glúteos",
+      "Mamás con Brazos Increíbles",
+      "Circuito de Cardio",
+      "Tonificación de Cuerpo Completo",
+      "Entrenamiento para Amar tu Cuerpo",
+      "Fuerza de Cuerpo Completo",
+      "Rutina Dinámica con Toalla",
+      "Entrenamiento de Fuerza Prenatal",
+      "Mini Pelota para Mejores Resultados",
+      "Fitness con Banda de Resistencia",
+      "Cuerpo con Banda Elástica",
+      "Entrenamiento con Fuerza",
+      "Entrenamiento de Mamá en Forma",
+      "Orgullosa de tu Fuerza"
+    ],
+    "en": [
+      "Back Blast",
+      "Glute Toning",
+      "Amazing Arms for Moms",
+      "Cardio Circuit",
+      "Full Body Toning",
+      "Love Your Body Workout",
+      "Total Body Strength",
+      "Dynamic Towel Routine",
+      "Prenatal Strength Training",
+      "Mini Ball for Better Results",
+      "Resistance Band Fitness",
+      "Banded Body Workout",
+      "Strength Workout",
+      "Fit Mom Workout",
+      "Proud of Your Strength"
+    ]
+  }
+}

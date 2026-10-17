@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Search, Mail, KeyRound, Plus, Trash2, UserPlus, CheckCircle2, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { mockBonuses } from '@/lib/mock-bonuses'
+import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 import { routing, type AppLocale } from '@/i18n/routing'
 import {
   searchUser,
@@ -16,13 +17,7 @@ import {
 
 // Ferramenta interna (Bruno + suporte) — texto fixo em português, sem i18n.
 
-const CHALLENGES = [
-  { id: '1', name: '💪 Calistenia en Casa' },
-  { id: '2', name: '🧘‍♀️ Pilates en la Pared' },
-  { id: '3', name: '✨ Yoga Facial' },
-  { id: '4', name: '🪑 Yoga en la Silla' },
-  { id: '5', name: '🔥 Cuerpo Sexy de Verano' },
-]
+const CHALLENGES = mockChallenges.map((c) => ({ id: c.id, name: challengeNameEs(c.id, true) ?? `Desafio ${c.id}` }))
 
 // Produtos vendidos à parte (upsell) vivem na MESMA tabela user_challenges, então
 // o suporte libera igual. Derivado de mock-bonuses pra não desandar quando um novo

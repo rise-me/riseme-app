@@ -2,6 +2,7 @@
 // usa a service role — as tabelas não têm policy nenhuma.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Aprendizado, Consulta, MensagemConversa, PerfilAluna } from './responder'
+import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 
 let _admin: SupabaseClient | null = null
 export function admin(): SupabaseClient {
@@ -180,11 +181,7 @@ export async function passarParaHumano(phone: string, horas: number, motivo: str
 // Nome do que pode estar liberado em user_challenges (ids de lib/mock-challenges.ts e
 // compras de lib/mock-bonuses.ts com access 'purchase'). Em espanhol — o agente traduz.
 const NOME_PRODUTO: Record<string, string> = {
-  '1': 'Calistenia en Casa',
-  '2': 'Pilates en la Pared',
-  '3': 'Yoga Facial',
-  '4': 'Yoga en la Silla',
-  '5': 'Cuerpo Sexy de Verano',
+  ...Object.fromEntries(mockChallenges.map((c) => [c.id, challengeNameEs(c.id) ?? c.id])),
   'protocolo-metabolico': 'Protocolo Metabólico',
 }
 

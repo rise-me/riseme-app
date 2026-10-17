@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { ArrowLeft, CheckCircle2, Lock, Play, Clock, Tv } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { MockChallenge } from '@/lib/mock-challenges'
-import { hasLocalizedVideos, type MockDay } from '@/lib/mock-challenge-days'
+import { fallbackAudio, type MockDay } from '@/lib/mock-challenge-days'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 import { CastTvHelp } from '@/components/challenges/CastTvHelp'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -21,6 +21,7 @@ interface Props {
 export function ChallengeDetailClient({ challenge, days, locale }: Props) {
   const router = useRouter()
   const t = useTranslations('challenges')
+  const audioFallback = fallbackAudio(challenge.id, locale)
   const tData = useTranslations('challengeData')
   const tTv = useTranslations('castTv')
   const [paywallOpen, setPaywallOpen] = useState(false)
@@ -68,9 +69,9 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
             {challenge.days_count} {t('workouts')} · {challengeCategory}
           </p>
 
-          {!hasLocalizedVideos(challenge.id, locale) && (
+          {audioFallback && (
             <span className="inline-block mt-2 text-[11px] font-semibold bg-background/15 text-background/80 px-2.5 py-1 rounded-full">
-              {t('audioSpanish')}
+              {t(audioFallback === 'en' ? 'audioEnglish' : 'audioSpanish')}
             </span>
           )}
 

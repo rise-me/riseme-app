@@ -1,0 +1,54 @@
+{
+  "id": "7",
+  "modulo": "22 - Módulo [Treinos Pós-Parto]",
+  "emoji": "🤱",
+  "gratis": false,
+  "idiomas": [
+    "es",
+    "en"
+  ],
+  "titulo": {
+    "es": "Entrenamientos Posparto",
+    "en": "Postpartum Workouts"
+  },
+  "categoria": {
+    "es": "Posparto",
+    "en": "Postpartum"
+  },
+  "dias": {
+    "es": [
+      "Entrenamiento con Control de Tiempo",
+      "Rutina Pélvica Posparto",
+      "Esculpe tu Cuerpo",
+      "Moldea tu Cuerpo Posparto",
+      "Mamá Tonificada",
+      "Feliz y Sudada",
+      "Adiós Glúteos Planos",
+      "Tren Superior Más Fuerte",
+      "Cuerpo y Bebé",
+      "Cardio Posparto",
+      "Glúteos Firmes y Elevados",
+      "Quema de Cuerpo Completo",
+      "Rutina Definitiva de Postura",
+      "Rehabilitación del Core",
+      "Rutina para Perder Peso"
+    ],
+    "en": [
+      "Timed Workout",
+      "Postpartum Pelvic Routine",
+      "Body Sculpt",
+      "Postpartum Shaper",
+      "Toned Mom",
+      "Happy and Sweaty",
+      "No More Flat Glutes",
+      "Stronger Upper Body",
+      "Body and Baby",
+      "Postpartum Cardio",
+      "Lifted Glutes",
+      "Full Body Melt",
+      "Ultimate Posture Routine",
+      "Core Rehab",
+      "Weight Loss Routine"
+    ]
+  }
+}
