@@ -27,6 +27,9 @@ export const LINKS: Record<string, { url: string; versao: Versao }[]> = {
   es: [
     { url: 'https://www.facebook.com/365563009981105/posts/122203707488483220', versao: 'v2' },
     { url: 'https://www.instagram.com/p/DeIs5uJAIfW/', versao: 'v2' },
+    // Anúncios novos com performance (Bruno, 17/10/2026) — v1 até juntarem comentários.
+    { url: 'https://www.facebook.com/365563009981105/posts/122204794946483220', versao: 'v1' }, // V91
+    { url: 'https://www.instagram.com/p/DeieiRigCK7/', versao: 'v1' }, // V93
   ],
   // CL-PL — AD07_H2-H1_CL_PL, o melhor anúncio da CL-PL (CA 2 - LATAM). Facebook e Instagram alternados.
   pl: [
