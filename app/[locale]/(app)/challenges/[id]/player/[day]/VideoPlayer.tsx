@@ -181,8 +181,11 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   const prevDay = days.find((d) => d.day_number === currentDayNumber - 1)
   const video = currentDay.video
   const videoProvider = video?.provider
-  // Aula no R2: o caminho já vem com o passe assinado pelo servidor (page.tsx)
-  const videoId = videoProvider === 'hls' ? (hlsPath ?? undefined) : video?.id
+  // Identidade ESTÁVEL do vídeo (no R2: o caminho da playlist SEM o passe). O passe muda a cada
+  // render do servidor — e o router.refresh() dos 80% re-renderiza — então ele não pode estar nas
+  // deps do efeito: senão o player desmonta e a aula volta pro começo (bug CL-PL, 16–18/10/2026).
+  const videoId = video?.id
+  const playId = videoProvider === 'hls' ? (hlsPath ?? undefined) : videoId
 
   const playerRef = useRef<PlayerHandle | null>(null)
   const iframeHostRef = useRef<HTMLDivElement | null>(null)
@@ -236,12 +239,12 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
     savedRef.current = false
     setDayDone(false)
     setElapsed(0)
-    if (!videoProvider || !videoId || !iframeHostRef.current) return
+    if (!videoProvider || !playId || !iframeHostRef.current) return
 
     let pollId: ReturnType<typeof setInterval> | null = null
     let cancelled = false
 
-    mountPlayer(iframeHostRef.current, { provider: videoProvider, id: videoId }).then((handle) => {
+    mountPlayer(iframeHostRef.current, { provider: videoProvider, id: playId }).then((handle) => {
       if (cancelled) {
         handle?.destroy()
         return
@@ -303,6 +306,8 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
       } catch {}
       playerRef.current = null
     }
+    // playId fica de fora de propósito: o passe novo de um refresh não pode remontar o player
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoProvider, videoId, challenge.id, currentDayNumber])
 
   const formatTime = (s: number) => {
@@ -325,7 +330,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
       <div className="relative flex-1 bg-zinc-900 flex items-center justify-center">
-        {videoId ? (
+        {playId ? (
           <div ref={iframeHostRef} className="absolute inset-0 w-full h-full [&>iframe]:w-full [&>iframe]:h-full" />
         ) : (
           <>
