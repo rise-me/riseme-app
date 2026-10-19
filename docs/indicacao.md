@@ -8,6 +8,12 @@
 - Amiga comprou → aluna manda ao agente o email da amiga → servidor confere (compra do desafio nos últimos 30 dias,
   não é a própria aluna, amiga ainda não contada) e libera **1 mês do Pase Completo** (lib/whatsapp-agent/indicacao.ts).
 
+- **(19/10, automático)** Cartão "Invita a una amiga" no Início (só `es`) com botão de compartilhar no WhatsApp e
+  link próprio (`src=ind-<id da aluna>`). Quando a amiga compra o desafio por esse link, o webhook da Hotmart
+  (`data.purchase.origin.src`) libera 1 mês do Pase para quem indicou e uma dieta (cardápio) extra para a amiga, e
+  avisa as duas pelo WhatsApp (app/api/hotmart/route.ts → presentesDaIndicacao). Copy e link: lib/indicacao-link.ts.
+- Destino do link: checkout direto (decisão provisória; testar a página de vendas depois).
+
 ## O que a pesquisa diz (fontes no fim)
 - ✔ Cliente indicado vale mais e retém mais (banco alemão, ~10 mil clientes: +16% de valor; churn menor).
 - ✔ **Presente para a AMIGA traz mais clientes novos do que presente só para quem indica** (2 experimentos de campo,
@@ -21,7 +27,7 @@
   só compra recente (feito), teto de meses por aluna, revisar à mão os casos estranhos.
 
 ## Desenho proposto (decisões do Bruno pendentes)
-1. Recompensa para as duas: quem indica = 1 mês do Pase; amiga = cardápio extra (custo zero).
+1. ✅ Recompensa para as duas: quem indica = 1 mês do Pase; amiga = "dieta personalizada" (cardápio extra) — Bruno, 19/10.
 2. Cartão discreto fixo no Início + destaque ao terminar o dia 7 e o dia 28 (máx. 1x/semana; nunca para quem está com problema).
 3. Botão "compartilhar no WhatsApp" com mensagem pronta em 1ª pessoa e link com o código da aluna.
 4. Email único para a base ES (não PL), com descadastro.
