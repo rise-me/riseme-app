@@ -81,6 +81,25 @@ com fontes: `docs/pesquisa-video-multiaudio.md`.
 - [ ] Migrar Calistenia PL do Stream e, quando houver os originais, ES e TR do YouTube.
 - [ ] Conferir o custo real depois de um mês e cancelar o Stream quando nada mais depender dele.
 
+## Boas-vindas no Instagram com presente (pedido do Bruno 19/10/2026, ainda não iniciado)
+
+Ideia dele: "uma automação de boas-vindas ao perfil do IG para todas as mulheres que começam a seguir… um
+presentinho… para criar relacionamento e converter elas em clientes depois." Presente: **teste grátis do Pase
+Completo** (7 dias, todos os desafios).
+
+- DM automática ao SEGUIR não existe na API oficial da Meta (empresa só responde a quem escreveu primeiro).
+  Ferramentas que prometem isso usam caminho não oficial → risco de restrição do @riseme_app (24,6 mil seguidores).
+- Caminhos oficiais com o mesmo efeito: (1) **palavra-chave em comentário** ("comenta REGALO" num post/Reel →
+  DM automática com o presente) — começar por este; (2) resposta a Story; (3) ice breakers no direct
+  ("🎁 Quiero mi regalo"); (4) link na bio para a página do presente.
+- Já existe: token do usuário de sistema com instagram_manage_messages / instagram_manage_comments /
+  pages_messaging (`~/Ferramentas/lancador-ads/.env.instagram`). Falta: receptor de webhook do Instagram no app
+  (onde já roda o agente do WhatsApp).
+- A conversa do Instagram só fica aberta 24 h depois que ela escreve → o presente leva para o app (cadastro com
+  email/WhatsApp) e aí ela entra na jornada de `docs/relacionamento-alunas.md`.
+- Divisão: post/Reel com a chamada = chat do Instagram (`~/Ferramentas/riseme-redes-sociais`); webhook, DM e
+  presente = este app.
+
 ## Outros pendentes já conhecidos
 - Tela de assinatura mostra "Starter" para quem cancelou mas ainda está no período pago
   (consulta só `status='active'` em `more/subscription`).
