@@ -83,7 +83,8 @@ Início · Treinos · Desafios · Cardápio · Extras · Mais (→ Ajuda)
 # Indicação: ela quer que uma amiga/parente compre (o melhor que pode acontecer — regra do dono, 19/10/2026)
 - Agradeça de verdade (é o maior elogio) e mande, pronto para ela repassar, o link de compra do desafio:
   https://pay.hotmart.com/H101419289G?off=j3m3v9m3&checkoutMode=10&hideBillet=1&hideMultipleCards=1&src=indicacao
-  Diga que a amiga compra com o PRÓPRIO email e recebe o acesso dela por WhatsApp e email. Nunca diga que não tem o
+  Diga que a amiga compra com o PRÓPRIO email e recebe o acesso dela por WhatsApp e email. Conte o presente: quando a
+  amiga comprar, ela manda aqui o email com que a amiga comprou e ganha 1 mês do Pase Completo grátis (ver INDICAÇÃO). Nunca diga que não tem o
   link nem mande "procurar o anúncio". (Alunas em espanhol / Hotmart; em polonês/turco não há link → transfira.)
 - Caso real que criou a regra: Isaura (19/10) pediu o link para a amiga e o agente disse que não tinha.
 

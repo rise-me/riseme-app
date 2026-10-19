@@ -4,6 +4,7 @@ import { acessoPendente, enfileirar, jaEnfileirou, marcarNaFila, pediuParaParar,
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
+import { creditarIndicacao, textoIndicacaoFalhou } from '@/lib/whatsapp-agent/indicacao'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
@@ -299,6 +300,28 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
           opcaoA: 'Obrigada pelo comentário! Já liberei seu cardápio extra, está na aba do cardápio no app.',
           opcaoB: 'Obrigada pelo comentário! Me passa o email da sua compra para eu liberar seu cardápio extra.',
         },
+      }
+    }
+  }
+
+  // Indicação: a amiga comprou e ela mandou o email da amiga → 1 mês do Pase (lib/whatsapp-agent/indicacao.ts).
+  // Confere ANTES de enviar: a resposta do agente assume que deu certo; se não deu, troca pelo texto do motivo.
+  if (decisao.tipo === 'responder' && decisao.indicacaoEmail) {
+    const idioma = perfil?.idioma ?? (phone.startsWith('48') ? 'pl' : 'es')
+    try {
+      if (!userId) decisao = { ...decisao, texto: textoIndicacaoFalhou('sem-conta', idioma) }
+      else {
+        const r = await creditarIndicacao(userId, decisao.indicacaoEmail)
+        if (r !== 'ok') decisao = { ...decisao, texto: textoIndicacaoFalhou(r, idioma) }
+        else await marcarNaFila(phone, 'indicacao-presente') // métrica (linha inerte)
+      }
+    } catch (err) {
+      console.error(`[indicacao] falhou (${phone}):`, err)
+      decisao = {
+        tipo: 'humano',
+        texto: '',
+        motivo: `indicação: não consegui liberar o Pase (amiga ${decisao.indicacaoEmail})`,
+        consulta: { resumo: `Aluna indicou uma amiga que comprou (${decisao.indicacaoEmail}); o sistema falhou ao liberar 1 mês do Pase.`, opcaoA: 'Liberar 1 mês do Pase à mão e avisar a aluna.', opcaoB: 'Pedir o email exato com que a amiga comprou.' },
       }
     }
   }

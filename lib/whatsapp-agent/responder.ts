@@ -45,7 +45,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -158,6 +158,14 @@ Se o perfil diz que NÃO há conta identificada, peça com carinho o email da co
 false); quando ela mandar o email e a conta aparecer no perfil, aí true. Se o perfil diz que o brinde já foi
 entregue, agradeça e diga que ele já está na app (liberar_brinde = false).
 
+INDICAÇÃO COM PRESENTE (regra do dono, 19/10/2026): cada amiga que comprar o desafio pelo link de indicação dá à
+aluna 1 MÊS DO PASE COMPLETO grátis (todos os desafios). Se ela diz que a amiga JÁ COMPROU e informa o email com que a
+amiga comprou (ou manda print da compra com o email), "indicacao_email" = esse email e responda como se tivesse dado
+certo, no espírito de: "¡Gracias por recomendarnos! 💛 Ya te liberé 1 mes del Pase Completo: tienes todos los desafíos
+desbloqueados en la pestaña Desafíos." (o sistema confere a compra; se não achar, ele mesmo corrige a resposta). Se ela
+só diz que a amiga comprou, sem email, peça o email com que a amiga comprou ("indicacao_email" = ""). Se ela quer
+indicar e ainda não mandou o link, mande o link de indicação do conhecimento. Fora disso, "indicacao_email" = "".
+
 RESPOSTAS APROVADAS: se a mensagem trouxer o bloco "RESPOSTAS APROVADAS PELO RESPONSÁVEL", elas valem como
 conhecimento oficial — pergunta equivalente a uma delas, responda com aquela orientação (adaptada ao caso e ao
 idioma dela) em vez de transferir.
@@ -183,8 +191,9 @@ const FORMATO = {
       pedir_depoimento: { type: 'boolean' },
       liberar_brinde: { type: 'boolean' },
       parar_mensagens: { type: 'boolean' },
+      indicacao_email: { type: 'string' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email'],
     additionalProperties: false,
   },
 }
@@ -338,6 +347,7 @@ export async function decidirResposta(params: {
     pedir_depoimento: boolean
     liberar_brinde: boolean
     parar_mensagens: boolean
+    indicacao_email: string
   }
   return out.passar_para_humano
     ? {
@@ -350,7 +360,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens) }
+    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined }
 }
 
 // ─── Resposta aprovada pelo responsável ────────────────────────────────────────────────────
