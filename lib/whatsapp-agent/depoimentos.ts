@@ -25,9 +25,9 @@ export const LINKS: Record<string, { url: string; versao: Versao }[]> = {
   // '*': [{ url: 'https://www.instagram.com/p/XXXXXXXX/', versao: 'v1' }],
   // CL-ES — V42, a campeã (post que roda na BidCap). Facebook e Instagram alternados.
   // CL-ES — post FIXADO "quiénes somos" do @riseme_app (carrossel; card 2 em espanhol), pedido do Bruno 19/10/2026:
-  // todas as compradoras ES vão para ele ATÉ o post chegar a 100 comentários (vitrine do perfil). v2 (Bruno, 19/10: "não
-  // é a mensagem nova") — a frase da v2 em es virou "nos encuentran" para servir a post e anúncio. Comentário é do
-  // post inteiro, o card só muda o que ela lê.
+  // todas as compradoras ES vão para ele ATÉ o post chegar a 100 comentários (vitrine do perfil). v2 com o texto aprovado
+  // (Bruno, 19/10: "pode falar anúncio, não tem problema" — todas chegam pelo anúncio). Comentário é do post
+  // inteiro, o card só muda o que ela lê.
   // Ao chegar a 100: voltar a lista de anúncios abaixo (comentada).
   es: [{ url: 'https://www.instagram.com/p/DerPwaqlg_U/?img_index=2', versao: 'v2' }],
   // Lista dos anúncios (até 19/10/2026) — voltar quando o post fixado tiver 100 comentários:
@@ -130,7 +130,7 @@ const CONVITE_V2: Record<string, (link: string) => string> = {
     [
       '¿Te puedo pedir un favor rapidito? 💛',
       '',
-      'Muchas mujeres nos encuentran y piensan: "¿será confiable?", "¿me llegará de verdad?". Tu experiencia les ayuda muchísimo a las que están con esa duda.',
+      'Muchas mujeres ven nuestro anuncio y piensan: "¿será confiable?", "¿me llegará de verdad?". Tu experiencia les ayuda muchísimo a las que están con esa duda.',
       '',
       'Si puedes, deja un comentario en esta publicación contando, con tus palabras:',
       '• qué duda o miedo tenías antes de comprar',
