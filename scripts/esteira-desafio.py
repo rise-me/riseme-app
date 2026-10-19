@@ -3,7 +3,8 @@
 
 Etapas (cada uma idempotente; o estado fica em <fábrica>/trabalho/<slug>/esteira.json):
 
-  baixar    --modulo 69 --slug menopausa   baixa o módulo do Drive, confere e transcreve (Whisper)
+  baixar    --modulo 69 --slug menopausa   baixa o módulo do Drive, confere, alinha o áudio e
+                                           transcreve fala por fala (Whisper, 12_transcrever_falas)
   [tradução es + títulos — feita pelo Claude: fábrica pipeline/TRADUCAO-AULAS.md, ver CLAUDE.md da fábrica]
   produzir  --slug menopausa [--aulas 1] [--descanso 0]   inglês (original + descansos + música) e espanhol dublado,
                                            com os descansos nos MESMOS pontos; confere os dois
@@ -106,8 +107,18 @@ def baixar(a):
         est = {**ler_estado(a.slug), **{k: est[k] for k in ("modulo", "drive_id", "aulas")}}
     gravar_estado(a.slug, est)
     normalizar(ent, videos)
-    print(f"{len(videos)} aulas → dias 1–{len(videos)}. Transcrevendo (Whisper; demora)…")
-    sh([PY_FABRICA, FABRICA / "pipeline" / "preparar_lote.py", ent])
+    print(f"{len(videos)} aulas → dias 1–{len(videos)}. Transcrevendo fala por fala (Whisper; demora)…")
+    # Fala por fala (12): a transcrição da aula inteira (preparar_lote) alucinou e perdeu
+    # exercícios na menopausa mesmo com o áudio alinhado (19/10/2026)
+    real = tra / "transcricao-real"
+    real.mkdir(exist_ok=True)
+    for n, v in zip(nums, videos):
+        saida = real / f"aula-{n:02d}.falas.json"
+        if saida.exists():
+            continue
+        tmp = saida.with_suffix(".tmp.json")
+        sh([PY_FABRICA, FABRICA / "pipeline" / "12_transcrever_falas.py", ent / v, tmp])
+        tmp.replace(saida)
     print("\n✅ baixado e transcrito. Próximo: tradução es (Claude) + nomes.{es,en}.tsv, depois 'produzir --aulas 1'.")
 
 
@@ -320,7 +331,7 @@ def status(a):
     for x in est["aulas"]:
         n = x["aula"]
         tr = (tra / f"aula-{n:02d}.es.tr.json").exists()
-        print(f"  dia {x['dia']:2d} (aula {n:2d})  transcrito {'✓' if (tra / f'aula-{n:02d}.blocos.json').exists() else '·'}"
+        print(f"  dia {x['dia']:2d} (aula {n:2d})  transcrito {'✓' if (tra / 'transcricao-real' / f'aula-{n:02d}.falas.json').exists() else '·'}"
               f"  es traduzido {'✓' if tr else '·'}"
               f"  finais {''.join(i if fin[i][x['dia']].exists() else '·' for i in IDIOMAS)}"
               f"  R2 {','.join(hls.get(str(x['dia']), {}).get('languages', [])) or '·'}")
