@@ -4,6 +4,7 @@
 
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
 import { admin, registrarMensagem, variantesTelefone } from '@/lib/whatsapp-agent/conversa'
+import { decidirResposta } from '@/lib/whatsapp-agent/responder'
 
 const MAX_TENTATIVAS = 5
 const REPROGRAMAR_MS = 2 * 60_000
@@ -194,6 +195,22 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
           .eq('id', item.id)
         continue
       }
+    }
+
+    // 'teste-agente' não manda nada: roda o agente num caso de teste (body = JSON {perfil, msgs}) e grava a decisão
+    // no próprio body. Serve para testar mudança de prompt no servidor, onde está a chave da Anthropic (19/10/2026).
+    if (item.kind === 'teste-agente') {
+      let saida: string
+      try {
+        const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: string[] }
+        const agora = new Date().toISOString()
+        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((t) => ({ autor: 'student' as const, texto: t, em: agora })), agora })
+        saida = JSON.stringify({ ...caso, resultado: d })
+      } catch (err) {
+        saida = JSON.stringify({ erro: String(err), entrada: item.body.slice(0, 500) })
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
     }
 
     // 'reprocessar' não manda texto: faz o agente retomar a conversa (o que ficou sem resposta) pelo
