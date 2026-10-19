@@ -5,7 +5,7 @@ Etapas (cada uma idempotente; o estado fica em <fábrica>/trabalho/<slug>/esteir
 
   baixar    --modulo 69 --slug menopausa   baixa o módulo do Drive, confere e transcreve (Whisper)
   [tradução es + títulos — feita pelo Claude: fábrica pipeline/TRADUCAO-AULAS.md, ver CLAUDE.md da fábrica]
-  produzir  --slug menopausa [--aulas 1]   inglês (original + descansos + música) e espanhol dublado,
+  produzir  --slug menopausa [--aulas 1] [--descanso 0]   inglês (original + descansos + música) e espanhol dublado,
                                            com os descansos nos MESMOS pontos; confere os dois
   publicar  --slug menopausa --desafio 8   empacota (vídeo único + áudio es/en) e sobe no R2,
                                            gravando lib/hls-lessons.json
@@ -155,7 +155,7 @@ def finais(est, idioma):
 
 def produzir(a):
     est = ler_estado(a.slug)
-    extra = ["--aulas", a.aulas] if a.aulas else []
+    extra = (["--aulas", a.aulas] if a.aulas else []) + ["--descanso", str(a.descanso)]
     lote = FABRICA / "pipeline" / "05_produzir_lote.py"
     # Inglês primeiro: ele define os pontos de descanso que o espanhol reaproveita
     for idioma in ["en"] + [i for i in IDIOMAS if i != "en"]:
@@ -304,6 +304,8 @@ def main():
     sub = ap.add_subparsers(dest="etapa", required=True)
     p = sub.add_parser("baixar"); p.add_argument("--modulo", type=int, required=True); p.add_argument("--slug", required=True)
     p = sub.add_parser("produzir"); p.add_argument("--slug", required=True); p.add_argument("--aulas")
+    # 10 s = cartão de descanso padrão; 0 = módulo que já tem descanso nativo (telas "Next Up")
+    p.add_argument("--descanso", type=float, default=10)
     p = sub.add_parser("publicar"); p.add_argument("--slug", required=True); p.add_argument("--desafio", required=True)
     p = sub.add_parser("ficha")
     for arg in ["--slug", "--desafio", "--emoji", "--titulo-es", "--titulo-en", "--categoria-es", "--categoria-en"]:
