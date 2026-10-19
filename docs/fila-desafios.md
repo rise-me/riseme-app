@@ -20,6 +20,13 @@
   outros do mesmo produtor): fica em inglês, sem apagar (Bruno, 19/10/2026). Ele é igual em todos os
   idiomas, então não quebra o vídeo único. 52 e 17 não têm texto na tela.
 
+- **Música** (Bruno, 19/10/2026): por enquanto todos os desafios usam a biblioteca atual da fábrica
+  (`entrada/musica/Musicas para aulas de calistenia`, 25 faixas royalty-free do Pixabay, house/workout).
+  **Pendente:** baixar mais faixas no mesmo padrão e variar por desafio, para não ficar repetitivo
+  (uma pasta por lote de músicas; a esteira passa `--musica` ao 05 por desafio).
+- **Descanso:** módulo com tela nativa "Next Up" (~7 s com cronômetro) sai SEM o nosso cartão
+  (`produzir --descanso 0`); o cartão de 10 s fica para módulo sem descanso nativo (52, 17).
+
 ## Já no app
 
 | id | Desafio | Módulo do Drive |
