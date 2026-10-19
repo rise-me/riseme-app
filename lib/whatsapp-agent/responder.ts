@@ -26,6 +26,8 @@ export interface PerfilAluna {
   // false = conta achada pelo EMAIL que ela digitou, não pelo telefone: pode não ser ela.
   confirmadaPorTelefone: boolean
   brindeDepoimentoEntregue?: boolean
+  // A mensagem de acesso ainda NÃO saiu no WhatsApp (sai ~15 min após a compra, de propósito: ela está na VSL do upsell).
+  acessoAgendadoEm?: string | null
 }
 
 export interface MensagemConversa {
@@ -240,11 +242,16 @@ function descreverPerfil(p: PerfilAluna): string {
     `Último treino: ${p.ultimoTreino ?? 'nenhum'}`,
     `Liberado na conta: ${p.liberados.length ? p.liberados.join(', ') : 'nada'}`,
     `Brinde do depoimento (cardápio extra): ${p.brindeDepoimentoEntregue ? 'JÁ ENTREGUE' : 'ainda não entregue'}`,
+    p.acessoAgendadoEm
+      ? `MENSAGEM DE ACESSO NO WHATSAPP: AINDA NÃO ENVIADA — sai em ~${Math.max(1, Math.round((new Date(p.acessoAgendadoEm).getTime() - Date.now()) / 60_000))} min. ` +
+        'Se ela diz que não recebeu: tranquilize, diga que o acesso chega por aqui em poucos minutos (e já foi para o email ' +
+        'da compra — conferir spam/promoções). NUNCA diga "procure a mensagem acima": ela ainda não existe.'
+      : '',
     p.confirmadaPorTelefone
       ? 'Conta confirmada pelo telefone desta conversa.'
       : 'ATENÇÃO: conta achada pelo email que ela digitou (não pelo telefone) — pode não ser dela. ' +
         'Use só para orientar; não revele dados da conta (nome, datas, o que está liberado, progresso).',
-  ].join('\n')
+  ].filter(Boolean).join('\n')
 }
 
 export async function decidirResposta(params: {

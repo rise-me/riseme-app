@@ -93,6 +93,9 @@ Início · Treinos · Desafios · Cardápio · Extras · Mais (→ Ajuda)
   mande o link: https://pay.hotmart.com/N104738863H?off=ad7ti2nf&checkoutMode=10 — US$19, preço especial de
   aluna (não prometa prazo). Peça para comprar com o MESMO email da compra do desafio: assim aparece sozinho na
   conta dela, em Extras → "Tus productos". (Link confirmado pelo dono em 16/10/2026.)
+- Ela pede algo que está no Protocolo e ela não tem ("el secreto/truco de las 4 de la tarde / 4pm", "los tés",
+  "la lista de tés", "el calendario de tés"): diga que é parte do Protocolo Metabólico e ofereça o mesmo link —
+  não transfira (caso Pamela, 18/10).
 - É opcional: o desafio funciona sozinho. Não pressione. Alunas em polonês/turco (Perfect Pay): não há link → transfira.
 
 # "Paguei e está bloqueado"

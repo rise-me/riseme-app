@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
-import { enfileirar, jaEnfileirou, marcarNaFila, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
+import { acessoPendente, enfileirar, jaEnfileirou, marcarNaFila, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
@@ -23,6 +23,7 @@ import {
   passarParaHumano,
   perfilDaAluna,
   registrarMensagem,
+  pareceRobo,
   respostasRecentes,
   salvarLid,
   telefoneDoLid,
@@ -235,12 +236,13 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
 
   // Trava anti-loop: do outro lado pode haver OUTRO robô (resposta automática com IA que devolve
   // o nosso texto — caso real em 10/10/2026). Com 4 em 5 min ela calou 10 alunas DE VERDADE em 13–16/10
-  // (gente que escreve em rajada: Lupe chamou "Hello?" 4x por 1h). Agora: 8 em 10 min, e quem trava
-  // avisa o responsável — nunca mais silêncio sem ninguém saber.
-  if ((await respostasRecentes(phone, 10)) >= 8) {
-    await passarParaHumano(phone, HORAS_PESSOA, 'possível robô do outro lado (respostas em rajada) — bot parou sozinho')
+  // (gente que escreve em rajada: Lupe chamou "Hello?" 4x por 1h); 8 em 10 min ainda calou Yadira e Madeleine
+  // (17–18/10). Agora o sinal é o TEMPO: robô responde em segundos (pareceRobo). Teto de volume só de segurança.
+  // Quem trava avisa o responsável — nunca silêncio sem ninguém saber.
+  if ((await pareceRobo(phone)) || (await respostasRecentes(phone, 10)) >= 20) {
+    await passarParaHumano(phone, HORAS_PESSOA, 'possível robô do outro lado (respostas em segundos) — bot parou sozinho')
     if (TAG_TRANSFERIU) await etiquetar(phone, TAG_TRANSFERIU)
-    await avisarHumano(phone, undefined, 'o bot parou nesta conversa (8 respostas em 10 min — robô do outro lado?). Confira; se for aluna, responda.')
+    await avisarHumano(phone, undefined, 'o bot parou nesta conversa (respostas em segundos — robô do outro lado?). Confira; se for aluna, responda.')
     return
   }
 
@@ -248,6 +250,8 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
   const userId = chat.userId ?? porEmail
   const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
+  // Escreveu antes de o acesso sair (ele espera ~15 min de propósito): o agente precisa saber (caso Madeleine, 18/10).
+  if (perfil) perfil.acessoAgendadoEm = await acessoPendente(phone)
 
   let decisao: Awaited<ReturnType<typeof decidirResposta>>
   try {

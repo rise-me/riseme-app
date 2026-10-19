@@ -78,8 +78,41 @@ export async function marcarNaFila(phone: string, kind: string): Promise<void> {
 
 // Não manda convite/oferta para quem pediu para parar, já recebeu um igual (por qualquer forma do número),
 // está sendo atendida por uma pessoa ou tem consulta aberta (reclamação, reembolso…).
+/** Hora (ISO) em que a mensagem de acesso desta aluna ainda vai sair, ou null se já saiu / não há. */
+export async function acessoPendente(phone: string): Promise<string | null> {
+  const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
+  const { data } = await admin()
+    .from('whatsapp_outbox')
+    .select('send_after')
+    .in('phone', formas)
+    .in('kind', ['acesso', 'acesso-retro'])
+    .is('sent_at', null)
+    .lt('attempts', MAX_TENTATIVAS)
+    .order('send_after', { ascending: true })
+    .limit(1)
+  return data?.[0]?.send_after ?? null
+}
+
+// Convite de depoimento NÃO vai para quem está com problema (casos 17–18/10: "quer favor? responde minhas
+// perguntas"; "estão roubando"): última fala dela sem resposta, ou reclamação/dinheiro nos últimos 3 dias.
+const SINAL_DE_PROBLEMA = /reembols|devoluci|estaf|fraud|robo|roband|denunc|cancel|no funciona|no puedo|zwrot|oszust|nie dzia|anul|iade|dolandır|refund|scam/i
+async function estaComProblema(phone: string): Promise<boolean> {
+  const formas = variantesTelefone(phone)
+  const { data } = await admin()
+    .from('whatsapp_messages')
+    .select('author, body, created_at')
+    .in('phone', formas)
+    .gte('created_at', new Date(Date.now() - 3 * 86_400_000).toISOString())
+    .order('created_at', { ascending: false })
+    .limit(40)
+  const ms = (data ?? []).filter((m) => m.author !== 'system')
+  if (ms[0]?.author === 'student') return true
+  return ms.some((m) => m.author === 'student' && SINAL_DE_PROBLEMA.test(m.body))
+}
+
 async function motivoParaPular(phone: string, kind: string, id: number): Promise<string | null> {
   if (await pediuParaParar(phone)) return 'pediu para não receber mensagens'
+  if (kind === 'depoimento' && (await estaComProblema(phone))) return 'aluna com problema/pergunta aberta'
   const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
   const db = admin()
   const [{ count: jaFoi }, { data: chats }, { count: consultas }] = await Promise.all([

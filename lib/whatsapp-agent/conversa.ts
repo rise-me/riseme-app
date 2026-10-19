@@ -146,6 +146,28 @@ export async function telefoneDoLid(lid: string): Promise<string | null> {
   return data?.[0]?.phone ?? null
 }
 
+/**
+ * Robô do outro lado responde em SEGUNDOS; gente lê e digita. Conta, nos últimos 10 min, quantas mensagens
+ * dela chegaram até 8 s depois de uma resposta nossa. A regra antiga (só volume de respostas) calou alunas
+ * reais que escrevem em rajada — Lupe, Yadira, Madeleine (13–18/10/2026).
+ */
+export async function pareceRobo(phone: string): Promise<boolean> {
+  const { data } = await admin()
+    .from('whatsapp_messages')
+    .select('author, created_at')
+    .eq('phone', phone)
+    .gte('created_at', new Date(Date.now() - 10 * 60_000).toISOString())
+    .order('created_at', { ascending: true })
+  let ultimaNossa = 0
+  let rapidas = 0
+  for (const m of data ?? []) {
+    const t = new Date(m.created_at).getTime()
+    if (m.author === 'agent') ultimaNossa = t
+    else if (m.author === 'student' && ultimaNossa && t - ultimaNossa <= 8_000) rapidas++
+  }
+  return rapidas >= 4
+}
+
 /** Quantas respostas o agente mandou para este número nos últimos `minutos`. */
 export async function respostasRecentes(phone: string, minutos: number): Promise<number> {
   const { count } = await admin()
