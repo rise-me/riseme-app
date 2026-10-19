@@ -24,8 +24,9 @@
   (`entrada/musica/Musicas para aulas de calistenia`, 25 faixas royalty-free do Pixabay, house/workout).
   **Pendente:** baixar mais faixas no mesmo padrão e variar por desafio, para não ficar repetitivo
   (uma pasta por lote de músicas; a esteira passa `--musica` ao 05 por desafio).
-- **Descanso:** módulo com tela nativa "Next Up" (~7 s com cronômetro) sai SEM o nosso cartão
-  (`produzir --descanso 0`); o cartão de 10 s fica para módulo sem descanso nativo (52, 17).
+- **Descanso** (Bruno, 19/10/2026: alunas reclamam que a troca de exercício é rápida): TODO desafio sai
+  com o nosso cartão de 10 s sem texto. Em módulo com tela "Next Up" ele entra logo antes dela
+  (`11_pontos_transicao.py`, automático no `produzir`).
 
 ## Já no app
 
