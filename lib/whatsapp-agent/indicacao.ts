@@ -5,8 +5,6 @@
 
 import { admin } from '@/lib/whatsapp-agent/conversa'
 
-export const LINK_INDICACAO =
-  'https://pay.hotmart.com/H101419289G?off=j3m3v9m3&checkoutMode=10&hideBillet=1&hideMultipleCards=1&src=indicacao'
 const DIAS_PRESENTE = 30
 const COMPRA_RECENTE_DIAS = 30 // indicação = compra nova; compradora antiga não conta
 const DESAFIOS_DO_PASE = ['2', '3', '4', '5'] // mesmo conjunto que a Hotmart libera no Pase (app/api/hotmart)
@@ -28,8 +26,14 @@ export async function creditarIndicacao(alunaId: string, emailAmiga: string): Pr
     .gte('granted_at', new Date(Date.now() - COMPRA_RECENTE_DIAS * DIA).toISOString())
     .limit(1)
   if (!compra?.length) return 'sem-compra'
+  return darPaseDeIndicacao(alunaId, amiga.id)
+}
 
-  const codigo = `indicacao-${amiga.id}` // 1 crédito por amiga, para quem indicar primeiro
+/** 1 mês do Pase para quem indicou, 1x por amiga. Usado pelo agente (email da amiga) e pela Hotmart (src=ind-<id>). */
+export async function darPaseDeIndicacao(alunaId: string, amigaId: string): Promise<ResultadoIndicacao> {
+  if (amigaId === alunaId) return 'propria'
+  const db = admin()
+  const codigo = `indicacao-${amigaId}` // 1 crédito por amiga, para quem indicar primeiro
   const { data: ja } = await db.from('subscriptions').select('id').eq('stripe_sub_id', codigo).limit(1)
   if (ja?.length) return 'ja-contada'
 

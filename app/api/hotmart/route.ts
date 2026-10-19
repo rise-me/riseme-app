@@ -6,6 +6,10 @@ import { sendAccessEmail } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
 import { routing } from '@/i18n/routing'
 import { hasLocale } from 'next-intl'
+import { indicadoraDoSrc } from '@/lib/indicacao-link'
+import { darPaseDeIndicacao } from '@/lib/whatsapp-agent/indicacao'
+import { darCardapioBonus } from '@/lib/diet/quota'
+import { enfileirar } from '@/lib/whatsapp-outbox'
 
 
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
@@ -51,6 +55,7 @@ interface HotmartPayload {
       offer?: { code: string }
       recurrence_number?: number
       date_next_charge?: number // epoch ms da próxima cobrança (no teste grátis = fim do teste)
+      origin?: { src?: string; sck?: string; xcod?: string } // rastreio do link (src=ind-<id> = indicação)
     }
     subscription?: {
       subscriber: { code: string }
@@ -239,6 +244,8 @@ export async function POST(request: NextRequest) {
           challenge_id: challengeId,
           access_type: 'lifetime',
         }, { onConflict: 'user_id,challenge_id' })
+        // Indicação (19/10/2026): comprou pelo link de uma aluna → presente para as duas, sem ninguém pedir.
+        if (challengeId === '1') await presentesDaIndicacao(purchase.origin?.src, userId, buyer.name)
       } else {
         // Produto fora do mapa (ex.: order bump novo): antes passava em silêncio, sem liberar nada.
         console.error(
@@ -329,4 +336,39 @@ function getMappingForProduct(productId: string): { challengeId: string; locale:
 
 function getChallengeIdForProduct(productId: string): string | null {
   return getMappingForProduct(productId)?.challengeId || null
+}
+
+// Amiga comprou o desafio com o link de uma aluna (src=ind-<id da aluna>, lib/indicacao-link.ts): a aluna ganha
+// 1 mês do Pase, a amiga ganha a dieta personalizada extra, e as duas ficam sabendo pelo WhatsApp. Falha aqui
+// nunca derruba a compra (o acesso já foi liberado acima).
+async function presentesDaIndicacao(src: string | undefined, amigaId: string, nomeAmiga: string) {
+  const alunaId = indicadoraDoSrc(src)
+  if (!alunaId || alunaId === amigaId) return
+  try {
+    const r = await darPaseDeIndicacao(alunaId, amigaId)
+    if (r !== 'ok') return
+    await darCardapioBonus(amigaId, 'indicacao')
+    const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+    const { data: aluna } = await db.from('users').select('phone, name').eq('id', alunaId).single()
+    const { data: amiga } = await db.from('users').select('phone').eq('id', amigaId).single()
+    const primeiro = (n?: string | null) => (n ?? '').trim().split(/\s+/)[0] ?? ''
+    if (aluna?.phone) {
+      await enfileirar({
+        phone: aluna.phone.replace(/\D/g, ''),
+        kind: 'indicacao-aviso',
+        body: `¡${primeiro(nomeAmiga) || 'Tu amiga'} compró con tu link! 💛 Gracias por recomendarnos.\n\nTe liberamos *1 mes del Pase Completo*: ya tienes todos los desafíos desbloqueados en la pestaña Desafíos.`,
+        sendAfter: new Date(Date.now() + 60_000),
+      })
+    }
+    if (amiga?.phone) {
+      await enfileirar({
+        phone: amiga.phone.replace(/\D/g, ''),
+        kind: 'indicacao-aviso',
+        body: `Llegaste por invitación de ${primeiro(aluna?.name) || 'una amiga'} 💛 Como regalo, te liberamos una *dieta personalizada* extra en la app: pestaña Menú → crea tu menú.`,
+        sendAfter: new Date(Date.now() + 25 * 60_000), // depois do acesso (que sai ~15 min após a compra)
+      })
+    }
+  } catch (err) {
+    console.error('[hotmart] presentes da indicação falharam:', err)
+  }
 }

@@ -7,6 +7,7 @@ import { mockChallenges } from '@/lib/mock-challenges'
 import { getCurrentUser } from '@/lib/current-user-server'
 import { WaterTracker } from '@/components/home/WaterTracker'
 import { FirstAccessNotice } from '@/components/home/FirstAccessNotice'
+import { IndicaAmiga } from '@/components/home/IndicaAmiga'
 
 const MINUTES_PER_DAY_AVG = 20
 
@@ -295,6 +296,9 @@ export default async function ProgressPage({
 
       {/* Hidratação — veio da antiga aba Plan (removida 2026-08-06) */}
       <WaterTracker />
+
+      {/* Indicação (19/10/2026): só espanhol por enquanto — o link é o checkout da CL-ES na Hotmart. */}
+      {user && locale === 'es' && <IndicaAmiga userId={user.id} />}
     </div>
   )
 }
