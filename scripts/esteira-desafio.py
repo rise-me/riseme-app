@@ -153,21 +153,48 @@ def finais(est, idioma):
     return {x["dia"]: FABRICA / "saida" / est["slug"] / idioma / x["arquivo"] for x in est["aulas"]}
 
 
+def so_aulas(aulas):
+    if not aulas:
+        return None
+    so = set()
+    for parte in aulas.split(","):
+        ini, _, fim = parte.partition("-")
+        so.update(range(int(ini), int(fim or ini) + 1))
+    return so
+
+
+def pontos_por_transicao(est, so):
+    """Módulo com telas "Next Up" (sem o som de GO do 09): o cartão entra logo antes de cada tela.
+    O 11 grava aula-NN.pontos.json e o 05 usa esses pontos em todos os idiomas (vídeo único)."""
+    tra = FABRICA / "trabalho" / est["slug"]
+    for x in est["aulas"]:
+        n = x["aula"]
+        if so and n not in so:
+            continue
+        saida, tr = tra / f"aula-{n:02d}.pontos.json", tra / f"aula-{n:02d}.es.tr.json"
+        if saida.exists() or not tr.exists():
+            continue
+        tmp = saida.with_suffix(".tmp.json")
+        sh([PY_FABRICA, FABRICA / "pipeline" / "11_pontos_transicao.py",
+            FABRICA / "entrada" / est["slug"] / x["arquivo"], tr, tmp])
+        if len(json.loads(tmp.read_text())["telas"]) >= 3:
+            tmp.replace(saida)
+        else:
+            tmp.unlink()  # sem telas de transição: o 09 detecta pelo som de GO, como antes
+
+
 def produzir(a):
     est = ler_estado(a.slug)
     extra = (["--aulas", a.aulas] if a.aulas else []) + ["--descanso", str(a.descanso)]
     lote = FABRICA / "pipeline" / "05_produzir_lote.py"
+    if a.descanso > 0:
+        pontos_por_transicao(est, so_aulas(a.aulas))
     # Inglês primeiro: ele define os pontos de descanso que o espanhol reaproveita
     for idioma in ["en"] + [i for i in IDIOMAS if i != "en"]:
         sh([PY_FABRICA, lote, "--desafio", a.slug, "--idioma", idioma, *extra])
 
     print("\nconferência (vídeo único: mesma duração; áudio presente):")
-    so = None
-    if a.aulas:
-        so = set()
-        for parte in a.aulas.split(","):
-            ini, _, fim = parte.partition("-")
-            so.update(range(int(ini), int(fim or ini) + 1))
+    so = so_aulas(a.aulas)
     problemas = 0
     fin = {i: finais(est, i) for i in IDIOMAS}
     for x in est["aulas"]:
