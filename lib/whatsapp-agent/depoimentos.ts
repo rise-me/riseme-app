@@ -24,13 +24,19 @@ export const LINKS: Record<string, { url: string; versao: Versao }[]> = {
   // '*' vale para qualquer idioma sem lista própria (ex.: post-manifesto em inglês no Instagram).
   // '*': [{ url: 'https://www.instagram.com/p/XXXXXXXX/', versao: 'v1' }],
   // CL-ES — V42, a campeã (post que roda na BidCap). Facebook e Instagram alternados.
-  es: [
-    { url: 'https://www.facebook.com/365563009981105/posts/122203707488483220', versao: 'v2' },
-    { url: 'https://www.instagram.com/p/DeIs5uJAIfW/', versao: 'v2' },
-    // Anúncios novos com performance (Bruno, 17/10/2026) — v1 até juntarem comentários.
-    { url: 'https://www.facebook.com/365563009981105/posts/122204794946483220', versao: 'v1' }, // V91
-    { url: 'https://www.instagram.com/p/DeieiRigCK7/', versao: 'v1' }, // V93
-  ],
+  // CL-ES — post FIXADO "quiénes somos" do @riseme_app (carrossel; card 2 em espanhol), pedido do Bruno 19/10/2026:
+  // todas as compradoras ES vão para ele ATÉ o post chegar a 100 comentários (vitrine do perfil). v1: o texto fala
+  // de "esta publicación" (a v2 fala de "nuestro anuncio"). Comentário é do post inteiro, o card só muda o que ela lê.
+  // Ao chegar a 100: voltar a lista de anúncios abaixo (comentada).
+  es: [{ url: 'https://www.instagram.com/p/DerPwaqlg_U/?img_index=2', versao: 'v1' }],
+  // Lista dos anúncios (até 19/10/2026) — voltar quando o post fixado tiver 100 comentários:
+  // es: [
+  //   { url: 'https://www.facebook.com/365563009981105/posts/122203707488483220', versao: 'v2' },
+  //   { url: 'https://www.instagram.com/p/DeIs5uJAIfW/', versao: 'v2' },
+  //   // Anúncios novos com performance (Bruno, 17/10/2026) — v1 até juntarem comentários.
+  //   { url: 'https://www.facebook.com/365563009981105/posts/122204794946483220', versao: 'v1' }, // V91
+  //   { url: 'https://www.instagram.com/p/DeieiRigCK7/', versao: 'v1' }, // V93
+  // ],
   // CL-PL — AD07_H2-H1_CL_PL, o melhor anúncio da CL-PL (CA 2 - LATAM). Facebook e Instagram alternados.
   pl: [
     { url: 'https://www.facebook.com/365563009981105/posts/122203962470483220', versao: 'v2' },
