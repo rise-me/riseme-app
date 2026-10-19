@@ -14,6 +14,12 @@
 - Módulo de remontagem (quase tudo repetido) entra no fim, **sem custo**: a ficha aponta para aulas
   que já estão no R2, sem baixar nem dublar de novo.
 
+## Decisões que valem para a fila
+
+- **Texto nativo na tela** ("Warm Up", "Next Up" + cronômetro nas transições; módulos 69, 12, 77, 51 e
+  outros do mesmo produtor): fica em inglês, sem apagar (Bruno, 19/10/2026). Ele é igual em todos os
+  idiomas, então não quebra o vídeo único. 52 e 17 não têm texto na tela.
+
 ## Já no app
 
 | id | Desafio | Módulo do Drive |
