@@ -105,9 +105,33 @@ def baixar(a):
     if estado_path(a.slug).exists():
         est = {**ler_estado(a.slug), **{k: est[k] for k in ("modulo", "drive_id", "aulas")}}
     gravar_estado(a.slug, est)
+    normalizar(ent, videos)
     print(f"{len(videos)} aulas → dias 1–{len(videos)}. Transcrevendo (Whisper; demora)…")
     sh([PY_FABRICA, FABRICA / "pipeline" / "preparar_lote.py", ent])
     print("\n✅ baixado e transcrito. Próximo: tradução es (Claude) + nomes.{es,en}.tsv, depois 'produzir --aulas 1'.")
+
+
+def normalizar(ent, videos):
+    """Conserta o áudio com marcas de tempo sobrepostas (achado na Menopausa, 19/10/2026).
+
+    Nesses arquivos, decodificar o áudio rende até 25 s A MAIS que o vídeo: a transcrição sai fora
+    do tempo e as etapas que recodificam o áudio (descansos, música) o atrasam em relação à imagem.
+    Recodifica só o áudio, alinhado pelas marcas de tempo (vídeo copiado), no próprio arquivo, uma vez.
+    """
+    for nome in videos:
+        arq = ent / nome
+        bruto = subprocess.run(["ffmpeg", "-v", "error", "-i", arq, "-vn", "-f", "s16le", "-ac", "1",
+                                "-ar", "8000", "-"], capture_output=True).stdout
+        dur_bruto = len(bruto) / 2 / 8000
+        dur = duracao(arq)
+        if dur_bruto - dur < 0.5:
+            continue
+        tmp = arq.with_suffix(".norm.mp4")
+        sh(["ffmpeg", "-v", "error", "-i", arq, "-map", "0:v:0", "-map", "0:a:0", "-c:v", "copy",
+            "-af", "aresample=async=1:first_pts=0", "-c:a", "aac", "-b:a", "192k",
+            "-movflags", "+faststart", "-y", tmp])
+        tmp.replace(arq)
+        print(f"  áudio alinhado: {nome} (sobrava {dur_bruto - dur:.1f} s)")
 
 
 # ------------------------------------------------------------------ produzir
