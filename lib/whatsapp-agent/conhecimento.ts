@@ -2,153 +2,109 @@
 // propósito: é o arquivo que se edita quando aparece pergunta nova que o agente
 // não soube responder (ver histórico em whatsapp_messages). Escrito pra Claude,
 // em português — ele responde no idioma da aluna.
+//
+// Histórico das regras (o agente não lê isto; serve para saber de onde veio cada uma):
+// - vitalício = pagamento único (Bruno 14/10); "Perfect Academy/Portugal" não é golpe (consulta #22, 13/10);
+// - playlist do YouTube saiu da mensagem de apoio e virou plano B (16/10);
+// - reembolso: 1 tentativa de ajuda, depois o caminho (Bruno 15/10); garantia na Hotmart virou 15 dias para compras
+//   a partir de 17/10 (caixa), a oferta continua 30 e é honrada por fora;
+// - cobrança duplicada: entender antes, reembolsar só a duplicada (Bruno 19/10; casos Luimar, Miriam, Selene);
+// - Protocolo depois do funil com link US$19 (16/10); "secreto de las 4pm" = Protocolo (caso Pamela, 18/10);
+// - indicação com presente (Bruno 19/10; caso Isaura). Enxugado em 19/10/2026 — mesmas regras, sem repetição.
 
 import { LINK_INDICACAO } from '@/lib/indicacao-link'
 
+const LINK_PROTOCOLO = 'https://pay.hotmart.com/N104738863H?off=ad7ti2nf&checkoutMode=10'
+const PLAYLIST_ES = 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d'
+
 export const CONHECIMENTO = `
-# RiseMe — o que a aluna comprou
-App de treino em casa para mulheres (calistenia: exercícios com o peso do corpo, sem aparelho).
-A compra dá acesso vitalício ao desafio comprado (programa dia a dia, um vídeo de treino por dia).
+# CONHECIMENTO
 
-# Compra e "vitalício" (perguntas frequentes)
-- "Vitalício" (es: vitalicio / de por vida): PAGAMENTO ÚNICO, sem mensalidade e sem renovar no ano seguinte. O acesso
-  ao desafio que ela comprou é para sempre. (Confirmado pelo Bruno em 14/10/2026.)
-- Ela chegou pelo botão "Preguntas sobre facturación" (ou "Gestionar suscripción") do app: isso NÃO é motivo para
-  transferir. Pergunte o que ela quer saber e responda se estiver aqui (ex.: vitalício). Só transfira quando for
-  cobrança real (valor cobrado, cobrança duplicada, reembolso, cancelamento).
+## O produto
+App de treino em casa para mulheres (calistenia: peso do corpo, sem aparelho). A compra dá acesso VITALÍCIO ao
+desafio comprado (um vídeo de treino por dia). Vitalício = PAGAMENTO ÚNICO, sem mensalidade nem renovação.
+Na fatura da Perfect Pay (polonês/turco) a cobrança pode vir como "Perfect Academy" / empresa de Portugal: é só a
+processadora; não é golpe. Explique com calma e mostre que o acesso está liberado.
+Ela chegou pelo botão "Preguntas sobre facturación"/"Gestionar suscripción": pergunte o que quer saber e responda;
+só é assunto de dinheiro se for cobrança real.
 
-# "É golpe?" — cobrança com nome estranho (CL-PL / Perfect Pay)
-- Na fatura ou no app do banco, a compra pela Perfect Pay pode aparecer com o nome da processadora de pagamento
-  ("Perfect Academy" / empresa com sede em Portugal), não "RiseMe". Isso é normal: é só quem processa o pagamento;
-  o programa é o RiseMe. Explique com calma, mostre que o acesso dela está liberado (perfil) e ofereça ajuda.
-  (Caso real: consulta #22, 13/10/2026; comentário "golpe… Portugal" no anúncio da CL-PL.)
-
-# Acesso (conferido no código em 06/10/2026 — rótulos em espanhol; traduza para o idioma dela)
-- A conta é criada sozinha na compra. O acesso chega por WhatsApp (esta conversa) e por email:
-  email da compra + uma senha de acesso (código de 8 letras/números) + um link que entra com um toque.
-- Ela recebeu nesta conversa 2 mensagens automáticas: a de acesso (com passo a passo) e, logo depois, uma de apoio
-  ("se tiver dificuldade, me escreve"). Pode remeter a elas ("a mensagem lá em cima"). Compradoras até 16/10/2026
-  receberam também uma playlist do YouTube.
-- Treinar é DENTRO do app (é lá que o dia conta, o progresso aparece e os bônus ficam). Não ofereça a playlist do
-  YouTube como caminho normal. Só como plano B, para aluna em espanhol cujo vídeo não abre no app depois de uma
-  tentativa (fechar e reabrir, outra conexão): https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d
-  — e transfira o problema técnico.
+## Acesso (rótulos em espanhol; use os do idioma dela)
+- A conta é criada sozinha na compra. O acesso chega por WhatsApp (esta conversa) e por email: email da compra +
+  senha (código de 8 letras/números) + link que entra com um toque. Nesta conversa ela recebeu 2 mensagens
+  automáticas: a de acesso e uma de apoio — pode remeter a elas ("el mensaje de arriba").
 - Link de acesso: abre "Entrando..." e entra sozinho. Se cair num formulário: "Correo electrónico" + "Contraseña"
-  (a do WhatsApp) → "Entrar". Erro "Correo o contraseña incorrectos" = conferir o email da compra e o código.
-- Entrar em outro dia: riseme.app → email da compra + senha → "INICIAR SESIÓN".
-- Não precisa criar conta ("registrarse"): a conta já existe. Criar conta nova NÃO libera nada.
-- Instalar como app (opcional; funciona no navegador também):
-  iPhone: riseme.app no SAFARI → compartilhar → "Adicionar à Tela de Início" (não "Favoritos").
-  Android: riseme.app no CHROME → menu de três pontos → "Instalar app". Ícone sumido: últimas telas do celular.
+  (a do WhatsApp) → "Entrar". "Correo o contraseña incorrectos" = conferir email e código.
+- Outro dia: riseme.app → email da compra + senha → "INICIAR SESIÓN". Não precisa criar conta (criar outra não libera nada).
+- Instalar (opcional): iPhone → riseme.app no SAFARI → compartilhar → "Agregar a pantalla de inicio" (não
+  "Favoritos"); Android → riseme.app no CHROME → três pontos → "Instalar app". Ícone sumido: últimas telas.
+- Trocar a senha: Más → Mi perfil → "Contraseña" → nova duas vezes → "GUARDAR CONTRASEÑA".
+- Esqueceu a senha: no login, "¿Olvidaste tu contraseña?" (pl "Nie pamiętasz hasła?", cs "Zapomněla jsi heslo?",
+  tr "Şifreni mi unuttun?", en "Forgot your password?") → email da compra → "ENVIAR ENLACE" → cria a nova no
+  email ("GUARDAR NUEVA CONTRASEÑA"). No formulário do link de acesso chama "No recibí mi acceso". Email não
+  chegou: spam/promoções. Nada resolveu → transfira.
 
-# Senha
-- Trocar a senha (criar uma própria): Más → Mi perfil → seção "Contraseña" → digita a nova duas vezes →
-  "GUARDAR CONTRASEÑA". O botão "Crear mi contraseña" do aviso de primeiro acesso leva direto para lá.
-- Esqueceu a senha (não consegue entrar): na tela de login, "¿Olvidaste tu contraseña?"
-  (pl: "Nie pamiętasz hasła?", cs: "Zapomněla jsi heslo?", tr: "Şifreni mi unuttun?", en: "Forgot your password?") → digita o email da
-  compra → "ENVIAR ENLACE" → abre o email e cria a nova senha em "GUARDAR NUEVA CONTRASEÑA". No formulário do
-  link de acesso o mesmo caminho se chama "No recibí mi acceso". Email não chegou: spam/promoções.
-- Se nada disso resolver → transfira.
+## Dentro do app
+Abas, na ordem: es Inicio · Entrenamientos · Desafíos · Menú · Extras · Más (→ Ayuda) | pl Start · Treningi ·
+Wyzwania · Jadłospis · Dodatki · Więcej | cs Domů · Tréninky · Výzvy · Jídelníček · Bonusy · Více | tr Ana Sayfa ·
+Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla | en Home · Workouts · Challenges · Menu · Extras · More
+- Treinar é DENTRO do app (lá o dia conta e o progresso aparece). Começar pelo dia 1, no próprio ritmo; se estiver
+  difícil, menos repetições (o desafio tem um nível só; se fácil, mais repetições e atenção à técnica). Os dias abrem EM ORDEM ("Clase bloqueada" se
+  pular); o dia conta com 80% do vídeo assistido. Desafio com 🔒 = não comprado (abre a oferta de assinatura).
+  Selo "🎧 Audio en español" = sem vídeo no idioma dela ainda.
+- Vídeo que não abre no app depois de uma tentativa (fechar e reabrir, outra conexão): transfira o problema
+  técnico; para aluna em espanhol, dê como plano B a playlist ${PLAYLIST_ES}
+- Ver na TV: o botão de TV ensina a espelhar a tela (mesmo Wi-Fi; iPhone → Espelhar Tela; Android → Transmitir
+  tela / Smart View; TV com AirPlay ou Chromecast).
+- Extras: bônus em PDF (para quem comprou qualquer desafio), com "Descargar PDF". Produto comprado à parte (ex.:
+  Protocolo Metabólico) aparece em "Tus productos" só se ela comprou.
+- Menú: cardápio personalizado gerado no app. Vitalícia: 2 no total (+1 por brinde); mensal: 3/mês; anual: 1/semana.
+  Ayuno: "Próximamente".
+- Más → Mi perfil: nome e email (não editáveis) + troca de senha. Más → Idioma. Más → Gestionar suscripción:
+  vitalícia = "Vitalicio · Activo"; assinante vê o link "Gestionar mi suscripción en Hotmart" (cancelar é só lá;
+  o acesso segue até o fim do período). Más → Centro de ayuda abre esta conversa.
 
-# Dentro do app
-Nomes das abas no idioma do app da aluna (use os do idioma dela), na ordem:
-Início · Treinos · Desafios · Cardápio · Extras · Mais (→ Ajuda)
-- es: Inicio · Entrenamientos · Desafíos · Menú · Extras · Más (→ Ayuda)
-- pl: Start · Treningi · Wyzwania · Jadłospis · Dodatki · Więcej (→ Pomoc)
-- cs: Domů · Tréninky · Výzvy · Jídelníček · Bonusy · Více (→ Nápověda)
-- tr: Ana Sayfa · Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla (→ Yardım)
-- en: Home · Workouts · Challenges · Menu · Extras · More (→ Help)
-- Desafios: os comprados aparecem liberados ("Empezar desafío" / "Continuar — Día N"). Os dias abrem EM ORDEM:
-  pular dia mostra "Clase bloqueada". O dia conta como concluído quando ela assiste pelo menos 80% do vídeo.
-  Desafio com cadeado ("🔒 Desbloquear") = não comprado: o botão abre a oferta de assinatura do app.
-- Selo "🎧 Audio en español": aquele desafio ainda não tem vídeo no idioma dela; o áudio é em espanhol.
-- Ver na TV: botão de TV no player = instruções de espelhar a tela (não transmite sozinho). Celular e TV no mesmo
-  Wi-Fi; iPhone → Central de Controle → Espelhar Tela; Android → configurações rápidas → Transmitir tela
-  (Samsung: Smart View). TV compatível com AirPlay ou Chromecast/Google TV.
-- Extras: os bônus em PDF (liberados para quem comprou qualquer desafio). Produto comprado à parte (ex.: Protocolo
-  Metabólico) aparece em "Tus productos" SÓ se ela comprou — se comprou e não aparece, ver "Paguei e está bloqueado".
-  Dentro do material há "Descargar PDF".
-- Cardápio (Menú): cardápio personalizado gerado no app. Compra vitalícia: 2 cardápios no total; depois disso o app
-  oferece assinatura. Assinatura mensal: 3 por mês; anual: 1 por semana.
-- Ayuno (jejum): ainda não existe ("Próximamente").
-- Más → Mi perfil: mostra nome e email (não dá para editar nem pôr foto) e tem a troca de senha. Más → Idioma: troca o idioma do app.
-- Más → Gestionar suscripción: compra vitalícia aparece como "Vitalicio · Activo". Assinante vê o plano e o link
-  "Gestionar mi suscripción en Hotmart" — cancelar a assinatura é SÓ por lá; o acesso continua até o fim do período
-  pago. Assunto de cobrança/cancelamento além de mostrar o caminho → transfira.
-- Más → Centro de ayuda: atalhos que abrem esta mesma conversa de WhatsApp.
+## "Paguei e está bloqueado"
+Veja "Liberado na conta" no perfil. Liberado → mostre onde fica (desafios em Desafíos; Protocolo em Extras).
+Não liberado → transfira (conferir o pagamento). Nunca prometa liberar.
 
-# Conteúdo (treino, chás, alimentação, planos)
-- Responda pelo texto dos MATERIAIS. Começar pelo dia 1, no próprio ritmo; se estiver difícil, menos repetições.
-- Se o material não cobre a pergunta → transfira. Saúde (gravidez, doença, remédio, dor, lesão) → o que o
-  material diz + "confirme com seu médico"; se ela quiser mais, transfira.
+## Vendas que você faz (só alunas em espanhol / Hotmart; em polonês/turco não há link → transfira)
+- PROTOCOLO METABÓLICO (opcional; o desafio funciona sozinho; não pressione): ela quer comprar depois do funil, ou
+  pede algo que está nele e não tem ("los tés", "calendario de tés", "el secreto/truco de las 4 de la tarde"): em
+  1–2 frases (sistema de chás de 28 dias, 1 por semana somado ao anterior, PDF em Extras) + link (copie exato) ${LINK_PROTOCOLO}
+  — US$19, preço especial de aluna (sem prometer prazo). Comprar com o MESMO email do desafio: aparece sozinho em
+  Extras → "Tus productos". Não transfira.
+- INDICAÇÃO (o melhor que pode acontecer): ela quer que uma amiga/parente compre → agradeça de verdade e mande, pronto
+  para repassar, o link ${LINK_INDICACAO} — copie EXATAMENTE, sem traduzir nem mudar nada (a amiga compra com o PRÓPRIO email). Presente: quando a amiga comprar,
+  ela ganha 1 mês do Pase Completo e a amiga uma dieta personalizada extra (no app há um cartão no Início com o link
+  próprio dela, que libera sozinho; sem ele, ela manda aqui o email da amiga). Nunca diga que não tem o link.
 
-# Indicação: ela quer que uma amiga/parente compre (o melhor que pode acontecer — regra do dono, 19/10/2026)
-- Agradeça de verdade (é o maior elogio) e mande, pronto para ela repassar, o link de compra do desafio:
-  ${LINK_INDICACAO}
-  Diga que a amiga compra com o PRÓPRIO email e recebe o acesso dela por WhatsApp e email. Conte o presente: quando a
-  amiga comprar, ela manda aqui o email com que a amiga comprou e ganha 1 mês do Pase Completo grátis (ver INDICAÇÃO); a amiga
-  ganha uma dieta (cardápio) personalizada extra. No app há um cartão no Início com o link próprio dela (crédito automático). Nunca diga que não tem o
-  link nem mande "procurar o anúncio". (Alunas em espanhol / Hotmart; em polonês/turco não há link → transfira.)
-- Caso real que criou a regra: Isaura (19/10) pediu o link para a amiga e o agente disse que não tinha.
-
-# Quer comprar o Protocolo Metabólico depois (alunas em espanhol / Hotmart)
-- Oferta que aparece logo após a compra do desafio (vídeo do chá). Se ela não comprou e agora quer, NÃO transfira:
-  explique em 1–2 frases (sistema de chás de 28 dias, 1 chá por semana somado ao anterior, PDF na aba Extras) e
-  mande o link: https://pay.hotmart.com/N104738863H?off=ad7ti2nf&checkoutMode=10 — US$19, preço especial de
-  aluna (não prometa prazo). Peça para comprar com o MESMO email da compra do desafio: assim aparece sozinho na
-  conta dela, em Extras → "Tus productos". (Link confirmado pelo dono em 16/10/2026.)
-- Ela pede algo que está no Protocolo e ela não tem ("el secreto/truco de las 4 de la tarde / 4pm", "los tés",
-  "la lista de tés", "el calendario de tés"): diga que é parte do Protocolo Metabólico e ofereça o mesmo link —
-  não transfira (caso Pamela, 18/10).
-- É opcional: o desafio funciona sozinho. Não pressione. Alunas em polonês/turco (Perfect Pay): não há link → transfira.
-
-# "Paguei e está bloqueado"
-- Veja "Liberado na conta" no perfil. Se o produto JÁ está liberado, mostre onde fica (desafios na aba
-  Desafios; Protocolo Metabólico na aba Extras) — muitas vezes ela só não achou.
-- Se NÃO está liberado: transfira para o setor responsável (precisa conferir o pagamento). Nunca prometa liberar.
-
-# Reembolso (regra do Bruno, 15/10/2026 — você resolve, sem transferir, salvo onde diz)
-- Garantia: 30 DIAS a partir da compra ("Dias desde a compra" no perfil). Vale para todos os produtos.
-- 1º pedido: UMA tentativa de ajudar, curta e sem pressão (o que aconteceu? quer ajuda para entrar/usar?).
-- Se é o 2º pedido na conversa, OU ela deixa claro que não quer ajuda e só quer o dinheiro: NÃO tente de novo —
-  passe o caminho do reembolso na hora, com gentileza e sem drama:
-  · Hotmart (alunas em espanhol/tcheco), ATÉ 15 DIAS da compra (compra ANTES de 17/10/2026: até 30 dias): ela mesma pede em https://refund.hotmart.com/ — informa o NÚMERO DA TRANSAÇÃO
-    (começa com 2 letras, ex.: HP1234567890; está no email da compra ou em https://consumer.hotmart.com →
-    "Mis compras" → "Mostrar detalles"), o email da compra, o código que chega nesse email (vale 15 min), o
-    motivo, e "Finalizar". A Hotmart aprova em até 7 dias; no cartão o estorno aparece na fatura atual ou na
-    seguinte (Yape até 7 dias, PSE até 15 dias úteis, Oxxo/Efecty: pedem os dados bancários por email).
-  · Hotmart, compra a partir de 17/10/2026, de 16 a 30 DIAS da compra: a garantia na Hotmart passou a 15 dias
-    (decisão do dono, 17/10/2026, por caixa) — o link acima NÃO funciona mais. A garantia prometida continua de 30 dias e é honrada: NÃO mande o
-    link; diga que o pedido foi REGISTRADO e que a equipe faz o reembolso dentro da garantia, e TRANSFIRA
-    (motivo começando com "REEMBOLSO PELA REGRA (Hotmart, dia N — fora do prazo da Hotmart) — pagar por fora").
-    Responda rápido e com segurança: sem resposta, ela abre disputa no cartão (chargeback), que é pior.
-    Nunca fale de "15 dias", de Wise ou de transferência, e nunca peça dados bancários — a equipe faz isso.
-  · Perfect Pay (alunas em polonês ou turco): não há botão para a compradora — o reembolso é feito pela equipe.
-    Diga que o pedido foi REGISTRADO e será processado pela equipe, e TRANSFIRA ("passar_para_humano" = true,
-    motivo começando com "REEMBOLSO APROVADO PELA REGRA (Perfect Pay) — processar no painel"; opção A da
-    consulta = avisar a aluna que o reembolso foi processado).
-- Mais de 30 dias desde a compra: com muita educação, explique que a garantia é de 30 dias justamente para ela
-  ter tempo de conhecer o programa com calma e decidir, e que depois desse prazo não é possível reembolsar.
-  Ofereça ajuda para aproveitar o programa. Não transfira, não prometa exceção. Se ela insistir muito ou
-  ameaçar disputa/denúncia → transfira.
+## Dinheiro
+REEMBOLSO — garantia de 30 DIAS ("Dias desde a compra" no perfil), todos os produtos. Você resolve:
+- 1º pedido: UMA tentativa curta de ajudar (o que aconteceu? quer ajuda para entrar/usar?).
+- 2º pedido, ou ela deixa claro que só quer o dinheiro: passe o caminho na hora, com gentileza:
+  · Hotmart, até o dia 15 (compra antes de 17/10/2026: até o dia 30): ela pede em https://refund.hotmart.com/ com
+    o NÚMERO DA TRANSAÇÃO (2 letras + números, ex. HP1234567890; no email da compra ou em consumer.hotmart.com →
+    "Mis compras" → "Mostrar detalles"), o email da compra, o código que chega nesse email (vale 15 min) e o motivo
+    → "Finalizar". Aprova em até 7 dias; cartão: fatura atual ou seguinte; Yape até 7 dias; PSE até 15 dias úteis;
+    Oxxo/Efecty: pedem dados bancários por email.
+  · Hotmart, compra a partir de 17/10/2026, do dia 16 ao 30: o link não funciona mais, mas a garantia de 30 dias é
+    honrada. NÃO mande o link: diga que o pedido foi REGISTRADO e a equipe faz o reembolso, e TRANSFIRA (motivo
+    "REEMBOLSO PELA REGRA (Hotmart, dia N — fora do prazo da Hotmart) — pagar por fora"). Nunca fale de "15 dias",
+    Wise ou transferência, nem peça dados bancários.
+  · Perfect Pay (polonês/turco): não há botão; diga que foi REGISTRADO e TRANSFIRA (motivo "REEMBOLSO APROVADO PELA
+    REGRA (Perfect Pay) — processar no painel"; opção A = avisar que o reembolso foi processado).
+- Mais de 30 dias: com muita educação, a garantia de 30 dias existe para ela conhecer com calma; depois não há
+  reembolso. Ofereça ajuda para aproveitar. Não transfira; se insistir muito ou ameaçar disputa → transfira.
 - Cancelar ASSINATURA (Pase/mensal/anual) é outra coisa: Más → Gestionar suscripción → link da Hotmart.
+COBROU DUAS VEZES / COBRANÇA QUE ELA NÃO RECONHECE — entender antes; reembolso só se houve compra DUPLICADA de verdade,
+e só da duplicada. Você não vê a Hotmart: não prometa reembolso nem peça prova atrás de prova. Na 1ª resposta:
+explique o caso comum (cargos de US$19 "pendentes"/"HOTMART META" logo após a compra, sem o Protocolo liberado =
+tentativas do upsell que o banco RECUSOU: não foram cobradas, o banco libera em alguns dias, os "+" são as
+devoluções), peça UMA vez o email da compra ou o número HP… e TRANSFIRA (motivo "COBRANÇA DUPLICADA — conferir na
+Hotmart", com email, valores e datas do print), dizendo que estamos conferindo e respondemos hoje.
+Sem resposta no dinheiro, ela abre contestação no cartão (chargeback): responda rápido e com segurança.
 
-# Cobrou duas vezes / cobrança que ela não reconhece (regra do dono, 19/10/2026)
-- Primeiro ENTENDER o que aconteceu; reembolso só se houve compra DUPLICADA de verdade — e só da duplicada.
-  Você não vê a Hotmart: não prometa reembolso e não fique pedindo prova atrás de prova (quem fica sem resposta
-  abre contestação no cartão). Na PRIMEIRA resposta:
-  · Explique o caso mais comum: cargos de US$19 (ou valor do Protocolo) "pendentes" / "HOTMART META" logo depois
-    da compra, sem o Protocolo liberado no perfil = tentativas de compra do upsell que o banco RECUSOU — não foram
-    cobradas e o banco libera sozinho em alguns dias; lançamentos com "+" são essas devoluções (caso Miriam, 19/10).
-  · Peça UMA vez o que falta para conferir (email da compra ou número de transação HP…, se ela tiver à mão) e
-    TRANSFIRA com motivo começando com "COBRANÇA DUPLICADA — conferir na Hotmart" (resumo com o email, valores e
-    datas que aparecem no print). Diga que estamos conferindo a compra e respondemos por aqui hoje.
-  · Quem confere na Hotmart decide: houve duplicada → a aluna recebe o caminho do reembolso só daquela transação;
-    não houve → explicação com o que a Hotmart mostra. Se a consulta já voltou com a resposta, siga ela.
-
-# Sempre passar para humano (handoff)
-- Valor cobrado errado, chargeback, assinatura cobrada sem querer — dinheiro fora das regras acima.
-- Reclamação séria, irritação, ameaça de denunciar/expor.
-- Problema técnico que as orientações acima não resolveram depois de uma tentativa.
-- Qualquer pergunta cuja resposta não está aqui nem nos MATERIAIS — nunca inventar preço, prazo, política ou recurso do app.
+## Sempre transfira
+Valor cobrado errado, chargeback, assinatura cobrada sem querer; reclamação séria, irritação, ameaça de denunciar;
+problema técnico que não resolveu depois de uma tentativa; pergunta cuja resposta não está aqui nem nos MATERIAIS.
 `.trim()
