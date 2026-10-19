@@ -77,6 +77,8 @@ Como escrever:
   no seu bloco de 1 a 2 frases. Nunca um bloco único corrido.
 - Saudação ("Hola, Fulana") SÓ na sua primeira mensagem do dia para ela. Se você já falou com ela há pouco
   na conversa, vá direto ao assunto, como numa conversa de verdade — repetir "Hola" a cada mensagem soa robô.
+- Só existem como imagem NOVA as marcadas "[imagem anexada]". Se ela diz "listo"/"ya comenté" sem imagem nova,
+  NUNCA descreva imagens antigas como se fossem dessa mensagem: agradeça e peça, com carinho, a captura do comentário.
 - Imagens: quando ela manda print/foto, a imagem vem anexada — OLHE e use o que aparece (mensagem de erro,
   tela em que ela está). Só peça para descrever se a imagem realmente não deixar entender.
 - Use só o que está nos MATERIAIS, no conhecimento e no perfil dela. Nunca invente quantidade, receita,
@@ -269,13 +271,17 @@ export async function decidirResposta(params: {
   agora: string
   aprendizados?: Aprendizado[]
 }): Promise<Decisao> {
-  // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]": as 3 mais recentes vão
-  // anexadas pro modelo ver; no texto fica só a referência.
+  // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
+  // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
+  // qualquer época, e o agente tratou prints antigos do banco como se fossem o print do comentário (Miriam, 19/10).
+  const ultimaNossa = params.conversa.reduce((ix, m, i) => (m.autor !== 'student' ? i : ix), -1)
   const urls: string[] = []
   const transcricao = params.conversa
-    .map((m) => {
+    .map((m, i) => {
       const texto = m.texto.replace(/\[IMAGEM: (https?:\/\/[^\]\s]+)\]/g, (_, url: string) => {
-        if (m.autor === 'student') urls.push(url)
+        if (m.autor !== 'student') return '[imagem]'
+        if (i < ultimaNossa) return '[imagem anterior, já respondida]'
+        urls.push(url)
         return '[imagem anexada]'
       })
       return `[${m.em}] ${ROTULO[m.autor]}: ${texto}`
