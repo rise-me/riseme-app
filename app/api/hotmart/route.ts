@@ -10,6 +10,7 @@ import { indicadoraDoSrc } from '@/lib/indicacao-link'
 import { darPaseDeIndicacao } from '@/lib/whatsapp-agent/indicacao'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { enfileirar } from '@/lib/whatsapp-outbox'
+import { deveRevogar, registrarCompra } from '@/lib/compras'
 
 
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
@@ -244,6 +245,7 @@ export async function POST(request: NextRequest) {
           challenge_id: challengeId,
           access_type: 'lifetime',
         }, { onConflict: 'user_id,challenge_id' })
+        await registrarCompra(supabase, { userId, produto: productId, venda: `hm:${purchase.transaction}` })
         // Indicação (19/10/2026): comprou pelo link de uma aluna → presente para as duas, sem ninguém pedir.
         if (challengeId === '1') await presentesDaIndicacao(purchase.origin?.src, userId, buyer.name)
       } else {
@@ -301,7 +303,10 @@ export async function POST(request: NextRequest) {
         .eq('access_type', 'subscription')
     } else {
       const challengeId = getChallengeIdForProduct(productId)
-      if (challengeId) {
+      const transacao = data.purchase?.transaction
+      // Estorno de UMA venda não tira o acesso se ela tem outra compra válida do mesmo produto (lib/compras.ts).
+      const revoga = !transacao || (await deveRevogar(supabase, { userId, produto: productId, venda: `hm:${transacao}` }))
+      if (challengeId && revoga) {
         await supabase
           .from('user_challenges')
           .delete()

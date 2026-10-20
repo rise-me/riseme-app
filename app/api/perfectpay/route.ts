@@ -4,6 +4,7 @@ import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { sendWhatsAppAccess } from '@/lib/whatsapp-access'
 import { sendAccessEmail } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
+import { deveRevogar, registrarCompra } from '@/lib/compras'
 
 
 const PERFECTPAY_TOKEN = process.env.PERFECTPAY_WEBHOOK_TOKEN
@@ -159,11 +160,16 @@ export async function POST(request: NextRequest) {
       { user_id: userId, challenge_id: mapping.challengeId, access_type: 'lifetime' },
       { onConflict: 'user_id,challenge_id', ignoreDuplicates: true }
     )
+    await registrarCompra(supabase, { userId, produto: productCode, venda: `pp:${payload.code}` })
   }
 
   if (isRevoke) {
     if (!existingUsers || existingUsers.length === 0) {
       return NextResponse.json({ ok: true, skipped: 'user not found' })
+    }
+    // Estorno de UMA venda não tira o acesso se ela tem outra compra válida do mesmo produto (lib/compras.ts).
+    if (!(await deveRevogar(supabase, { userId: existingUsers[0].id, produto: productCode, venda: `pp:${payload.code}` }))) {
+      return NextResponse.json({ ok: true, kept: 'outra compra válida do mesmo produto' })
     }
     await supabase
       .from('user_challenges')
