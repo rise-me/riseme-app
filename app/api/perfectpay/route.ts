@@ -164,6 +164,8 @@ export async function POST(request: NextRequest) {
   }
 
   if (isRevoke) {
+    // Registro de todo aviso que tira acesso (caso Beata 20/10: ninguém sabia se foi cancelamento, estorno ou contestação).
+    console.warn(`[perfectpay] revogação: status ${status} (${payload.sale_status_detail ?? '?'}) venda ${payload.code} produto ${productCode} ${buyerEmail}`)
     if (!existingUsers || existingUsers.length === 0) {
       return NextResponse.json({ ok: true, skipped: 'user not found' })
     }

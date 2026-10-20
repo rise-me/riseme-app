@@ -287,6 +287,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true })
     }
 
+    console.warn(`[hotmart] revogação: ${event} transação ${data.purchase?.transaction ?? '?'} produto ${productId} ${buyerEmail}`)
     // Reembolso/chargeback: dinheiro devolvido — acesso cai na hora.
     if (isSubscription) {
       const subCode = data.subscription?.subscriber?.code ?? data.purchase?.transaction
