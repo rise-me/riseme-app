@@ -40,6 +40,13 @@
 | 6 | Fitness Prenatal | 21 Fitness Pré-Parto (R2, es+en — entrando) |
 | 7 | Entrenamientos Posparto | 22 Treinos Pós-Parto (R2, es+en — entrando) |
 
+## Pedidos vindos das alunas (para priorizar a fila)
+
+- **20/10/2026 — diástase abdominal (Bruno):** aluna (Concepción, MX) não consegue fazer abdominais nem prancha por
+  diástase. Recebeu o 7 (Pós-Parto). Pedido do Bruno: ver se algum módulo da fila serve para "ajustes"/diástase e
+  subir antes. Candidatos pelo nome (conferir o conteúdo): 60 Pilates para Pavimento Pélvico, 34 Tonificação do
+  Assoalho Pélvico, 45 Treinos de Recuperação, 37 Proteção nas Costas, 77 Treinos de Postura.
+
 ## Fila (aulas novas = que o app ainda não tem)
 
 | # | Módulo | Aulas | Novas | id | Entrou |
