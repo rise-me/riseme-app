@@ -5,6 +5,7 @@ import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { creditarIndicacao, textoIndicacaoFalhou } from '@/lib/whatsapp-agent/indicacao'
+import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
@@ -71,7 +72,7 @@ interface ZapiCallback {
   image?: { caption?: string; imageUrl?: string }
   referenceMessageId?: string // mensagem que esta responde (citação)
   reaction?: { value?: string; referencedMessage?: { messageId?: string; fromMe?: boolean } }
-  video?: { caption?: string }
+  video?: { caption?: string; videoUrl?: string }
   document?: { fileName?: string }
   sticker?: unknown
 }
@@ -87,7 +88,11 @@ function textoDa(m: ZapiCallback): string | null {
     const legenda = m.image.caption ? ` Legenda: ${m.image.caption}` : ''
     return m.image.imageUrl ? `[IMAGEM: ${m.image.imageUrl}]${legenda}` : `[a aluna mandou uma IMAGEM]${legenda}`
   }
-  if (m.video) return `[a aluna mandou um VÍDEO${m.video.caption ? ` com a legenda: ${m.video.caption}` : ''}]`
+  // Com URL o vídeo é guardado (depoimento em vídeo, lib/video-depoimento.ts); o agente não assiste, só sabe que chegou.
+  if (m.video) {
+    const legenda = m.video.caption ? ` Legenda: ${m.video.caption}` : ''
+    return m.video.videoUrl ? `[VÍDEO: ${m.video.videoUrl}]${legenda}` : `[a aluna mandou um VÍDEO]${legenda}`
+  }
   if (m.document) return `[a aluna mandou um DOCUMENTO: ${m.document.fileName ?? 'sem nome'}]`
   if (m.sticker) return '[a aluna mandou uma figurinha]'
   return null
@@ -253,6 +258,21 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
   // Escreveu antes de o acesso sair (ele espera ~15 min de propósito): o agente precisa saber (caso Madeleine, 18/10).
   if (perfil) perfil.acessoAgendadoEm = await acessoPendente(phone)
+
+  // Depoimento em VÍDEO (21/10): vídeo novo (depois da nossa última fala) → guarda, dá os 3 meses do Pase a quem foi
+  // convidada e manda o link ao responsável. O agente só agradece e pede a autorização de uso.
+  const ultimaNossa = conversa.reduce((ix, m, i) => (m.autor !== 'student' ? i : ix), -1)
+  const urlVideo = conversa.slice(ultimaNossa + 1).map((m) => m.texto.match(/\[VÍDEO: (\S+)\]/)?.[1]).find(Boolean)
+  if (urlVideo) {
+    try {
+      const convidada = await foiConvidadaParaVideo(phone)
+      const v = await receberVideo({ phone, userId, url: urlVideo, darPresente: convidada })
+      if (perfil) perfil.videoDepoimento = v.resultado
+      await dizerAoResponsavel(`🎥 Depoimento em VÍDEO — ${perfil?.nome ?? 'aluna sem conta'} (+${phone.replace('@lid', '')})\nPresente: ${v.resultado}${v.link ? `\nBaixar (30 dias): ${v.link}` : ''}`)
+    } catch (err) {
+      console.error(`[video-depoimento] falhou (${phone}):`, err)
+    }
+  }
 
   let decisao: Awaited<ReturnType<typeof decidirResposta>>
   try {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { processarFila } from '@/lib/whatsapp-outbox'
 import { verificarConexao } from '@/lib/whatsapp-alarme'
 import { processarEmailsIndicacao } from '@/lib/email-indicacao'
+import { convidarParaVideo } from '@/lib/video-depoimento'
 
 // GET /api/whatsapp/outbox — cron da Vercel a cada minuto (vercel.json). Envia as
 // mensagens de WhatsApp que já venceram na fila (lib/whatsapp-outbox.ts).
@@ -21,6 +22,9 @@ export async function GET(request: NextRequest) {
   // Email de indicação para a base (desligado até EMAIL_INDICACAO_ATIVO=1); falha nunca segura a fila do WhatsApp.
   const emails = await processarEmailsIndicacao().catch((err) => (console.error('[email-indicacao] falhou:', err), 0))
   if (emails) console.log(`[email-indicacao] enviados=${emails}`)
+  // Convite de depoimento em vídeo para quem chegou a 7 dias de treino (1x/hora, poucas por vez).
+  const videos = await convidarParaVideo().catch((err) => (console.error('[video-depoimento] convite falhou:', err), 0))
+  if (videos) console.log(`[video-depoimento] convites=${videos}`)
   if (r.enviados || r.falhas) console.log(`[outbox] enviados=${r.enviados} falhas=${r.falhas}`)
   return NextResponse.json({ ok: true, ...r })
 }

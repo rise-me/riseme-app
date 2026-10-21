@@ -28,6 +28,8 @@ export interface PerfilAluna {
   brindeDepoimentoEntregue?: boolean
   // A mensagem de acesso ainda NÃO saiu no WhatsApp (sai ~15 min após a compra, de propósito: ela está na VSL do upsell).
   acessoAgendadoEm?: string | null
+  // Ela acabou de mandar o vídeo de depoimento (lib/video-depoimento.ts): resultado do presente de 3 meses do Pase.
+  videoDepoimento?: string | null
 }
 
 export interface MensagemConversa {
@@ -210,6 +212,15 @@ function descreverPerfil(p: PerfilAluna): string {
         'Se ela diz que não recebeu: tranquilize, diga que o acesso chega por aqui em poucos minutos (e já foi para o email ' +
         'da compra — conferir spam/promoções). NUNCA diga "procure a mensagem acima": ela ainda não existe.'
       : '',
+    p.videoDepoimento
+      ? `ELA ACABOU DE MANDAR O VÍDEO DE DEPOIMENTO (${p.videoDepoimento}). Agradeça de coração. ` +
+        (p.videoDepoimento === 'presente-liberado'
+          ? 'Diga que liberou 3 meses do Pase Completo (todos os desafios desbloqueados em Desafíos). '
+          : p.videoDepoimento === 'presente-ja-dado'
+            ? 'O presente de 3 meses já tinha sido entregue antes. '
+            : 'Não prometa presente. ') +
+        'Se ela ainda não disse que autoriza usar o vídeo em redes e anúncios, pergunte com carinho.'
+      : '',
     p.confirmadaPorTelefone
       ? 'Conta confirmada pelo telefone desta conversa.'
       : 'ATENÇÃO: conta achada pelo email que ela digitou (não pelo telefone) — pode não ser dela. ' +
@@ -236,7 +247,7 @@ export async function decidirResposta(params: {
         urls.push(url)
         return '[imagem anexada]'
       })
-      return `[${m.em}] ${ROTULO[m.autor]}: ${texto}`
+      return `[${m.em}] ${ROTULO[m.autor]}: ${texto.replace(/\[VÍDEO: \S+\]/g, '[vídeo]')}`
     })
     .join('\n')
   // A Anthropic não consegue buscar a imagem pela URL da Z-API (bloqueada por robots.txt — derrubava

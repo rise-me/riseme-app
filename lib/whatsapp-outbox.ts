@@ -97,7 +97,7 @@ export async function acessoPendente(phone: string): Promise<string | null> {
 // Convite de depoimento NÃO vai para quem está com problema (casos 17–18/10: "quer favor? responde minhas
 // perguntas"; "estão roubando"): última fala dela sem resposta, ou reclamação/dinheiro nos últimos 3 dias.
 const SINAL_DE_PROBLEMA = /reembols|devoluci|estaf|fraud|robo|roband|denunc|cancel|no funciona|no puedo|zwrot|oszust|nie dzia|anul|iade|dolandır|refund|scam/i
-async function estaComProblema(phone: string): Promise<boolean> {
+export async function estaComProblema(phone: string): Promise<boolean> {
   const formas = variantesTelefone(phone)
   const { data } = await admin()
     .from('whatsapp_messages')

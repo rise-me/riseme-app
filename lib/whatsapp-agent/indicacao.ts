@@ -32,11 +32,14 @@ export async function creditarIndicacao(alunaId: string, emailAmiga: string): Pr
 /** 1 mês do Pase para quem indicou, 1x por amiga. Usado pelo agente (email da amiga) e pela Hotmart (src=ind-<id>). */
 export async function darPaseDeIndicacao(alunaId: string, amigaId: string): Promise<ResultadoIndicacao> {
   if (amigaId === alunaId) return 'propria'
-  const db = admin()
-  const codigo = `indicacao-${amigaId}` // 1 crédito por amiga, para quem indicar primeiro
-  const { data: ja } = await db.from('subscriptions').select('id').eq('stripe_sub_id', codigo).limit(1)
-  if (ja?.length) return 'ja-contada'
+  return (await darPaseGratis(alunaId, `indicacao-${amigaId}`, DIAS_PRESENTE)) ? 'ok' : 'ja-contada' // 1 crédito por amiga
+}
 
+/** Pase Completo de presente por `dias`, 1x por `codigo` (somado ao Pase que ela já tiver). false = já dado. */
+export async function darPaseGratis(alunaId: string, codigo: string, dias: number): Promise<boolean> {
+  const db = admin()
+  const { data: ja } = await db.from('subscriptions').select('id').eq('stripe_sub_id', codigo).limit(1)
+  if (ja?.length) return false
   // Soma ao Pase que ela já tiver (presente não "come" dias pagos).
   const { data: subs } = await db.from('subscriptions').select('current_period_end').eq('user_id', alunaId).in('status', ['active', 'canceled'])
   const base = Math.max(Date.now(), ...(subs ?? []).map((s) => new Date(s.current_period_end).getTime()))
@@ -45,14 +48,14 @@ export async function darPaseDeIndicacao(alunaId: string, amigaId: string): Prom
     stripe_sub_id: codigo,
     status: 'canceled', // não renova; vale até current_period_end (lib/user-access-server)
     plan_type: 'monthly',
-    current_period_end: new Date(base + DIAS_PRESENTE * DIA).toISOString(),
+    current_period_end: new Date(base + dias * DIA).toISOString(),
   })
   if (error) throw error
   await db.from('user_challenges').upsert(
     DESAFIOS_DO_PASE.map((cid) => ({ user_id: alunaId, challenge_id: cid, access_type: 'subscription' as const })),
     { onConflict: 'user_id,challenge_id', ignoreDuplicates: true },
   )
-  return 'ok'
+  return true
 }
 
 // Resposta quando NÃO deu para creditar (a do agente já assume que deu certo).
