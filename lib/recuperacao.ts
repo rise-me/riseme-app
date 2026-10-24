@@ -16,11 +16,21 @@ const OFERTA_FRONT = 'j3m3v9m3'
 // separar "venda recuperada" pelo código da oferta — sem tocar em src/sck/xcod. Vazia = o link usa a oferta do front.
 // Antes de preencher: a oferta nova precisa estar na página de checkout personalizada, no order bump e no Funil de Vendas.
 export const OFERTA_RECUPERACAO = process.env.RECUPERACAO_OFERTA ?? ''
-// Tentativas que disparam a recuperação e aprovações que a cancelam: o front e a própria oferta de recuperação.
-export const OFERTAS = new Set([OFERTA_FRONT, OFERTA_RECUPERACAO].filter(Boolean))
+// Teste T19 (ligado 24/10/2026; decisão do Bruno no mesmo dia): quem tentou pagar a oferta B (US$ 19,90, só EUA/PR) e falhou
+// recebe o link com a MESMA oferta B — manter o preço preserva o teste (a wwssbmi6 cobraria 12,90). AO ENCERRAR O TESTE:
+// deixar esta constante vazia ('') e fazer deploy, senão a recuperação segue mandando o preço do teste. Como medir: mensagens
+// da whatsapp_outbox com "off=yrn1s1q7" no texto × vendas aprovadas da yrn1s1q7 do mesmo email depois delas.
+export const OFERTA_TESTE_B = 'yrn1s1q7'
+// Tentativas que disparam a recuperação e aprovações que a cancelam: o front, a oferta de recuperação e a B do teste.
+export const OFERTAS = new Set([OFERTA_FRONT, OFERTA_RECUPERACAO, OFERTA_TESTE_B].filter(Boolean))
 const CHECKOUT = 'https://pay.hotmart.com/H101419289G'
 // Mesmos parâmetros do atalho oficial do funil (hotm.io/checkout-calistenia-es-sem-boleto), conferido 14/10/2026.
-const PARAMS_FIXOS = { off: OFERTA_RECUPERACAO || OFERTA_FRONT, checkoutMode: '10', hideBillet: '1', hideMultipleCards: '1' }
+const PARAMS_FIXOS = { checkoutMode: '10', hideBillet: '1', hideMultipleCards: '1' }
+// Oferta do link de volta: tentativa na B do teste → a própria B; qualquer outra → oferta de recuperação (ou o front).
+function ofertaDoLink(ofertaTentativa?: string): string {
+  if (OFERTA_TESTE_B && ofertaTentativa === OFERTA_TESTE_B) return OFERTA_TESTE_B
+  return OFERTA_RECUPERACAO || OFERTA_FRONT
+}
 
 // Regras de tempo/dedupe: lib/recuperacao-fila.ts (comum à CL-PL).
 
@@ -53,8 +63,9 @@ export function casoDoEvento(evento: string, tipoPagamento: string | undefined):
 // Os TRÊS campos de rastreio da tentativa original voltam no link (purchase.origin.{src,sck,xcod}): o dashboard lê a
 // cadeia do anúncio do `src` (FB|campanha|id|…|placement, formato fixo de 6 ou 8 partes) e do `xcod`; só o `sck` não
 // basta — a venda recuperada chegaria "sem anúncio" (sintoma BC-EN 08/10, regra L0). Conferido 14/10/2026 em vendas reais.
-export function linkCheckout(p: { email?: string; nome?: string; sck?: string; src?: string; xcod?: string }): string {
+export function linkCheckout(p: { email?: string; nome?: string; sck?: string; src?: string; xcod?: string; oferta?: string }): string {
   const u = new URL(CHECKOUT)
+  u.searchParams.set('off', ofertaDoLink(p.oferta))
   for (const [k, v] of Object.entries(PARAMS_FIXOS)) u.searchParams.set(k, v)
   if (p.email) u.searchParams.set('email', p.email)
   if (p.nome) u.searchParams.set('name', p.nome)

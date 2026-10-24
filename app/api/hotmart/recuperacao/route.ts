@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   const caso = casoDoEvento(event, compra?.payment?.type)
   if (!caso) return NextResponse.json({ ok: true, skipped: 'caso' })
-  const link = linkCheckout({ email, nome: buyer?.name, src: compra?.origin?.src, sck: compra?.origin?.sck, xcod: compra?.origin?.xcod })
+  const link = linkCheckout({ email, nome: buyer?.name, src: compra?.origin?.src, sck: compra?.origin?.sck, xcod: compra?.origin?.xcod, oferta: compra?.offer?.code })
   const body = mensagem(caso, { nome: buyer?.name, tipoPagamento: compra?.payment?.type, link })
   const r = await agendarRecuperacao({ phone, email, body })
   if ('skipped' in r) return NextResponse.json({ ok: true, skipped: r.skipped })
