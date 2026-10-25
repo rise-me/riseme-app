@@ -27,7 +27,7 @@ async function statusZapi(): Promise<{ conectado: boolean; detalhe: string }> {
 
 async function avisarPorEmail(detalhe: string, presas: number): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY
-  const para = process.env.ALERTA_EMAIL
+  const para = process.env.ALERTA_EMAIL // um ou mais, separados por vírgula
   if (!apiKey || !para) return false
   const from = process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>'
   const texto = [
@@ -42,7 +42,7 @@ async function avisarPorEmail(detalhe: string, presas: number): Promise<boolean>
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ from, to: [para], subject: '⚠️ WhatsApp do suporte desconectado', text: texto }),
+    body: JSON.stringify({ from, to: para.split(',').map((e: string) => e.trim()).filter(Boolean), subject: '⚠️ WhatsApp do suporte desconectado', text: texto }),
   }).catch(() => null)
   return Boolean(res?.ok)
 }
