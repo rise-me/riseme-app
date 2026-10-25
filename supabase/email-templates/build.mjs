@@ -190,6 +190,7 @@ const TEXT = {
     },
     it: {
       title: 'Conferma il tuo nuovo indirizzo e-mail',
+      subject: 'Conferma la nuova email', // assunto curto: o Supabase recusa assunto > 255 caracteres (25/10/2026)
       h1: 'Conferma il tuo nuovo indirizzo e-mail',
       body: `Hai chiesto di cambiare l'e-mail del tuo account in ${NEW_EMAIL}. Conferma la modifica cliccando sul pulsante qui sotto.`,
       button: 'Conferma il nuovo indirizzo',
@@ -297,6 +298,10 @@ for (const [name, spec] of Object.entries(TEXT)) {
   }
   writeFileSync(join(dir, `${name}.html`), renderTemplate(spec))
   // O assunto é um campo à parte no painel ("Subject heading") — mesma lógica, numa linha
-  const subject = byLocale((l) => spec[l].title).replace(/\n/g, '')
-  console.log(`ok ${name}.html\n   assunto: {{ $l := or .Data.locale "${DEFAULT_LOCALE}" }}${subject}${EMOJI_ASSUNTO[name] ?? ''}`)
+  // Limite do Supabase: assunto <= 255 caracteres (o "it" estourou o email-change em 25/10/2026) → `subject` curto
+  // por idioma quando precisar, e as tags sem espaço interno ({{if …}} vale igual a {{ if … }}).
+  const subject = byLocale((l) => spec[l].subject ?? spec[l].title).replace(/\n/g, '').replace(/\{\{ /g, '{{').replace(/ \}\}/g, '}}')
+  const assunto = `{{$l := or .Data.locale "${DEFAULT_LOCALE}"}}${subject}${EMOJI_ASSUNTO[name] ?? ''}`
+  if ([...assunto].length > 255) throw new Error(`${name}: assunto com ${[...assunto].length} caracteres (> 255 do Supabase)`)
+  console.log(`ok ${name}.html\n   assunto: ${assunto}`)
 }
