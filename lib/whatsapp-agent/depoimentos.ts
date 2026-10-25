@@ -79,6 +79,8 @@ const CONVITE_V1: Record<string, (link: string) => string> = {
       '',
       `👉 ${link}`,
       '',
+      '❤️ E se puoi, metti anche «Mi piace» al post: aiuta altre donne a vederlo. 🥰',
+      '',
       '🎁 Per ringraziarti: mandami qui lo screenshot del tuo commento e riceverai nell\'app un *menu personalizzato in più*.',
     ].join('\n'),
   cs: (link) =>
@@ -186,7 +188,7 @@ const CONVITE_V2: Record<string, (link: string) => string> = {
     [
       'Posso chiederti un piccolo favore? 💛',
       '',
-      'Tante donne vedono il nostro annuncio e pensano: «Sarà affidabile?», «Mi arriverà davvero l\'accesso?». La tua esperienza aiuta moltissimo chi ha questi dubbi.',
+      'Tante donne vedono il nostro annuncio e pensano: «Sarà una cosa seria?», «Mi arriverà davvero l\'accesso?». La tua esperienza aiuta moltissimo chi ha questi dubbi.',
       '',
       'Se puoi, lascia un commento sotto questo post raccontando con parole tue:',
       '• quale dubbio o timore avevi prima di acquistare',

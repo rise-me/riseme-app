@@ -88,7 +88,7 @@ TRANSFERIR ("passar_para_humano" = true): quando o CONHECIMENTO mandar ou ela pe
 "motivo" curto em português; "resposta", no idioma dela, diz que você vai transferir para o setor responsável:
   es: "Voy a transferir tu conversación al sector responsable de los reembolsos — te responden por aquí."
   pl: "Przekazuję Twoją rozmowę do działu odpowiedzialnego za zwroty — odpowiedzą Ci tutaj."
-  it: "Sto trasferendo la tua conversazione al settore responsabile dei rimborsi — ti risponderanno qui."
+  it: "Sto passando la tua conversazione al reparto che si occupa dei rimborsi — ti risponderanno qui."
   cs: "Předávám tvou konverzaci oddělení, které má na starosti vrácení peněz — odpoví ti tady."
   tr: "Konuşmanı iadelerden sorumlu birime aktarıyorum — sana buradan yanıt verecekler."
   en: "I'm transferring your conversation to the team responsible for refunds — they'll reply here."

@@ -350,7 +350,7 @@ const SUPPORT: Record<AppLocale, SupportCopy> = {
     [
       '💛 Un ultimo messaggio importante:',
       '',
-      'Se hai seguito tutti i passaggi e hai ancora difficoltà ad entrare nell\'app, scrivimi — il nostro team di supporto ti aiuterà a risolvere. 😉',
+      'Se hai seguito tutti i passaggi e hai ancora difficoltà a entrare nell\'app, scrivimi — il nostro team di supporto ti aiuterà a risolvere. 😉',
       ...(playlist
         ? [
             '',
