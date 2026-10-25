@@ -267,7 +267,9 @@
     "plLabel": "Polski",
     "plRegion": "Polonia",
     "csLabel": "Čeština",
-    "csRegion": "Chequia"
+    "csRegion": "Chequia",
+    "itLabel": "Italiano",
+    "itRegion": "Italia"
   },
   "help": {
     "title": "Ayuda",

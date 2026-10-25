@@ -267,7 +267,9 @@
     "plLabel": "Polski",
     "plRegion": "Polonya",
     "csLabel": "Čeština",
-    "csRegion": "Çekya"
+    "csRegion": "Çekya",
+    "itLabel": "Italiano",
+    "itRegion": "İtalya"
   },
   "help": {
     "title": "Yardım",

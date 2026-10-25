@@ -70,7 +70,10 @@ PAIS_TO_ISO = {"turquia": "TR", "brasil": "BR", "brazil": "BR", "espanha": "ES",
                "república tcheca": "CZ", "tchéquia": "CZ", "czech republic": "CZ", "czechia": "CZ",
                "česko": "CZ", "eslováquia": "SK", "slovakia": "SK", "alemanha": "DE", "germany": "DE",
                "áustria": "AT", "austria": "AT", "reino unido": "GB", "united kingdom": "GB",
-               "irlanda": "IE", "ireland": "IE"}
+               "irlanda": "IE", "ireland": "IE",
+               # CL-IT (Hotmart, 25/10/2026): Itália + Suíça e San Marino
+               "itália": "IT", "italia": "IT", "italy": "IT", "suíça": "CH", "suica": "CH", "switzerland": "CH",
+               "san marino": "SM"}
 
 # Relatório de Vendas da Hotmart (.csv com ';') → mesmos nomes de coluna do relatório da
 # Perfect Pay, pra filtro, dedupe e fila serem um só.

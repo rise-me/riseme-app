@@ -267,7 +267,9 @@
     "plLabel": "Polski",
     "plRegion": "Polsko",
     "csLabel": "Čeština",
-    "csRegion": "Česko"
+    "csRegion": "Česko",
+    "itLabel": "Italiano",
+    "itRegion": "Itálie"
   },
   "help": {
     "title": "Nápověda",

@@ -18,6 +18,8 @@ const COUNTRY_TO_DDI: Record<string, string> = {
   GT: '502', SV: '503', HN: '504', NI: '505', CR: '506', PA: '507', DO: '1', PR: '1',
   // CL-CZ (Hotmart, euro): Tchéquia + países da diáspora que o funil oferece na tela 4.
   CZ: '420', SK: '421', DE: '49', AT: '43', GB: '44', IE: '353',
+  // CL-IT (Hotmart, euro): Italia + Svizzera e San Marino (italofone vicine).
+  IT: '39', CH: '41', SM: '378',
 }
 
 // Locales de país ÚNICO → DDI (fallback quando o payload não traz `country`).
@@ -26,6 +28,7 @@ const LOCALE_TO_DDI: Record<string, string> = {
   tr: '90',
   pl: '48',
   cs: '420',
+  it: '39',
   'pt-BR': '55',
 }
 

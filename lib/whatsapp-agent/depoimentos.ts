@@ -71,6 +71,16 @@ const CONVITE_V1: Record<string, (link: string) => string> = {
       '',
       '🎁 W podziękowaniu: wyślij mi tutaj zrzut ekranu swojego komentarza, a dostaniesz w aplikacji *dodatkowy spersonalizowany jadłospis*.',
     ].join('\n'),
+  it: (link) =>
+    [
+      'Posso chiederti un piccolo favore? 💛',
+      '',
+      "Se puoi, lascia un commento sotto questo post raccontando con parole tue che il tuo accesso è arrivato senza problemi e com'è andato l'acquisto. Aiuta moltissimo le altre donne che hanno dei dubbi.",
+      '',
+      `👉 ${link}`,
+      '',
+      '🎁 Per ringraziarti: mandami qui lo screenshot del tuo commento e riceverai nell\'app un *menu personalizzato in più*.',
+    ].join('\n'),
   cs: (link) =>
     [
       'Můžu tě poprosit o malou laskavost? 💛',
@@ -171,6 +181,22 @@ const CONVITE_V2: Record<string, (link: string) => string> = {
       "❤️ A jeśli możesz, polub też ten post: dzięki temu inne kobiety też go zobaczą. 🥰",
       '',
       '🎁 W podziękowaniu odblokuję Ci w aplikacji *dodatkowy spersonalizowany jadłospis*, całkowicie za darmo. Wyślij mi tylko tutaj zrzut ekranu komentarza, żebym mogła to potwierdzić.',
+    ].join('\n'),
+  it: (link) =>
+    [
+      'Posso chiederti un piccolo favore? 💛',
+      '',
+      'Tante donne vedono il nostro annuncio e pensano: «Sarà affidabile?», «Mi arriverà davvero l\'accesso?». La tua esperienza aiuta moltissimo chi ha questi dubbi.',
+      '',
+      'Se puoi, lascia un commento sotto questo post raccontando con parole tue:',
+      '• quale dubbio o timore avevi prima di acquistare',
+      "• com'è stato quando è arrivato il tuo accesso",
+      '',
+      `👉 ${link}`,
+      '',
+      '❤️ E se puoi, metti anche «Mi piace» al post: aiuta altre donne a vederlo. 🥰',
+      '',
+      "🎁 Per ringraziarti, ti sblocco nell'app un *menu personalizzato in più*, completamente gratis. Mandami qui lo screenshot del tuo commento così lo confermo.",
     ].join('\n'),
   cs: (link) =>
     [

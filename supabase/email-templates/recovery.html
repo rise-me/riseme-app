@@ -10,6 +10,8 @@
     <title>Zresetuj hasło</title>
 {{ else if eq $l "cs" }}
     <title>Obnov si heslo</title>
+{{ else if eq $l "it" }}
+    <title>Reimposta la tua password</title>
 {{ else }}
     <title>Recupera tu contraseña</title>
 {{ end }}
@@ -141,6 +143,46 @@
                 </p>
                 <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
                   S láskou,<br />Tým RiseMe
+                </p>
+              </td>
+            </tr>
+{{ else if eq $l "it" }}
+            <tr>
+              <td style="padding:8px 40px 8px 40px;">
+                <h1 style="margin:0; font-size:28px; line-height:1.2; font-weight:800; color:#171717;">Reimposta la tua password</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 8px 40px;">
+                <p style="margin:0; font-size:16px; line-height:1.6; color:#262626;">
+                  Abbiamo ricevuto una richiesta per reimpostare la tua password. Clicca sul pulsante qui sotto per crearne una nuova.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 8px 40px;">
+                <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery" style="display:inline-block; background-color:#171717; color:#FFFFFF; text-decoration:none; font-weight:700; font-size:16px; padding:16px 32px; border-radius:999px;">
+                  Reimposta la password
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 24px 40px;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  Se il pulsante non funziona, copia questo link e incollalo nel browser:
+                </p>
+                <p style="margin:8px 0 0 0; font-size:12px; line-height:1.5; color:#171717; word-break:break-all;">
+                  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery" style="color:#171717; text-decoration:underline;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 40px 40px; border-top:1px solid #E8E2D5;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  Se non sei stata tu a fare questa richiesta, puoi ignorare questa e-mail. La tua password attuale continuerà a funzionare.
+                </p>
+                <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  Con affetto,<br />Il team RiseMe
                 </p>
               </td>
             </tr>

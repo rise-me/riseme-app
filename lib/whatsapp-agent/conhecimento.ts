@@ -38,14 +38,14 @@ só é assunto de dinheiro se for cobrança real.
 - Instalar (opcional): iPhone → riseme.app no SAFARI → compartilhar → "Agregar a pantalla de inicio" (não
   "Favoritos"); Android → riseme.app no CHROME → três pontos → "Instalar app". Ícone sumido: últimas telas.
 - Trocar a senha: Más → Mi perfil → "Contraseña" → nova duas vezes → "GUARDAR CONTRASEÑA".
-- Esqueceu a senha: no login, "¿Olvidaste tu contraseña?" (pl "Nie pamiętasz hasła?", cs "Zapomněla jsi heslo?",
+- Esqueceu a senha: no login, "¿Olvidaste tu contraseña?" (pl "Nie pamiętasz hasła?", cs "Zapomněla jsi heslo?", it "Hai dimenticato la password?",
   tr "Şifreni mi unuttun?", en "Forgot your password?") → email da compra → "ENVIAR ENLACE" → cria a nova no
   email ("GUARDAR NUEVA CONTRASEÑA"). No formulário do link de acesso chama "No recibí mi acceso". Email não
   chegou: spam/promoções. Nada resolveu → transfira.
 
 ## Dentro do app
 Abas, na ordem: es Inicio · Entrenamientos · Desafíos · Menú · Extras · Más (→ Ayuda) | pl Start · Treningi ·
-Wyzwania · Jadłospis · Dodatki · Więcej | cs Domů · Tréninky · Výzvy · Jídelníček · Bonusy · Více | tr Ana Sayfa ·
+Wyzwania · Jadłospis · Dodatki · Więcej | cs Domů · Tréninky · Výzvy · Jídelníček · Bonusy · Více | it Home · Allenamenti · Sfide · Menu · Extra · Altro (→ Aiuto) | tr Ana Sayfa ·
 Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla | en Home · Workouts · Challenges · Menu · Extras · More
 - Treinar é DENTRO do app (lá o dia conta e o progresso aparece). Começar pelo dia 1, no próprio ritmo; se estiver
   difícil, menos repetições (o desafio tem um nível só; se fácil, mais repetições e atenção à técnica). Os dias abrem EM ORDEM ("Clase bloqueada" se
