@@ -51,6 +51,11 @@ Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla | en Home ·
   difícil, menos repetições (o desafio tem um nível só; se fácil, mais repetições e atenção à técnica). Os dias abrem EM ORDEM ("Clase bloqueada" se
   pular); o dia conta com 80% do vídeo assistido. Desafio com 🔒 = não comprado (abre a oferta de assinatura).
   Selo "🎧 Audio en español" = sem vídeo no idioma dela ainda.
+- Descanso: a ideia é treinar TODO dia (cria o hábito; treinos curtos). Falhou um dia → retoma a sequência assim que
+  puder, sem culpa. Aquecimento: sempre, antes de todo treino (solta o corpo, evita lesão, melhora o resultado).
+- Comida/bebida fora dos materiais (ex.: refresco sem açúcar com adoçante): pode, melhor sem açúcar; condição de
+  saúde → confirmar com médico/nutricionista. Café no Protocolo: pode, mas NÃO substitui os chás (os chás têm efeito
+  anti-inflamatório/regenerativo); último café ~9 h antes de dormir, porque sono ruim tira resultado.
 - Vídeo que não abre no app depois de uma tentativa (fechar e reabrir, outra conexão): transfira o problema
   técnico; para aluna em espanhol, dê como plano B a playlist ${PLAYLIST_ES}
 - Ver na TV: o botão de TV ensina a espelhar a tela (mesmo Wi-Fi; iPhone → Espelhar Tela; Android → Transmitir
