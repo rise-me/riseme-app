@@ -13,6 +13,22 @@ const MESES_PRESENTE_DIAS = 90
 const POR_HORA = 8 // convites por rodada (1x/hora): base atual (~290) entra aos poucos, sem rajada no chip
 const BUCKET = 'depoimentos'
 export const KIND_CONVITE = 'video-convite'
+const HORA_INICIO = 9 // convite só de dia NO FUSO DELA (25/10: saíam de madrugada, 8/h a noite toda)
+const HORA_FIM = 21
+
+// Fuso pelo DDI do telefone; país fora da lista → México (maior base).
+const FUSO_DDI: [string, string][] = [
+  ['593', 'America/Guayaquil'], ['591', 'America/La_Paz'], ['595', 'America/Asuncion'], ['598', 'America/Montevideo'],
+  ['502', 'America/Guatemala'], ['503', 'America/El_Salvador'], ['504', 'America/Tegucigalpa'], ['505', 'America/Managua'],
+  ['506', 'America/Costa_Rica'], ['507', 'America/Panama'], ['52', 'America/Mexico_City'], ['57', 'America/Bogota'],
+  ['51', 'America/Lima'], ['56', 'America/Santiago'], ['54', 'America/Argentina/Buenos_Aires'], ['58', 'America/Caracas'],
+  ['34', 'Europe/Madrid'], ['48', 'Europe/Warsaw'], ['1', 'America/New_York'],
+]
+
+function horaLocal(tel: string): number {
+  const tz = FUSO_DDI.find(([ddi]) => tel.startsWith(ddi))?.[1] ?? 'America/Mexico_City'
+  return Number(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', hourCycle: 'h23' }).format(new Date()))
+}
 
 const CONVITE: Record<string, (nome: string, dias: number) => string> = {
   es: (nome, dias) =>
@@ -73,6 +89,8 @@ export async function convidarParaVideo(): Promise<number> {
     if (!tel || convidadas.has(tel.slice(-9))) continue
     const idioma = tel.startsWith('48') ? 'pl' : tel.startsWith('90') || tel.startsWith('420') ? null : 'es'
     if (!idioma) continue
+    const hora = horaLocal(tel)
+    if (hora < HORA_INICIO || hora >= HORA_FIM) continue // de noite lá: fica pra uma rodada de dia
     if ((await pediuParaParar(tel)) || (await estaComProblema(tel))) continue
     const nome = (u?.name ?? '').trim().split(/\s+/)[0] ?? ''
     const nomeBonito = nome ? nome[0].toUpperCase() + nome.slice(1).toLowerCase() : ''

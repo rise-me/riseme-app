@@ -11,7 +11,7 @@ export default async function ChallengesPage({
   const { locale } = await params
   const [access, { progressByChallenge, activeChallengeId }] = await Promise.all([
     getUserAccess(),
-    getProgressSummary(),
+    getProgressSummary(locale),
   ])
 
   const challenges: MockChallenge[] = mockChallenges.map((c) => {

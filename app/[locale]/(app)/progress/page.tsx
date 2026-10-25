@@ -8,44 +8,9 @@ import { getCurrentUser } from '@/lib/current-user-server'
 import { WaterTracker } from '@/components/home/WaterTracker'
 import { FirstAccessNotice } from '@/components/home/FirstAccessNotice'
 import { IndicaAmiga } from '@/components/home/IndicaAmiga'
+import { diaNoFuso, fusoDaAluna, numeroDoDia, sequenciaDeDias } from '@/lib/dias'
 
 const MINUTES_PER_DAY_AVG = 20
-
-function startOfLocalDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
-function daysBetween(a: Date, b: Date) {
-  return Math.round((startOfLocalDay(a).getTime() - startOfLocalDay(b).getTime()) / 86400000)
-}
-
-function computeStreak(completedDates: Date[]): number {
-  if (completedDates.length === 0) return 0
-  const uniqueDays = Array.from(
-    new Set(completedDates.map((d) => startOfLocalDay(d).getTime()))
-  )
-    .map((t) => new Date(t))
-    .sort((a, b) => b.getTime() - a.getTime())
-
-  const today = startOfLocalDay(new Date())
-  let streak = 0
-  let cursor = today
-  const firstDiff = daysBetween(today, uniqueDays[0])
-  if (firstDiff > 1) return 0
-  if (firstDiff === 1) cursor = new Date(today.getTime() - 86400000)
-
-  for (const day of uniqueDays) {
-    if (daysBetween(cursor, day) === 0) {
-      streak++
-      cursor = new Date(cursor.getTime() - 86400000)
-    } else if (daysBetween(cursor, day) < 0) {
-      continue
-    } else {
-      break
-    }
-  }
-  return streak
-}
 
 // Primeiro nome apresentável a partir do nome do checkout ("ÖMÜR GÜREL" -> "Ömür").
 // toLocale* respeita regras do idioma (ex.: İ/i do turco). Sem nome real -> null.
@@ -64,26 +29,25 @@ export default async function ProgressPage({
   const { locale } = await params
   const t = await getTranslations('progress')
   const tData = await getTranslations('challengeData')
-  const [progress, user] = await Promise.all([
+  const [progress, user, tz] = await Promise.all([
     getAllProgressForUser(),
     getCurrentUser(),
+    fusoDaAluna(locale),
   ])
 
   const greetName = firstNameForGreeting(user?.realName ?? null, locale)
 
   const WEEK_DAYS = t('weekDays').split(',')
 
-  const completedDates = progress.map((p) => new Date(p.completed_at))
   const totalCompleted = progress.length
-  const streak = computeStreak(completedDates)
+  const streak = sequenciaDeDias(progress.map((p) => new Date(p.completed_at)), tz)
 
-  const today = startOfLocalDay(new Date())
-  const todayIndex = today.getDay()
-  const thisWeekStart = new Date(today.getTime() - todayIndex * 86400000)
+  const todayKey = diaNoFuso(new Date(), tz)
+  const todayIndex = new Date(`${todayKey}T00:00:00Z`).getUTCDay()
+  const thisWeekStart = numeroDoDia(todayKey) - todayIndex
   const weekCompleted = new Set<number>()
   for (const p of progress) {
-    const d = startOfLocalDay(new Date(p.completed_at))
-    const diff = daysBetween(d, thisWeekStart)
+    const diff = numeroDoDia(diaNoFuso(new Date(p.completed_at), tz)) - thisWeekStart
     if (diff >= 0 && diff <= 6) weekCompleted.add(diff)
   }
   type DayStatus = 'done' | 'today-done' | 'today' | 'missed' | 'upcoming'
@@ -94,11 +58,10 @@ export default async function ProgressPage({
     return 'upcoming'
   })
 
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
   const monthDays = new Set(
     progress
-      .filter((p) => new Date(p.completed_at) >= monthStart)
-      .map((p) => startOfLocalDay(new Date(p.completed_at)).toISOString())
+      .map((p) => diaNoFuso(new Date(p.completed_at), tz))
+      .filter((dia) => dia.slice(0, 7) === todayKey.slice(0, 7))
   )
 
   const progressByChallenge = new Map<string, number>()
