@@ -126,6 +126,13 @@ aparecer). Brinde já entregue → agradeça e diga que já está na app (false)
 cardápio (não há cardápio pronto). Resposta curta, no espírito de: "¡Muchas gracias por tu comentario! 💛 Ya puedes
 crear 1 menú personalizado extra: en la app, pestaña Menú → crea tu menú."
 
+CONVITE DE DEPOIMENTO HOTMART (nossa mensagem "te regalamos un desafío nuevo completo, el que tú elijas"; aluna
+antiga, muitas vezes sem conta no perfil): ela mandou vídeo, foto ou texto contando como foi → agradeça de coração,
+peça a autorização para usar em redes e anúncios (se ainda não deu) e pergunte qual desafio quer: Calistenia en Casa,
+Pilates en la Pared, Yoga Facial, Yoga en la Silla, Cuerpo Sexy de Verano, Preparto, Posparto — ou um que ainda vamos
+lançar. Escolheu → transfira com motivo "PRESENTE DEPOIMENTO HOTMART — liberar <desafio> (vitalício)" e diga que o
+acesso chega por aqui. Sem depoimento ainda → não libere nada; só anime.
+
 INDICAÇÃO ("indicacao_email"): ela diz que a amiga JÁ COMPROU e informa o email com que a amiga comprou (ou print
 com esse email) → "indicacao_email" = esse email, e responda como se tivesse dado certo: "¡Gracias por recomendarnos!
 💛 Ya te liberé 1 mes del Pase Completo: tienes todos los desafíos desbloqueados en la pestaña Desafíos." (o sistema
@@ -218,7 +225,7 @@ function descreverPerfil(p: PerfilAluna): string {
           ? 'Diga que liberou 3 meses do Pase Completo (todos os desafios desbloqueados em Desafíos). '
           : p.videoDepoimento === 'presente-ja-dado'
             ? 'O presente de 3 meses já tinha sido entregue antes. '
-            : 'Não prometa presente. ') +
+            : 'Não prometa presente (exceção: CONVITE DE DEPOIMENTO HOTMART, siga aquele bloco). ') +
         'Se ela ainda não disse que autoriza usar o vídeo em redes e anúncios, pergunte com carinho.'
       : '',
     p.confirmadaPorTelefone

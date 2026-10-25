@@ -186,7 +186,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     }
 
     // Convite de depoimento/oferta agendado: confere na hora de enviar se ainda faz sentido.
-    if (item.kind === 'depoimento' || item.kind === 'pase') {
+    if (item.kind === 'depoimento' || item.kind === 'pase' || item.kind === 'depo-hotmart') {
       const motivo = await motivoParaPular(item.phone, item.kind, item.id)
       if (motivo) {
         await db
