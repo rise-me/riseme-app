@@ -95,8 +95,13 @@ TRANSFERIR ("passar_para_humano" = true): quando o CONHECIMENTO mandar ou ela pe
   pt: "Vou transferir sua conversa para o setor responsável pelos reembolsos — eles te respondem por aqui."
 Preencha também, em PORTUGUÊS: "consulta_resumo" (1–2 frases com os dados úteis: email, produto, o que já
 tentou) e "consulta_opcao_a"/"consulta_opcao_b" (duas respostas realmente DIFERENTES que poderiam ir para ela,
-2–4 frases cada; sem inventar política — se depende de regra que você não conhece, escreva como proposta). Sem
-transferir, os três ficam "".
+2–4 frases cada; sem inventar política — se depende de regra que você não conhece, escreva como proposta). Opção
+que diz que algo JÁ FOI FEITO na conta (email trocado, produto liberado, acesso reenviado, reembolso) começa com
+"[FAZER ANTES: <comando>]", entre: "troca o email de <atual> para <novo>", "libera o <produto> para <email>",
+"reenvia o acesso de <email>", "dá um cardápio extra para <email>" ou "reembolsar no painel" (ex.: "[FAZER ANTES:
+troca o email de a@x.com para b@y.com] Ya corregimos tu correo…"). Sem transferir, os três ficam "".
+Nunca diga à aluna que você ou nós JÁ fizemos algo na conta (trocar email, liberar, reenviar, reembolsar) se o
+sistema não fez: o que só o setor faz, diga que está com o setor.
 Depois de transferir a conversa continua com você: responda tudo o que souber. No MESMO assunto ainda sem resposta,
 diga em uma frase que já está com o setor e que respondem por aqui (sem repetir "vou transferir"). Exceção:
 pedido de reembolso repetido segue a regra de reembolso do CONHECIMENTO, nunca "já está com o setor".
@@ -249,6 +254,7 @@ export async function decidirResposta(params: {
   conversa: MensagemConversa[] // ordem cronológica, termina na(s) mensagem(ns) da aluna
   agora: string
   aprendizados?: Aprendizado[]
+  conviteHotmart?: { presente: string | null } | null // recebeu o convite Hotmart (lib/whatsapp-agent/prova-social.ts)
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -275,12 +281,18 @@ export async function decidirResposta(params: {
       params.aprendizados!.map((a, i) => `${i + 1}. Pergunta: ${a.pergunta}\n   Resposta: ${a.resposta}`).join('\n')
     : ''
 
-  const contexto = params.perfil
+  const convite = params.conviteHotmart
+    ? '\nELA RECEBEU O CONVITE DE DEPOIMENTO HOTMART (mesmo que a mensagem não apareça na conversa abaixo): o presente ' +
+      'prometido é UM DESAFIO COMPLETO À ESCOLHA DELA — siga o bloco CONVITE DE DEPOIMENTO HOTMART. O cardápio extra do ' +
+      'print de comentário é outra coisa e NUNCA substitui o desafio; nunca diga que o presente é "só o menu". ' +
+      (params.conviteHotmart.presente ? `Presente JÁ LIBERADO (${params.conviteHotmart.presente}): não libere outro.` : 'Presente ainda não liberado.')
+    : ''
+  const contexto = (params.perfil
     ? descreverPerfil(params.perfil)
     : 'Este número NÃO corresponde a nenhuma conta (comprou com outro telefone, ou não é aluna). ' +
       'Se a dúvida é das que você resolve (acesso, instalar o app, onde fica algo), peça o email usado na ' +
       'compra: o sistema acha a conta sozinho quando ela mandar. Se ela JÁ mandou um email e ainda assim não ' +
-      'há conta, ou se o assunto é para o setor responsável, transfira.'
+      'há conta, ou se o assunto é para o setor responsável, transfira.') + convite
 
   const p = params.perfil
   const temProtocolo = Boolean(p?.confirmadaPorTelefone && p.liberados.includes('Protocolo Metabólico'))
@@ -402,6 +414,11 @@ export async function redigirRespostaAprovada(params: {
       'para <email>", "reenvia o acesso de <email>", "troca o email de <email> para <novo>", "dá um cardápio extra para ' +
       '<email>" — e que depois responda a consulta de novo. Nunca deixe a nota vazia. Só marque "enviar" = true ' +
       'quando dá para mandar à aluna exatamente o que ele decidiu; aí "nota_ao_responsavel" = "".\n' +
+      '- Opção escolhida que começa com "[FAZER ANTES: …]": ela diz à aluna que algo já foi feito na conta. Só envie se a ' +
+      'resposta dele disser que já fez ("feito", "já troquei", "liberei", "A, já fiz") ou se a conversa mostrar o sistema ' +
+      'fazendo. Só a letra ("A") NÃO basta (26/10: a aluna ouviu "ya corregimos tu correo" e ninguém tinha trocado): ' +
+      '"enviar" = false e a nota diz qual comando mandar (o do colchete) e que depois responda "#N feito, A". Nunca ' +
+      'copie o colchete para a mensagem da aluna.\n' +
       '- "mensagem": no idioma em que ELA escreve (nunca misture idiomas), tom de atendente calorosa e direta, ' +
       'blocos curtos separados por linha em branco, no máximo um emoji, sem saudação se a conversa já está em ' +
       'andamento. Diga exatamente o que ele orientou — não acrescente promessa, prazo, valor ou regra que ele não ' +

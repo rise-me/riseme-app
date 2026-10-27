@@ -6,7 +6,7 @@ import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { creditarIndicacao, textoIndicacaoFalhou } from '@/lib/whatsapp-agent/indicacao'
 import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
-import { contaDaConvidadaHotmart, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
+import { contaDaConvidadaHotmart, conviteHotmartDela, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
@@ -283,7 +283,8 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
 
   let decisao: Awaited<ReturnType<typeof decidirResposta>>
   try {
-    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos() })
+    const conviteHotmart = await conviteHotmartDela(phone).catch(() => null)
+    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
     // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).

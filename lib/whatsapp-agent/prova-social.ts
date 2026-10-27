@@ -30,6 +30,17 @@ export async function marcarDepoimentoNoPost(phone: string): Promise<void> {
   if (tag) await etiquetar(phone, tag)
 }
 
+/**
+ * Ela recebeu o convite Hotmart? (o convite sai do histórico de 30 mensagens rápido; 27/10: o agente disse à Lucy
+ * que o presente era só o cardápio). null = não foi convidada; presente = o desafio já liberado, se houver.
+ */
+export async function conviteHotmartDela(phone: string): Promise<{ presente: string | null } | null> {
+  const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
+  const { data } = await admin().from('whatsapp_outbox').select('kind, body').in('phone', formas).in('kind', ['depo-hotmart', 'presente-depoimento']).not('sent_at', 'is', null)
+  if (!data?.some((r) => r.kind === 'depo-hotmart')) return null
+  return { presente: data.find((r) => r.kind === 'presente-depoimento')?.body ?? null }
+}
+
 export type ResultadoPresente = 'liberado' | 'ja-tinha' | 'futuro' | 'sem-dados' | 'erro'
 
 async function contaPorEmail(email: string): Promise<string | null> {
