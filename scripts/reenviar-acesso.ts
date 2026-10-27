@@ -17,21 +17,14 @@ import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { aberturaReenvio, mensagensDeAcesso } from '@/lib/whatsapp-access'
 import { enfileirar } from '@/lib/whatsapp-outbox'
 import { admin } from '@/lib/whatsapp-agent/conversa'
-import { toZapiPhone } from '@/lib/zapi'
+import { temWhatsApp, toZapiPhone } from '@/lib/zapi'
 
 const APP_URL = 'https://riseme.app'
 const WHATSAPP_NO_AR = '2026-10-04T15:00:00Z'
 
 
-// Número mal formado (DDI duplicado, dígito sobrando) não pode receber senha: pergunta à Z-API.
-async function temWhatsApp(phone: string): Promise<boolean> {
-  const r = await fetch(
-    `https://api.z-api.io/instances/${process.env.ZAPI_INSTANCE_ID}/token/${process.env.ZAPI_TOKEN}/phone-exists/${toZapiPhone(phone)}`,
-    { headers: process.env.ZAPI_CLIENT_TOKEN ? { 'Client-Token': process.env.ZAPI_CLIENT_TOKEN } : {} }
-  )
-  if (!r.ok) throw new Error(`phone-exists ${r.status}`)
-  return Boolean(((await r.json()) as { exists?: boolean }).exists)
-}
+// Número mal formado (DDI duplicado, dígito sobrando) não pode receber senha. Sem a chave da Z-API aqui
+// (ela só existe no servidor, 27/10/2026), a fila confere na hora de enviar e pula o acesso-retro.
 
 function arg(nome: string, padrao?: string): string | undefined {
   const i = process.argv.indexOf(`--${nome}`)
@@ -71,7 +64,7 @@ async function main() {
     if (!count) { pular('sem acesso (reembolso?)'); continue }
     const { data: auth } = await db.auth.admin.getUserById(p.id)
     if (auth?.user?.last_sign_in_at) { pular('já entrou no app'); continue }
-    if (!(await temWhatsApp(p.phone))) { pular('número sem WhatsApp (mal formado?)'); continue }
+    if ((await temWhatsApp(p.phone)) === false) { pular('número sem WhatsApp (mal formado?)'); continue }
     alvos.push({
       id: p.id,
       email: p.email,

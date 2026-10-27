@@ -68,6 +68,18 @@ async function zapiCall(method: 'POST' | 'PUT', path: string, body?: unknown): P
   }
 }
 
+/** O número tem WhatsApp? null = não deu para perguntar (sem env ou Z-API fora). */
+export async function temWhatsApp(phone: string): Promise<boolean | null> {
+  const instance = process.env.ZAPI_INSTANCE_ID
+  const token = process.env.ZAPI_TOKEN
+  if (!instance || !token) return null
+  const headers: Record<string, string> = {}
+  if (process.env.ZAPI_CLIENT_TOKEN) headers['Client-Token'] = process.env.ZAPI_CLIENT_TOKEN
+  const res = await fetch(`https://api.z-api.io/instances/${instance}/token/${token}/phone-exists/${toZapiPhone(phone)}`, { headers }).catch(() => null)
+  if (!res?.ok) return null
+  return Boolean(((await res.json().catch(() => ({}))) as { exists?: boolean }).exists)
+}
+
 /** Marca a conversa como não lida (aparece como pendente no celular do suporte). */
 export function marcarNaoLida(phone: string) {
   return zapiCall('POST', 'modify-chat', { phone, action: 'unread' })

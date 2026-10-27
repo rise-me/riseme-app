@@ -2,7 +2,7 @@
 // o cron /api/whatsapp/outbox (a cada minuto) chama processarFila(), que envia o que
 // venceu, registra no histórico como 'system' e apaga a senha do body depois do envio.
 
-import { sendZapiText, toZapiPhone } from '@/lib/zapi'
+import { sendZapiText, temWhatsApp, toZapiPhone } from '@/lib/zapi'
 import { admin, registrarMensagem, variantesTelefone } from '@/lib/whatsapp-agent/conversa'
 import { decidirResposta } from '@/lib/whatsapp-agent/responder'
 
@@ -195,6 +195,15 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
           .eq('id', item.id)
         continue
       }
+    }
+
+    // Reenvio de acesso (scripts/reenviar-acesso.ts): número mal formado não recebe senha. A conferência
+    // é aqui porque a chave da Z-API só existe no servidor; pula também a msg de apoio que depende dela.
+    if (item.kind === 'acesso-retro' && (await temWhatsApp(item.phone)) === false) {
+      const pulo = { attempts: MAX_TENTATIVAS, last_error: 'pulado: número sem WhatsApp', claimed_at: null }
+      await db.from('whatsapp_outbox').update(pulo).eq('id', item.id)
+      await db.from('whatsapp_outbox').update(pulo).eq('depends_on', item.id).is('sent_at', null)
+      continue
     }
 
     // 'etiquetar-prova' não manda nada: põe a etiqueta "⭐ Enviou prova social" numa conversa antiga (o registro
