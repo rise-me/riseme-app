@@ -70,11 +70,11 @@ export async function registrarPedidoParaParar(phone: string): Promise<void> {
 }
 
 /** Linha inerte (já "enviada") que só registra um fato: opt-out, brinde entregue… — a fila ignora. */
-export async function marcarNaFila(phone: string, kind: string): Promise<void> {
+export async function marcarNaFila(phone: string, kind: string, body = ''): Promise<void> {
   const agora = new Date().toISOString()
   await admin()
     .from('whatsapp_outbox')
-    .insert({ phone: phone.replace(/\D/g, ''), kind, body: '', send_after: agora, sent_at: agora })
+    .insert({ phone: phone.replace(/\D/g, ''), kind, body, send_after: agora, sent_at: agora })
 }
 
 // Não manda convite/oferta para quem pediu para parar, já recebeu um igual (por qualquer forma do número),
@@ -195,6 +195,15 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
           .eq('id', item.id)
         continue
       }
+    }
+
+    // 'etiquetar-prova' não manda nada: põe a etiqueta "⭐ Enviou prova social" numa conversa antiga (o registro
+    // retroativo é feito daqui porque a chave da Z-API só existe no servidor; 26/10/2026).
+    if (item.kind === 'etiquetar-prova') {
+      const { marcarProvaSocial } = await import('@/lib/whatsapp-agent/prova-social')
+      await marcarProvaSocial(item.phone, item.body)
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1 }).eq('id', item.id)
+      continue
     }
 
     // 'teste-agente' não manda nada: roda o agente num caso de teste (body = JSON {perfil, msgs}) e grava a decisão

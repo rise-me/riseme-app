@@ -6,6 +6,7 @@ import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { creditarIndicacao, textoIndicacaoFalhou } from '@/lib/whatsapp-agent/indicacao'
 import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
+import { liberarPresenteHotmart, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
@@ -344,6 +345,27 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
         consulta: { resumo: `Aluna indicou uma amiga que comprou (${decisao.indicacaoEmail}); o sistema falhou ao liberar 1 mês do Pase.`, opcaoA: 'Liberar 1 mês do Pase à mão e avisar a aluna.', opcaoB: 'Pedir o email exato com que a amiga comprou.' },
       }
     }
+  }
+
+  // Presente do convite às alunas da área de membros Hotmart (Bruno, 26/10): mandou o depoimento e escolheu o
+  // desafio → libera ANTES de enviar (a resposta do agente já diz que está liberado). Falhou → avisa e vira consulta.
+  if (decisao.tipo === 'responder' && decisao.presenteDesafio) {
+    const r = await liberarPresenteHotmart({ phone, userId, desafio: decisao.presenteDesafio })
+    await dizerAoResponsavel(`🎁 Presente do depoimento (Hotmart) — ${perfil?.nome ?? 'aluna'} (+${phone.replace('@lid', '')}): desafio ${decisao.presenteDesafio} → ${r}`)
+    if (r === 'sem-dados' || r === 'erro') {
+      decisao = {
+        tipo: 'humano',
+        texto: '¡Muchas gracias! 💛 Voy a revisar tu correo aquí y enseguida te libero todo. Si no lo encuentro, te escribo para pedirte otro correo.',
+        motivo: `PRESENTE DEPOIMENTO HOTMART — liberar desafio ${decisao.presenteDesafio} (vitalício): o sistema não achou a conta/compra (${r})`,
+        consulta: { resumo: `Aluna do convite Hotmart mandou o depoimento e escolheu o desafio ${decisao.presenteDesafio}; o sistema não conseguiu liberar (${r}).`, opcaoA: 'Achar a conta/compra e liberar o desafio.', opcaoB: 'Pedir a ela o email da compra.' },
+      }
+    }
+  }
+
+  // Prova social (foto de resultado, vídeo, depoimento escrito) → etiqueta no WhatsApp + registro para achar depois.
+  if (urlVideo || (decisao.tipo === 'responder' && decisao.provaSocial)) {
+    const dela = conversa.slice(ultimaNossa + 1).map((m) => m.texto).join(' / ')
+    await marcarProvaSocial(phone, dela).catch((err) => console.error(`[prova-social] falhou (${phone}):`, err))
   }
 
   if (decisao.texto && !(silencioso && decisao.tipo === 'humano')) {

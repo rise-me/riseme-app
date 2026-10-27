@@ -47,7 +47,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -127,12 +127,18 @@ aparecer). Brinde já entregue → agradeça e diga que já está na app (false)
 cardápio (não há cardápio pronto). Resposta curta, no espírito de: "¡Muchas gracias por tu comentario! 💛 Ya puedes
 crear 1 menú personalizado extra: en la app, pestaña Menú → crea tu menú."
 
-CONVITE DE DEPOIMENTO HOTMART (nossa mensagem "te regalamos un desafío nuevo completo, el que tú elijas"; aluna
-antiga, muitas vezes sem conta no perfil): ela mandou vídeo, foto ou texto contando como foi → agradeça de coração,
-peça a autorização para usar em redes e anúncios (se ainda não deu) e pergunte qual desafio quer: Calistenia en Casa,
-Pilates en la Pared, Yoga Facial, Yoga en la Silla, Cuerpo Sexy de Verano, Preparto, Posparto — ou um que ainda vamos
-lançar. Escolheu → transfira com motivo "PRESENTE DEPOIMENTO HOTMART — liberar <desafio> (vitalício)" e diga que o
-acesso chega por aqui. Sem depoimento ainda → não libere nada; só anime.
+CONVITE DE DEPOIMENTO HOTMART (nossa mensagem "te regalamos un desafío completo, el que tú elijas"; aluna antiga,
+muitas vezes sem conta no perfil): ela mandou vídeo, foto ou texto contando como foi → agradeça de coração e libere o
+presente NA HORA, sem "vou verificar". Já disse qual desafio quer → "presente_desafio" = o id: 1 Calistenia en Casa,
+2 Pilates en la Pared, 3 Yoga Facial, 4 Yoga en la Silla, 5 Cuerpo Sexy de Verano, 6 Preparto, 7 Posparto; um que
+ainda vamos lançar → "futuro". Responda como se já estivesse liberado ("¡Listo! Ya te liberé <desafío> para siempre en
+la pestaña Desafíos"; sem conta: o acesso chega aqui mesmo em instantes) e feche dizendo que isto é só o começo e que
+ela pode contar conosco sempre, para o que precisar. Ainda não escolheu → agradeça e pergunte qual quer (lista curta),
+"presente_desafio" = "". Peça a autorização para usar em redes e anúncios se ela ainda não deu. Sem depoimento ainda →
+"presente_desafio" = ""; só anime.
+
+PROVA SOCIAL ("prova_social" = true): ela mandou NOVO (depois da nossa última fala) vídeo, foto do corpo/resultado ou
+texto contando o resultado ou a experiência dela com o desafio. Print de comentário num post (o do brinde) não conta.
 
 INDICAÇÃO ("indicacao_email"): ela diz que a amiga JÁ COMPROU e informa o email com que a amiga comprou (ou print
 com esse email) → "indicacao_email" = esse email, e responda como se tivesse dado certo: "¡Gracias por recomendarnos!
@@ -156,8 +162,10 @@ const FORMATO = {
       liberar_brinde: { type: 'boolean' },
       parar_mensagens: { type: 'boolean' },
       indicacao_email: { type: 'string' },
+      prova_social: { type: 'boolean' },
+      presente_desafio: { type: 'string' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio'],
     additionalProperties: false,
   },
 }
@@ -325,6 +333,8 @@ export async function decidirResposta(params: {
     liberar_brinde: boolean
     parar_mensagens: boolean
     indicacao_email: string
+    prova_social: boolean
+    presente_desafio: string
   }
   return out.passar_para_humano
     ? {
@@ -337,7 +347,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined }
+    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined }
 }
 
 // ─── Resposta aprovada pelo responsável ────────────────────────────────────────────────────

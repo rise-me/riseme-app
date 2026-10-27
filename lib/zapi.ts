@@ -77,3 +77,30 @@ export function marcarNaoLida(phone: string) {
 export function etiquetar(phone: string, tagId: string, acao: 'add' | 'remove' = 'add') {
   return zapiCall('PUT', `chats/${phone}/tags/${tagId}/${acao}`)
 }
+
+async function listarEtiquetas(): Promise<{ id: string; name: string }[]> {
+  const instance = process.env.ZAPI_INSTANCE_ID
+  const token = process.env.ZAPI_TOKEN
+  if (!instance || !token) return []
+  const headers: Record<string, string> = {}
+  if (process.env.ZAPI_CLIENT_TOKEN) headers['Client-Token'] = process.env.ZAPI_CLIENT_TOKEN
+  const res = await fetch(`https://api.z-api.io/instances/${instance}/token/${token}/tags`, { headers }).catch(() => null)
+  if (!res?.ok) return []
+  const d = (await res.json().catch(() => [])) as { id?: string | number; name?: string }[]
+  return (Array.isArray(d) ? d : []).map((t) => ({ id: String(t.id ?? ''), name: t.name ?? '' }))
+}
+
+const ETIQUETAS = new Map<string, string>()
+
+/** Id da etiqueta pelo NOME; cria no WhatsApp Business se ainda não existir. */
+export async function garantirEtiqueta(nome: string): Promise<string | null> {
+  if (ETIQUETAS.has(nome)) return ETIQUETAS.get(nome)!
+  let achada = (await listarEtiquetas()).find((t) => t.name === nome)
+  if (!achada) {
+    await zapiCall('POST', 'business/create-tag', { name: nome })
+    achada = (await listarEtiquetas()).find((t) => t.name === nome)
+  }
+  if (!achada?.id) return null
+  ETIQUETAS.set(nome, achada.id)
+  return achada.id
+}
