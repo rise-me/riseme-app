@@ -6,7 +6,7 @@ import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { creditarIndicacao, textoIndicacaoFalhou } from '@/lib/whatsapp-agent/indicacao'
 import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
-import { contaDaConvidadaHotmart, liberarPresenteHotmart, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
+import { contaDaConvidadaHotmart, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
@@ -310,6 +310,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
         liberou = true
         // Métrica do depoimento: print + brinde entregue (linha inerte na fila, só para contar).
         if (novo) await marcarNaFila(phone, 'brinde-depoimento')
+        await marcarDepoimentoNoPost(phone).catch(() => {})
       }
     } catch (err) {
       console.error(`[depoimento] brinde falhou (${phone}):`, err)

@@ -205,6 +205,13 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1 }).eq('id', item.id)
       continue
     }
+    // 'etiquetar-post': idem para "💬 Depoimento no post" (print do comentário, retroativo; 27/10/2026).
+    if (item.kind === 'etiquetar-post') {
+      const { marcarDepoimentoNoPost } = await import('@/lib/whatsapp-agent/prova-social')
+      await marcarDepoimentoNoPost(item.phone)
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1 }).eq('id', item.id)
+      continue
+    }
 
     // 'teste-agente' não manda nada: roda o agente num caso de teste (body = JSON {perfil, msgs}) e grava a decisão
     // no próprio body. Serve para testar mudança de prompt no servidor, onde está a chave da Anthropic (19/10/2026).

@@ -10,6 +10,7 @@ import { marcarNaFila } from '@/lib/whatsapp-outbox'
 import { etiquetar, garantirEtiqueta } from '@/lib/zapi'
 
 export const ETIQUETA_PROVA = '⭐ Enviou prova social'
+export const ETIQUETA_POST = '💬 Depoimento no post' // print do comentário (brinde do cardápio); separada da prova forte (Bruno, 27/10)
 export const KIND_PROVA = 'prova-social' // linha inerte: body = o que ela mandou (resumo)
 export const KIND_DADOS_HOTMART = 'depo-hotmart-dados' // linha inerte por aluna: JSON {email, nome, produtoId, transacao, pais}
 const DESAFIOS = ['1', '2', '3', '4', '5', '6', '7']
@@ -20,6 +21,12 @@ export async function marcarProvaSocial(phone: string, resumo: string): Promise<
   const { count } = await admin().from('whatsapp_outbox').select('id', { count: 'exact', head: true }).in('phone', formas).eq('kind', KIND_PROVA)
   if (!count) await marcarNaFila(phone, KIND_PROVA, resumo.slice(0, 300))
   const tag = await garantirEtiqueta(ETIQUETA_PROVA)
+  if (tag) await etiquetar(phone, tag)
+}
+
+/** Print do comentário no post/anúncio: só a etiqueta (o registro já é a linha 'brinde-depoimento'). */
+export async function marcarDepoimentoNoPost(phone: string): Promise<void> {
+  const tag = await garantirEtiqueta(ETIQUETA_POST)
   if (tag) await etiquetar(phone, tag)
 }
 
