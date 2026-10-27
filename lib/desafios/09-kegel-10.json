@@ -1,0 +1,80 @@
+{
+  "id": "9",
+  "modulo": "60 - Módulo [Pilates para Pavimento Pélvico]",
+  "emoji": "🌸",
+  "gratis": false,
+  "idiomas": [
+    "es",
+    "en"
+  ],
+  "titulo": {
+    "es": "Plan de Bienestar Íntimo",
+    "en": "Intimate Wellness Plan"
+  },
+  "categoria": {
+    "es": "Suelo pélvico",
+    "en": "Pelvic floor"
+  },
+  "dias": {
+    "es": [
+      "Core y suelo pélvico básico",
+      "Core profundo y suelo pélvico",
+      "Fortalece tu suelo pélvico y tu core",
+      "Mejora la fuerza de tu core",
+      "Flujo de suelo pélvico",
+      "Serie de core y suelo pélvico",
+      "Core fuerte, suelo pélvico sano",
+      "Serie de core y tren inferior",
+      "Rutina de fuerza para el tren inferior",
+      "Acondicionamiento del tren inferior",
+      "Core y suelo pélvico básico",
+      "Core profundo y suelo pélvico",
+      "Fortalece tu suelo pélvico y tu core",
+      "Mejora la fuerza de tu core",
+      "Flujo de suelo pélvico",
+      "Serie de core y suelo pélvico",
+      "Core fuerte, suelo pélvico sano",
+      "Serie de core y tren inferior",
+      "Rutina de fuerza para el tren inferior",
+      "Acondicionamiento del tren inferior",
+      "Core y suelo pélvico básico",
+      "Core profundo y suelo pélvico",
+      "Fortalece tu suelo pélvico y tu core",
+      "Mejora la fuerza de tu core",
+      "Flujo de suelo pélvico",
+      "Serie de core y suelo pélvico",
+      "Core fuerte, suelo pélvico sano",
+      "Serie de core y tren inferior"
+    ],
+    "en": [
+      "Core & Pelvic Floor Basics",
+      "Deep Core & Pelvic Floor",
+      "Pelvic Floor & Core Strength",
+      "Build Core Strength",
+      "Pelvic Floor Flow",
+      "Core & Pelvic Floor Series",
+      "Strong Core, Healthy Pelvic Floor",
+      "Core & Lower Body Series",
+      "Lower Body Strength Routine",
+      "Lower Body Conditioning",
+      "Core & Pelvic Floor Basics",
+      "Deep Core & Pelvic Floor",
+      "Pelvic Floor & Core Strength",
+      "Build Core Strength",
+      "Pelvic Floor Flow",
+      "Core & Pelvic Floor Series",
+      "Strong Core, Healthy Pelvic Floor",
+      "Core & Lower Body Series",
+      "Lower Body Strength Routine",
+      "Lower Body Conditioning",
+      "Core & Pelvic Floor Basics",
+      "Deep Core & Pelvic Floor",
+      "Pelvic Floor & Core Strength",
+      "Build Core Strength",
+      "Pelvic Floor Flow",
+      "Core & Pelvic Floor Series",
+      "Strong Core, Healthy Pelvic Floor",
+      "Core & Lower Body Series"
+    ]
+  }
+}

@@ -176,6 +176,7 @@ export async function POST(request: NextRequest) {
         // Entrega dupla, best-effort: WhatsApp (Z-API ou Voxuy, pela env WHATSAPP_PROVIDER) + email (Resend, contingência
         // que não depende de telefone). Se um falhar, o outro cobre.
         await sendWhatsAppAccess({
+          challengeId: getChallengeIdForProduct(productId) ?? undefined,
           productCode: productId,
           transactionId: purchase.transaction,
           name: buyer.name,

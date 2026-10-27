@@ -427,6 +427,7 @@ export async function sendWhatsAppAccess(params: {
   email: string
   phone?: string
   code: string
+  challengeId?: string
   link: string
   locale: string
 }): Promise<void> {
@@ -478,18 +479,31 @@ export async function sendWhatsAppAccess(params: {
 }
 
 /** As 2 mensagens da sequência, prontas — exportado também pra pré-visualizar/testar o texto. */
-export function mensagensDeAcesso(p: { locale: string; email: string; code: string; link: string }): [string, string] {
+export function mensagensDeAcesso(p: {
+  locale: string
+  email: string
+  code: string
+  link: string
+  challengeId?: string
+}): [string, string] {
   const locale = p.locale as AppLocale
   const copy = COPY[locale] ?? COPY.es
   const support = SUPPORT[locale] ?? SUPPORT.es
   // Raiz do app no idioma dela (mesmo prefixo do link de acesso: /tr, /pl…; es sem prefixo).
+// Produto de front que não é a Calistenia: o desafio (id do app) troca o nome na saudação (KGF-ES, 26/10/2026).
+const NOME_DO_DESAFIO: Record<string, Partial<Record<AppLocale, string>>> = {
+  '9': { es: 'Plan de Bienestar Íntimo' },
+}
+
   const homeUrl = p.link.split('/entrar')[0]
   return [
-    copy({ email: p.email, code: p.code, link: p.link, homeUrl }),
+    nome ? acesso.replace('Desafío de Calistenia', nome) : acesso,
     // Sem playlist desde 16/10/2026: ela existia para tapar a falta de suporte, mas tirava a aluna do app
     // (~60% nunca faziam o dia 1 lá). Agora o suporte responde; a playlist fica só como plano B do agente.
     support({}),
   ]
+  const nome = p.challengeId ? NOME_DO_DESAFIO[p.challengeId]?.[locale] : undefined
+  const acesso = copy({ email: p.email, code: p.code, link: p.link, homeUrl })
 }
 
 // Abertura do REENVIO de acesso (senha nova) — usada pelo script de reenvio em lote e pelo comando
