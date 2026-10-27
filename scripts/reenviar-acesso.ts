@@ -48,11 +48,18 @@ async function main() {
     .order('created_at', { ascending: true })
   if (error) throw error
 
-  const [{ data: naFila }, { data: noHistorico }] = await Promise.all([
-    db.from('whatsapp_outbox').select('phone'),
-    db.from('whatsapp_messages').select('phone').eq('author', 'system'),
-  ])
-  const jaContatado = new Set([...(naFila ?? []), ...(noHistorico ?? [])].map((r) => toZapiPhone(r.phone)))
+  // Só os telefones do período, em lotes: um select sem filtro para em 1.000 linhas e deixava passar quem já
+  // estava na fila (27/10/2026: 2ª rodada enfileirou de novo as 90 da 1ª e trocou a senha delas).
+  const telefones = perfis.map((p) => p.phone).filter(Boolean) as string[]
+  const jaContatado = new Set<string>()
+  for (let i = 0; i < telefones.length; i += 100) {
+    const lote = telefones.slice(i, i + 100).flatMap((t) => [t, toZapiPhone(t), `+${toZapiPhone(t)}`])
+    const [{ data: naFila }, { data: noHistorico }] = await Promise.all([
+      db.from('whatsapp_outbox').select('phone').in('phone', lote),
+      db.from('whatsapp_messages').select('phone').eq('author', 'system').in('phone', lote),
+    ])
+    for (const r of [...(naFila ?? []), ...(noHistorico ?? [])]) jaContatado.add(toZapiPhone(r.phone))
+  }
 
   const alvos: { id: string; email: string; phone: string; locale: string; created: string }[] = []
   const pulos: Record<string, number> = {}
