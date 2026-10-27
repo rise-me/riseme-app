@@ -255,6 +255,7 @@ export async function decidirResposta(params: {
   agora: string
   aprendizados?: Aprendizado[]
   conviteHotmart?: { presente: string | null } | null // recebeu o convite Hotmart (lib/whatsapp-agent/prova-social.ts)
+  conviteVideo?: boolean // recebeu o convite do vídeo de 7 dias (lib/video-depoimento.ts)
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -287,12 +288,20 @@ export async function decidirResposta(params: {
       'print de comentário é outra coisa e NUNCA substitui o desafio; nunca diga que o presente é "só o menu". ' +
       (params.conviteHotmart.presente ? `Presente JÁ LIBERADO (${params.conviteHotmart.presente}): não libere outro.` : 'Presente ainda não liberado.')
     : ''
+  // O convite do vídeo vai pro telefone da CONTA; a conversa pode chegar em outra forma do número (AR com/sem o 9)
+  // e o convite não aparece no histórico (27/10: o agente disse à Yesica que não havia presente de 3 meses).
+  const video = params.conviteVideo
+    ? '\nELA RECEBEU O CONVITE DO VÍDEO DE DEPOIMENTO (mesmo que a mensagem não apareça na conversa abaixo): quem manda o ' +
+      'vídeo (30 a 60 s, vertical, contando como estava antes, o que mudou e como se sente) ganha 3 MESES DO PASE COMPLETO, ' +
+      'liberados pelo sistema quando o vídeo chega. Se ela perguntar, confirme a promessa e peça o vídeo por aqui; nunca diga ' +
+      'que não existe esse presente.'
+    : ''
   const contexto = (params.perfil
     ? descreverPerfil(params.perfil)
     : 'Este número NÃO corresponde a nenhuma conta (comprou com outro telefone, ou não é aluna). ' +
       'Se a dúvida é das que você resolve (acesso, instalar o app, onde fica algo), peça o email usado na ' +
       'compra: o sistema acha a conta sozinho quando ela mandar. Se ela JÁ mandou um email e ainda assim não ' +
-      'há conta, ou se o assunto é para o setor responsável, transfira.') + convite
+      'há conta, ou se o assunto é para o setor responsável, transfira.') + convite + video
 
   const p = params.perfil
   const temProtocolo = Boolean(p?.confirmadaPorTelefone && p.liberados.includes('Protocolo Metabólico'))

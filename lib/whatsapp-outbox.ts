@@ -227,9 +227,9 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     if (item.kind === 'teste-agente') {
       let saida: string
       try {
-        const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: string[]; conviteHotmart?: { presente: string | null } }
+        const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: string[]; conviteHotmart?: { presente: string | null }; conviteVideo?: boolean }
         const agora = new Date().toISOString()
-        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((t) => ({ autor: 'student' as const, texto: t, em: agora })), agora, conviteHotmart: caso.conviteHotmart })
+        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((t) => ({ autor: 'student' as const, texto: t, em: agora })), agora, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo })
         saida = JSON.stringify({ ...caso, resultado: d })
       } catch (err) {
         saida = JSON.stringify({ erro: String(err), entrada: item.body.slice(0, 500) })

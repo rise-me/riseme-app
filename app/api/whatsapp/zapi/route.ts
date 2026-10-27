@@ -284,7 +284,8 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   let decisao: Awaited<ReturnType<typeof decidirResposta>>
   try {
     const conviteHotmart = await conviteHotmartDela(phone).catch(() => null)
-    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart })
+    const conviteVideo = await foiConvidadaParaVideo(phone).catch(() => false)
+    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
     // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).
