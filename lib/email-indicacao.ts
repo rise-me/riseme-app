@@ -76,7 +76,7 @@ export async function processarEmailsIndicacao(): Promise<number> {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) return 0
   const db = admin()
-  const teto = Number(process.env.EMAIL_INDICACAO_POR_DIA ?? '300')
+  const teto = Number(process.env.EMAIL_INDICACAO_POR_DIA ?? '1000')
   const hoje = new Date(); hoje.setUTCHours(0, 0, 0, 0)
   const { count: enviadosHoje } = await db.from('whatsapp_outbox').select('id', { count: 'exact', head: true }).eq('kind', KIND_ENVIO).gte('sent_at', hoje.toISOString())
   const restam = Math.min(POR_RODADA, teto - (enviadosHoje ?? 0))
