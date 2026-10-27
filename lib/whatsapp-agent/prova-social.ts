@@ -55,6 +55,11 @@ async function criarContaPelaCompra(phone: string): Promise<string | null> {
   return contaPorEmail(d.email)
 }
 
+/** Convidada do convite Hotmart sem conta no app: cria pela compra (null = não é convidada ou falhou). */
+export async function contaDaConvidadaHotmart(phone: string): Promise<string | null> {
+  return criarContaPelaCompra(phone).catch(() => null)
+}
+
 /** Libera o desafio escolhido ('1'–'7'); 'futuro' só registra a escolha para quando lançar. */
 export async function liberarPresenteHotmart(p: { phone: string; userId: string | null; desafio: string }): Promise<ResultadoPresente> {
   try {

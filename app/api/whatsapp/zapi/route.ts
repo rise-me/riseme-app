@@ -6,7 +6,7 @@ import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { creditarIndicacao, textoIndicacaoFalhou } from '@/lib/whatsapp-agent/indicacao'
 import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
-import { liberarPresenteHotmart, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
+import { contaDaConvidadaHotmart, liberarPresenteHotmart, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
 import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
@@ -255,7 +255,13 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
 
   const conversa = await historico(phone)
   const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
-  const userId = chat.userId ?? porEmail
+  // Aluna antiga do convite Hotmart (comprou antes do app existir, sem conta): respondeu algo que não é "NO" →
+  // cria a conta pela compra dela; o acesso chega por aqui em ~15 min e o agente avisa (27/10/2026).
+  const ultimaDela = [...conversa].reverse().find((m) => m.autor === 'student')?.texto ?? ''
+  const criada = chat.userId || porEmail || /^\s*(no|stop|baja)\W*$/i.test(ultimaDela) || (await pediuParaParar(phone))
+    ? null
+    : await contaDaConvidadaHotmart(phone)
+  const userId = chat.userId ?? porEmail ?? criada
   const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
   // Escreveu antes de o acesso sair (ele espera ~15 min de propósito): o agente precisa saber (caso Madeleine, 18/10).
   if (perfil) perfil.acessoAgendadoEm = await acessoPendente(phone)
