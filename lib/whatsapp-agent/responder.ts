@@ -294,7 +294,7 @@ export async function decidirResposta(params: {
     ? '\nELA RECEBEU O CONVITE DO VÍDEO DE DEPOIMENTO (mesmo que a mensagem não apareça na conversa abaixo): quem manda o ' +
       'vídeo (30 a 60 s, vertical, contando como estava antes, o que mudou e como se sente) ganha 3 MESES DO PASE COMPLETO, ' +
       'liberados pelo sistema quando o vídeo chega. Se ela perguntar, confirme a promessa e peça o vídeo por aqui; nunca diga ' +
-      'que não existe esse presente.'
+      'que não existe esse presente. Termine essa mensagem com um emoji de sorriso ou coração (😊 ou 💛).'
     : ''
   const contexto = (params.perfil
     ? descreverPerfil(params.perfil)
