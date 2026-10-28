@@ -129,9 +129,18 @@ export async function receberVideo(p: { phone: string; userId: string | null; ur
   return { resultado: novo ? 'presente-liberado' : 'presente-ja-dado', link }
 }
 
-/** Ela já foi convidada para o vídeo? (só então o presente de 3 meses vale) */
-export async function foiConvidadaParaVideo(phone: string): Promise<boolean> {
-  const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
+/**
+ * Ela já foi convidada para o vídeo? (só então o presente de 3 meses vale). O convite vai pro telefone da CONTA; a
+ * conversa pode chegar por LID ou noutra forma do número, então confere também o telefone da conta (26/10: a Erika
+ * mandou o vídeo por LID e ficou sem o presente).
+ */
+export async function foiConvidadaParaVideo(phone: string, userId?: string | null): Promise<boolean> {
+  const telefones = [phone]
+  if (userId) {
+    const { data: u } = await admin().from('users').select('phone').eq('id', userId).maybeSingle()
+    if (u?.phone) telefones.push(u.phone.replace(/\D/g, ''))
+  }
+  const formas = telefones.flatMap((t) => variantesTelefone(t)).flatMap((v) => [v, `+${v}`])
   const { count } = await admin().from('whatsapp_outbox').select('id', { count: 'exact', head: true }).in('phone', formas).eq('kind', KIND_CONVITE).not('sent_at', 'is', null)
   return Boolean(count)
 }

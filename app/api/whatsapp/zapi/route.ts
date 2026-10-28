@@ -272,7 +272,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   const urlVideo = conversa.slice(ultimaNossa + 1).map((m) => m.texto.match(/\[VÍDEO: (\S+)\]/)?.[1]).find(Boolean)
   if (urlVideo) {
     try {
-      const convidada = await foiConvidadaParaVideo(phone)
+      const convidada = await foiConvidadaParaVideo(phone, userId)
       const v = await receberVideo({ phone, userId, url: urlVideo, darPresente: convidada })
       if (perfil) perfil.videoDepoimento = v.resultado
       await dizerAoResponsavel(`🎥 Depoimento em VÍDEO — ${perfil?.nome ?? 'aluna sem conta'} (+${phone.replace('@lid', '')})\nPresente: ${v.resultado}${v.link ? `\nBaixar (30 dias): ${v.link}` : ''}`)
@@ -284,7 +284,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   let decisao: Awaited<ReturnType<typeof decidirResposta>>
   try {
     const conviteHotmart = await conviteHotmartDela(phone).catch(() => null)
-    const conviteVideo = await foiConvidadaParaVideo(phone).catch(() => false)
+    const conviteVideo = await foiConvidadaParaVideo(phone, userId).catch(() => false)
     decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
