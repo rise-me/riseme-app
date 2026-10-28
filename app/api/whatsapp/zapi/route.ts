@@ -359,6 +359,12 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   // Presente do convite às alunas da área de membros Hotmart (Bruno, 26/10): mandou o depoimento e escolheu o
   // desafio → libera ANTES de enviar (a resposta do agente já diz que está liberado). Falhou → avisa e vira consulta.
   if (decisao.tipo === 'responder' && decisao.presenteDesafio) {
+    // 28/10: ela escreveu "Pos parto" e saiu o Preparto (6). O que ela escreveu vence o id do modelo.
+    const falaDela = conversa.slice(ultimaNossa + 1).map((m) => m.texto).join(' ')
+    if (decisao.presenteDesafio === '6' && /p[oó]s\s*t?\s*-?\s*parto|despu[eé]s del parto/i.test(falaDela) && !/pre\s*-?\s*parto|embaraz/i.test(falaDela)) {
+      decisao.presenteDesafio = '7'
+      decisao.texto = decisao.texto.replaceAll('Preparto', 'Posparto')
+    }
     const r = await liberarPresenteHotmart({ phone, userId, desafio: decisao.presenteDesafio })
     await dizerAoResponsavel(`🎁 Presente do depoimento (Hotmart) — ${perfil?.nome ?? 'aluna'} (+${phone.replace('@lid', '')}): desafio ${decisao.presenteDesafio} → ${r}`)
     if (r === 'sem-dados' || r === 'erro') {
