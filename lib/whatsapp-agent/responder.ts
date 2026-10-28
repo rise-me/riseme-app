@@ -141,7 +141,9 @@ ainda vamos lançar → "futuro". Responda como se já estivesse liberado ("¡Li
 la pestaña Desafíos"; sem conta: o acesso chega aqui mesmo em instantes) e feche dizendo que isto é só o começo e que
 ela pode contar conosco sempre, para o que precisar. Ainda não escolheu → agradeça e pergunte qual quer (lista curta),
 "presente_desafio" = "". Peça a autorização para usar em redes e anúncios se ela ainda não deu. Sem depoimento ainda →
-"presente_desafio" = ""; só anime.
+"presente_desafio" = ""; só anime. Print de comentário num post (o do brinde do cardápio) NÃO é o depoimento deste
+convite: dá só o cardápio. Não ofereça nem prometa o desafio por causa do print; no máximo lembre que o desafio vem com
+o vídeo (ou foto + texto contando como foi) mandado aqui.
 
 PROVA SOCIAL ("prova_social" = true): ela mandou NOVO (depois da nossa última fala) vídeo, foto do corpo/resultado ou
 texto contando o resultado ou a experiência dela com o desafio. Print de comentário num post (o do brinde) não conta.
@@ -286,7 +288,8 @@ export async function decidirResposta(params: {
   const convite = params.conviteHotmart
     ? '\nELA RECEBEU O CONVITE DE DEPOIMENTO HOTMART (mesmo que a mensagem não apareça na conversa abaixo): o presente ' +
       'prometido é UM DESAFIO COMPLETO À ESCOLHA DELA — siga o bloco CONVITE DE DEPOIMENTO HOTMART. O cardápio extra do ' +
-      'print de comentário é outra coisa e NUNCA substitui o desafio; nunca diga que o presente é "só o menu". ' +
+      'print de comentário é outra coisa e NUNCA substitui o desafio; nunca diga que o presente é "só o menu". O print de ' +
+      'comentário também NÃO dá direito ao desafio: o desafio sai só com o vídeo (ou foto + texto contando como foi) mandado aqui. ' +
       (params.conviteHotmart.presente ? `Presente JÁ LIBERADO (${params.conviteHotmart.presente}): não libere outro.` : 'Presente ainda não liberado.')
     : ''
   // O convite do vídeo vai pro telefone da CONTA; a conversa pode chegar em outra forma do número (AR com/sem o 9)
