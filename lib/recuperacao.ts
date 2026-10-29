@@ -21,14 +21,17 @@ export const OFERTA_RECUPERACAO = process.env.RECUPERACAO_OFERTA ?? ''
 // deixar esta constante vazia ('') e fazer deploy, senão a recuperação segue mandando o preço do teste. Como medir: mensagens
 // da whatsapp_outbox com "off=yrn1s1q7" no texto × vendas aprovadas da yrn1s1q7 do mesmo email depois delas.
 export const OFERTA_TESTE_B = 'yrn1s1q7'
-// Tentativas que disparam a recuperação e aprovações que a cancelam: o front, a oferta de recuperação e a B do teste.
-export const OFERTAS = new Set([OFERTA_FRONT, OFERTA_RECUPERACAO, OFERTA_TESTE_B].filter(Boolean))
+// Teste T25 (29/10/2026, Bruno): mesma regra para a oferta de US$ 14,90 da Colômbia. AO ENCERRAR: esvaziar também esta.
+export const OFERTA_TESTE_B_CO = '39kagsh5'
+const OFERTAS_TESTE_B = [OFERTA_TESTE_B, OFERTA_TESTE_B_CO].filter(Boolean)
+// Tentativas que disparam a recuperação e aprovações que a cancelam: o front, a oferta de recuperação e as B dos testes.
+export const OFERTAS = new Set([OFERTA_FRONT, OFERTA_RECUPERACAO, ...OFERTAS_TESTE_B].filter(Boolean))
 const CHECKOUT = 'https://pay.hotmart.com/H101419289G'
 // Mesmos parâmetros do atalho oficial do funil (hotm.io/checkout-calistenia-es-sem-boleto), conferido 14/10/2026.
 const PARAMS_FIXOS = { checkoutMode: '10', hideBillet: '1', hideMultipleCards: '1' }
 // Oferta do link de volta: tentativa na B do teste → a própria B; qualquer outra → oferta de recuperação (ou o front).
 function ofertaDoLink(ofertaTentativa?: string): string {
-  if (OFERTA_TESTE_B && ofertaTentativa === OFERTA_TESTE_B) return OFERTA_TESTE_B
+  if (ofertaTentativa && OFERTAS_TESTE_B.includes(ofertaTentativa)) return ofertaTentativa
   return OFERTA_RECUPERACAO || OFERTA_FRONT
 }
 
