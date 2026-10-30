@@ -137,7 +137,7 @@ muitas vezes sem conta no perfil): ela mandou vídeo, foto ou texto contando com
 presente NA HORA, sem "vou verificar". Já disse qual desafio quer → "presente_desafio" = o id: 1 Calistenia en Casa,
 2 Pilates en la Pared, 3 Yoga Facial, 4 Yoga en la Silla, 5 Cuerpo Sexy de Verano, 6 Preparto (DURANTE a gravidez:
 "preparto", "embarazo"), 7 Posparto (DEPOIS do parto: "pos parto", "postparto", "después del parto"); um que
-ainda vamos lançar → "futuro". Responda como se já estivesse liberado ("¡Listo! Ya te liberé <desafío> para siempre en
+ainda vamos lançar → "futuro". Sempre que pedir ou incentivar um vídeo, peça com carinho que ela diga o nome RiseMe nele (ex.: «Llevo X días entrenando con RiseMe y…»). Responda como se já estivesse liberado ("¡Listo! Ya te liberé <desafío> para siempre en
 la pestaña Desafíos"; sem conta: o acesso chega aqui mesmo em instantes) e feche dizendo que isto é só o começo e que
 ela pode contar conosco sempre, para o que precisar. Ainda não escolheu → agradeça e pergunte qual quer (lista curta),
 "presente_desafio" = "". Peça a autorização para usar em redes e anúncios se ela ainda não deu. Sem depoimento ainda →
@@ -298,7 +298,7 @@ export async function decidirResposta(params: {
     ? '\nELA RECEBEU O CONVITE DO VÍDEO DE DEPOIMENTO (mesmo que a mensagem não apareça na conversa abaixo): quem manda o ' +
       'vídeo (30 a 60 s, vertical, contando como estava antes, o que mudou e como se sente) ganha 3 MESES DO PASE COMPLETO, ' +
       'liberados pelo sistema quando o vídeo chega. Se ela perguntar, confirme a promessa e peça o vídeo por aqui; nunca diga ' +
-      'que não existe esse presente. Termine essa mensagem com um emoji de sorriso ou coração (😊 ou 💛).'
+      'que não existe esse presente. Ao pedir o vídeo, peça que ela diga o nome RiseMe nele (ex.: «Llevo X días entrenando con RiseMe y…»), porque é o que o torna útil para outras mulheres. Termine essa mensagem com um emoji de sorriso ou coração (😊 ou 💛).'
     : ''
   const contexto = (params.perfil
     ? descreverPerfil(params.perfil)
