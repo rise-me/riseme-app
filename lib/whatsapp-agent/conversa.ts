@@ -220,10 +220,26 @@ export async function perfilDaAluna(userId: string, confirmadaPorTelefone = true
     db.from('user_challenges').select('challenge_id').eq('user_id', userId),
   ])
   if (!u) return null
+  // Conta criada pelo convite Hotmart (prova-social.ts, kind 'depo-hotmart-dados'): nasce DEPOIS da linha de dados
+  // e vem de uma compra ANTIGA; users.created_at é a data da conta, não a da compra (30/10/2026: Cira ouviu
+  // "acabou de comprar" e achou que tinham cobrado de novo).
+  const email = auth?.user?.email?.toLowerCase()
+  let compraAntiga = false
+  if (email) {
+    const { data: dados } = await db
+      .from('whatsapp_outbox')
+      .select('created_at')
+      .eq('kind', 'depo-hotmart-dados')
+      .ilike('body', `%"${email}"%`)
+      .limit(1)
+      .maybeSingle()
+    compraAntiga = Boolean(dados) && new Date(u.created_at) > new Date(dados!.created_at)
+  }
   return {
     nome: u.name ?? undefined,
     idioma: (auth?.user?.user_metadata?.locale as string) ?? 'es',
     compradaEm: u.created_at,
+    compraAntiga,
     ultimoLogin: auth?.user?.last_sign_in_at ?? null,
     diasFeitos: progresso?.length ?? 0,
     ultimoTreino: progresso?.[0]?.completed_at ?? null,

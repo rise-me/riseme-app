@@ -19,6 +19,8 @@ export interface PerfilAluna {
   nome?: string
   idioma: string // locale do app (es, tr, pt-BR, en…)
   compradaEm?: string // ISO
+  // Conta criada pelo convite da área de membros Hotmart: compradaEm é a data da CONTA; a compra é antiga e a data real é desconhecida.
+  compraAntiga?: boolean
   ultimoLogin?: string | null // ISO; null = nunca entrou
   diasFeitos: number
   ultimoTreino?: string | null // ISO
@@ -224,8 +226,17 @@ function descreverPerfil(p: PerfilAluna): string {
   return [
     `Nome: ${p.nome ?? 'desconhecido'}`,
     `Idioma do perfil: ${p.idioma}`,
-    `Comprou em: ${p.compradaEm ?? 'desconhecido'}`,
-    `Dias desde a compra: ${p.compradaEm ? Math.floor((Date.now() - new Date(p.compradaEm).getTime()) / 86_400_000) : 'desconhecido'} (garantia = 30)`,
+    ...(p.compraAntiga
+      ? [
+          `Conta criada em: ${p.compradaEm ?? 'desconhecido'}, hoje ou há pouco, a partir de uma compra ANTIGA da área de membros Hotmart (convite de depoimento). ` +
+            'A data real da compra é anterior e desconhecida. NÃO é compra de hoje e NÃO houve cobrança nova: nunca diga "acabou de comprar". ' +
+            'Se ela estranhar o email/mensagem de acesso ou achar que foi cobrada, explique isso com calma. ' +
+            'Reembolso: a compra é antiga (fora da garantia de 30 dias, salvo exceção): não prometa; se pedir, transfira.',
+        ]
+      : [
+          `Comprou em: ${p.compradaEm ?? 'desconhecido'}`,
+          `Dias desde a compra: ${p.compradaEm ? Math.floor((Date.now() - new Date(p.compradaEm).getTime()) / 86_400_000) : 'desconhecido'} (garantia = 30)`,
+        ]),
     `Último login no app: ${p.ultimoLogin ?? 'NUNCA ENTROU'}`,
     `Dias de treino concluídos: ${p.diasFeitos}`,
     `Último treino: ${p.ultimoTreino ?? 'nenhum'}`,
