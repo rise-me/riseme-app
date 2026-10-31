@@ -149,6 +149,7 @@ async function numeros(desde: Date, ate: Date, msgs: Msg[]): Promise<Numeros> {
 interface Item {
   conversa: number
   veredito: 'ok' | 'erro_certo_conferivel' | 'erro_depende_do_responsavel' | 'estranho_sem_certeza'
+  confianca: 'alta' | 'media' | 'baixa'
   o_que_aconteceu: string
   fala_do_agente: string
   o_certo: string
@@ -175,6 +176,7 @@ const FORMATO = {
           properties: {
             conversa: { type: 'integer' },
             veredito: { type: 'string', enum: ['ok', 'erro_certo_conferivel', 'erro_depende_do_responsavel', 'estranho_sem_certeza'] },
+            confianca: { type: 'string', enum: ['alta', 'media', 'baixa'] },
             o_que_aconteceu: { type: 'string' },
             fala_do_agente: { type: 'string' },
             o_certo: { type: 'string' },
@@ -182,7 +184,7 @@ const FORMATO = {
             teste_sugerido: { type: 'string' },
             pergunta_ao_responsavel: { type: 'string' },
           },
-          required: ['conversa', 'veredito', 'o_que_aconteceu', 'fala_do_agente', 'o_certo', 'regra_sugerida', 'teste_sugerido', 'pergunta_ao_responsavel'],
+          required: ['conversa', 'veredito', 'confianca', 'o_que_aconteceu', 'fala_do_agente', 'o_certo', 'regra_sugerida', 'teste_sugerido', 'pergunta_ao_responsavel'],
           additionalProperties: false,
         },
       },
@@ -237,6 +239,14 @@ async function analisar(conversas: Conversa[]): Promise<Analise> {
           'Sinais de erro sem saber o certo: aluna repetiu a pergunta, "no entendí", irritação, pediu pessoa/reembolso, ' +
           'ficou sem resposta, o responsável teve que entrar (a resposta dele é o certo). Conversa de AMOSTRA sem sinal: ' +
           'procure o erro dito com confiança que a aluna não percebeu (fato, preço, prazo, produto errado).\n' +
+          'LIMITES DO REVISOR (leia): você NÃO vê o perfil da aluna (produtos liberados, dias de compra, último login) nem ' +
+          'o que o sistema fazia por trás. O agente via isso. Portanto, afirmação do agente sobre o estado da conta ("já vi ' +
+          'seu pagamento", "está liberado") só é erro se a PRÓPRIA conversa a contradiz (ex.: a aluna diz que não chegou ' +
+          'nada e depois confirma que o agente mentiu); senão é "ok" ou, no máximo, "estranho_sem_certeza". As conversas ' +
+          'têm data e as regras do agente mudaram ao longo de outubro: conversa de mais de 14 dias pode já estar ' +
+          'corrigida; diga isso em "o_que_aconteceu" quando for o caso e use confiança "media". "confianca": "alta" só ' +
+          'quando a regra atual cobre o caso com clareza e a conversa mostra o agente violando-a; senão "media" ou ' +
+          '"baixa". Na dúvida, NÃO marque erro.\n' +
           'Campos que não se aplicam = "". "fala_do_agente" = o trecho exato (curto) da fala errada. Seja específico e ' +
           'honesto: não invente erro para parecer útil; se está bom, diga ok.\n' +
           '"padroes": 3 a 6 frases sobre o que se repete na semana (o que mais gera dúvida, onde o agente falha mais). ' +
@@ -251,13 +261,16 @@ async function analisar(conversas: Conversa[]): Promise<Analise> {
   })
   const bloco = res.content.find((b) => b.type === 'text')
   if (res.stop_reason === 'refusal' || !bloco || bloco.type !== 'text') throw new Error(`análise sem texto (stop_reason ${res.stop_reason})`)
-  return JSON.parse(bloco.text) as Analise
+  const analise = JSON.parse(bloco.text) as Analise
+  // Erro só entra no bloco 1 (corrijo e aviso) com confiança alta; o resto o Bruno confere no cru.
+  for (const i of analise.itens) if (i.veredito === 'erro_certo_conferivel' && i.confianca !== 'alta') i.veredito = 'estranho_sem_certeza'
+  return analise
 }
 
 // ─── E-mail e aviso ──────────────────────────────────────────────────────────────────────
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-const delta = (a: number | null, b: number | null) => (a === null || b === null ? '' : a === b ? ' (=)' : ` (${a > b ? '+' : ''}${Math.round((a - b) * 10) / 10} vs. período anterior)`)
+const delta = (a: number | null, b: number | null) => (a === null || b === null || b === 0 ? '' : a === b ? ' (=)' : ` (${a > b ? '+' : ''}${Math.round((a - b) * 10) / 10} vs. período anterior)`)
 
 function htmlDoRelatorio(p: {
   dias: number
