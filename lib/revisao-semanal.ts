@@ -13,8 +13,8 @@ import { sendZapiText } from '@/lib/zapi'
 
 const CLAUDE_MODEL = 'claude-sonnet-5-5'
 const KIND_RELATORIO = 'revisao-semanal-relatorio'
-const MAX_COM_SINAL = 35
-const TAMANHO_AMOSTRA = 15
+const MAX_COM_SINAL = 30
+const TAMANHO_AMOSTRA = 12
 const MAX_CHARS_CONVERSA = 3500
 const DIA_MS = 86_400_000
 
@@ -215,7 +215,7 @@ async function analisar(conversas: Conversa[]): Promise<Analise> {
 
   const res = await anthropic().beta.messages.create({
     model: CLAUDE_MODEL,
-    max_tokens: 12000,
+    max_tokens: 20000,
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
     output_config: { effort: 'medium', format: FORMATO },
@@ -247,7 +247,7 @@ async function analisar(conversas: Conversa[]): Promise<Analise> {
           'corrigida; diga isso em "o_que_aconteceu" quando for o caso e use confiança "media". "confianca": "alta" só ' +
           'quando a regra atual cobre o caso com clareza e a conversa mostra o agente violando-a; senão "media" ou ' +
           '"baixa". Na dúvida, NÃO marque erro.\n' +
-          'Campos que não se aplicam = "". "fala_do_agente" = o trecho exato (curto) da fala errada. Seja específico e ' +
+          'Itens "ok": só "conversa", "veredito", "confianca" e "o_que_aconteceu" (1 frase curta); o resto "". Campos que não se aplicam = "". "fala_do_agente" = o trecho exato (curto) da fala errada. Seja específico e ' +
           'honesto: não invente erro para parecer útil; se está bom, diga ok.\n' +
           '"padroes": 3 a 6 frases sobre o que se repete na semana (o que mais gera dúvida, onde o agente falha mais). ' +
           '"feedback_de_produto": sugestão ou queixa sobre o APP/aulas/conteúdo que uma aluna fez (não sobre o ' +
@@ -261,6 +261,7 @@ async function analisar(conversas: Conversa[]): Promise<Analise> {
   })
   const bloco = res.content.find((b) => b.type === 'text')
   if (res.stop_reason === 'refusal' || !bloco || bloco.type !== 'text') throw new Error(`análise sem texto (stop_reason ${res.stop_reason})`)
+  if (res.stop_reason === 'max_tokens') throw new Error('análise cortada por max_tokens: reduza o número de conversas ou o texto dos itens')
   const analise = JSON.parse(bloco.text) as Analise
   // Erro só entra no bloco 1 (corrijo e aviso) com confiança alta; o resto o Bruno confere no cru.
   for (const i of analise.itens) if (i.veredito === 'erro_certo_conferivel' && i.confianca !== 'alta') i.veredito = 'estranho_sem_certeza'
