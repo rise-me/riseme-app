@@ -18,6 +18,10 @@ const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string }[] = [
   { nome: 'fora do material', perfil: base, msg: 'cuántas calorías tengo que comer al día para bajar 5 kilos?' },
   { nome: 'reembolso', perfil: base, msg: 'quiero mi dinero de vuelta' },
   { nome: 'PL chá (tem protocolo)', perfil: { ...comProtocolo, idioma: 'pl', nome: 'Anna Kowalska' }, msg: 'Dzień dobry, jaką herbatę mam pić rano i ile razy dziennie?' },
+  // Casos reais de 30/10/2026 (revisão do atendimento): cada correção vira teste.
+  { nome: 'conta criada pelo convite (compra antiga, sem cobrança nova)', perfil: { ...base, nome: 'Cira', compradaEm: '2026-10-05T11:50:00Z', compraAntiga: true, ultimoLogin: null, diasFeitos: 0 }, msg: 'Hola, no he comprado nada hoy, me llegó un correo de compra y acceso. ¿Me cobraron?' },
+  { nome: 'insatisfeita: sugestão sem reembolso de cara', perfil: base, msg: 'Muy mal su app, los videos no tienen calentamiento ni estiramiento y soy principiante de más de 40 años.' },
+  { nome: 'treinar em jejum (sem regra fixa)', perfil: base, msg: '¿Puedo hacer el entrenamiento en ayunas?' },
 ]
 
 async function main() {

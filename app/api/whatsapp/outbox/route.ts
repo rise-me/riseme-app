@@ -9,7 +9,8 @@ import { convidarParaVideo } from '@/lib/video-depoimento'
 // A Vercel manda "Authorization: Bearer <CRON_SECRET>" quando a env existe.
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 60
+// 300: a linha 'revisao-semanal' (gatilho manual da revisão, lib/whatsapp-outbox.ts) chama o Claude e passa de 60 s.
+export const maxDuration = 300
 
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET

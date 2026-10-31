@@ -7,6 +7,10 @@
     {
       "path": "/api/custos",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/whatsapp/revisao",
+      "schedule": "0 11 * * 1"
     }
   ]
 }

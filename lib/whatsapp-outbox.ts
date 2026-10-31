@@ -238,6 +238,21 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       continue
     }
 
+    // 'revisao-semanal' não manda texto: gera a revisão do atendimento na hora (body = JSON {dias}); o cron de segunda
+    // faz o mesmo sozinho. Serve para rodar a 1ª (acúmulo) sem ter a chave da Anthropic fora do servidor (30/10/2026).
+    if (item.kind === 'revisao-semanal') {
+      let saida: string
+      try {
+        const { dias } = JSON.parse(item.body || '{}') as { dias?: number }
+        const { gerarRevisao } = await import('@/lib/revisao-semanal')
+        saida = JSON.stringify(await gerarRevisao({ dias: dias || 7, forcar: true }))
+      } catch (err) {
+        saida = JSON.stringify({ ok: false, erro: String(err).slice(0, 500) })
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
     // 'reprocessar' não manda texto: faz o agente retomar a conversa (o que ficou sem resposta) pelo
     // próprio servidor. Assim dá para destravar alunas sem a chave da Z-API sair da Vercel (16/10/2026).
     if (item.kind === 'reprocessar') {
