@@ -68,6 +68,23 @@ async function zapiCall(method: 'POST' | 'PUT', path: string, body?: unknown): P
   }
 }
 
+/** GET cru na Z-API (JSON ou null). Para operações de grupo que só rodam no servidor. */
+export async function zapiGet(path: string): Promise<unknown> {
+  const instance = process.env.ZAPI_INSTANCE_ID
+  const token = process.env.ZAPI_TOKEN
+  if (!instance || !token) return null
+  const headers: Record<string, string> = {}
+  if (process.env.ZAPI_CLIENT_TOKEN) headers['Client-Token'] = process.env.ZAPI_CLIENT_TOKEN
+  const res = await fetch(`https://api.z-api.io/instances/${instance}/token/${token}/${path}`, { headers }).catch(() => null)
+  if (!res?.ok) return null
+  return res.json().catch(() => null)
+}
+
+/** Renomeia um grupo (groupId = "<id>-group"). */
+export function renomearGrupo(groupId: string, nome: string) {
+  return zapiCall('POST', 'update-group-name', { groupId, groupName: nome })
+}
+
 /** O número tem WhatsApp? null = não deu para perguntar (sem env ou Z-API fora). */
 export async function temWhatsApp(phone: string): Promise<boolean | null> {
   const instance = process.env.ZAPI_INSTANCE_ID

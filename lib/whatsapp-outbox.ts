@@ -238,6 +238,41 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       continue
     }
 
+    // 'grupo' não manda texto: lê ou renomeia um grupo do suporte (body = JSON {acao:'buscar', nome} ou
+    // {acao:'renomear', groupId, nome}) e grava o resultado no body. A chave da Z-API só existe no servidor (02/11/2026).
+    if (item.kind === 'grupo') {
+      let saida: string
+      try {
+        const { zapiGet, renomearGrupo } = await import('@/lib/zapi')
+        const p = JSON.parse(item.body) as { acao: 'buscar' | 'renomear'; nome: string; groupId?: string }
+        if (p.acao === 'renomear') {
+          saida = JSON.stringify({ ...p, ok: await renomearGrupo(p.groupId!, p.nome) })
+        } else {
+          const achados: { phone: string; name: string }[] = []
+          for (let pg = 1; pg <= 20; pg++) {
+            const lista = (await zapiGet(`groups?page=${pg}&pageSize=100`)) as { phone: string; name: string }[] | null
+            if (!Array.isArray(lista) || !lista.length) break
+            achados.push(...lista.filter((g) => (g.name ?? '').toLowerCase().includes(p.nome.toLowerCase())))
+          }
+          const grupos = []
+          for (const g of achados) {
+            const m = (await zapiGet(`group-metadata/${g.phone}`)) as Record<string, unknown> | null
+            const part = (m?.participants as { phone: string; isAdmin?: boolean; isSuperAdmin?: boolean }[] | undefined) ?? []
+            grupos.push({
+              phone: g.phone, name: g.name, subject: m?.subject, invitationLink: m?.invitationLink, communityId: m?.communityId,
+              adminOnlyMessage: m?.adminOnlyMessage, requireAdminApproval: m?.requireAdminApproval, growthLocked: m?.growthLocked,
+              admins: part.filter((x) => x.isAdmin || x.isSuperAdmin).map((x) => x.phone), participantes: part.map((x) => x.phone),
+            })
+          }
+          saida = JSON.stringify({ ...p, grupos })
+        }
+      } catch (err) {
+        saida = JSON.stringify({ erro: String(err).slice(0, 500), entrada: item.body.slice(0, 300) })
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
     // 'revisao-semanal' não manda texto: gera a revisão do atendimento na hora (body = JSON {dias}); o cron de segunda
     // faz o mesmo sozinho. Serve para rodar a 1ª (acúmulo) sem ter a chave da Anthropic fora do servidor (30/10/2026).
     if (item.kind === 'revisao-semanal') {
