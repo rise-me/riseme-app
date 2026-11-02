@@ -291,6 +291,9 @@ const COPY: Record<AppLocale, AccessCopy> = {
     ].join('\n'),
 }
 
+// Comunidade RiseMe World (do número do suporte; só a equipe posta): enquetes e avisos da cocriação do app (Bruno, 24/10–02/11/2026).
+const COMUNIDADE_ES = 'https://chat.whatsapp.com/Hno2alFkrILEWfoC8QJpVQ'
+
 const SUPPORT: Record<AppLocale, SupportCopy> = {
   es: ({ playlist }) =>
     [
@@ -307,6 +310,9 @@ const SUPPORT: Record<AppLocale, SupportCopy> = {
             '🙏 Este enlace es exclusivamente tuyo y solo es para nuestras estudiantes.',
           ]
         : []),
+      '',
+      '💬 Únete también a nuestra comunidad *RiseMe World*: ahí votamos juntas los próximos regalos y novedades de la app.',
+      `👉 ${COMUNIDADE_ES}`,
       '',
       '¡Nos vemos en el desafío! 💪',
     ].join('\n'),

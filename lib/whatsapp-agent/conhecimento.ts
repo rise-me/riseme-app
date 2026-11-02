@@ -16,6 +16,7 @@ import { LINK_INDICACAO } from '@/lib/indicacao-link'
 
 const LINK_PROTOCOLO = 'https://pay.hotmart.com/N104738863H?off=ad7ti2nf&checkoutMode=10'
 const PLAYLIST_ES = 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d'
+const COMUNIDADE_ES = 'https://chat.whatsapp.com/Hno2alFkrILEWfoC8QJpVQ' // mesma da mensagem de apoio (lib/whatsapp-access.ts)
 
 export const CONHECIMENTO = `
 # CONHECIMENTO
@@ -67,6 +68,9 @@ Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla | en Home ·
 - Más → Mi perfil: nome e email (não editáveis) + troca de senha. Más → Idioma. Más → Gestionar suscripción:
   vitalícia = "Vitalicio · Activo"; assinante vê o link "Gestionar mi suscripción en Hotmart" (cancelar é só lá;
   o acesso segue até o fim do período). Más → Centro de ayuda abre esta conversa.
+- Comunidade *RiseMe World* (só alunas em espanhol): no WhatsApp, só a equipe posta; ali saem as enquetes da cocriação
+  do app (ela vota no que criamos a seguir) e as novidades. Pediu grupo/comunidade ou quer opinar no que vem → ${COMUNIDADE_ES}
+  Dúvida ou problema dela continua sendo resolvido AQUI, não na comunidade.
 
 ## "Paguei e está bloqueado"
 Veja "Liberado na conta" no perfil. Liberado → mostre onde fica (desafios em Desafíos; Protocolo em Extras).
