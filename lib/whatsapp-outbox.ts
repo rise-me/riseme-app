@@ -113,7 +113,7 @@ export async function estaComProblema(phone: string): Promise<boolean> {
 
 async function motivoParaPular(phone: string, kind: string, id: number): Promise<string | null> {
   if (await pediuParaParar(phone)) return 'pediu para não receber mensagens'
-  if (kind === 'depoimento' && (await estaComProblema(phone))) return 'aluna com problema/pergunta aberta'
+  if ((kind === 'depoimento' || kind === 'convite-comunidade') && (await estaComProblema(phone))) return 'aluna com problema/pergunta aberta'
   const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
   const db = admin()
   const [{ count: jaFoi }, { data: chats }, { count: consultas }] = await Promise.all([
@@ -186,7 +186,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     }
 
     // Convite de depoimento/oferta agendado: confere na hora de enviar se ainda faz sentido.
-    if (item.kind === 'depoimento' || item.kind === 'pase' || item.kind === 'depo-hotmart') {
+    if (item.kind === 'depoimento' || item.kind === 'pase' || item.kind === 'depo-hotmart' || item.kind === 'convite-comunidade') {
       const motivo = await motivoParaPular(item.phone, item.kind, item.id)
       if (motivo) {
         await db
