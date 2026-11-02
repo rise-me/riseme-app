@@ -91,6 +91,11 @@ export function enviarEnquete(groupId: string, pergunta: string, opcoes: string[
   return zapiCall('POST', 'send-poll', { phone: groupId, message: pergunta, poll: opcoes.map((name) => ({ name })) })
 }
 
+/** Ajustes do grupo (a Z-API exige os quatro campos). */
+export function ajustarGrupo(a: { phone: string; adminOnlyMessage: boolean; adminOnlySettings: boolean; requireAdminApproval: boolean; adminOnlyAddMember: boolean }) {
+  return zapiCall('POST', 'update-group-settings', a)
+}
+
 /** O número tem WhatsApp? null = não deu para perguntar (sem env ou Z-API fora). */
 export async function temWhatsApp(phone: string): Promise<boolean | null> {
   const instance = process.env.ZAPI_INSTANCE_ID

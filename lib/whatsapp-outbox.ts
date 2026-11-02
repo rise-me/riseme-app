@@ -113,7 +113,7 @@ export async function estaComProblema(phone: string): Promise<boolean> {
 
 async function motivoParaPular(phone: string, kind: string, id: number): Promise<string | null> {
   if (await pediuParaParar(phone)) return 'pediu para não receber mensagens'
-  if ((kind === 'depoimento' || kind === 'convite-comunidade') && (await estaComProblema(phone))) return 'aluna com problema/pergunta aberta'
+  if ((kind === 'depoimento' || kind === 'convite-comunidade' || kind === 'convite-grupo') && (await estaComProblema(phone))) return 'aluna com problema/pergunta aberta'
   const formas = variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
   const db = admin()
   const [{ count: jaFoi }, { data: chats }, { count: consultas }] = await Promise.all([
@@ -186,7 +186,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     }
 
     // Convite de depoimento/oferta agendado: confere na hora de enviar se ainda faz sentido.
-    if (item.kind === 'depoimento' || item.kind === 'pase' || item.kind === 'depo-hotmart' || item.kind === 'convite-comunidade') {
+    if (item.kind === 'depoimento' || item.kind === 'pase' || item.kind === 'depo-hotmart' || item.kind === 'convite-comunidade' || item.kind === 'convite-grupo') {
       const motivo = await motivoParaPular(item.phone, item.kind, item.id)
       if (motivo) {
         await db
@@ -244,8 +244,14 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       let saida: string
       try {
         const { zapiGet, renomearGrupo, enviarEnquete } = await import('@/lib/zapi')
-        const p = JSON.parse(item.body) as { acao: 'buscar' | 'renomear' | 'enquete' | 'texto'; nome: string; groupId?: string; opcoes?: string[] }
-        if (p.acao === 'texto') {
+        const p = JSON.parse(item.body) as { acao: 'buscar' | 'renomear' | 'enquete' | 'texto' | 'ajustes'; nome: string; groupId?: string; opcoes?: string[]; ajustes?: Record<string, boolean> }
+        if (p.acao === 'ajustes') {
+          // a Z-API exige todos os campos: mantém os atuais e troca só os que vierem em p.ajustes
+          const m = (await zapiGet(`group-metadata/${p.groupId}`)) as Record<string, unknown> | null
+          const atual = { adminOnlyMessage: Boolean(m?.adminOnlyMessage), adminOnlySettings: Boolean(m?.adminOnlySettings ?? true), requireAdminApproval: Boolean(m?.requireAdminApproval), adminOnlyAddMember: true }
+          const { ajustarGrupo } = await import('@/lib/zapi')
+          saida = JSON.stringify({ ...p, antes: atual, ok: await ajustarGrupo({ phone: p.groupId!, ...atual, ...p.ajustes }) })
+        } else if (p.acao === 'texto') {
           const { sendZapiText } = await import('@/lib/zapi')
           saida = JSON.stringify({ ...p, r: await sendZapiText({ phone: p.groupId!, message: p.nome }) })
         } else if (p.acao === 'enquete') {
