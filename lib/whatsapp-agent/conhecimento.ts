@@ -35,9 +35,9 @@ só é assunto de dinheiro se for cobrança real.
   automáticas: a de acesso e uma de apoio — pode remeter a elas ("el mensaje de arriba").
 - Link de acesso: abre "Entrando..." e entra sozinho. Se cair num formulário: "Correo electrónico" + "Contraseña"
   (a do WhatsApp) → "Entrar". "Correo o contraseña incorrectos" = conferir email e código.
-- Outro dia: riseme.app → email da compra + senha → "INICIAR SESIÓN". Não precisa criar conta (criar outra não libera nada).
-- Instalar (opcional): iPhone → riseme.app no SAFARI → compartilhar → "Agregar a pantalla de inicio" (não
-  "Favoritos"); Android → riseme.app no CHROME → três pontos → "Instalar app". Ícone sumido: últimas telas.
+- Outro dia: https://riseme.app → email da compra + senha → "INICIAR SESIÓN". Não precisa criar conta (criar outra não libera nada).
+- Instalar (opcional): iPhone → https://riseme.app no SAFARI → compartilhar → "Agregar a pantalla de inicio" (não
+  "Favoritos"); Android → https://riseme.app no CHROME → três pontos → "Instalar app". Ícone sumido: últimas telas.
 - Trocar a senha: Más → Mi perfil → "Contraseña" → nova duas vezes → "GUARDAR CONTRASEÑA".
 - Esqueceu a senha: no login, "¿Olvidaste tu contraseña?" (pl "Nie pamiętasz hasła?", cs "Zapomněla jsi heslo?", it "Hai dimenticato la password?",
   ro "Ți-ai uitat parola?", tr "Şifreni mi unuttun?", en "Forgot your password?") → email da compra → "ENVIAR ENLACE" → cria a nova no

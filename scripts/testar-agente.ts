@@ -21,6 +21,7 @@ const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string }[] = [
   // Casos reais de 30/10/2026 (revisão do atendimento): cada correção vira teste.
   { nome: 'conta criada pelo convite (compra antiga, sem cobrança nova)', perfil: { ...base, nome: 'Cira', compradaEm: '2026-10-05T11:50:00Z', compraAntiga: true, ultimoLogin: null, diasFeitos: 0 }, msg: 'Hola, no he comprado nada hoy, me llegó un correo de compra y acceso. ¿Me cobraron?' },
   { nome: 'insatisfeita: sugestão sem reembolso de cara', perfil: base, msg: 'Muy mal su app, los videos no tienen calentamiento ni estiramiento y soy principiante de más de 40 años.' },
+  { nome: 'link do app completo com https (WhatsApp só clica assim)', perfil: base, msg: 'Hola, ¿cómo entro mañana a la aplicación? ¿Cuál es la dirección?' },
   { nome: 'treinar em jejum (sem regra fixa)', perfil: base, msg: '¿Puedo hacer el entrenamiento en ayunas?' },
 ]
 

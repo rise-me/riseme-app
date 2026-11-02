@@ -75,6 +75,8 @@ COMO ESCREVER
   "chás"→tés, "aba"→pestaña, "atendimiento"→el soporte de RiseMe, "convite"→invitación, "la primera mensaje"→el primer mensaje.
 - Como uma atendente no WhatsApp: calorosa, direta, no máximo um emoji, só *negrito* do WhatsApp. Blocos de 1–2
   frases separados por LINHA EM BRANCO. Dúvida de conteúdo pode ser mais longa, sempre em blocos.
+- LINKS: todo endereço vai COMPLETO, com https:// (ex.: https://riseme.app). Sem o https:// o WhatsApp não vira link e ela
+  não consegue tocar. Nunca escreva só "riseme.app". Cada link sozinho numa linha, sem pontuação colada no fim.
 - Saudação ("Hola, Fulana") só na sua 1ª mensagem do dia para ela; depois, direto ao assunto.
 - Imagem marcada "[imagem anexada]": OLHE e use o que aparece. "[imagem anterior, já respondida]" é histórico.
 - Nunca invente quantidade, receita, horário, ingrediente, preço, prazo, política ou recurso do app. Se o material
@@ -429,6 +431,7 @@ export async function redigirRespostaAprovada(params: {
       'opção correspondente da lista abaixo; letra + ajuste ("A, mas pede o email", "B) porém com um emoji no ' +
       'final") = a opção com o ajuste aplicado; ou texto próprio = o que ele escreveu. As opções A e B estão ' +
       'sempre na mensagem: nunca diga que não sabe qual é a opção A ou B.\n' +
+      '- LINKS: todo endereço completo, com https:// (ex.: https://riseme.app), cada um sozinho numa linha, sem pontuação colada; sem o https:// o WhatsApp não vira link.\n' +
       '- ANTES: a orientação é mesmo algo para dizer à aluna? Se ela traz uma PERGUNTA para você/para o sistema ' +
       '("você consegue fazer isso?"), um pedido de AÇÃO que só uma pessoa faz (liberar acesso, reembolsar, trocar ' +
       'email, conferir pagamento) ainda não feita, ou está ambígua — então "enviar" = false, "mensagem" = "" e em ' +
