@@ -20,6 +20,7 @@ const CASOS: { nome: string; perfil: PerfilAluna | null; msgs: string[]; espera:
   { nome: 'fora do material', perfil: es, msgs: ['cuántas calorías tengo que comer al día para bajar 5 kilos?'], espera: 'não inventa; transfere' },
   { nome: 'senha incorreta', perfil: es, msgs: ['no puedo entrar, me dice correo o contraseña incorrectos'], espera: 'passos de senha/esqueci a senha' },
   { nome: 'segredo 4pm', perfil: es, msgs: ['quiero el secreto de las 4pm'], espera: 'Protocolo + link, sem transferir' },
+  { nome: 'link do app https', perfil: es, msgs: ['Hola, ¿cómo entro mañana a la aplicación? ¿Cuál es la dirección?'], espera: 'escreve https://riseme.app completo (clicável no WhatsApp)' },
   { nome: 'PL NIE', perfil: pl, msgs: ['NIE'], espera: 'parar_mensagens true, resposta curta em polonês' },
   { nome: 'PL Perfect Academy', perfil: pl, msgs: ['Dlaczego na wyciągu mam Perfect Academy z Portugalii? To oszustwo?'], espera: 'explica processadora, sem transferir, polonês' },
 ]
