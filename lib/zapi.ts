@@ -85,6 +85,11 @@ export function renomearGrupo(groupId: string, nome: string) {
   return zapiCall('POST', 'update-group-name', { groupId, groupName: nome })
 }
 
+/** Enquete num grupo (a Z-API só manda enquete para grupo), com várias respostas. */
+export function enviarEnquete(groupId: string, pergunta: string, opcoes: string[]) {
+  return zapiCall('POST', 'send-poll', { phone: groupId, message: pergunta, poll: opcoes.map((name) => ({ name })) })
+}
+
 /** O número tem WhatsApp? null = não deu para perguntar (sem env ou Z-API fora). */
 export async function temWhatsApp(phone: string): Promise<boolean | null> {
   const instance = process.env.ZAPI_INSTANCE_ID

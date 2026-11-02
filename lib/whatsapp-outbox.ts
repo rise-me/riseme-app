@@ -239,13 +239,16 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     }
 
     // 'grupo' não manda texto: lê ou renomeia um grupo do suporte (body = JSON {acao:'buscar', nome} ou
-    // {acao:'renomear', groupId, nome}) e grava o resultado no body. A chave da Z-API só existe no servidor (02/11/2026).
+    // {acao:'renomear', groupId, nome} ou {acao:'enquete', groupId, nome, opcoes}) e grava o resultado no body. A chave da Z-API só existe no servidor (02/11/2026).
     if (item.kind === 'grupo') {
       let saida: string
       try {
-        const { zapiGet, renomearGrupo } = await import('@/lib/zapi')
-        const p = JSON.parse(item.body) as { acao: 'buscar' | 'renomear'; nome: string; groupId?: string }
-        if (p.acao === 'renomear') {
+        const { zapiGet, renomearGrupo, enviarEnquete } = await import('@/lib/zapi')
+        const p = JSON.parse(item.body) as { acao: 'buscar' | 'renomear' | 'enquete'; nome: string; groupId?: string; opcoes?: string[] }
+        if (p.acao === 'enquete') {
+          // nome = pergunta; sem pollMaxOptions = várias respostas (doc send-poll da Z-API)
+          saida = JSON.stringify({ ...p, ok: await enviarEnquete(p.groupId!, p.nome, p.opcoes ?? []) })
+        } else if (p.acao === 'renomear') {
           saida = JSON.stringify({ ...p, ok: await renomearGrupo(p.groupId!, p.nome) })
         } else {
           const achados: { phone: string; name: string }[] = []
