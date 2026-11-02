@@ -13,6 +13,7 @@ export function isZapiConfigured(): boolean {
 // A Z-API quer só dígitos com DDI ("5511999999999"), sem "+" nem máscara — ou o LID do
 // WhatsApp como veio ("1453…@lid"), que também serve de destino.
 export function toZapiPhone(phone: string): string {
+  if (phone.endsWith('-group')) return phone // id de grupo ("1203…-group") vai como está
   const d = phone.replace(/\D/g, '')
   return phone.endsWith('@lid') ? `${d}@lid` : d
 }
