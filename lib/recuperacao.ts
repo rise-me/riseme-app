@@ -23,7 +23,9 @@ export const OFERTA_RECUPERACAO = process.env.RECUPERACAO_OFERTA ?? ''
 export const OFERTA_TESTE_B = 'yrn1s1q7'
 // Teste T25 (29/10/2026, Bruno): mesma regra para a oferta de US$ 14,90 da Colômbia. AO ENCERRAR: esvaziar também esta.
 export const OFERTA_TESTE_B_CO = '39kagsh5'
-const OFERTAS_TESTE_B = [OFERTA_TESTE_B, OFERTA_TESTE_B_CO].filter(Boolean)
+// Teste T30 (03/11/2026, Bruno): US$ 24,90 × 19,90 em EUA/PR (a 19,90 acima passou a ser a A). AO ENCERRAR: tirar a que perder.
+export const OFERTA_TESTE_B_2490 = '0kk0z0if'
+const OFERTAS_TESTE_B = [OFERTA_TESTE_B, OFERTA_TESTE_B_CO, OFERTA_TESTE_B_2490].filter(Boolean)
 // Tentativas que disparam a recuperação e aprovações que a cancelam: o front, a oferta de recuperação e as B dos testes.
 export const OFERTAS = new Set([OFERTA_FRONT, OFERTA_RECUPERACAO, ...OFERTAS_TESTE_B].filter(Boolean))
 const CHECKOUT = 'https://pay.hotmart.com/H101419289G'
