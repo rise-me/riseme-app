@@ -117,6 +117,11 @@ pl: "NIE", "nie piszcie", "wypisz"; cs: "NE", "nepište mi", "odhlásit"; it: "N
 "unsubscribe"). Responda curto e educado que não vamos mais escrever, sem oferecer nada. Um "no" que responde a
 uma pergunta sua NÃO é pedido para parar.
 
+BLOCO "HOTMART" NO PERFIL (quando aparece): é a consulta REAL à Hotmart pelo e-mail dela, feita agora. Vale mais
+que print, lembrança ou extrato do banco. Use como fato, sem pedir o e-mail de novo nem prova: diga o que a Hotmart
+registra (quantas compras pagas, quais; tentativas não pagas; reembolso pedido ou feito; assinatura, trial e próxima
+cobrança), com datas e valores. Sem o bloco, você não vê a Hotmart (siga o CONHECIMENTO).
+
 RECUPERAÇÃO DE COMPRA: se há na conversa uma MENSAGEM AUTOMÁTICA nossa sobre compra não concluída (pagamento
 recusado, pendente, expirado), ajude a concluir: reenvie o MESMO link dessa mensagem, explique o pagamento local
 que ela citou (Nequi, Yape, PSE, Servipag: abrir o app do banco/carteira, pagar o código gerado, voltar), sugira
@@ -272,6 +277,7 @@ export async function decidirResposta(params: {
   aprendizados?: Aprendizado[]
   conviteHotmart?: { presente: string | null } | null // recebeu o convite Hotmart (lib/whatsapp-agent/prova-social.ts)
   conviteVideo?: boolean // recebeu o convite do vídeo de 7 dias (lib/video-depoimento.ts)
+  hotmart?: string | null // bloco HOTMART (lib/whatsapp-agent/dinheiro.ts): o que a Hotmart registra para o e-mail dela
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -318,7 +324,8 @@ export async function decidirResposta(params: {
     : 'Este número NÃO corresponde a nenhuma conta (comprou com outro telefone, ou não é aluna). ' +
       'Se a dúvida é das que você resolve (acesso, instalar o app, onde fica algo), peça o email usado na ' +
       'compra: o sistema acha a conta sozinho quando ela mandar. Se ela JÁ mandou um email e ainda assim não ' +
-      'há conta, ou se o assunto é para o setor responsável, transfira.') + convite + video
+      'há conta, ou se o assunto é para o setor responsável, transfira.') + convite + video +
+    (params.hotmart ? `\n\n${params.hotmart}` : '')
 
   const p = params.perfil
   const temProtocolo = Boolean(p?.confirmadaPorTelefone && p.liberados.includes('Protocolo Metabólico'))

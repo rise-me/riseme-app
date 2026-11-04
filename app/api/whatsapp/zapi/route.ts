@@ -33,7 +33,9 @@ import {
   ultimaEntrada,
   vincularPorEmail,
   voltarParaBot,
+  emailDaConta,
 } from '@/lib/whatsapp-agent/conversa'
+import { blocoHotmart } from '@/lib/whatsapp-agent/dinheiro'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.
@@ -285,7 +287,9 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   try {
     const conviteHotmart = await conviteHotmartDela(phone).catch(() => null)
     const conviteVideo = await foiConvidadaParaVideo(phone, userId).catch(() => false)
-    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo })
+    // Assunto de dinheiro: consulta a Hotmart pelo e-mail (da conta ou o que ela digitou) e entrega como fato (04/11/2026).
+    const hotmart = await blocoHotmart(conversa, userId ? await emailDaConta(userId) : null).catch(() => null)
+    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
     // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).

@@ -135,6 +135,12 @@ export async function vincularPorEmail(conversa: MensagemConversa[]): Promise<st
   return data?.[0]?.id ?? null
 }
 
+/** E-mail da conta (para consultar a Hotmart em assunto de dinheiro). */
+export async function emailDaConta(userId: string): Promise<string | null> {
+  const { data } = await admin().from('users').select('email').eq('id', userId).maybeSingle()
+  return (data?.email as string | undefined)?.toLowerCase() ?? null
+}
+
 /** Guarda o LID da conversa (só dá pra saber quando o webhook traz telefone E LID juntos). */
 export async function salvarLid(phone: string, lid: string): Promise<void> {
   await admin().from('whatsapp_chats').upsert({ phone, lid }, { onConflict: 'phone' })

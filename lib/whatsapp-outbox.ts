@@ -227,9 +227,11 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     if (item.kind === 'teste-agente') {
       let saida: string
       try {
-        const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: string[]; conviteHotmart?: { presente: string | null }; conviteVideo?: boolean }
+        const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: string[]; conviteHotmart?: { presente: string | null }; conviteVideo?: boolean; hotmart?: string; hotmartEmail?: string }
         const agora = new Date().toISOString()
-        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((t) => ({ autor: 'student' as const, texto: t, em: agora })), agora, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo })
+        // hotmartEmail = consulta real à Hotmart no teste; hotmart = bloco pronto (teste sem credencial)
+        const hotmart = caso.hotmartEmail ? await (await import('@/lib/hotmart-api')).resumoHotmart(caso.hotmartEmail) : caso.hotmart ?? null
+        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((t) => ({ autor: 'student' as const, texto: t, em: agora })), agora, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo, hotmart })
         saida = JSON.stringify({ ...caso, resultado: d })
       } catch (err) {
         saida = JSON.stringify({ erro: String(err), entrada: item.body.slice(0, 500) })
@@ -240,6 +242,21 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
 
     // 'grupo' não manda texto: lê ou renomeia um grupo do suporte (body = JSON {acao:'buscar', nome} ou
     // {acao:'renomear', groupId, nome} ou {acao:'enquete', groupId, nome, opcoes} ou {acao:'texto', groupId, nome = a mensagem}) e grava o resultado no body. A chave da Z-API só existe no servidor (02/11/2026).
+    // 'hotmart' não manda texto: consulta a Hotmart pelo e-mail (body = JSON {email}) e grava o bloco no body. Serve para
+    // testar a credencial e para conferir consultas pendentes sem a chave sair da Vercel (04/11/2026).
+    if (item.kind === 'hotmart') {
+      let saida: string
+      try {
+        const { email } = JSON.parse(item.body) as { email: string }
+        const { resumoHotmart, hotmartConfigurada } = await import('@/lib/hotmart-api')
+        saida = JSON.stringify({ email, configurada: hotmartConfigurada(), bloco: await resumoHotmart(email) })
+      } catch (err) {
+        saida = JSON.stringify({ erro: String(err).slice(0, 500), entrada: item.body.slice(0, 300) })
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
     if (item.kind === 'grupo') {
       let saida: string
       try {
