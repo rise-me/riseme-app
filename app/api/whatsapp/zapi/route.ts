@@ -428,6 +428,10 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   // Autosserviço de acesso (05/11/2026, lib/whatsapp-agent/acesso.ts): e-mail corrigido ANTES de enviar (a resposta já diz
   // que trocou); senha renovada DEPOIS do texto (a mensagem de acesso chega em seguida). Só conta confirmada pelo telefone.
   let reenviarDepois: string | null = null // e-mail com que o acesso novo sai
+  // Transferiu por causa do e-mail/senha mas o texto afirma que já trocou/renovou (teste 05/11): troca pelo texto neutro.
+  if (decisao.tipo === 'humano' && /e-?mail|senha|acesso/i.test(decisao.motivo) && /cambi(amos|ado|é)|renov(amos|ada)|ya (te )?(llega|quedó)|zmieni|odnowi|changed|renewed/i.test(decisao.texto)) {
+    decisao = { ...decisao, texto: textoVamosVer(perfil?.idioma ?? 'es') }
+  }
   if (decisao.tipo === 'responder' && (decisao.novoEmail || decisao.reenviarAcesso)) {
     const idioma = perfil?.idioma ?? 'es'
     const pedido = decisao.novoEmail ? `trocar o e-mail para ${decisao.novoEmail}` : 'renovar a senha'
