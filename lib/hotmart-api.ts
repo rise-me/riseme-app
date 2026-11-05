@@ -61,6 +61,23 @@ export async function reembolsarHotmart(transacao: string): Promise<{ ok: true }
   return { ok: true }
 }
 
+/**
+ * CANCELA uma assinatura na Hotmart (desliga a renovação; o acesso segue até o fim do período pago). Usado pelo botão
+ * "Cancelar suscripción" do app (app/[locale]/(app)/more/subscription), depois de conferir que a assinatura é da aluna.
+ * Endpoint oficial: POST subscriptions/{subscriber_code}/cancel, body { send_mail } (a Hotmart avisa a assinante por e-mail).
+ */
+export async function cancelarAssinaturaHotmart(codigo: string): Promise<{ ok: true } | { ok: false; erro: string }> {
+  const t = await token()
+  if (!t) return { ok: false, erro: 'credencial da Hotmart ausente' }
+  const res = await fetch(`${API}/subscriptions/${encodeURIComponent(codigo)}/cancel`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ send_mail: true }),
+  }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }) as { ok: boolean; status: number; text: () => Promise<string> })
+  if (!res.ok) return { ok: false, erro: `Hotmart respondeu ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}` }
+  return { ok: true }
+}
+
 export interface CompraHotmart {
   transacao: string
   produto: string

@@ -152,8 +152,12 @@ um pedido feito DENTRO dos 15 dias NUNCA pode ficar para depois (Bruno, 05/11/20
 - Cartão trocado, perdido ou cancelado NÃO atrapalha: a Hotmart devolve ao banco emissor, que credita na conta dela
   (artigo oficial). Nunca peça número de cartão novo.
 - Assinatura (Pase): só a cobrança inicial é reembolsável, e dentro da garantia; renovação não (artigo oficial).
-- Cancelar ASSINATURA (Pase/mensal/anual) é outra coisa: Más → Gestionar suscripción → link da Hotmart. Com o bloco
-  HOTMART, diga o status real da assinatura, se está em trial e a data da próxima cobrança.
+- PASE COMPLETO (assinatura; 05/11/2026): 7 dias grátis e, no dia 8, cobrança ÚNICA de US$ 27 por UM ANO (não é mensal);
+  renova no ano seguinte se não cancelar. Cancelar antes do dia 8 = nada é cobrado. Cancelar depois = não cobra mais e o
+  acesso segue até o fim do ano pago. Só a cobrança inicial é reembolsável, dentro da garantia (acima).
+- Cancelar ASSINATURA: no app, Más → Gestionar suscripción → botão "Cancelar suscripción" (confirma e pronto; mostra
+  status e próxima cobrança). Com o bloco HOTMART, diga o status real, se está em trial e a data da próxima cobrança.
+  Se o botão não aparecer ou falhar → transfira (motivo "ASSINATURA — cancelar <código>") dizendo que cancelamos hoje.
 COBROU DUAS VEZES / COBRANÇA QUE ELA NÃO RECONHECE — entender antes; reembolso só se houve compra DUPLICADA de verdade,
 e só da duplicada. COM o bloco HOTMART no perfil (consulta real, 04/11/2026): responda com o que ele diz, na hora —
 1 compra paga + tentativas não pagas = não houve cobrança dupla (os valores "pendentes" no banco somem sozinhos em

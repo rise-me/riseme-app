@@ -3,6 +3,8 @@ import { ArrowLeft, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { getUserAccess } from '@/lib/user-access-server'
 import { createClient } from '@/lib/supabase/server'
+import { assinaturasDaAluna } from './actions'
+import { CancelarAssinatura } from './CancelarAssinatura'
 
 type Subscription = {
   plan_type: string | null
@@ -30,10 +32,16 @@ export default async function SubscriptionPage({
   const t = await getTranslations('subscriptionPage')
 
   const access = await getUserAccess()
-  const subscription =
-    access.userId && access.hasActiveSubscription
-      ? await getActiveSubscription(access.userId)
-      : null
+  const [subscription, hotmart] = await Promise.all([
+    access.userId && access.hasActiveSubscription ? getActiveSubscription(access.userId) : Promise.resolve(null),
+    // Assinaturas reais na Hotmart (pelo e-mail da conta): é daqui que sai o botão de cancelar (05/11/2026).
+    access.userId ? assinaturasDaAluna().catch(() => null) : Promise.resolve(null),
+  ])
+  const CANCELAVEL = /^(ACTIVE|DELAYED|STARTED|OVERDUE)$/i
+  const hotmartSubs = (hotmart ?? []).filter((a) => CANCELAVEL.test(a.status) || /CANCEL/i.test(a.status))
+  const statusLabel = (a: { status: string; trial: boolean }) =>
+    /CANCEL/i.test(a.status) ? t('statusCancelled') : a.trial ? t('statusTrial') : /^(DELAYED|OVERDUE)$/i.test(a.status) ? t('statusDelayed') : /^ACTIVE$/i.test(a.status) ? t('statusActive') : t('statusOther', { status: a.status })
+  const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' }) : null)
 
   const hasSubscription = !!subscription
   const hasLifetime = !hasSubscription && access.ownedChallengeIds.size > 0
@@ -94,7 +102,7 @@ export default async function SubscriptionPage({
             {t('renewsOn', { date: renewsOn })}
           </p>
         )}
-        {hasSubscription && (
+        {hasSubscription && !hotmartSubs.length && (
           <a
             href="https://app-vlc.hotmart.com/tools/subscriptions"
             target="_blank"
@@ -106,6 +114,29 @@ export default async function SubscriptionPage({
           </a>
         )}
       </div>
+
+      {hotmartSubs.length > 0 && (
+        <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest">{t('hotmartHeader')}</p>
+          {hotmartSubs.map((a) => (
+            <div key={a.codigo} className="space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-bold">{a.produto}{a.plano ? ` · ${a.plano}` : ''}</p>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">{statusLabel(a)}</span>
+              </div>
+              {!/CANCEL/i.test(a.status) && fmt(a.proximaCobranca) && (
+                <p className="text-xs text-muted-foreground">{t('nextCharge', { date: fmt(a.proximaCobranca)! })}</p>
+              )}
+              {!/CANCEL/i.test(a.status) && (
+                <>
+                  <p className="text-xs text-muted-foreground">{t('accessUntilNote')}</p>
+                  <CancelarAssinatura codigo={a.codigo} locale={locale} />
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
     </div>
   )
