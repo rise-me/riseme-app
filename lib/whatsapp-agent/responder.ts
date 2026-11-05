@@ -355,6 +355,7 @@ export async function decidirResposta(params: {
   hotmart?: string | null // bloco HOTMART (lib/whatsapp-agent/dinheiro.ts): o que a Hotmart registra para o e-mail dela
   emailSemConta?: string | null // ela mandou este e-mail, não há conta nem compra paga com ele (lib/whatsapp-agent/acesso.ts)
   forcarAssuntos?: ReadonlySet<Assunto> // interno: 2ª rodada com os materiais quando a 1ª pediu (precisa_materiais)
+  consultaPendente?: { id: number; resumo: string; motivo: string; desde: string } | null // reprocessamento: a pergunta que ficou sem resposta
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -445,6 +446,7 @@ export async function decidirResposta(params: {
           {
             type: 'text' as const,
             text:
+              (params.consultaPendente ? `CONSULTA PENDENTE #${params.consultaPendente.id} (aberta em ${params.consultaPendente.desde.slice(0, 10)}, ainda sem resposta): ${params.consultaPendente.resumo}\nA aluna espera ESSA resposta, não um "de nada". Responda a isso agora com o que você sabe hoje (Hotmart, acervo, catálogo, acesso); se não souber resolver, passar_para_humano = true e diga que a equipe já está vendo, sem repetir "vou ver".\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
               `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília): ${prazoDaLista(params.agora) === 'hoje' ? 'HOJE (es "hoy hasta las 20h")' : 'AMANHÃ (es "mañana hasta las 20h")'}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
@@ -491,7 +493,7 @@ export async function decidirResposta(params: {
   // Verificador antes de enviar (lib/whatsapp-agent/verificador.ts, q1 do mapa, 05/11/2026): confere contra a voz do
   // atendimento e corrige o mínimo. Resposta de conteúdo, dinheiro ou transferência pode ser longa.
   const ultimaDela = [...params.conversa].reverse().find((m) => m.autor === 'student')?.texto ?? ''
-  const permiteLongo = Boolean(params.hotmart) || Boolean(out.reembolso_transacoes?.trim()) || out.passar_para_humano ||
+  const permiteLongo = Boolean(params.hotmart) || Boolean(params.consultaPendente) || Boolean(out.reembolso_transacoes?.trim()) || out.passar_para_humano ||
     /\?|receta|té\b|tes\b|men[uú]|plan\b|ejercicio|rutina|entren|d[ií]a \d|c[oó]mo|d[oó]nde|qu[eé]\b|puedo|cu[aá]nt|herbat|ćwicz|jak\b|gdzie|ile\b/i.test(ultimaDela) ||
     ultimaDela.length > 120
   const verificacao = await verificarResposta({ texto: out.resposta, conversa: params.conversa, agora: params.agora, permiteLongo })

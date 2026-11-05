@@ -314,7 +314,11 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     const conviteVideo = await foiConvidadaParaVideo(phone, userId).catch(() => false)
     // Assunto de dinheiro: consulta a Hotmart pelo e-mail (da conta ou o que ela digitou) e entrega como fato (04/11/2026).
     const hotmart = semCompra ? semCompra.bloco : await blocoHotmart(conversa, userId ? await emailsDaConta(userId) : null).catch(() => null)
-    decisao = await decidirResposta({ phone, perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart, emailSemConta: semCompra?.email })
+    // Reprocessamento de pendente: o agente recebe a consulta aberta como a pergunta a responder (05/11/2026; antes respondia ao "gracias").
+    const consultaPendente = silencioso ? await admin().from('whatsapp_consultas').select('id, resumo, motivo, created_at').eq('phone', phone).eq('status', 'pendente').order('created_at', { ascending: false }).limit(1).then((r) => (r.data?.[0] ? { id: r.data[0].id, resumo: r.data[0].resumo, motivo: r.data[0].motivo, desde: r.data[0].created_at } : null)) : null
+    // Assunto de dinheiro no reprocessamento: a consulta pendente conta como sinal (a conversa pode ter esfriado).
+    const hotmartSilencioso = consultaPendente && /cobr|reembols|dinheiro|duplic|assinatura|cancel/i.test(consultaPendente.motivo) && userId ? await blocoHotmart([...conversa, { autor: 'student', texto: consultaPendente.motivo, em: new Date().toISOString() }], await emailsDaConta(userId)).catch(() => null) : null
+    decisao = await decidirResposta({ phone, perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart: hotmart ?? hotmartSilencioso, emailSemConta: semCompra?.email, consultaPendente })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
     // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).
@@ -508,7 +512,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     else if (decisao.pedirDepoimento && !silencioso) await ofertasPosConversa(phone, perfil?.idioma ?? 'es', userId, Boolean(porEmail))
     // Reprocessamento de pendente antigo (05/11/2026): o bot respondeu sozinho com as capacidades novas (Hotmart, acesso, catálogo,
     // acervo) → a consulta sai da lista do responsável, com a resposta registrada; ele recebe uma linha.
-    if (silencioso && decisao.texto) {
+    if (silencioso && decisao.texto && decisao.texto.length > 80) {
       const { data: abertas } = await admin().from('whatsapp_consultas').select('id').eq('phone', phone).eq('status', 'pendente')
       for (const c of abertas ?? []) {
         await fecharConsulta(c.id, { status: 'respondida', orientacao: 'bot respondeu sozinho (reprocessado)', respostaEnviada: decisao.texto })
