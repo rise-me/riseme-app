@@ -54,7 +54,7 @@ export const ACERVO: Trecho[] = [
     fontes: [
       { org: 'Bhutani S et al., Physiological Reports', titulo: 'Composition of two-week change in body weight under unrestricted free-living conditions', ano: 2017, url: 'https://doi.org/10.14814/phy2.13336' },
     ],
-    tags: ['balanza', 'bascula', 'balança', 'peso sube', 'subi de peso', 'no bajo', 'no bajo de peso', 'retencion', 'retención de liquidos', 'hinchada', 'inchada', 'medidas'],
+    tags: ['balanza', 'bascula', 'báscula', 'balança', 'peso sube', 'subi de peso', 'subí de peso', 'no bajo', 'no bajo de peso', 'sin bajar', 'peso igual', 'retencion', 'retención de liquidos', 'hinchada', 'inchada', 'medidas'],
   },
   // ── Jejum e horário das refeições ───────────────────────────────────────────────────────────────────────────────────────
   {
@@ -358,7 +358,7 @@ export const ACERVO: Trecho[] = [
       { org: 'Trexler ET et al., Journal of the International Society of Sports Nutrition', titulo: 'Metabolic adaptation to weight loss: implications for the athlete', ano: 2014, url: 'https://doi.org/10.1186/1550-2783-11-7' },
       { org: 'Paluch AE et al., The Lancet Public Health', titulo: 'Daily steps and all-cause mortality: a meta-analysis of 15 international cohorts', ano: 2022, url: 'https://doi.org/10.1016/S2468-2667(21)00302-9' },
     ],
-    tags: ['estancada', 'estancamiento', 'meseta', 'plateau', 'no bajo mas', 'no bajo más', 'dejé de bajar', 'deje de bajar', 'pasos', 'caminar', 'caminata', 'descanso de la dieta'],
+    tags: ['estancada', 'estancamiento', 'meseta', 'plateau', 'no bajo mas', 'no bajo más', 'dejé de bajar', 'deje de bajar', 'sin bajar', 'no bajo', 'no he bajado', 'no pierdo peso', 'no adelgazo', 'no baja', 'mismo peso', 'ni un gramo', 'ni un kilo', 'la bascula no', 'la báscula no', 'semanas sin', 'pasos', 'caminar', 'caminata', 'descanso de la dieta'],
   },
   // ── Fases da vida, nível 2 ──────────────────────────────────────────────────────────────────────────────────────────────
   {

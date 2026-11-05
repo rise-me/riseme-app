@@ -47,7 +47,7 @@ O peso varia 1 a 2 kg em poucos dias por água, sal, carboidrato guardado nos m�
 Fontes:
 - Bhutani S et al., Physiological Reports — *Composition of two-week change in body weight under unrestricted free-living conditions* (2017) — <https://doi.org/10.14814/phy2.13336>
 
-Palavras que acionam: balanza, bascula, balança, peso sube, subi de peso, no bajo, no bajo de peso, retencion, retención de liquidos, hinchada, inchada, medidas
+Palavras que acionam: balanza, bascula, báscula, balança, peso sube, subi de peso, subí de peso, no bajo, no bajo de peso, sin bajar, peso igual, retencion, retención de liquidos, hinchada, inchada, medidas
 
 ## Jejum
 
@@ -426,7 +426,7 @@ Fontes:
 - Trexler ET et al., Journal of the International Society of Sports Nutrition — *Metabolic adaptation to weight loss: implications for the athlete* (2014) — <https://doi.org/10.1186/1550-2783-11-7>
 - Paluch AE et al., The Lancet Public Health — *Daily steps and all-cause mortality: a meta-analysis of 15 international cohorts* (2022) — <https://doi.org/10.1016/S2468-2667(21)00302-9>
 
-Palavras que acionam: estancada, estancamiento, meseta, plateau, no bajo mas, no bajo más, dejé de bajar, deje de bajar, pasos, caminar, caminata, descanso de la dieta
+Palavras que acionam: estancada, estancamiento, meseta, plateau, no bajo mas, no bajo más, dejé de bajar, deje de bajar, sin bajar, no bajo, no he bajado, no pierdo peso, no adelgazo, no baja, mismo peso, ni un gramo, ni un kilo, la bascula no, la báscula no, semanas sin, pasos, caminar, caminata, descanso de la dieta
 
 ## Gravidez
 
