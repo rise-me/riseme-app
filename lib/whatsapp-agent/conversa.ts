@@ -1,5 +1,6 @@
 // Estado e histórico das conversas de WhatsApp (migration_008). Só servidor:
 // usa a service role — as tabelas não têm policy nenhuma.
+import { quizDaAluna } from '@/lib/quiz-contexto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Aprendizado, Consulta, MensagemConversa, PerfilAluna } from './responder'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
@@ -254,6 +255,8 @@ export async function perfilDaAluna(userId: string, confirmadaPorTelefone = true
     brindeDepoimentoEntregue: Boolean(
       (auth?.user?.app_metadata?.menu_bonus_motivos as Record<string, string> | undefined)?.depoimento
     ),
+    // O que ela respondeu no quiz antes de comprar (lib/quiz-contexto.ts); null sem sck/credencial.
+    quiz: await quizDaAluna(db, auth?.user),
   }
 }
 

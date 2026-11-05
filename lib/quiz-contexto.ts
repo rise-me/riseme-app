@@ -1,0 +1,92 @@
+// O que a aluna respondeu no QUIZ antes de comprar, para o agente de WhatsApp (Bruno, 05/11/2026: "seria incrível").
+// Cadeia: a venda chega da Hotmart com `purchase.origin.sck` (id do visitante do Tag Manager) → o app guarda o sck em
+// auth user_metadata → a sessão do quiz com esse sck (banco `metricas-quiz`, tabela quiz_sessoes, painel-quizes)
+// traz as respostas {tela: opção} → viram texto legível com o mapa tela→pergunta→opção (quiz-cl-es.json, gerado do
+// copy.es.json do funil). Guardado em user_metadata.quiz na 1ª leitura; sem credencial do banco de métricas
+// (METRICAS_SUPABASE_URL/_SERVICE_KEY) nada é buscado e o perfil segue sem o quiz. Medido em 05/11: 769 das 2.358
+// compradoras dos últimos 30 dias com conta no app têm sessão do quiz com respostas (31% das vendas com sck).
+import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
+import mapaClEs from './whatsapp-agent/quiz-cl-es.json'
+
+type Mapa = Record<string, { key: string; pergunta: string; opcoes: Record<string, string> }>
+const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-ES-BR': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa }
+
+// Rótulo curto por chave: a pergunta inteira é longa demais pro perfil.
+const ROTULO: Record<string, string> = {
+  objetivo: 'objetivo', tipo_cuerpo_actual: 'corpo hoje', pais: 'país', rango_edad: 'faixa de idade', experiencia_calistenia: 'experiência com calistenia',
+  animo_sin_equipo: 'treinar sem equipamento', experiencia_cuerpo: 'ganha/perde peso', ultima_satisfaccion_cuerpo: 'última vez satisfeita com o corpo',
+  areas_trabajar: 'áreas que quer trabalhar', tipo_cuerpo_deseado: 'corpo desejado', problemas_fisicos: 'problemas físicos', frecuencia_ejercicio: 'frequência de exercício',
+  consumo_agua: 'água por dia', respuestas_parecidas: 'se identifica com', falta_aire_escaleras: 'fôlego na escada', frecuencia_caminar: 'caminha',
+  nivel_energia: 'energia', calistenia_energia: 'calistenia e energia', horas_sueno: 'sono', malos_habitos: 'maus hábitos', eventos_aumento_peso: 'o que fez engordar',
+  razon_principal: 'razão principal', evento_importante: 'evento importante à vista', proyeccion_resultados: 'projeção',
+}
+
+export interface QuizGuardado { sck: string; funil: string; respostas: Record<string, string>; em: string }
+
+export function quizConfigurado(): boolean {
+  return Boolean(process.env.METRICAS_SUPABASE_URL && process.env.METRICAS_SUPABASE_SERVICE_KEY)
+}
+
+let _quiz: SupabaseClient | null = null
+function metricas(): SupabaseClient | null {
+  if (!quizConfigurado()) return null
+  if (!_quiz) _quiz = createClient(process.env.METRICAS_SUPABASE_URL!, process.env.METRICAS_SUPABASE_SERVICE_KEY!, { auth: { persistSession: false } })
+  return _quiz
+}
+
+/** Sessão do quiz com respostas para um sck (qualquer funil), ou null. */
+export async function buscarRespostasQuiz(sck: string, cliente: SupabaseClient | null = metricas()): Promise<Omit<QuizGuardado, 'em'> | null> {
+  if (!cliente || !sck) return null
+  const { data } = await cliente.from('quiz_sessoes').select('funil, respostas, respondeu, inicio').eq('sck', sck).eq('respondeu', true).order('inicio', { ascending: false }).limit(1)
+  const s = data?.[0]
+  if (!s || Object.keys(s.respostas ?? {}).length < 3) return null
+  return { sck, funil: s.funil, respostas: s.respostas as Record<string, string> }
+}
+
+/** Texto em português para o perfil do agente. null = nada legível. */
+export function resumirQuiz(q: { funil: string; respostas: Record<string, string>; em?: string }): string | null {
+  const mapa = MAPAS[q.funil]
+  if (!mapa) return null
+  const linhas: string[] = []
+  for (const [tela, resp] of Object.entries(q.respostas)) {
+    const m = mapa[tela]
+    if (!m || !resp) continue
+    const vals = String(resp).split(',').map((id) => m.opcoes[id.trim()] ?? id.trim()).filter(Boolean)
+    if (!vals.length) continue
+    linhas.push(`${ROTULO[m.key] ?? m.key}: ${vals.join(', ')}`)
+  }
+  if (!linhas.length) return null
+  return `O QUE ELA RESPONDEU NO QUIZ antes de comprar${q.em ? ` (${q.em.slice(0, 10)})` : ''} — é quem ela é e o que quer; use para entender e personalizar, sem recitar de volta nem dizer "você respondeu no quiz" (só cite se ajudar na resposta):\n- ${linhas.join('\n- ')}`
+}
+
+/** Guarda sck e/ou respostas em user_metadata (sem migração; o perfil já lê o metadata). */
+export async function guardarQuizNaConta(db: SupabaseClient, userId: string, dados: { sck?: string; quiz?: QuizGuardado }, atual?: Record<string, unknown>): Promise<void> {
+  const meta = atual ?? ((await db.auth.admin.getUserById(userId)).data.user?.user_metadata ?? {})
+  const novo: Record<string, unknown> = { ...meta }
+  if (dados.sck && !meta.sck) novo.sck = dados.sck
+  if (dados.quiz) novo.quiz = dados.quiz
+  await db.auth.admin.updateUserById(userId, { user_metadata: novo })
+}
+
+/**
+ * Resumo do quiz para a aluna: do metadata se já guardado; senão busca pelo sck (se houver credencial), guarda e devolve.
+ * Nunca lança: sem dado, null.
+ */
+export async function quizDaAluna(db: SupabaseClient, user: User | null | undefined): Promise<string | null> {
+  if (!user) return null
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>
+  const guardado = meta.quiz as QuizGuardado | undefined
+  if (guardado?.respostas) return resumirQuiz(guardado)
+  const sck = meta.sck as string | undefined
+  if (!sck) return null
+  try {
+    const achado = await buscarRespostasQuiz(sck)
+    if (!achado) return null
+    const quiz: QuizGuardado = { ...achado, em: new Date().toISOString() }
+    await guardarQuizNaConta(db, user.id, { quiz }, meta)
+    return resumirQuiz(quiz)
+  } catch (err) {
+    console.error('[quiz-contexto] falhou:', err)
+    return null
+  }
+}

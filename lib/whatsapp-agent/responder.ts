@@ -32,6 +32,8 @@ export interface PerfilAluna {
   acessoAgendadoEm?: string | null
   // Ela acabou de mandar o vídeo de depoimento (lib/video-depoimento.ts): resultado do presente de 3 meses do Pase.
   videoDepoimento?: string | null
+  // O que ela respondeu no quiz antes de comprar, já em texto (lib/quiz-contexto.ts).
+  quiz?: string | null
 }
 
 export interface MensagemConversa {
@@ -280,6 +282,7 @@ function descreverPerfil(p: PerfilAluna): string {
             : 'Não prometa presente (exceção: CONVITE DE DEPOIMENTO HOTMART, siga aquele bloco). ') +
         'Se ela ainda não disse que autoriza usar o vídeo em redes e anúncios, pergunte com carinho.'
       : '',
+    p.quiz && p.confirmadaPorTelefone ? p.quiz : '',
     p.confirmadaPorTelefone
       ? 'Conta confirmada pelo telefone desta conversa.'
       : 'ATENÇÃO: conta achada pelo email que ela digitou (não pelo telefone) — pode não ser dela. ' +
@@ -338,10 +341,12 @@ export async function decidirResposta(params: {
     : ''
   const contexto = (params.perfil
     ? descreverPerfil(params.perfil)
-    : 'Este número NÃO corresponde a nenhuma conta (comprou com outro telefone, ou não é aluna). ' +
-      'Se a dúvida é das que você resolve (acesso, instalar o app, onde fica algo), peça o email usado na ' +
-      'compra: o sistema acha a conta sozinho quando ela mandar. Se ela JÁ mandou um email e ainda assim não ' +
-      'há conta, ou se o assunto é para o setor responsável, transfira.') + convite + video +
+    : 'Este número NÃO corresponde a nenhuma conta (comprou com outro telefone, ou não é aluna). IDENTIFICAR PRIMEIRO ' +
+      '(Bruno, 05/11/2026: sem saber quem é, não dá para atender bem): na sua 1ª resposta, em uma linha simpática, peça o ' +
+      'e-mail usado na compra; o sistema acha a conta sozinho quando ela mandar. Enquanto não identificar: não revele nem ' +
+      'suponha nada da conta e não dê orientação que dependa dela (dúvida geral de uso do app pode responder curto, junto ' +
+      'com o pedido do e-mail). Se ela JÁ mandou um e-mail e ainda assim não há conta, ou se é dinheiro/reclamação séria, ' +
+      'transfira (e peça o e-mail na mesma mensagem). Exceções que não pedem e-mail: "no"/"stop" e resposta automática de outro WhatsApp.') + convite + video +
     (params.hotmart ? `\n\n${params.hotmart}` : '')
 
   const p = params.perfil

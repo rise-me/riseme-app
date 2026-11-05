@@ -1,0 +1,217 @@
+{
+"1": {
+"key": "objetivo",
+"pergunta": "¿Cuál es tu principal objetivo con la calistenia?",
+"opcoes": {
+"perder_peso": "Perder peso",
+"ganar_fuerza": "Ganar más fuerza muscular y tonificar el cuerpo",
+"ganar_flexibilidad": "Ganar más flexibilidad",
+"eliminar_tensiones": "Eliminar tensiones y preocupaciones",
+"controlar_azucar": "Controlar el azúcar en la sangre para mejorar mi salud y prevenir y/o tratar la "
+}
+},
+"3": {
+"key": "tipo_cuerpo_actual",
+"pergunta": "¿Cuál de estas opciones describe mejor tu cuerpo?",
+"opcoes": {
+"delgada": "Delgada",
+"media": "Media",
+"grande": "Grande",
+"con_sobrepeso": "Con sobrepeso"
+}
+},
+"4": {
+"key": "pais",
+"pergunta": "¿En qué país vives?",
+"opcoes": {
+"mexico": "México",
+"colombia": "Colombia",
+"argentina": "Argentina",
+"chile": "Chile",
+"peru": "Perú",
+"estados_unidos": "Estados Unidos",
+"bolivia": "Bolívia",
+"otro": "Otro"
+}
+},
+"6": {
+"key": "rango_edad",
+"pergunta": "¿Cuál es tu edad?",
+"opcoes": {
+"edad_18_29": "18 - 29 años",
+"edad_30_39": "30 - 39 años",
+"edad_40_49": "40 - 49 años",
+"edad_mas_50": "Más de 50 años"
+}
+},
+"7": {
+"key": "experiencia_calistenia",
+"pergunta": "¿Has probado Calistenina antes?",
+"opcoes": {
+"si_algunas_veces": "Sí, lo he hecho algunas veces.",
+"nunca_lo_intente": "No, nunca lo he intentado."
+}
+},
+"9": {
+"key": "experiencia_cuerpo",
+"pergunta": "¿Cuál es tu experiencia con tu cuerpo?",
+"opcoes": {
+"cuesta_ganar_peso": "Me cuesta ganar peso o músculo",
+"gano_pierdo_facil": "Gano y pierdo peso con facilidad",
+"gano_rapido_pierdo_lento": "Gano peso rápido, pero lo pierdo lentamente",
+"ninguna_de_estas": "Ninguna de estas"
+}
+},
+"10": {
+"key": "ultima_satisfaccion_cuerpo",
+"pergunta": "¿Cuándo fue la última vez que te sentiste satisfecha con tu cuerpo?",
+"opcoes": {
+"menos_1_ano": "Hace menos de <b>1 año</b>",
+"entre_1_2_anos": "Entre <b>1 y 2 años</b>",
+"mas_3_anos": "Hace más de <b>3 años</b>",
+"nunca": "Nunca"
+}
+},
+"11": {
+"key": "areas_trabajar",
+"pergunta": "Elige las principales áreas que deseas trabajar:",
+"opcoes": {
+"vientre": "Vientre",
+"gluteos": "Glúteos",
+"piernas": "Piernas",
+"pecho": "Pecho",
+"todo": "Todo"
+}
+},
+"12": {
+"key": "tipo_cuerpo_deseado",
+"pergunta": "¡Elige el tipo de cuerpo que quieres alcanzar!",
+"opcoes": {
+"delgada": "Delgada",
+"tonificada": "Tonificada",
+"con_curvas": "Con curvas",
+"promedio": "Promedio"
+}
+},
+"13": {
+"key": "problemas_fisicos",
+"pergunta": "¿Tienes problemas con alguno de los siguientes?",
+"opcoes": {
+"espalda_sensible": "Espalda sensible",
+"rodillas_sensibles": "Rodillas sensibles",
+"ninguna_de_las_anteriores": "Ninguna de las anteriores"
+}
+},
+"14": {
+"key": "frecuencia_ejercicio",
+"pergunta": "¿Con qué frecuencia haces ejercicio?",
+"opcoes": {
+"casi_todos_los_dias": "Casi todos los días",
+"varias_veces_semana": "Varias veces a la semana",
+"algunas_veces_mes": "Algunas veces al mes",
+"nunca": "Nunca"
+}
+},
+"15": {
+"key": "consumo_agua",
+"pergunta": "¿Cuánta agua bebes diariamente?",
+"opcoes": {
+"solo_cafe_o_te": "Solo tomo café o té",
+"dos_vasos": "Dos vasos",
+"dos_a_seis_vasos": "De dos a seis vasos",
+"mas_de_seis_vasos": "Más de seis vasos"
+}
+},
+"17": {
+"key": "falta_aire_escaleras",
+"pergunta": "¿Te falta el aire al subir escaleras?",
+"opcoes": {
+"sin_aliento_no_hablo": "Me quedo tan sin aliento que no puedo hablar",
+"poco_aire_puedo_hablar": "Me falta un poco el aire, pero puedo hablar",
+"bien_un_tramo": "Estoy bien después de un tramo de escaleras",
+"varios_tramos": "Puedo manejar unos cuantos tramos de escaleras"
+}
+},
+"18": {
+"key": "frecuencia_caminar",
+"pergunta": "¿Con qué frecuencia sales a caminar?",
+"opcoes": {
+"casi_todos_los_dias": "Casi todos los días",
+"varias_veces_semana": "Varias veces a la semana",
+"algunas_veces_mes": "Algunas veces al mes",
+"nunca": "Nunca"
+}
+},
+"19": {
+"key": "nivel_energia",
+"pergunta": "¿Cómo están tus niveles de energía durante el día?",
+"opcoes": {
+"bajos_cansada_todo_dia": "Bajos, me siento cansada durante todo el día",
+"caida_despues_almuerzo": "Sinto une caída de energía después del almuerzo",
+"me_arrastro_entre_comidas": "Me arrasto entre las comidas",
+"altos_y_estables": "Altos y estables"
+}
+},
+"21": {
+"key": "horas_sueno",
+"pergunta": "¿Cuánto duermes generalmente?",
+"opcoes": {
+"menos_5_horas": "Menos de 5 horas",
+"de_5_a_6_horas": "5-6 horas",
+"de_7_a_8_horas": "7-8 horas",
+"mas_8_horas": "Más de 8 horas"
+}
+},
+"22": {
+"key": "malos_habitos",
+"pergunta": "¿Tienes alguno de los siguientes malos hábitos?",
+"opcoes": {
+"comer_por_emocion": "Comer por emoción o aburrimiento",
+"comer_en_exceso": "Comer en exceso",
+"bocadillos_de_noche": "Comer bocadillos tarde en la noche",
+"saltar_comidas": "Saltar comidas con demasiada frecuencia",
+"ninguna_de_las_anteriores": "Ninguna de las opciones anteriores"
+}
+},
+"23": {
+"key": "eventos_aumento_peso",
+"pergunta": "¿Alguno de los siguientes eventos de la vida ha llevado al aumento de peso en los últimos años?",
+"opcoes": {
+"presion_laboral": "Presión laboral",
+"vida_familiar_ocupada": "Vida familiar ocupada",
+"divorcio_o_ruptura": "Divorcio o ruptura",
+"metabolismo_lento": "Metabolismo más lento debido al envejecimiento",
+"menopausia": "Menopausia",
+"embarazo_posparto": "Cambios por embarazo o posparto",
+"desafios_financieros": "Desafíos financieros",
+"otros_eventos_estresantes": "Otros eventos estresantes",
+"pandemia_covid": "Pandemia de Covid-19",
+"ninguno_de_los_anteriores": "Ninguno de los elementos anteriores"
+}
+},
+"24": {
+"key": "razon_principal",
+"pergunta": "¿Cuál es tu principal razón para ponerte en forma?",
+"opcoes": {
+"mas_confianza_cuerpo": "Sentirme más confiada en mi cuerpo",
+"mas_saludable_energia": "Sentirme más saludable y con más energía",
+"ropa_quede_mejor": "Que me queden mejor mis prendas",
+"recuperar_forma_posparto": "Recuperar mi forma después de dar a luz",
+"otra": "Otra"
+}
+},
+"30": {
+"key": "evento_importante",
+"pergunta": "¿Tienes un evento importante próximamente?",
+"opcoes": {
+"vacaciones": "Vacaciones",
+"boda": "Boda",
+"reunion": "Reunión",
+"cumpleanos": "Cumpleaños",
+"dia_festivo": "Día festivo",
+"evento_deportivo": "Evento deportivo",
+"otro": "Otro",
+"ningun_evento": "Ningún evento en el corto plazo"
+}
+}
+}

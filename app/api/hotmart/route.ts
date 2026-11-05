@@ -1,3 +1,4 @@
+import { buscarRespostasQuiz, guardarQuizNaConta } from '@/lib/quiz-contexto'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
@@ -187,6 +188,16 @@ export async function POST(request: NextRequest) {
           locale,
         })
         await sendAccessEmail({ email: buyerEmail, code, link, locale })
+      }
+    }
+
+    // Chave do quiz (sck do link) → conta, para o agente de WhatsApp ver o que ela respondeu (lib/quiz-contexto.ts). Best-effort.
+    if (purchase.origin?.sck) {
+      try {
+        const achado = await buscarRespostasQuiz(purchase.origin.sck)
+        await guardarQuizNaConta(supabase, userId, { sck: purchase.origin.sck, quiz: achado ? { ...achado, em: new Date().toISOString() } : undefined })
+      } catch (err) {
+        console.error('[hotmart] quiz/sck não guardado:', err)
       }
     }
 
