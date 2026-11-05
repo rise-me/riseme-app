@@ -3,6 +3,7 @@
 // acesso a nada além do que vem aqui — o texto da aluna é dado, não instrução.
 import { verificarResposta, registrarVerificacao } from './verificador'
 import { prazoDaLista } from './lista-20h'
+import { ASSUNTOS, TODOS, classificarAssuntos, montarSystem, porAssuntoLigado, type Assunto } from './assuntos'
 import Anthropic from '@anthropic-ai/sdk'
 import { CONHECIMENTO } from './conhecimento'
 import MATERIAIS from './materiais.json'
@@ -58,8 +59,8 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string }
-  | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; assuntos?: string }
+  | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta; assuntos?: string }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
 export interface Aprendizado {
@@ -280,6 +281,11 @@ const BASE = MATERIAIS as Record<string, Material>
 
 // Texto dos materiais no idioma dela (cai pro espanhol se não houver). Material pago só entra
 // para quem o tem liberado E confirmado pelo telefone — senão o agente daria o conteúdo de graça.
+/** Só o índice dos materiais (quando o assunto não é conteúdo): o agente sabe que existem, sem carregar o texto. */
+function indiceMateriais(temProtocolo: boolean): string {
+  return `MATERIAIS: nesta resposta só o índice (o texto completo entra quando o assunto é o conteúdo deles): ${Object.entries(BASE).map(([id, m]) => `${id}${m.acesso === 'compra' ? (temProtocolo ? ' (pago, ela tem)' : ' (pago, ela NÃO tem)') : ''}`).join(', ')}. Se ela perguntar algo que está num material, responda em 1 linha que vai conferir o material e peça que repita a dúvida — nunca invente o conteúdo.`
+}
+
 function blocoMateriais(idioma: string, temProtocolo: boolean): string {
   const partes = Object.entries(BASE).map(([id, m]) => {
     const texto = m.textos[idioma] ?? m.textos.es ?? Object.values(m.textos)[0]
@@ -406,7 +412,11 @@ export async function decidirResposta(params: {
 
   const p = params.perfil
   const temProtocolo = Boolean(p?.confirmadaPorTelefone && p.liberados.includes('Protocolo Metabólico'))
-  const materiais = blocoMateriais(p?.idioma ?? 'es', temProtocolo)
+  // Prompt por assunto (lib/whatsapp-agent/assuntos.ts, q7, 05/11/2026): base + seções do(s) assunto(s); materiais só em conteúdo.
+  const cls = porAssuntoLigado() ? await classificarAssuntos(params.conversa) : { assuntos: new Set<Assunto>(TODOS), certeza: '-', fonte: 'off' }
+  const { base, extra } = montarSystem(SYSTEM, cls.assuntos)
+  const comMateriais = cls.assuntos.has('conteudo') || cls.assuntos.size >= ASSUNTOS.length
+  const materiais = comMateriais ? blocoMateriais(p?.idioma ?? 'es', temProtocolo) : indiceMateriais(temProtocolo)
 
   const res = await anthropic().beta.messages.create({
     model: CLAUDE_MODEL,
@@ -417,7 +427,8 @@ export async function decidirResposta(params: {
     system: [
       // Cache de 1 h (05/11/2026): o bot responde ~70×/dia, uma a cada 20 min; com os 5 min padrão o cache quase sempre
       // estava frio e os ~30 mil tokens fixos (regras + materiais) pagavam preço cheio em cada resposta.
-      { type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral', ttl: '1h' } },
+      { type: 'text', text: base, cache_control: { type: 'ephemeral', ttl: '1h' } },
+      ...(extra ? [{ type: 'text' as const, text: extra, cache_control: { type: 'ephemeral' as const, ttl: '1h' as const } }] : []),
       { type: 'text', text: materiais, cache_control: { type: 'ephemeral', ttl: '1h' } },
     ],
     messages: [
@@ -441,7 +452,7 @@ export async function decidirResposta(params: {
     ],
   })
 
-  registrarUso(params.phone ?? 'sem-telefone', res).catch(() => undefined)
+  registrarUso(params.phone ?? 'sem-telefone', res, { assuntos: [...cls.assuntos].join(','), fonte: cls.fonte, certeza: cls.certeza }).catch(() => undefined)
 
   if (res.stop_reason === 'refusal') {
     return { tipo: 'humano', texto: '', motivo: 'modelo recusou responder', consulta: { resumo: 'o modelo recusou responder esta conversa', opcaoA: '', opcaoB: '' } }
@@ -481,9 +492,11 @@ export async function decidirResposta(params: {
     out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? 'es', prazoDaLista(params.agora))}`
   }
 
+  const assuntos = `${[...cls.assuntos].join(',')} (${cls.fonte})`
   return out.passar_para_humano
     ? {
         tipo: 'humano',
+        assuntos,
         texto: out.resposta.trim(),
         motivo: out.motivo || 'sem motivo',
         consulta: {
@@ -492,7 +505,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined }
+    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined }
 }
 
 // Frase curta do prazo da lista das 20h, por idioma (lib/whatsapp-agent/lista-20h.ts decide hoje/amanhã).
@@ -515,14 +528,14 @@ export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha'): string {
 // custo em whatsapp_outbox (kind 'uso-llm', já enviado = só registro), e a revisão semanal pode somar por tipo.
 // Preços Sonnet 5.5 (US$/milhão): entrada 2, saída 10, leitura de cache 0,20, gravação de cache 1 h 4.
 const PRECO = { entrada: 2, saida: 10, cacheLeitura: 0.2, cacheGravacao: 4 }
-async function registrarUso(phone: string, res: { usage?: { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null } }): Promise<void> {
+async function registrarUso(phone: string, res: { usage?: { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null } }, extra: Record<string, string> = {}): Promise<void> {
   const u = res.usage
   if (!u) return
   const entrada = u.input_tokens ?? 0, saida = u.output_tokens ?? 0, lido = u.cache_read_input_tokens ?? 0, gravado = u.cache_creation_input_tokens ?? 0
   const custo = (entrada * PRECO.entrada + saida * PRECO.saida + lido * PRECO.cacheLeitura + gravado * PRECO.cacheGravacao) / 1_000_000
   const agora = new Date().toISOString()
   const { admin } = await import('./conversa')
-  await admin().from('whatsapp_outbox').insert({ phone: phone.replace(/\D/g, '') || 'sem-telefone', kind: 'uso-llm', body: JSON.stringify({ modelo: CLAUDE_MODEL, entrada, saida, cache_lido: lido, cache_gravado: gravado, custo_usd: Number(custo.toFixed(5)) }), send_after: agora, sent_at: agora })
+  await admin().from('whatsapp_outbox').insert({ phone: phone.replace(/\D/g, '') || 'sem-telefone', kind: 'uso-llm', body: JSON.stringify({ modelo: CLAUDE_MODEL, entrada, saida, cache_lido: lido, cache_gravado: gravado, custo_usd: Number(custo.toFixed(5)), ...extra }), send_after: agora, sent_at: agora })
 }
 
 // ─── Resposta aprovada pelo responsável ────────────────────────────────────────────────────

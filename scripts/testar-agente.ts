@@ -24,7 +24,7 @@ const HOTMART_PROTESTED = `HOTMART (consultado agora pelo e-mail maria@example.c
 Resumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 1 reembolso(s) em análise.
 Assinaturas: nenhuma.`
 
-const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; emailSemConta?: string }[] = [
+export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; emailSemConta?: string }[] = [
   { nome: 'plano 3 dias / merienda (real)', perfil: base, msg: 'Hola, soy alumna de RiseMe 💛 Necesito ayuda con el plan de 3 días para deshinchar...  En todo el día se come solo lo que dice ahí? Por ejemplo, desayuno yogurt con chia, almuerzo pollo con ensalada y cena vegetales? No hay merienda?' },
   { nome: 'qual chá (TEM protocolo)', perfil: comProtocolo, msg: 'Hola! qué té tengo que tomar en la mañana?' },
   { nome: 'qual chá (NÃO tem protocolo)', perfil: base, msg: 'Hola! qué té tengo que tomar en la mañana?' },
@@ -75,11 +75,11 @@ async function main() {
     hotmart: c.hotmart,
     emailSemConta: c.emailSemConta,
   })
-  console.log(`\n━━━ ${c.nome} (${((Date.now() - t) / 1000).toFixed(1)}s) ${d.tipo === 'humano' ? '→ TRANSFERE: ' + d.motivo : ''}${d.tipo === 'responder' && d.reembolsoTransacoes?.length ? ' → REEMBOLSO ' + d.reembolsoTransacoes.join(',') : ''}${d.tipo === 'responder' && d.reenviarAcesso ? ' → REENVIAR ACESSO' : ''}${d.tipo === 'responder' && d.novoEmail ? ' → NOVO E-MAIL ' + d.novoEmail : ''}\nALUNA: ${c.msg}\n\n${d.texto}`)
+  console.log(`\n━━━ ${c.nome} (${((Date.now() - t) / 1000).toFixed(1)}s) [${d.assuntos ?? ''}] ${d.tipo === 'humano' ? '→ TRANSFERE: ' + d.motivo : ''}${d.tipo === 'responder' && d.reembolsoTransacoes?.length ? ' → REEMBOLSO ' + d.reembolsoTransacoes.join(',') : ''}${d.tipo === 'responder' && d.reenviarAcesso ? ' → REENVIAR ACESSO' : ''}${d.tipo === 'responder' && d.novoEmail ? ' → NOVO E-MAIL ' + d.novoEmail : ''}\nALUNA: ${c.msg}\n\n${d.texto}`)
 }
 }
 
-main().catch((e) => {
+if (process.argv[1]?.endsWith('testar-agente.ts')) main().catch((e) => {
   console.error(e)
   process.exit(1)
 })
