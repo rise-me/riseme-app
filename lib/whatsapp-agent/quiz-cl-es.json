@@ -66,9 +66,9 @@
 "key": "ultima_satisfaccion_cuerpo",
 "pergunta": "¿Cuándo fue la última vez que te sentiste satisfecha con tu cuerpo?",
 "opcoes": {
-"menos_1_ano": "Hace menos de <b>1 año</b>",
-"entre_1_2_anos": "Entre <b>1 y 2 años</b>",
-"mas_3_anos": "Hace más de <b>3 años</b>",
+"menos_1_ano": "Hace menos de 1 año",
+"entre_1_2_anos": "Entre 1 y 2 años",
+"mas_3_anos": "Hace más de 3 años",
 "nunca": "Nunca"
 }
 },
