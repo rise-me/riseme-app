@@ -1,6 +1,6 @@
 # Acervo científico do atendimento — gerado de `lib/whatsapp-agent/acervo.ts` (editar o .ts e rodar `npx tsx scripts/acervo-md.ts`)
 
-Gerado em 2026-11-05. 45 trechos. Regra (Bruno 05/11/2026): só fonte confiável e válida em qualquer região; resposta que a aluna possa aplicar com segurança. "Revisado" vazio = leva inicial, aguardando a leitura do Bruno.
+Gerado em 2026-11-05. 46 trechos. Regra (Bruno 05/11/2026): só fonte confiável e válida em qualquer região; resposta que a aluna possa aplicar com segurança. "Revisado" vazio = leva inicial, aguardando a leitura do Bruno.
 
 ## Calorias
 
@@ -538,3 +538,15 @@ Fontes:
 - ACSM, Riebe D et al., Medicine & Science in Sports & Exercise — *Updating ACSM's recommendations for exercise preparticipation health screening* (2015) — <https://doi.org/10.1249/MSS.0000000000000664>
 
 Palavras que acionam: dolor en el pecho, me falta el aire, mareo, mareada, desmayo, palpitaciones, taquicardia, nauseas, náuseas, vomito, me siento mal
+
+## Treino
+
+### exe-01 · O que cada exercício básico trabalha (anatomia consolidada) · a revisar
+
+Agachamento: glúteos, quadríceps, posteriores de coxa, core. Afundo/estocada: glúteo e quadríceps, com equilíbrio. Ponte de glúteo: glúteo máximo e posteriores. Prancha frontal: core profundo (transverso), reto abdominal, ombros. Prancha lateral: oblíquos, quadrado lombar, glúteo médio (estabilizador do quadril), ombro de apoio. Inseto morto e cachorro-pássaro: core profundo e coordenação, poupando a lombar. Flexão: peitoral, tríceps, ombro anterior, core. Superman e elevações em decúbito: eretores da coluna e glúteo. Elevação de pernas e canivete: reto abdominal inferior e flexores do quadril. Polichinelo e corrida parada: cardio e panturrilha. Cat-cow, thread the needle, world's greatest stretch: mobilidade de coluna e quadril.
+
+Fontes:
+- ACE (American Council on Exercise) — *Exercise Library (músculos trabalhados por exercício)* (2024) — <https://www.acefitness.org/resources/everyone/exercise-library/>
+- ACSM — *Position stand: progression models in resistance training for healthy adults* (2009) — <https://doi.org/10.1249/MSS.0b013e3181915670>
+
+Palavras que acionam: que trabaja, qué trabaja, que musculo, qué músculo, para que sirve, para qué sirve, plancha lateral, plancha, sentadilla, puente, estocada, zancada, superman, bird dog, dead bug, flexiones, abdominales, core, oblicuos, gluteo, glúteo

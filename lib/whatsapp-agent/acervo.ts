@@ -445,6 +445,16 @@ export const ACERVO: Trecho[] = [
     ],
     tags: ['dolor en el pecho', 'me falta el aire', 'mareo', 'mareada', 'desmayo', 'palpitaciones', 'taquicardia', 'nauseas', 'náuseas', 'vomito', 'me siento mal'],
   },
+
+  {
+    id: 'exe-01', tema: 'Treino', titulo: 'O que cada exercício básico trabalha (anatomia consolidada)',
+    pontos: 'Agachamento: glúteos, quadríceps, posteriores de coxa, core. Afundo/estocada: glúteo e quadríceps, com equilíbrio. Ponte de glúteo: glúteo máximo e posteriores. Prancha frontal: core profundo (transverso), reto abdominal, ombros. Prancha lateral: oblíquos, quadrado lombar, glúteo médio (estabilizador do quadril), ombro de apoio. Inseto morto e cachorro-pássaro: core profundo e coordenação, poupando a lombar. Flexão: peitoral, tríceps, ombro anterior, core. Superman e elevações em decúbito: eretores da coluna e glúteo. Elevação de pernas e canivete: reto abdominal inferior e flexores do quadril. Polichinelo e corrida parada: cardio e panturrilha. Cat-cow, thread the needle, world\'s greatest stretch: mobilidade de coluna e quadril.',
+    fontes: [
+      { org: 'ACE (American Council on Exercise)', titulo: 'Exercise Library (músculos trabalhados por exercício)', ano: 2024, url: 'https://www.acefitness.org/resources/everyone/exercise-library/' },
+      { org: 'ACSM', titulo: 'Position stand: progression models in resistance training for healthy adults', ano: 2009, url: 'https://doi.org/10.1249/MSS.0b013e3181915670' },
+    ],
+    tags: ['que trabaja', 'qué trabaja', 'que musculo', 'qué músculo', 'para que sirve', 'para qué sirve', 'plancha lateral', 'plancha', 'sentadilla', 'puente', 'estocada', 'zancada', 'superman', 'bird dog', 'dead bug', 'flexiones', 'abdominales', 'core', 'oblicuos', 'gluteo', 'glúteo'],
+  },
 ]
 
 // ─── Busca simples por tags (sem IA): normaliza acentos e pontua por tag encontrada ──────────────────────────────────────

@@ -28,6 +28,7 @@ const MAPA_SYSTEM: [RegExp, Assunto[]][] = [
   [/^INDICAÇÃO/, ['venda', 'depoimento']],
   [/^FEEDBACK/, ['feedback']],
   [/^ACERVO CIENTÍFICO/, ['treino', 'conteudo']],
+  [/^AULAS DA CALISTENIA/, ['treino', 'conteudo']],
 ]
 const MAPA_CONHECIMENTO: [RegExp, Assunto[]][] = [
   [/^## Acesso/, ['acesso']],
@@ -84,7 +85,7 @@ const SINAIS: [Assunto, RegExp][] = [
   ['acesso', /contrase|senha|acceso|acess|entrar|login|iniciar sesi|correo|e-?mail|clave|hasło|logowa|password|no (puedo|logro) entrar|link|enlace|código/i],
   ['tecnico', /v[ií]deo|pantalla|carga|no abre|no funciona|error|bug|sonido|audio|negra|blanco|app no|aplicaci[oó]n|navegador|safari|chrome|iphone|android|instal/i],
   ['conteudo', /\bt[eé]s?\b|infusi|receta|men[uú]|plan\b|desayun|almuerz|cena\b|vinagre|hielo|fruta|protocolo|pdf|bono|bonus|extras|ayuno|comida|alimentac|calor[ií]a|herbat|dieta|diet\b/i],
-  ['treino', /ejercicio|rutina|entren|d[ií]a \d|repetic|descans|calentam|estiram|dolor|lesi[oó]n|rodilla|espalda|embaraz|lactan|edad|a[ñn]os|principiante|nivel|progres|serie|ćwicz|trening/i],
+  ['treino', /ejercicio|rutina|entren|d[ií]a \d|plancha|sentadilla|puente|abdominal|estocada|zancada|flexi[oó]n|clase|video del d[ií]a|repetic|descans|calentam|estiram|dolor|lesi[oó]n|rodilla|espalda|embaraz|lactan|edad|a[ñn]os|principiante|nivel|progres|serie|ćwicz|trening/i],
   ['venda', /precio|cu[aá]nto (cuesta|vale|sale)|comprar|compra\b|descuento|cup[oó]n|oferta|pase completo|pilates|yoga|amiga|hermana|regal|indicar|recomend|link de (compra|pago)|pagar/i],
   ['depoimento', /testimon|comentario|coment[eé]|captura|print|foto|\[IMAGEM|\[VÍDEO|v[ií]deo de|resultado|antes y despu/i],
   ['feedback', /sugerencia|sugiero|sugerir|opini[oó]n|me gust[oó]|no me gust|me encant|mejorar|podr[ií]an|deber[ií]an|feedback|queja|quejar|aburrid|excelente|muy bueno|muy malo|malo\b|feo\b|falta (un|una|el|la)|ser[ií]a bueno|estar[ií]a bien|propuesta|sugestia|opinia|podoba/i],

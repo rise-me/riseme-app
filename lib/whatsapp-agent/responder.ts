@@ -5,6 +5,7 @@ import { verificarResposta, registrarVerificacao } from './verificador'
 import { prazoDaLista } from './lista-20h'
 import { ASSUNTOS, TODOS, classificarAssuntos, montarSystem, porAssuntoLigado, type Assunto } from './assuntos'
 import { buscarAcervo, blocoAcervo } from './acervo'
+import AULAS from './aulas-calistenia.json'
 import Anthropic from '@anthropic-ai/sdk'
 import { CONHECIMENTO } from './conhecimento'
 import MATERIAIS from './materiais.json'
@@ -157,6 +158,13 @@ que o bloco mostra (nada com esse e-mail; ou tentativa não paga: o pagamento n�
 pergunte, uma vez, se comprou com outro e-mail. 2º e-mail sem compra, print de pagamento que o bloco não explica, ou compra em
 polonês/turco (Perfect Pay) → transfira com os e-mails no resumo.
 
+AULAS DA CALISTENIA (bloco na mensagem quando o assunto é treino): quando vier a transcrição, você CONHECE a aula.
+Dúvida sobre um exercício, a ordem, o tempo, "o que trabalha", "como faço", "é normal doer aqui" → responda com a aula do dia
+(nome do exercício, instrução da narração traduzida, e o que trabalha: a narração costuma dizer; se não, o acervo e a
+anatomia básica consolidada, ex.: prancha lateral = oblíquos, core profundo e estabilizadores do quadril). NUNCA responda
+"não tenho nos materiais" sobre um exercício das aulas (Bruno, 05/11/2026: "se o suporte não sabe, quem vai saber?"). Sem a
+transcrição da versão dela, responda pelo acervo e peça que descreva o exercício em uma frase. Sem o dia, pergunte o dia.
+
 ACERVO CIENTÍFICO (bloco na mensagem, quando a dúvida bate; Bruno 05/11/2026: "respostas confiáveis, de fonte verdadeira,
 que ela possa aplicar com segurança"): dúvida de treino, corpo, alimentação, metabolismo, calorias, jejum, fases da vida
 (gravidez, pós-parto, menopausa, ciclo) → responda com os trechos do acervo, em blocos curtos e no idioma dela, citando a
@@ -297,6 +305,34 @@ function blocoMateriais(idioma: string, temProtocolo: boolean): string {
   return `MATERIAIS (texto completo, idioma ${idioma}):\n\n${partes.join('\n\n')}`
 }
 
+// ─── Aulas da Calistenia (transcrição da narração, 28 dias) ─────────────────────────────────────────────────────────────
+// Bruno 05/11/2026 (caso Sandra #148, "o que trabalha a prancha lateral do dia 14" → "não tenho nos materiais"): o bot precisa
+// conhecer as aulas. lib/whatsapp-agent/aulas-calistenia.json (scripts/gerar-aulas.mts) guarda a transcrição POR VERSÃO: 'en' =
+// as aulas em inglês, que são as mesmas dubladas para pl, cs, it, ro e tr; 'es' = as aulas em espanhol, que são OUTROS vídeos
+// (Bruno 05/11) e ainda não têm transcrição. Entra a aula do dia citado (ou o dia atual pelo cartão) + um índice curto.
+type Aula = { texto: string; exercicios: string[]; duracaoMin: number }
+const AULAS_POR_VERSAO = AULAS as Record<string, Record<string, Aula>>
+const versaoDasAulas = (idioma: string) => (idioma === 'es' ? 'es' : 'en')
+export function diasCitados(conversa: MensagemConversa[], cartao?: string | null): number[] {
+  const ultimas = conversa.filter((m) => m.autor === 'student').slice(-3).map((m) => m.texto).join(' ')
+  const dias = new Set<number>()
+  for (const m of ultimas.matchAll(/\b(?:d[ií]a|day|dzie[ńn]|giorno|den|gün|ziua)\s*(\d{1,2})\b/gi)) { const n = Number(m[1]); if (n >= 1 && n <= 28) dias.add(n) }
+  if (!dias.size && cartao) {
+    const m = cartao.match(/Calistenia[^\n]*?concluiu até o dia (\d{1,2})/i)
+    if (m) { const n = Math.min(28, Number(m[1]) + 1); dias.add(n) }
+  }
+  return [...dias].slice(0, 2)
+}
+export function blocoAulas(idioma: string, dias: number[]): string {
+  const aulas = AULAS_POR_VERSAO[versaoDasAulas(idioma)]
+  if (!aulas || !Object.keys(aulas).length) {
+    return 'AULAS DA CALISTENIA: a transcrição das aulas em espanhol ainda não está disponível (são vídeos diferentes dos outros idiomas). Para dúvida sobre um exercício, responda com o acervo e a anatomia básica consolidada (o que o exercício trabalha, como executar com segurança), nunca "não tenho nos materiais"; se precisar do detalhe exato do vídeo, peça que ela descreva o exercício em uma frase.'
+  }
+  const indice = Object.entries(aulas).map(([d, a]) => `${d}: ${a.exercicios.slice(0, 5).join(', ')} (${a.duracaoMin} min)`).join(' · ')
+  const detalhe = dias.filter((d) => aulas[String(d)]).map((d) => { const a = aulas[String(d)]; return `AULA DO DIA ${d} (${a.duracaoMin} min; exercícios na ordem: ${a.exercicios.join(' → ')}). Narração do vídeo (inglês; a aluna ouve dublado no idioma dela):\n${a.texto}` })
+  return `AULAS DA CALISTENIA EN CASA (índice dos 28 dias, 5 primeiros exercícios de cada): ${indice}\n${detalhe.length ? '\n' + detalhe.join('\n\n') : '\n(Ela não citou o dia e o cartão não diz: para detalhar um exercício, pergunte em qual dia está.)'}`
+}
+
 function descreverPerfil(p: PerfilAluna): string {
   return [
     `Nome: ${p.nome ?? 'desconhecido'}`,
@@ -420,6 +456,7 @@ export async function decidirResposta(params: {
   // Acervo científico (lib/whatsapp-agent/acervo.ts, q10): trechos que batem com as últimas mensagens dela, só em treino/conteúdo.
   const comAcervo = cls.assuntos.has('treino') || cls.assuntos.has('conteudo') || cls.assuntos.size >= ASSUNTOS.length
   const acervo = comAcervo ? blocoAcervo(buscarAcervo(params.conversa.filter((m) => m.autor === 'student').slice(-3).map((m) => m.texto).join(' '))) : ''
+  const aulas = cls.assuntos.has('treino') || cls.assuntos.size >= ASSUNTOS.length ? blocoAulas(p?.idioma ?? 'es', diasCitados(params.conversa, p?.cartao)) : ''
   const materiais = comMateriais ? blocoMateriais(p?.idioma ?? 'es', temProtocolo) : indiceMateriais(temProtocolo)
 
   const res = await anthropic().beta.messages.create({
@@ -447,6 +484,7 @@ export async function decidirResposta(params: {
             type: 'text' as const,
             text:
               (params.consultaPendente ? `CONSULTA PENDENTE #${params.consultaPendente.id} (aberta em ${params.consultaPendente.desde.slice(0, 10)}, ainda sem resposta): ${params.consultaPendente.resumo}\nA aluna espera ESSA resposta, não um "de nada". Responda a isso agora com o que você sabe hoje (Hotmart, acervo, catálogo, acesso); se não souber resolver, passar_para_humano = true e diga que a equipe já está vendo, sem repetir "vou ver".\n\n` : '') +
+              (aulas ? `${aulas}\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
               `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília): ${prazoDaLista(params.agora) === 'hoje' ? 'HOJE (es "hoy hasta las 20h")' : 'AMANHÃ (es "mañana hasta las 20h")'}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
