@@ -299,6 +299,7 @@ function descreverPerfil(p: PerfilAluna): string {
 }
 
 export async function decidirResposta(params: {
+  phone?: string // só para o registro de uso (tokens/custo) por conversa
   perfil: PerfilAluna | null // null = número que não bate com nenhuma conta
   conversa: MensagemConversa[] // ordem cronológica, termina na(s) mensagem(ns) da aluna
   agora: string
@@ -368,8 +369,10 @@ export async function decidirResposta(params: {
     fallbacks: 'default',
     output_config: { effort: 'low', format: FORMATO },
     system: [
-      { type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } },
-      { type: 'text', text: materiais, cache_control: { type: 'ephemeral' } },
+      // Cache de 1 h (05/11/2026): o bot responde ~70×/dia, uma a cada 20 min; com os 5 min padrão o cache quase sempre
+      // estava frio e os ~30 mil tokens fixos (regras + materiais) pagavam preço cheio em cada resposta.
+      { type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral', ttl: '1h' } },
+      { type: 'text', text: materiais, cache_control: { type: 'ephemeral', ttl: '1h' } },
     ],
     messages: [
       {
@@ -391,6 +394,8 @@ export async function decidirResposta(params: {
       },
     ],
   })
+
+  registrarUso(params.phone ?? 'sem-telefone', res).catch(() => undefined)
 
   if (res.stop_reason === 'refusal') {
     return { tipo: 'humano', texto: '', motivo: 'modelo recusou responder', consulta: { resumo: 'o modelo recusou responder esta conversa', opcaoA: '', opcaoB: '' } }
@@ -425,6 +430,21 @@ export async function decidirResposta(params: {
         },
       }
     : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined }
+}
+
+// ─── Registro de uso (tokens e custo por resposta) ──────────────────────────────────────────
+// Bruno, 05/11/2026: "o custo de API vai às alturas?" — até aqui era estimativa. Cada chamada do agente grava tokens e
+// custo em whatsapp_outbox (kind 'uso-llm', já enviado = só registro), e a revisão semanal pode somar por tipo.
+// Preços Sonnet 5.5 (US$/milhão): entrada 2, saída 10, leitura de cache 0,20, gravação de cache 1 h 4.
+const PRECO = { entrada: 2, saida: 10, cacheLeitura: 0.2, cacheGravacao: 4 }
+async function registrarUso(phone: string, res: { usage?: { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null } }): Promise<void> {
+  const u = res.usage
+  if (!u) return
+  const entrada = u.input_tokens ?? 0, saida = u.output_tokens ?? 0, lido = u.cache_read_input_tokens ?? 0, gravado = u.cache_creation_input_tokens ?? 0
+  const custo = (entrada * PRECO.entrada + saida * PRECO.saida + lido * PRECO.cacheLeitura + gravado * PRECO.cacheGravacao) / 1_000_000
+  const agora = new Date().toISOString()
+  const { admin } = await import('./conversa')
+  await admin().from('whatsapp_outbox').insert({ phone: phone.replace(/\D/g, '') || 'sem-telefone', kind: 'uso-llm', body: JSON.stringify({ modelo: CLAUDE_MODEL, entrada, saida, cache_lido: lido, cache_gravado: gravado, custo_usd: Number(custo.toFixed(5)) }), send_after: agora, sent_at: agora })
 }
 
 // ─── Resposta aprovada pelo responsável ────────────────────────────────────────────────────

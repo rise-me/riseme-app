@@ -291,7 +291,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     const conviteVideo = await foiConvidadaParaVideo(phone, userId).catch(() => false)
     // Assunto de dinheiro: consulta a Hotmart pelo e-mail (da conta ou o que ela digitou) e entrega como fato (04/11/2026).
     const hotmart = await blocoHotmart(conversa, userId ? await emailDaConta(userId) : null).catch(() => null)
-    decisao = await decidirResposta({ perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart })
+    decisao = await decidirResposta({ phone, perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
     // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).
