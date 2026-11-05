@@ -44,11 +44,9 @@ export async function reembolsosPendentes(): Promise<{ id: number; params: Pedid
   return (data ?? []) as { id: number; params: PedidoReembolso }[]
 }
 
-/** Monta a lista numerada, grava o número em cada pedido e manda ao responsável. Devolve o texto (ou null se vazio). */
-export async function enviarListaReembolsos(): Promise<string | null> {
+/** Linhas numeradas dos reembolsos aguardando (grava o número em cada pedido). Vazio = nenhum. */
+export async function linhasReembolsos(): Promise<string[]> {
   const lista = await reembolsosPendentes()
-  const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
-  if (!lista.length || !destino) return null
   const linhas: string[] = []
   for (let i = 0; i < lista.length; i++) {
     const { id, params: p } = lista[i]
@@ -59,14 +57,13 @@ export async function enviarListaReembolsos(): Promise<string | null> {
     const painel = p.plataforma === 'perfectpay' ? ' · 🖐 Perfect Pay: fazer no painel' : ''
     linhas.push(`*${n}* · ${p.nome || p.email} · ${p.produto} ${p.valor} · ${p.pagamento} · comprou há ${d} dias${prazo}${painel}\n   motivo: ${p.motivo}`)
   }
-  const msg = [`💸 *Reembolsos aguardando sua aprovação* (${lista.length})`, ...linhas, '', 'Responda *ok 1 2*, *ok todos* ou *não 2*. Aprovado = reembolso na Hotmart pela API + aviso à aluna.'].join('\n')
-  const r = await sendZapiText({ phone: destino, message: msg })
-  if (!r.ok) {
-    console.error('[reembolsos] lista não foi:', r.error)
-    return null
-  }
-  await registrarMensagem({ phone: destino, direction: 'out', author: 'system', body: msg, waMessageId: r.messageId })
-  return msg
+  return linhas
+}
+
+/** Manda a lista ao responsável agora (pedido urgente, perto do dia 15). Desde 05/11 é a lista unificada (lib/whatsapp-agent/lista-20h.ts). */
+export async function enviarListaReembolsos(): Promise<string | null> {
+  const { enviarListaDiaria } = await import('./lista-20h')
+  return enviarListaDiaria()
 }
 
 // Artigo da central de ajuda da Hotmart para a COMPRADORA ("como solicitar o reembolso da minha compra"), indicado pelo Bruno 05/11/2026.

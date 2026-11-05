@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { enviarListaReembolsos } from '@/lib/whatsapp-agent/reembolsos'
+import { enviarListaDiaria } from '@/lib/whatsapp-agent/lista-20h'
 
 // GET /api/whatsapp/reembolsos — cron da Vercel, todo dia 23:00 UTC (20h em Brasília), ver vercel.json.
-// Manda ao responsável a lista numerada de reembolsos aguardando aprovação (lib/whatsapp-agent/reembolsos.ts).
-// Pedido perto do dia 15 não espera esta hora: sai na criação. A Vercel manda "Authorization: Bearer <CRON_SECRET>".
+// Manda ao responsável a LISTA DAS 20H unificada: consultas abertas + reembolsos aguardando (lib/whatsapp-agent/lista-20h.ts).
+// Reembolso perto do dia 15 não espera esta hora: a lista sai na criação. A Vercel manda "Authorization: Bearer <CRON_SECRET>".
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   try {
-    const msg = await enviarListaReembolsos()
+    const msg = await enviarListaDiaria()
     return NextResponse.json({ ok: true, enviada: Boolean(msg) })
   } catch (err) {
     console.error('[reembolsos] cron falhou:', err)

@@ -123,16 +123,24 @@ function ehResponsavel(phone: string): boolean {
   return Boolean(destino) && !phone.endsWith('@lid') && phone.slice(-8) === destino.slice(-8) && phone.slice(0, 4) === destino.slice(0, 4)
 }
 
-// Transferência = CONSULTA: quem é, o que disse, o resumo e 2 respostas possíveis. O responsável
-// responde citando a mensagem (A, B, texto livre ou "pular") — ver responderConsulta.
+// O que não pode esperar a lista das 20h: avisa na hora (chargeback/ameaça, erro do sistema, pedido explícito de urgência).
+const URGENTE = /chargeback|contesta|disput|denunc|amea[çc]|urgente|falhou|erro|fraude|golpe|estafa/i
+
+// Transferência = CONSULTA: quem é, o que disse, o resumo e 2 respostas possíveis. Desde 05/11/2026 a consulta comum
+// nasce em silêncio e entra na LISTA DAS 20H (lib/whatsapp-agent/lista-20h.ts); a aluna ouviu "te respondo hoy hasta las
+// 20h". Só a urgente avisa na hora. O responsável responde "#id A", "#id B", texto livre ou "pular" — ver responderConsulta.
 async function consultarResponsavel(phone: string, nome: string | undefined, idioma: string, ultimaFala: string, motivo: string, c: Consulta) {
-  // Já há consulta aberta desta conversa (últimas 24 h): não manda outro alerta a cada mensagem dela.
+  // Já há consulta aberta desta conversa (últimas 24 h): não abre outra a cada mensagem dela.
   if (await consultaPendenteDoChat(phone)) return
   const id = await criarConsulta({ ...c, phone, nome, motivo })
   if (!id) return avisarHumano(phone, nome, motivo) // tabela indisponível → aviso simples, como antes
+  if (!URGENTE.test(motivo)) {
+    console.log(`[consulta] #${id} aberta para a lista das 20h (${nome ?? 'sem conta'}, ${phone}): ${motivo}`)
+    return
+  }
   const fala = ultimaFala.replace(/\[IMAGEM: [^\]]+\]/g, '[imagem]').slice(0, 400)
   const msg = [
-    `🟡 *Consulta #${id}* — ${nome ?? 'Aluna sem conta'} (${idioma}) +${phone.replace('@lid', ' · sem número')}`,
+    `🔴 *Consulta URGENTE #${id}* — ${nome ?? 'Aluna sem conta'} (${idioma}) +${phone.replace('@lid', ' · sem número')}`,
     '',
     `*Ela disse:* «${fala}»`,
     `*Resumo:* ${c.resumo}`,

@@ -56,6 +56,8 @@ const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: 
   { nome: 'ACESSO: acesso ainda agendado → chega em instantes, sem reenviar', perfil: { ...base, ultimoLogin: null, diasFeitos: 0, acessoAgendadoEm: new Date(Date.now() + 9 * 60_000).toISOString() }, msg: 'no me ha llegado nada del acceso' },
   { nome: 'E-MAIL: passo 1 (repete e pergunta, novo_email vazio)', perfil: base, msg: 'mi correo está mal escrito, el correcto es maria.lopez@gmail.com' },
   { nome: 'CONTA CRIADA AGORA: acesso chega em instantes', perfil: { ...base, nome: 'Rosa', ultimoLogin: null, diasFeitos: 0, contaCriadaAgora: true, acessoAgendadoEm: new Date(Date.now() + 60_000).toISOString() }, msg: 'rosa.perez@hotmail.com' },
+  // Lista das 20h (05/11/2026): ao transferir, o bot promete "hoy/mañana hasta las 20h", nunca "sector responsable".
+  { nome: 'TRANSFERE com prazo (hoy hasta las 20h)', perfil: base, msg: 'Me cobraron un valor diferente al que decía la página, quiero hablar con una persona' },
   { nome: 'E-MAIL SEM COMPRA: pergunta se usou outro e-mail', perfil: null, emailSemConta: 'rosa.perez@hotmail.com', hotmart: 'HOTMART (consultado agora pelo e-mail rosa.perez@hotmail.com; é o que a Hotmart REALMENTE registra, use como fato):\nNenhuma compra na Hotmart com o e-mail rosa.perez@hotmail.com (nem aprovada, nem tentativa).\nResumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.\nAssinaturas: nenhuma.', msg: 'rosa.perez@hotmail.com' },
 ]
 

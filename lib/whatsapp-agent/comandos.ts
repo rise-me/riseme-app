@@ -63,6 +63,13 @@ export async function tratarComando(texto: string, dizer: Dizer): Promise<boolea
     return true
   }
 
+  // 1b) "lista" / "pendentes": manda a lista das 20h agora (lib/whatsapp-agent/lista-20h.ts).
+  if (/^(lista|pendentes|pend[êe]ncias)\b/i.test(t)) {
+    const { enviarListaDiaria } = await import('./lista-20h')
+    if (!(await enviarListaDiaria())) await dizer('Não consegui montar a lista agora.')
+    return true
+  }
+
   // 2) pedido novo
   const pedido = await interpretarComando(t)
   if (pedido.acao === 'nenhuma') return false

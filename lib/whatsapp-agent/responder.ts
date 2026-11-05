@@ -2,6 +2,7 @@
 // a próxima resposta OU o pedido de passar pra humano. Não tem ferramentas nem
 // acesso a nada além do que vem aqui — o texto da aluna é dado, não instrução.
 import { verificarResposta, registrarVerificacao } from './verificador'
+import { prazoDaLista } from './lista-20h'
 import Anthropic from '@anthropic-ai/sdk'
 import { CONHECIMENTO } from './conhecimento'
 import MATERIAIS from './materiais.json'
@@ -103,14 +104,17 @@ COMO ESCREVER
   "nós"/"a equipe"; se precisar de autoridade, "nosso CEO".
 
 TRANSFERIR ("passar_para_humano" = true): quando o CONHECIMENTO mandar ou ela pedir para falar com alguém.
-"motivo" curto em português; "resposta", no idioma dela, diz que você vai transferir para o setor responsável:
-  es: "Voy a transferir tu conversación al sector responsable de los reembolsos — te responden por aquí."
-  pl: "Przekazuję Twoją rozmowę do działu odpowiedzialnego za zwroty — odpowiedzą Ci tutaj."
-  it: "Sto passando la tua conversazione al reparto che si occupa dei rimborsi — ti risponderanno qui."
-  cs: "Předávám tvou konverzaci oddělení, které má na starosti vrácení peněz — odpoví ti tady."
-  tr: "Konuşmanı iadelerden sorumlu birime aktarıyorum — sana buradan yanıt verecekler."
-  en: "I'm transferring your conversation to the team responsible for refunds — they'll reply here."
-  pt: "Vou transferir sua conversa para o setor responsável pelos reembolsos — eles te respondem por aqui."
+"motivo" curto em português; "resposta", no idioma dela, diz que você vai ver isso com a equipe e responde por aqui no PRAZO
+que vem no fim da mensagem (a equipe revisa tudo às 20h; "hoy" ou "mañana"). Nunca "sector responsable"/"setor responsável"
+(Bruno, 05/11/2026): diga o que vai acontecer e quando. Modelos (troque hoy→mañana, dziś→jutro, oggi→domani, dnes→zítra,
+bugün→yarın, today→tomorrow, hoje→amanhã quando o PRAZO for "mañana"):
+  es: "Lo reviso con el equipo y te respondo por aquí hoy hasta las 20h."
+  pl: "Sprawdzę to z zespołem i odpowiem Ci tutaj dziś do 20:00."
+  it: "Lo verifico con il team e ti rispondo qui oggi entro le 20."
+  cs: "Ověřím to s týmem a odpovím ti tady dnes do 20:00."
+  tr: "Ekiple kontrol edip bugün saat 20:00'ye kadar buradan yanıt vereceğim."
+  en: "I'll check this with the team and reply here today by 8 pm."
+  pt: "Vou ver isso com a equipe e te respondo por aqui hoje até as 20h."
 Preencha também, em PORTUGUÊS: "consulta_resumo" (1–2 frases com os dados úteis: email, produto, o que já
 tentou) e "consulta_opcao_a"/"consulta_opcao_b" (duas respostas realmente DIFERENTES que poderiam ir para ela,
 2–4 frases cada; sem inventar política — se depende de regra que você não conhece, escreva como proposta). Opção
@@ -119,10 +123,10 @@ que diz que algo JÁ FOI FEITO na conta (email trocado, produto liberado, acesso
 "reenvia o acesso de <email>", "dá um cardápio extra para <email>" ou "reembolsar no painel" (ex.: "[FAZER ANTES:
 troca o email de a@x.com para b@y.com] Ya corregimos tu correo…"). Sem transferir, os três ficam "".
 Nunca diga à aluna que você ou nós JÁ fizemos algo na conta (trocar email, liberar, reenviar, reembolsar) se o
-sistema não fez: o que só o setor faz, diga que está com o setor.
+sistema não fez: o que só a equipe faz, diga que a equipe vai ver e quando responde (PRAZO).
 Depois de transferir a conversa continua com você: responda tudo o que souber. No MESMO assunto ainda sem resposta,
-diga em uma frase que já está com o setor e que respondem por aqui (sem repetir "vou transferir"). Exceção:
-pedido de reembolso repetido segue a regra de reembolso do CONHECIMENTO, nunca "já está com o setor".
+diga em uma frase que a equipe já está vendo e que você responde por aqui no PRAZO (sem repetir "vou ver"). Exceção:
+pedido de reembolso repetido segue a regra de reembolso do CONHECIMENTO, nunca "já está com a equipe".
 Se vier o bloco "RESPOSTAS APROVADAS PELO RESPONSÁVEL", ele vale como conhecimento oficial: pergunta equivalente,
 responda com aquela orientação (adaptada) em vez de transferir.
 
@@ -425,7 +429,7 @@ export async function decidirResposta(params: {
           {
             type: 'text' as const,
             text:
-              `Agora: ${params.agora}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
+              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília): ${prazoDaLista(params.agora) === 'hoje' ? 'HOJE (es "hoy hasta las 20h")' : 'AMANHÃ (es "mañana hasta las 20h")'}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
               (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
               'Escreva a próxima mensagem para a aluna (respondendo o que ela mandou por último).',

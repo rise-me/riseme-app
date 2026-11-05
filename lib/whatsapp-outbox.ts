@@ -257,10 +257,10 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       continue
     }
 
-    // 'reembolsos-lista' não manda texto à aluna: manda ao responsável a lista numerada de reembolsos aguardando (05/11/2026).
+    // 'reembolsos-lista' não manda texto à aluna: manda ao responsável a lista das 20h (consultas + reembolsos; 05/11/2026).
     if (item.kind === 'reembolsos-lista') {
-      const { enviarListaReembolsos } = await import('@/lib/whatsapp-agent/reembolsos')
-      const msg = await enviarListaReembolsos().catch((err) => `erro: ${String(err).slice(0, 300)}`)
+      const { enviarListaDiaria } = await import('@/lib/whatsapp-agent/lista-20h')
+      const msg = await enviarListaDiaria().catch((err) => `erro: ${String(err).slice(0, 300)}`)
       await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: msg ?? 'lista vazia' }).eq('id', item.id)
       continue
     }
