@@ -19,6 +19,7 @@ import {
   consultasPendentes,
   criarConsulta,
   fecharConsulta,
+  admin,
   marcarAlertaDaConsulta,
   salvarAprendizado,
   type ConsultaAberta,
@@ -505,6 +506,15 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     }
     if (decisao.pararMensagens) await registrarPedidoParaParar(phone)
     else if (decisao.pedirDepoimento && !silencioso) await ofertasPosConversa(phone, perfil?.idioma ?? 'es', userId, Boolean(porEmail))
+    // Reprocessamento de pendente antigo (05/11/2026): o bot respondeu sozinho com as capacidades novas (Hotmart, acesso, catálogo,
+    // acervo) → a consulta sai da lista do responsável, com a resposta registrada; ele recebe uma linha.
+    if (silencioso && decisao.texto) {
+      const { data: abertas } = await admin().from('whatsapp_consultas').select('id').eq('phone', phone).eq('status', 'pendente')
+      for (const c of abertas ?? []) {
+        await fecharConsulta(c.id, { status: 'respondida', orientacao: 'bot respondeu sozinho (reprocessado)', respostaEnviada: decisao.texto })
+        await dizerAoResponsavel(`✅ Consulta #${c.id} resolvida pelo bot (reprocessada) — ${perfil?.nome ?? 'aluna'}:\n«${decisao.texto.slice(0, 300)}»`)
+      }
+    }
   }
 }
 

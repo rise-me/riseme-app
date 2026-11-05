@@ -332,7 +332,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       const res = await fetch(`${base}/api/whatsapp/zapi?acao=reprocessar&s=${process.env.ZAPI_WEBHOOK_SECRET}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: item.phone }),
+        body: JSON.stringify({ phone: item.phone, silencioso: item.body === 'silencioso' }),
       }).catch((err) => ({ ok: false, status: String(err) }) as const)
       await db
         .from('whatsapp_outbox')
