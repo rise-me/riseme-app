@@ -32,7 +32,8 @@ const MAPA_CONHECIMENTO: [RegExp, Assunto[]][] = [
   [/^## Dentro do app/, ['acesso', 'tecnico', 'treino', 'conteudo']],
   [/^## PROBLEMAS TÉCNICOS/, ['tecnico']],
   [/^## "Paguei e está bloqueado"/, ['acesso', 'dinheiro']],
-  [/^## CATÁLOGO|^## Vendas que você faz/, ['venda']],
+  [/^## CATÁLOGO/, ['venda']],
+  [/^## Vendas que você faz/, ['venda', 'conteudo']], // dúvida de conteúdo que ela NÃO tem (chás sem Protocolo) vira link, não transferência
   [/^## Dinheiro/, ['dinheiro']],
 ]
 

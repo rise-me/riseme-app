@@ -292,8 +292,8 @@ function blocoMateriais(idioma: string, temProtocolo: boolean): string {
     if (m.acesso === 'compra' && !temProtocolo) {
       return `### ${id} (PAGO — esta aluna NÃO tem)\nO que é (pode dizer): o sistema de chás de 28 dias do RiseMe — ` +
         'quais chás tomar, em que horário e em que fase. Não revele o conteúdo. Pergunta sobre chás (ou outra ' +
-        'coisa dele) → diga que isso está no Protocolo Metabólico, um material à parte, e transfira para o setor ' +
-        'responsável. Se algum bônus dela tiver algo relacionado, pode citar também.'
+        'coisa dele) → diga que isso está no Protocolo Metabólico, um material à parte, e mande o link de compra do ' +
+        'CONHECIMENTO (Vendas que você faz), sem transferir. Se algum bônus dela tiver algo relacionado, pode citar também.'
     }
     return `### ${id} (${m.acesso === 'compra' ? 'PAGO — liberado para ela' : 'bônus de todas as alunas'})\n${texto}`
   })
