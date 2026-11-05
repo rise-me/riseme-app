@@ -473,6 +473,11 @@ export async function decidirResposta(params: {
   const verificacao = await verificarResposta({ texto: out.resposta, conversa: params.conversa, agora: params.agora, permiteLongo })
   if (verificacao.corrigida || verificacao.problemas.length) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, verificacao).catch(() => undefined)
   out.resposta = verificacao.texto
+  // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
+  // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
+  if (out.passar_para_humano && !/20\s*h|20:00|las 20|le 20|8 ?pm/i.test(out.resposta)) {
+    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? 'es', prazoDaLista(params.agora))}`
+  }
 
   return out.passar_para_humano
     ? {
@@ -486,6 +491,21 @@ export async function decidirResposta(params: {
         },
       }
     : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined }
+}
+
+// Frase curta do prazo da lista das 20h, por idioma (lib/whatsapp-agent/lista-20h.ts decide hoje/amanhã).
+const PRAZO: Record<string, [string, string]> = {
+  es: ['Te respondo por aquí hoy hasta las 20h.', 'Te respondo por aquí mañana hasta las 20h.'],
+  pl: ['Odpowiem Ci tutaj dziś do 20:00.', 'Odpowiem Ci tutaj jutro do 20:00.'],
+  it: ['Ti rispondo qui oggi entro le 20.', 'Ti rispondo qui domani entro le 20.'],
+  cs: ['Odpovím ti tady dnes do 20:00.', 'Odpovím ti tady zítra do 20:00.'],
+  tr: ["Bugün saat 20:00'ye kadar buradan yanıt vereceğim.", "Yarın saat 20:00'ye kadar buradan yanıt vereceğim."],
+  en: ['I will reply here today by 8 pm.', 'I will reply here tomorrow by 8 pm.'],
+  ro: ['Îți răspund aici azi până la ora 20.', 'Îți răspund aici mâine până la ora 20.'],
+  'pt-BR': ['Te respondo por aqui hoje até as 20h.', 'Te respondo por aqui amanhã até as 20h.'],
+}
+export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha'): string {
+  return (PRAZO[idioma] ?? PRAZO.es)[prazo === 'hoje' ? 0 : 1]
 }
 
 // ─── Registro de uso (tokens e custo por resposta) ──────────────────────────────────────────
