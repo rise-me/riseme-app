@@ -69,8 +69,13 @@ const FORMATO = {
  * Confere a resposta do bot antes de enviar. Devolve o texto (corrigido ou igual). Nunca lança: em erro, devolve o original.
  * `permiteLongo` = a mensagem é uma resposta de conteúdo/dinheiro/reembolso em que blocos são esperados.
  */
+// Limpeza fixa do texto final: espaço duplo, espaço antes de pontuação, 3+ quebras seguidas (05/11: "¡Hola!  ¿En qué…" saiu com 2 espaços).
+export function limparTexto(t: string): string {
+  return t.replace(/[ \t]{2,}/g, ' ').replace(/ +([,.;:!?])/g, '$1').replace(/ +\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
+}
+
 export async function verificarResposta(p: { texto: string; conversa: MensagemConversa[]; agora: string; permiteLongo?: boolean }): Promise<Verificacao> {
-  const original = p.texto.trim()
+  const original = limparTexto(p.texto)
   if (!original) return { texto: original, corrigida: false, problemas: [] }
   const fixos = checarFixo(original, p.conversa, p.agora).filter((x) => !(p.permiteLongo && /longa|maior|900/.test(x)))
   const ultimas = p.conversa.slice(-8).map((m) => `${m.autor === 'student' ? 'ALUNA' : m.autor === 'system' ? 'SISTEMA' : 'NÓS'}: ${m.texto.slice(0, 400)}`).join('\n')
@@ -92,7 +97,7 @@ export async function verificarResposta(p: { texto: string; conversa: MensagemCo
     const bloco = res.content.find((b) => b.type === 'text')
     if (!bloco || bloco.type !== 'text') return { texto: original, corrigida: false, problemas: fixos }
     const o = JSON.parse(bloco.text) as { aprovada: boolean; problemas: string[]; texto_corrigido: string }
-    const novo = (o.texto_corrigido ?? '').trim()
+    const novo = limparTexto(o.texto_corrigido ?? '')
     const problemas = [...new Set([...fixos, ...(o.problemas ?? [])])]
     // Só aceita a correção se for um texto real, no mesmo idioma de sempre e sem link novo.
     const linksAntes = (original.match(/https?:\/\/\S+/g) ?? []).sort().join(' ')
