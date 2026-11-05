@@ -52,7 +52,7 @@ export const ACERVO: Trecho[] = [
     id: 'cal-04', tema: 'Balança', titulo: 'Por que o peso oscila de um dia para o outro',
     pontos: 'O peso varia 1 a 2 kg em poucos dias por água, sal, carboidrato guardado nos músculos, ciclo menstrual e intestino, sem que a gordura tenha mudado. Por isso a leitura certa é a tendência de 2 a 4 semanas (ou a média semanal), pesando sempre no mesmo horário e condição. Medidas e fotos mostram mudança que a balança esconde quando se ganha músculo e se perde gordura ao mesmo tempo.',
     fontes: [
-      { org: 'Bhutani S et al., Obesity', titulo: 'Composition of two-week change in body weight under unrestricted free-living conditions', ano: 2017, url: 'https://doi.org/10.1002/oby.21838' },
+      { org: 'Bhutani S et al., Physiological Reports', titulo: 'Composition of two-week change in body weight under unrestricted free-living conditions', ano: 2017, url: 'https://doi.org/10.14814/phy2.13336' },
     ],
     tags: ['balanza', 'bascula', 'balança', 'peso sube', 'subi de peso', 'no bajo', 'no bajo de peso', 'retencion', 'retención de liquidos', 'hinchada', 'inchada', 'medidas'],
   },
@@ -204,7 +204,7 @@ export const ACERVO: Trecho[] = [
     cuidado: 'Diástase, incontinência ou dor pélvica: fisioterapeuta pélvica antes de abdominais e saltos. No app, o Posparto (pelo Pase) é o desenhado para essa fase.',
     fontes: [
       { org: 'ACOG', titulo: 'Committee Opinion No. 804 (postpartum section)', ano: 2020, url: 'https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/04/physical-activity-and-exercise-during-pregnancy-and-the-postpartum-period' },
-      { org: 'Deering RE et al., British Journal of Sports Medicine', titulo: 'Exercise and postpartum: a consensus-based guidance (Return to running postnatal guideline)', ano: 2019, url: 'https://doi.org/10.1136/bjsports-2019-101342' },
+      { org: 'Evenson KR et al., Obstetrical & Gynecological Survey', titulo: 'Summary of international guidelines for physical activity after pregnancy', ano: 2014, url: 'https://doi.org/10.1097/OGX.0000000000000077' },
     ],
     tags: ['posparto', 'pos parto', 'postparto', 'pós-parto', 'cesarea', 'cesárea', 'diastasis', 'diástase', 'lactancia', 'amamantando', 'amamentando', 'recien parida', 'bebe'],
   },

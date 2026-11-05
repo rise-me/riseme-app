@@ -45,7 +45,7 @@ Palavras que acionam: metabolismo lento, metabolismo, edad, idade, 40 anos, 40 a
 O peso varia 1 a 2 kg em poucos dias por água, sal, carboidrato guardado nos músculos, ciclo menstrual e intestino, sem que a gordura tenha mudado. Por isso a leitura certa é a tendência de 2 a 4 semanas (ou a média semanal), pesando sempre no mesmo horário e condição. Medidas e fotos mostram mudança que a balança esconde quando se ganha músculo e se perde gordura ao mesmo tempo.
 
 Fontes:
-- Bhutani S et al., Obesity — *Composition of two-week change in body weight under unrestricted free-living conditions* (2017) — <https://doi.org/10.1002/oby.21838>
+- Bhutani S et al., Physiological Reports — *Composition of two-week change in body weight under unrestricted free-living conditions* (2017) — <https://doi.org/10.14814/phy2.13336>
 
 Palavras que acionam: balanza, bascula, balança, peso sube, subi de peso, no bajo, no bajo de peso, retencion, retención de liquidos, hinchada, inchada, medidas
 
@@ -229,7 +229,7 @@ Depois de um parto normal sem complicações, atividade leve (caminhada, respira
 
 Fontes:
 - ACOG — *Committee Opinion No. 804 (postpartum section)* (2020) — <https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/04/physical-activity-and-exercise-during-pregnancy-and-the-postpartum-period>
-- Deering RE et al., British Journal of Sports Medicine — *Exercise and postpartum: a consensus-based guidance (Return to running postnatal guideline)* (2019) — <https://doi.org/10.1136/bjsports-2019-101342>
+- Evenson KR et al., Obstetrical & Gynecological Survey — *Summary of international guidelines for physical activity after pregnancy* (2014) — <https://doi.org/10.1097/OGX.0000000000000077>
 
 Palavras que acionam: posparto, pos parto, postparto, pós-parto, cesarea, cesárea, diastasis, diástase, lactancia, amamantando, amamentando, recien parida, bebe
 
