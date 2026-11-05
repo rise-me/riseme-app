@@ -116,7 +116,12 @@
     "upNext": "NASTĘPNIE",
     "restart": "Powtórz wyzwanie",
     "audioSpanish": "🎧 Audio po hiszpańsku",
-    "audioEnglish": "🎧 Audio po angielsku"
+    "audioEnglish": "🎧 Audio po angielsku",
+    "videoUnmute": "Dotknij tutaj, aby włączyć dźwięk",
+    "videoFailTitle": "Wideo się nie załadowało",
+    "videoFailHint": "Sprawdź połączenie i spróbuj ponownie.",
+    "videoRetry": "Spróbuj ponownie",
+    "videoOpenYoutube": "Obejrzyj na YouTube"
   },
   "subscription": {
     "exclusiveOffer": "Ekskluzywna oferta subskrypcji",

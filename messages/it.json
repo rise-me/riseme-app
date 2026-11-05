@@ -116,7 +116,12 @@
     "upNext": "A SEGUIRE",
     "restart": "Ripeti la sfida",
     "audioSpanish": "🎧 Audio in spagnolo",
-    "audioEnglish": "🎧 Lezioni con audio in inglese"
+    "audioEnglish": "🎧 Lezioni con audio in inglese",
+    "videoUnmute": "Tocca qui per attivare l'audio",
+    "videoFailTitle": "Il video non si è caricato",
+    "videoFailHint": "Controlla la connessione e riprova.",
+    "videoRetry": "Riprova",
+    "videoOpenYoutube": "Guarda su YouTube"
   },
   "subscription": {
     "exclusiveOffer": "Offerta esclusiva di abbonamento",

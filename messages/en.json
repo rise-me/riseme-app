@@ -116,7 +116,12 @@
     "upNext": "UP NEXT",
     "restart": "Repeat challenge",
     "audioSpanish": "🎧 Video audio in Spanish",
-    "audioEnglish": "🎧 Lessons with English audio"
+    "audioEnglish": "🎧 Lessons with English audio",
+    "videoUnmute": "Tap here to turn on the sound",
+    "videoFailTitle": "The video didn't load",
+    "videoFailHint": "Check your connection and try again.",
+    "videoRetry": "Try again",
+    "videoOpenYoutube": "Watch on YouTube"
   },
   "subscription": {
     "exclusiveOffer": "Exclusive subscription offer",

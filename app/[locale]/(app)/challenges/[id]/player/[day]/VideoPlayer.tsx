@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, SkipBack, SkipForward, Tv } from 'lucide-react'
+import { X, SkipBack, SkipForward, Tv, Volume2, RotateCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { markDayComplete } from '@/lib/progress'
 import { track } from '@/lib/posthog/track'
@@ -27,11 +27,22 @@ type PlayerHandle = {
   getCurrentTime: () => number
   getDuration: () => number
   destroy: () => void
+  // Fila técnica 05/11/2026 (#149): no celular o YouTube embutido pode começar MUDO; o volume do aparelho não
+  // desmuta o player e a aluna treina sem som. Com isto o app mostra o próprio botão "activar el sonido".
+  isMuted?: () => boolean
+  unmute?: () => void
 }
+
+// Falha de carregamento vira tela com "Reintentar" em vez de tela preta eterna (#147) + evento no PostHog.
+type OnFail = (code: string) => void
 
 type YTPlayer = {
   getCurrentTime?: () => number
   getDuration?: () => number
+  isMuted?: () => boolean
+  unMute?: () => void
+  setVolume?: (v: number) => void
+  playVideo?: () => void
   destroy: () => void
 }
 
@@ -65,7 +76,7 @@ function loadStreamSDK(): Promise<void> {
   return streamSdkPromise
 }
 
-async function mountPlayer(host: HTMLDivElement, video: LessonVideo): Promise<PlayerHandle | null> {
+async function mountPlayer(host: HTMLDivElement, video: LessonVideo, onFail: OnFail): Promise<PlayerHandle | null> {
   if (video.provider === 'stream') {
     if (!STREAM_CUSTOMER_HOST) return null
     await loadStreamSDK()
@@ -108,16 +119,28 @@ async function mountPlayer(host: HTMLDivElement, video: LessonVideo): Promise<Pl
       if (Hls.isSupported()) {
         // não baixa 1080p pra uma tela de celular
         hls = new Hls({ capLevelToPlayerSize: true })
+        hls.on(Hls.Events.ERROR, (_e, data) => {
+          if (data.fatal) onFail(`hls-${data.type}`)
+        })
         hls.loadSource(src)
         hls.attachMedia(el)
       }
     }
-    if (!hls) el.src = src
+    if (!hls) {
+      el.onerror = () => onFail(`video-${el.error?.code ?? '?'}`)
+      el.src = src
+    }
     // autoplay com som costuma ser bloqueado no celular; aí a aluna toca no play
     el.play().catch(() => {})
     return {
       getCurrentTime: () => el.currentTime || 0,
       getDuration: () => (Number.isFinite(el.duration) ? el.duration : 0),
+      isMuted: () => el.muted,
+      unmute: () => {
+        el.muted = false
+        el.volume = 1
+        el.play().catch(() => {})
+      },
       destroy: () => {
         hls?.destroy()
         el.removeAttribute('src')
@@ -127,8 +150,20 @@ async function mountPlayer(host: HTMLDivElement, video: LessonVideo): Promise<Pl
     }
   }
 
-  await loadYouTubeAPI()
-  if (!window.YT) return null
+  try {
+    await loadYouTubeAPI()
+  } catch {
+    onFail('yt-api')
+    return null
+  }
+  if (!window.YT) {
+    onFail('yt-api')
+    return null
+  }
+  let ready = false
+  const readyTimer = setTimeout(() => {
+    if (!ready) onFail('yt-timeout')
+  }, 20_000)
   const p = new window.YT.Player(host, {
     videoId: video.id,
     playerVars: {
@@ -138,12 +173,32 @@ async function mountPlayer(host: HTMLDivElement, video: LessonVideo): Promise<Pl
       playsinline: 1,
       controls: 1,
     },
+    events: {
+      onReady: () => {
+        ready = true
+        clearTimeout(readyTimer)
+      },
+      // 2 parâmetro inválido · 5 erro do player HTML5 · 100 removido/privado · 101/150 embed proibido
+      onError: (e: { data: number }) => {
+        clearTimeout(readyTimer)
+        onFail(`yt-${e.data}`)
+      },
+    },
   })
   return {
     // os métodos do YT só existem depois do onReady
     getCurrentTime: () => p.getCurrentTime?.() ?? 0,
     getDuration: () => p.getDuration?.() ?? 0,
-    destroy: () => p.destroy(),
+    isMuted: () => p.isMuted?.() ?? false,
+    unmute: () => {
+      p.unMute?.()
+      p.setVolume?.(100)
+      p.playVideo?.()
+    },
+    destroy: () => {
+      clearTimeout(readyTimer)
+      p.destroy()
+    },
   }
 }
 
@@ -153,14 +208,24 @@ function loadYouTubeAPI(): Promise<void> {
   if (window.YT?.Player) return Promise.resolve()
   if (apiLoadingPromise) return apiLoadingPromise
 
-  apiLoadingPromise = new Promise((resolve) => {
+  apiLoadingPromise = new Promise((resolve, reject) => {
+    // Sem isto, se o script do YouTube não carrega (rede ruim, bloqueador) a promessa nunca termina e a aluna fica
+    // olhando a tela preta (#147). Falhou → libera pra tentar de novo.
+    const falhou = () => {
+      clearTimeout(timer)
+      apiLoadingPromise = null
+      reject(new Error('YouTube API failed to load'))
+    }
+    const timer = setTimeout(falhou, 15_000)
     const prev = window.onYouTubeIframeAPIReady
     window.onYouTubeIframeAPIReady = () => {
+      clearTimeout(timer)
       prev?.()
       resolve()
     }
     const script = document.createElement('script')
     script.src = 'https://www.youtube.com/iframe_api'
+    script.onerror = falhou
     document.head.appendChild(script)
   })
   return apiLoadingPromise
@@ -193,6 +258,10 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   const [elapsed, setElapsed] = useState(0)
   const [duration, setDuration] = useState(currentDay.duration_seconds ?? 15 * 60)
   const [tvOpen, setTvOpen] = useState(false)
+  const [failCode, setFailCode] = useState<string | null>(null)
+  const [muted, setMuted] = useState(false)
+  // Depois que tocou com som uma vez, o botão não volta (se ela mutar de propósito, é escolha dela).
+  const heardRef = useRef(false)
 
   // Oferta do teste grátis ao CONCLUIR a aula 1 e a última aula (14/10/2026) — nunca no meio do treino: o dia é
   // marcado aos 80% (ainda no desaquecimento), então a oferta espera a aluna sair do player (X / Siguiente)
@@ -237,14 +306,25 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
 
   useEffect(() => {
     savedRef.current = false
+    heardRef.current = false
     setDayDone(false)
     setElapsed(0)
+    setFailCode(null)
+    setMuted(false)
     if (!videoProvider || !playId || !iframeHostRef.current) return
 
     let pollId: ReturnType<typeof setInterval> | null = null
     let cancelled = false
+    let started = false
 
-    mountPlayer(iframeHostRef.current, { provider: videoProvider, id: playId }).then((handle) => {
+    const onFail: OnFail = (code) => {
+      // erro depois que a aula já andou (ex.: oscilação de rede no meio) não derruba a tela: o player se vira
+      if (cancelled || started) return
+      setFailCode(code)
+      track('player_error', { provider: videoProvider, code, challenge_id: challenge.id, day_number: currentDayNumber })
+    }
+
+    mountPlayer(iframeHostRef.current, { provider: videoProvider, id: playId }, onFail).then((handle) => {
       if (cancelled) {
         handle?.destroy()
         return
@@ -259,6 +339,18 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
         const d = p.getDuration()
         if (d > 0) setDuration(d)
         setElapsed(t)
+        if (t > 0 && !started) {
+          started = true
+          setFailCode(null)
+        }
+        if (t > 0 && p.isMuted && !heardRef.current) {
+          const m = p.isMuted()
+          if (!m) heardRef.current = true
+          setMuted((prev) => {
+            if (m && !prev) track('player_muted', { provider: videoProvider, challenge_id: challenge.id, day_number: currentDayNumber })
+            return m
+          })
+        }
         if (d > 0 && t / d >= 0.8 && !savedRef.current) {
           savedRef.current = true
           setDayDone(true)
@@ -340,6 +432,45 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
               <p className="text-white/60 text-sm">{t('videoSoon')}</p>
             </div>
           </>
+        )}
+
+        {muted && !failCode && (
+          <button
+            onClick={() => {
+              playerRef.current?.unmute?.()
+              heardRef.current = true
+              setMuted(false)
+              track('player_unmute_click', { provider: videoProvider, challenge_id: challenge.id, day_number: currentDayNumber })
+            }}
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-5 py-3 rounded-full bg-white text-black text-sm font-bold shadow-lg animate-pulse"
+          >
+            <Volume2 size={18} />
+            {t('videoUnmute')}
+          </button>
+        )}
+
+        {failCode && (
+          <div className="absolute inset-0 z-10 bg-zinc-950 flex flex-col items-center justify-center gap-4 px-8 text-center">
+            <p className="text-white text-base font-bold">{t('videoFailTitle')}</p>
+            <p className="text-white/60 text-sm">{t('videoFailHint')}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="flex items-center gap-2 px-5 py-3 rounded-full bg-white text-black text-sm font-bold"
+            >
+              <RotateCw size={16} />
+              {t('videoRetry')}
+            </button>
+            {videoProvider === 'youtube' && videoId && (
+              <a
+                href={`https://www.youtube.com/watch?v=${videoId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/70 text-sm underline"
+              >
+                {t('videoOpenYoutube')}
+              </a>
+            )}
+          </div>
         )}
 
         <button

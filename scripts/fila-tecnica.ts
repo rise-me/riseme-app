@@ -24,9 +24,15 @@ async function listar() {
       db.from('whatsapp_messages').select('author, body, created_at').in('phone', formas).order('created_at', { ascending: false }).limit(10),
     ])
     let conta = 'sem conta ligada'
-    if (chat?.[0]?.user_id) {
-      const { data: u } = await db.from('users').select('email, name').eq('id', chat[0].user_id).maybeSingle()
-      const { data: auth } = await db.auth.admin.getUserById(chat[0].user_id)
+    // whatsapp_chats.user_id quase sempre vem vazio: cai na mesma busca do bot (users.phone com as variantes, ex. MX 521→52)
+    let userId: string | null = chat?.[0]?.user_id ?? null
+    if (!userId) {
+      const { data: us } = await db.from('users').select('id').in('phone', formas.flatMap((v) => [`+${v}`, v])).limit(1)
+      userId = us?.[0]?.id ?? null
+    }
+    if (userId) {
+      const { data: u } = await db.from('users').select('email, name').eq('id', userId).maybeSingle()
+      const { data: auth } = await db.auth.admin.getUserById(userId)
       conta = `${u?.email ?? '?'} · idioma ${auth?.user?.user_metadata?.locale ?? '?'} · último login ${auth?.user?.last_sign_in_at?.slice(0, 16) ?? 'nunca'}`
     }
     console.log(`━━━ #${c.id} · ${c.nome ?? 'sem nome'} · +${c.phone} · ${idade(c.created_at)}\n   conta: ${conta}\n   motivo: ${c.motivo}\n   resumo: ${(c.resumo ?? '').replace(/\s+/g, ' ')}`)

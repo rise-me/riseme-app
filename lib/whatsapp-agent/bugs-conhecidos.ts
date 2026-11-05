@@ -30,7 +30,7 @@ export const BUGS_CONHECIDOS: BugConhecido[] = [
     sintoma: 'vídeo não carrega: "Video no disponible", ícone de página triste, tela preta, fica parado sem avançar',
     status: 'investigando',
     desde: '16/10/2026',
-    resposta: 'Fechar e reabrir o app, trocar a conexão (Wi-Fi ↔ dados móveis) e atualizar o navegador. Se seguir assim, mandar o dia do treino e um print, abrir ticket e, para aluna em espanhol, dar a playlist do YouTube como plano B para não parar de treinar.',
+    resposta: 'Fechar e reabrir o app, trocar a conexão (Wi-Fi ↔ dados móveis) e atualizar o navegador. Desde 05/11 o app mostra a tela "El video no cargó" com o botão Reintentar quando o vídeo não carrega: tocar em Reintentar. Se seguir assim, pedir o print dessa tela, o dia do treino e o modelo do celular, abrir ticket e, para aluna em espanhol, dar a playlist do YouTube como plano B para não parar de treinar.',
     casos: '#55 #67 #94 #97 #147',
   },
   {
@@ -62,7 +62,7 @@ export const BUGS_CONHECIDOS: BugConhecido[] = [
     sintoma: 'vídeo sem som (Android)',
     status: 'contorno',
     desde: '04/11/2026',
-    resposta: 'Tocar no ícone de som do próprio player (abre mudo em alguns aparelhos), tirar o modo silencioso, subir o volume de mídia (não o de toque) e tentar no Chrome. Se seguir sem som → ticket com o modelo do celular.',
+    resposta: 'Em alguns celulares o vídeo começa MUDO e os botões de volume do aparelho não desmutam o player. Desde 05/11 o app mostra um botão branco "Toca aquí para activar el sonido" quando isso acontece: tocar nele uma vez. Sem o botão: tocar no ícone de som do próprio vídeo, tirar o modo silencioso e subir o volume de mídia (não o de toque). Se seguir sem som → ticket com o modelo do celular.',
     casos: '#149',
   },
 ]

@@ -116,7 +116,12 @@
     "upNext": "SIRADAKİ",
     "restart": "Meydan okumayı tekrarla",
     "audioSpanish": "🎧 Ders videoları İspanyolca",
-    "audioEnglish": "🎧 Ders videoları İngilizce"
+    "audioEnglish": "🎧 Ders videoları İngilizce",
+    "videoUnmute": "Sesi açmak için buraya dokun",
+    "videoFailTitle": "Video yüklenmedi",
+    "videoFailHint": "Bağlantını kontrol et ve tekrar dene.",
+    "videoRetry": "Tekrar dene",
+    "videoOpenYoutube": "YouTube'da izle"
   },
   "subscription": {
     "exclusiveOffer": "Özel abonelik teklifi",

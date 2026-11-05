@@ -116,7 +116,12 @@
     "upNext": "A CONTINUACIÓN",
     "restart": "Repetir desafío",
     "audioSpanish": "🎧 Audio en español",
-    "audioEnglish": "🎧 Clases con audio en inglés"
+    "audioEnglish": "🎧 Clases con audio en inglés",
+    "videoUnmute": "Toca aquí para activar el sonido",
+    "videoFailTitle": "El video no cargó",
+    "videoFailHint": "Revisa tu conexión y vuelve a intentarlo.",
+    "videoRetry": "Reintentar",
+    "videoOpenYoutube": "Ver en YouTube"
   },
   "subscription": {
     "exclusiveOffer": "Oferta exclusiva de suscripción",
