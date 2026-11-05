@@ -1,6 +1,7 @@
 // Agente de WhatsApp: recebe o perfil da aluna + a conversa até agora e devolve
 // a próxima resposta OU o pedido de passar pra humano. Não tem ferramentas nem
 // acesso a nada além do que vem aqui — o texto da aluna é dado, não instrução.
+import { verificarResposta, registrarVerificacao } from './verificador'
 import Anthropic from '@anthropic-ai/sdk'
 import { CONHECIMENTO } from './conhecimento'
 import MATERIAIS from './materiais.json'
@@ -418,6 +419,16 @@ export async function decidirResposta(params: {
     reembolso_transacoes: string
     reembolso_motivo: string
   }
+  // Verificador antes de enviar (lib/whatsapp-agent/verificador.ts, q1 do mapa, 05/11/2026): confere contra a voz do
+  // atendimento e corrige o mínimo. Resposta de conteúdo, dinheiro ou transferência pode ser longa.
+  const ultimaDela = [...params.conversa].reverse().find((m) => m.autor === 'student')?.texto ?? ''
+  const permiteLongo = Boolean(params.hotmart) || Boolean(out.reembolso_transacoes?.trim()) || out.passar_para_humano ||
+    /\?|receta|té\b|tes\b|men[uú]|plan\b|ejercicio|rutina|entren|d[ií]a \d|c[oó]mo|d[oó]nde|qu[eé]\b|puedo|cu[aá]nt|herbat|ćwicz|jak\b|gdzie|ile\b/i.test(ultimaDela) ||
+    ultimaDela.length > 120
+  const verificacao = await verificarResposta({ texto: out.resposta, conversa: params.conversa, agora: params.agora, permiteLongo })
+  if (verificacao.corrigida || verificacao.problemas.length) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, verificacao).catch(() => undefined)
+  out.resposta = verificacao.texto
+
   return out.passar_para_humano
     ? {
         tipo: 'humano',

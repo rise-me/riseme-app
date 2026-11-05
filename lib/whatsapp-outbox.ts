@@ -227,11 +227,11 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     if (item.kind === 'teste-agente') {
       let saida: string
       try {
-        const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: string[]; conviteHotmart?: { presente: string | null }; conviteVideo?: boolean; hotmart?: string; hotmartEmail?: string }
+        const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: (string | { a: 'student' | 'agent' | 'human'; t: string; em?: string })[]; conviteHotmart?: { presente: string | null }; conviteVideo?: boolean; hotmart?: string; hotmartEmail?: string }
         const agora = new Date().toISOString()
         // hotmartEmail = consulta real à Hotmart no teste; hotmart = bloco pronto (teste sem credencial)
         const hotmart = caso.hotmartEmail ? await (await import('@/lib/hotmart-api')).resumoHotmart(caso.hotmartEmail) : caso.hotmart ?? null
-        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((t) => ({ autor: 'student' as const, texto: t, em: agora })), agora, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo, hotmart })
+        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((m) => (typeof m === 'string' ? { autor: 'student' as const, texto: m, em: agora } : { autor: m.a, texto: m.t, em: m.em ?? agora })), agora, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo, hotmart })
         saida = JSON.stringify({ ...caso, resultado: d })
       } catch (err) {
         saida = JSON.stringify({ erro: String(err), entrada: item.body.slice(0, 500) })
