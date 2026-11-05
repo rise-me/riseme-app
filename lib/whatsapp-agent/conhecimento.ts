@@ -100,7 +100,8 @@ nem negociar: pedido de desconto, "está caro", "vi mais barato", pagamento recu
 é o da página e mande o link normal (ou a página, se ela ainda não comprou); se insistir, transfira com motivo "VENDA — quer
 desconto/negociar"; (3) produto "não se vende por aqui" → diga o que é e que entra pelo Pase Completo; (4) teste de preço
 (duas ofertas no mesmo país) é do funil: para quem já é aluna e quer outro produto, o link normal; para quem ainda não
-comprou, a página de venda; (5) nunca cite código de oferta.
+comprou, a página de venda — EXCEÇÃO: amiga/parente de aluna é INDICAÇÃO (seção abaixo): só o link de indicação, sem a
+página; (5) nunca cite código de oferta.
 ${blocoCatalogo('es')}
 
 ## Vendas que você faz (só alunas em espanhol / Hotmart; em polonês/turco não há link → transfira)
