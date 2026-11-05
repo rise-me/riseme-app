@@ -91,12 +91,20 @@ export interface AssinaturaHotmart {
 const iso = (ms: unknown) => (typeof ms === 'number' && ms > 0 ? new Date(ms).toISOString() : null)
 
 /** Todas as compras (qualquer status) de um e-mail, da mais recente para a mais antiga. null = sem credencial ou API fora. */
+// Sem transaction_status a Hotmart devolve SÓ as aprovadas (conferido 05/11/2026: a compra da Nancy sumiu da busca por
+// e-mail assim que virou PROTESTED). Para enxergar reembolsos, tentativas e cancelamentos é uma consulta por status.
+const STATUS_CONSULTADOS = ['APPROVED', 'COMPLETE', 'PROTESTED', 'REFUNDED', 'PARTIALLY_REFUNDED', 'CHARGEBACK', 'CANCELLED', 'EXPIRED', 'STARTED', 'NO_FUNDS', 'WAITING_PAYMENT', 'PRINTED_BILLET', 'OVERDUE']
+
 export async function comprasPorEmail(email: string): Promise<CompraHotmart[] | null> {
-  // A Hotmart pede janela de datas em algumas contas; primeiro sem, depois com 2 anos.
-  let d = await get('sales/history', { buyer_email: email, max_results: '50' })
-  if (!d) d = await get('sales/history', { buyer_email: email, max_results: '50', start_date: String(Date.now() - 730 * 86_400_000), end_date: String(Date.now()) })
-  if (!d) return null
-  const items = (d.items as Record<string, unknown>[] | undefined) ?? []
+  const respostas = await Promise.all(STATUS_CONSULTADOS.map((st) => get('sales/history', { buyer_email: email, max_results: '50', transaction_status: st })))
+  if (respostas.every((r) => r === null)) return null
+  const vistos = new Set<string>()
+  const items = respostas.flatMap((d) => ((d?.items as Record<string, unknown>[] | undefined) ?? [])).filter((it) => {
+    const tx = String(((it.purchase ?? {}) as Record<string, unknown>).transaction ?? '')
+    if (!tx || vistos.has(tx)) return false
+    vistos.add(tx)
+    return true
+  })
   return items
     .map((it) => {
       const p = (it.purchase ?? {}) as Record<string, unknown>

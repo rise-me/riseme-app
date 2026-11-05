@@ -70,9 +70,9 @@ export async function enviarListaReembolsos(): Promise<string | null> {
 }
 
 const CONFIRMA: Record<string, (p: PedidoReembolso) => string> = {
-  es: (p) => `Listo${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Tu reembolso de *${p.produto}* (${p.valor}) ya fue procesado en Hotmart.\n\n${/BILLET|MERCADO|PSE|PIX|OXXO|EFECTY|YAPE/i.test(p.pagamento) ? 'Como pagaste por un medio local, el dinero vuelve en hasta 7 días hábiles (Hotmart puede pedirte por correo los datos para la devolución).' : 'Si pagaste con tarjeta, el dinero aparece en tu factura actual o en la siguiente.'}\n\nGracias por darnos la oportunidad 💛`,
-  pl: (p) => `Gotowe${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Twój zwrot za *${p.produto}* (${p.valor}) został zrealizowany.\n\nJeśli płaciłaś kartą, pieniądze pojawią się na bieżącym lub następnym wyciągu.\n\nDziękujemy, że dałaś nam szansę 💛`,
-  en: (p) => `Done${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Your refund for *${p.produto}* (${p.valor}) has been processed at Hotmart.\n\nIf you paid by card, it shows on your current or next statement; local payment methods take up to 7 business days.\n\nThank you for giving us a chance 💛`,
+  es: (p) => `Listo${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Tu reembolso de *${p.produto}* (${p.valor}) ya está en proceso en Hotmart (lo aprueban en hasta 7 días).\n\n${/BILLET|MERCADO|PSE|PIX|OXXO|EFECTY|YAPE/i.test(p.pagamento) ? 'Como pagaste por un medio local, el dinero vuelve en hasta 7 días hábiles después de la aprobación (Hotmart puede pedirte por correo los datos para la devolución).' : 'Si pagaste con tarjeta, el dinero aparece en tu factura actual o en la siguiente.'}\n\nGracias por darnos la oportunidad 💛`,
+  pl: (p) => `Gotowe${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Twój zwrot za *${p.produto}* (${p.valor}) jest już w trakcie realizacji w Hotmart (zatwierdzenie do 7 dni).\n\nJeśli płaciłaś kartą, pieniądze pojawią się na bieżącym lub następnym wyciągu.\n\nDziękujemy, że dałaś nam szansę 💛`,
+  en: (p) => `Done${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Your refund for *${p.produto}* (${p.valor}) is now being processed at Hotmart (approved within 7 days).\n\nIf you paid by card, it shows on your current or next statement; local payment methods take up to 7 business days.\n\nThank you for giving us a chance 💛`,
 }
 
 async function executarUm(id: number, p: PedidoReembolso): Promise<string> {
