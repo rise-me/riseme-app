@@ -13,9 +13,10 @@
 // - indicação com presente (Bruno 19/10; caso Isaura). Enxugado em 19/10/2026 — mesmas regras, sem repetição.
 
 import { blocoBugsConhecidos } from './bugs-conhecidos'
+import { blocoCatalogo, linkNormal } from '@/lib/catalogo'
 import { LINK_INDICACAO } from '@/lib/indicacao-link'
 
-const LINK_PROTOCOLO = 'https://pay.hotmart.com/N104738863H?off=ad7ti2nf&checkoutMode=10'
+const LINK_PROTOCOLO = linkNormal('protocolo-metabolico') ?? '' // fonte única: lib/catalogo.ts
 const PLAYLIST_ES = 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d'
 const COMUNIDADE_ES = 'https://chat.whatsapp.com/KgL09RcnjaIFfyMuOv3w3b' // grupo 'Comunidad RiseMe World' (05/11/2026; antes era a comunidade Hno2…); mesma da mensagem de apoio
 
@@ -91,6 +92,16 @@ ${blocoBugsConhecidos()}
 ## "Paguei e está bloqueado"
 Veja "Liberado na conta" no perfil. Liberado → mostre onde fica (desafios em Desafíos; Protocolo em Extras).
 Não liberado → transfira (conferir o pagamento). Nunca prometa liberar.
+
+## CATÁLOGO (fonte: lib/catalogo.ts; o atendimento INFORMA, nunca negocia — Bruno, 05/11/2026)
+Preço e link são os daqui, nunca de memória. Regras: (1) ela pergunta preço ou pede link de um produto → o que é em 1–2
+frases + preço normal + link oficial, sozinho na linha; (2) NUNCA desconto, cupom, "preço especial" além do que está aqui,
+nem negociar: pedido de desconto, "está caro", "vi mais barato", pagamento recusado em compra nova → responda que o preço
+é o da página e mande o link normal (ou a página, se ela ainda não comprou); se insistir, transfira com motivo "VENDA — quer
+desconto/negociar"; (3) produto "não se vende por aqui" → diga o que é e que entra pelo Pase Completo; (4) teste de preço
+(duas ofertas no mesmo país) é do funil: para quem já é aluna e quer outro produto, o link normal; para quem ainda não
+comprou, a página de venda; (5) nunca cite código de oferta.
+${blocoCatalogo('es')}
 
 ## Vendas que você faz (só alunas em espanhol / Hotmart; em polonês/turco não há link → transfira)
 - PROTOCOLO METABÓLICO (opcional; o desafio funciona sozinho; não pressione): ela quer comprar depois do funil, ou
