@@ -108,6 +108,12 @@ export async function estaComProblema(phone: string): Promise<boolean> {
     .limit(40)
   const ms = (data ?? []).filter((m) => m.author !== 'system')
   if (ms[0]?.author === 'student') return true
+  // O que o CLASSIFICADOR entendeu nas últimas respostas (kind 'uso-llm' guarda os assuntos): dinheiro, técnico ou feedback = problema.
+  // A lista de palavras fica só como atalho (Bruno 05/11: palavra exata não decide nada).
+  const { data: usos } = await admin().from('whatsapp_outbox').select('body').eq('kind', 'uso-llm').in('phone', formas).gte('created_at', new Date(Date.now() - 3 * 86_400_000).toISOString()).order('created_at', { ascending: false }).limit(5)
+  for (const u of usos ?? []) {
+    try { const b = JSON.parse(u.body) as { assuntos?: string }; if (/dinheiro|tecnico|feedback/.test(b.assuntos ?? '')) return true } catch { /* linha inválida */ }
+  }
   return ms.some((m) => m.author === 'student' && SINAL_DE_PROBLEMA.test(m.body))
 }
 

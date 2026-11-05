@@ -9,6 +9,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { MensagemConversa } from './responder'
 import { SINAL_DINHEIRO } from './dinheiro'
+import { ACERVO } from './acervo'
 
 export const ASSUNTOS = ['acesso', 'dinheiro', 'tecnico', 'conteudo', 'treino', 'venda', 'depoimento', 'feedback'] as const
 export type Assunto = (typeof ASSUNTOS)[number]
@@ -111,8 +112,10 @@ const FORMATO = {
     properties: {
       assuntos: { type: 'array', items: { type: 'string', enum: [...ASSUNTOS, 'social', 'outro'] } },
       certeza: { type: 'string', enum: ['alta', 'media', 'baixa'] },
+      dia_aula: { type: 'integer' }, // 1–28 quando ela fala de uma aula/dia específico ("día 14", "la clase de ayer" = dia atual − 1); 0 = nenhum
+      acervo: { type: 'array', items: { type: 'string' } }, // ids dos trechos do acervo que ajudam a responder (até 4); [] se nenhum
     },
-    required: ['assuntos', 'certeza'],
+    required: ['assuntos', 'certeza', 'dia_aula', 'acervo'],
     additionalProperties: false,
   },
 }
@@ -132,27 +135,32 @@ outro = não se encaixa ou não dá para saber.`
  * Assuntos da conversa (últimas mensagens dela). União dos sinais fixos com o classificador. "Na dúvida inclui": erro,
  * certeza baixa, 'outro' ou nada reconhecido → TODOS (prompt inteiro). 'social' sozinho → base.
  */
-export async function classificarAssuntos(conversa: MensagemConversa[]): Promise<{ assuntos: Set<Assunto>; certeza: string; fonte: string }> {
+export interface Classificacao { assuntos: Set<Assunto>; certeza: string; fonte: string; dia?: number; acervoIds: string[] }
+const TITULOS_ACERVO = ACERVO.map((t) => `${t.id}: ${t.titulo}`).join('\n')
+export async function classificarAssuntos(conversa: MensagemConversa[], diaAtual?: number | null): Promise<Classificacao> {
   const fixos = sinaisFixos(conversa)
   const ultimas = conversa.slice(-6).map((m) => `${m.autor === 'student' ? 'ALUNA' : m.autor === 'system' ? 'SISTEMA' : 'NÓS'}: ${m.texto.slice(0, 300)}`).join('\n')
   try {
     const res = await cliente().beta.messages.create({
       model: MODELO,
-      max_tokens: 200,
+      max_tokens: 300,
       output_config: { effort: 'low', format: FORMATO },
-      system: `Você classifica a ÚLTIMA mensagem da aluna (com o contexto das anteriores) do suporte de WhatsApp do RiseMe (app de treino para mulheres) em assuntos. Pode marcar mais de um. Se a mensagem continua um assunto anterior, mantenha esse assunto.\n\nAssuntos:\n${DESCRICAO}`,
-      messages: [{ role: 'user', content: `Conversa:\n${ultimas}\n\nResponda com os assuntos da última mensagem da aluna.` }],
+      system: `Você classifica a ÚLTIMA mensagem da aluna (com o contexto das anteriores) do suporte de WhatsApp do RiseMe (app de treino para mulheres). Erros de grafia, gíria e outro idioma não importam: classifique pelo SENTIDO. Pode marcar mais de um assunto. Se a mensagem continua um assunto anterior, mantenha esse assunto.\n\nAssuntos:\n${DESCRICAO}\n\nDIA DA AULA ("dia_aula"): se ela fala de uma aula/dia específico do desafio, o número (1–28); "hoy"/"la de hoy" = o dia atual informado; "ayer" = dia atual − 1; nada = 0.\n\nACERVO ("acervo"): entre os trechos abaixo, os ids que ajudam a responder a dúvida dela (até 4, os mais específicos primeiro); [] se nenhum:\n${TITULOS_ACERVO}`,
+      messages: [{ role: 'user', content: `Dia atual dela no desafio: ${diaAtual ?? 'desconhecido'}\n\nConversa:\n${ultimas}\n\nResponda com os assuntos da última mensagem da aluna, o dia da aula (se houver) e os trechos do acervo.` }],
     })
     const bloco = res.content.find((b) => b.type === 'text')
-    const o = bloco && bloco.type === 'text' ? (JSON.parse(bloco.text) as { assuntos: string[]; certeza: string }) : { assuntos: ['outro'], certeza: 'baixa' }
+    const o = bloco && bloco.type === 'text' ? (JSON.parse(bloco.text) as { assuntos: string[]; certeza: string; dia_aula?: number; acervo?: string[] }) : { assuntos: ['outro'], certeza: 'baixa', dia_aula: 0, acervo: [] }
+    const dia = o.dia_aula && o.dia_aula >= 1 && o.dia_aula <= 28 ? o.dia_aula : undefined
+    const ids = new Set(ACERVO.map((t) => t.id))
+    const acervoIds = (o.acervo ?? []).filter((id) => ids.has(id)).slice(0, 4)
     const ia = new Set(o.assuntos.filter((a): a is Assunto => (ASSUNTOS as readonly string[]).includes(a)))
     const social = o.assuntos.includes('social') && ia.size === 0
-    if (o.assuntos.includes('outro') || o.certeza === 'baixa') return { assuntos: new Set(TODOS), certeza: o.certeza, fonte: 'duvida' }
+    if (o.assuntos.includes('outro') || o.certeza === 'baixa') return { assuntos: new Set(TODOS), certeza: o.certeza, fonte: 'duvida', dia, acervoIds }
     const uniao = new Set<Assunto>([...fixos, ...ia])
-    if (!uniao.size && !social) return { assuntos: new Set(TODOS), certeza: o.certeza, fonte: 'vazio' }
-    return { assuntos: uniao, certeza: o.certeza, fonte: social && !uniao.size ? 'social' : 'ia+sinais' }
+    if (!uniao.size && !social) return { assuntos: new Set(TODOS), certeza: o.certeza, fonte: 'vazio', dia, acervoIds }
+    return { assuntos: uniao, certeza: o.certeza, fonte: social && !uniao.size ? 'social' : 'ia+sinais', dia, acervoIds }
   } catch (err) {
     console.error('[assuntos] classificador falhou, prompt inteiro:', err)
-    return { assuntos: new Set(TODOS), certeza: 'erro', fonte: 'erro' }
+    return { assuntos: new Set(TODOS), certeza: 'erro', fonte: 'erro', acervoIds: [] }
   }
 }

@@ -4,7 +4,7 @@
 import { verificarResposta, registrarVerificacao } from './verificador'
 import { prazoDaLista } from './lista-20h'
 import { ASSUNTOS, TODOS, classificarAssuntos, montarSystem, porAssuntoLigado, type Assunto } from './assuntos'
-import { buscarAcervo, blocoAcervo } from './acervo'
+import { buscarAcervo, blocoAcervo, trechosPorIds } from './acervo'
 import AULAS from './aulas-calistenia.json'
 import Anthropic from '@anthropic-ai/sdk'
 import { CONHECIMENTO } from './conhecimento'
@@ -393,6 +393,8 @@ export async function decidirResposta(params: {
   forcarAssuntos?: ReadonlySet<Assunto> // interno: 2ª rodada com os materiais quando a 1ª pediu (precisa_materiais)
   consultaPendente?: { id: number; resumo: string; motivo: string; desde: string } | null // reprocessamento: a pergunta que ficou sem resposta
   buscarHotmart?: () => Promise<string | null> // chamado quando o CLASSIFICADOR diz 'dinheiro' e o bloco ainda não veio (não depende de palavra certa)
+  diaAula?: number // interno (2ª rodada): dia e trechos já escolhidos na 1ª
+  acervoIds?: string[]
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -448,9 +450,10 @@ export async function decidirResposta(params: {
   const p = params.perfil
   const temProtocolo = Boolean(p?.confirmadaPorTelefone && p.liberados.includes('Protocolo Metabólico'))
   // Prompt por assunto (lib/whatsapp-agent/assuntos.ts, q7, 05/11/2026): base + seções do(s) assunto(s); materiais só em conteúdo.
+  const diaAtual = (() => { const m = p?.cartao?.match(/Calistenia[^\n]*?concluiu até o dia (\d{1,2})/i); return m ? Math.min(28, Number(m[1]) + 1) : null })()
   const cls = params.forcarAssuntos
-    ? { assuntos: new Set<Assunto>(params.forcarAssuntos), certeza: '-', fonte: 'materiais' }
-    : porAssuntoLigado() ? await classificarAssuntos(params.conversa) : { assuntos: new Set<Assunto>(TODOS), certeza: '-', fonte: 'off' }
+    ? { assuntos: new Set<Assunto>(params.forcarAssuntos), certeza: '-', fonte: 'materiais', dia: params.diaAula, acervoIds: params.acervoIds ?? [] }
+    : porAssuntoLigado() ? await classificarAssuntos(params.conversa, diaAtual) : { assuntos: new Set<Assunto>(TODOS), certeza: '-', fonte: 'off', dia: undefined, acervoIds: [] }
   const { base, extra } = montarSystem(SYSTEM, cls.assuntos)
   // Dinheiro pelo classificador (IA), não por lista de palavras (Bruno 05/11): se ele diz dinheiro e a Hotmart ainda não foi
   // consultada, consulta agora. O bloco entra no contexto abaixo.
@@ -460,8 +463,11 @@ export async function decidirResposta(params: {
   const comMateriais = cls.assuntos.has('conteudo') || cls.assuntos.size >= ASSUNTOS.length
   // Acervo científico (lib/whatsapp-agent/acervo.ts, q10): trechos que batem com as últimas mensagens dela, só em treino/conteúdo.
   const comAcervo = cls.assuntos.has('treino') || cls.assuntos.has('conteudo') || cls.assuntos.size >= ASSUNTOS.length
-  const acervo = comAcervo ? blocoAcervo(buscarAcervo(params.conversa.filter((m) => m.autor === 'student').slice(-3).map((m) => m.texto).join(' '))) : ''
-  const aulas = cls.assuntos.has('treino') || cls.assuntos.size >= ASSUNTOS.length ? blocoAulas(p?.idioma ?? 'es', diasCitados(params.conversa, p?.cartao)) : ''
+  // Trechos do acervo: os que o CLASSIFICADOR escolheu pelos títulos (sentido) + os achados por palavra (atalho), sem repetir.
+  const acervo = comAcervo ? blocoAcervo(trechosPorIds(cls.acervoIds, buscarAcervo(params.conversa.filter((m) => m.autor === 'student').slice(-3).map((m) => m.texto).join(' ')))) : ''
+  // Dia da aula: o que o classificador entendeu ("la clase de ayer"); sem isso, o padrão de texto e, por fim, o dia atual do cartão.
+  const dias = cls.dia ? [cls.dia] : diasCitados(params.conversa, p?.cartao)
+  const aulas = cls.assuntos.has('treino') || cls.assuntos.size >= ASSUNTOS.length ? blocoAulas(p?.idioma ?? 'es', dias) : ''
   const materiais = comMateriais ? blocoMateriais(p?.idioma ?? 'es', temProtocolo) : indiceMateriais(temProtocolo)
 
   const res = await anthropic().beta.messages.create({
@@ -532,7 +538,7 @@ export async function decidirResposta(params: {
   // A 1ª rodada não tinha os materiais e precisava deles: refaz uma vez com o assunto 'conteudo' (prompt por assunto, 05/11/2026).
   if (out.precisa_materiais && !comMateriais && !params.forcarAssuntos) {
     console.log(`[assuntos] precisa_materiais: refazendo com conteudo (${params.phone ?? '?'})`)
-    return decidirResposta({ ...params, forcarAssuntos: new Set<Assunto>([...cls.assuntos, 'conteudo']) })
+    return decidirResposta({ ...params, forcarAssuntos: new Set<Assunto>([...cls.assuntos, 'conteudo']), diaAula: cls.dia, acervoIds: cls.acervoIds })
   }
   // Verificador antes de enviar (lib/whatsapp-agent/verificador.ts, q1 do mapa, 05/11/2026): confere contra a voz do
   // atendimento e corrige o mínimo. Resposta de conteúdo, dinheiro ou transferência pode ser longa.

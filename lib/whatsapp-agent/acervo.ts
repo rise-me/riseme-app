@@ -470,6 +470,19 @@ export function buscarAcervo(texto: string, max = 4): Trecho[] {
     .map((x) => x.tr)
 }
 
+/** Trechos escolhidos pelo classificador (por id), somados aos achados por tag, sem repetir. */
+export function trechosPorIds(ids: string[], mais: Trecho[] = [], max = 4): Trecho[] {
+  const vistos = new Set<string>()
+  const out: Trecho[] = []
+  for (const t of [...ids.map((id) => ACERVO.find((x) => x.id === id)).filter((x): x is Trecho => Boolean(x)), ...mais]) {
+    if (vistos.has(t.id)) continue
+    vistos.add(t.id)
+    out.push(t)
+    if (out.length >= max) break
+  }
+  return out
+}
+
 /** Bloco para a resposta: trechos + fontes, com a regra de uso. */
 export function blocoAcervo(trechos: Trecho[]): string {
   if (!trechos.length) return ''
