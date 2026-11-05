@@ -74,7 +74,7 @@ export function limparTexto(t: string): string {
   return t.replace(/[ \t]{2,}/g, ' ').replace(/ +([,.;:!?])/g, '$1').replace(/ +\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
 }
 
-export async function verificarResposta(p: { texto: string; conversa: MensagemConversa[]; agora: string; permiteLongo?: boolean }): Promise<Verificacao> {
+export async function verificarResposta(p: { texto: string; conversa: MensagemConversa[]; agora: string; permiteLongo?: boolean; contexto?: string }): Promise<Verificacao> {
   const original = limparTexto(p.texto)
   if (!original) return { texto: original, corrigida: false, problemas: [] }
   const fixos = checarFixo(original, p.conversa, p.agora).filter((x) => !(p.permiteLongo && /longa|maior|900/.test(x)))
@@ -91,8 +91,10 @@ export async function verificarResposta(p: { texto: string; conversa: MensagemCo
         'que precisam ficar; (c) mantenha o idioma da resposta; (d) se a resposta já está boa, aprovada=true e texto_corrigido="" ; ' +
         '(e) se corrigir, texto_corrigido é a mensagem INTEIRA pronta para enviar, natural, como uma pessoa escreve no WhatsApp; ' +
         '(f) problemas = lista curta em português do que estava errado (ex.: "longa demais", "saudação repetida", "reabriu assunto", ' +
-        '"explica o produto sem ela perguntar", "sector responsable", "palavra em português", "tom de robô", "duas perguntas", "bloco sem quebra de linha").\n\n' + VOZ,
-      messages: [{ role: 'user', content: `Conversa (últimas mensagens):\n${ultimas}\n\nProblemas já detectados por checagem fixa: ${fixos.length ? fixos.join(', ') : 'nenhum'}${p.permiteLongo ? '\n(Esta resposta pode ser longa: é de conteúdo/dinheiro.)' : ''}\n\nRESPOSTA DO BOT:\n«${original}»` }],
+        '"explica o produto sem ela perguntar", "sector responsable", "palavra em português", "tom de robô", "duas perguntas", "bloco sem quebra de linha"); ' +
+        '(g) o bot recebeu FATOS DO SISTEMA (abaixo, quando houver: consulta real à Hotmart, cartão da aluna, acervo, aula): o que a resposta diz com base neles NÃO é invenção — nunca corte nem contradiga esses fatos; ' +
+        '(h) texto_corrigido SEMPRE no mesmo idioma da resposta original (nunca em português, que é só o idioma destas instruções).\n\n' + VOZ,
+      messages: [{ role: 'user', content: `${p.contexto ? `FATOS DO SISTEMA que o bot recebeu (não são invenção):\n${p.contexto.slice(0, 4000)}\n\n` : ''}Conversa (últimas mensagens):\n${ultimas}\n\nProblemas já detectados por checagem fixa: ${fixos.length ? fixos.join(', ') : 'nenhum'}${p.permiteLongo ? '\n(Esta resposta pode ser longa: é de conteúdo/dinheiro.)' : ''}\n\nRESPOSTA DO BOT:\n«${original}»` }],
     })
     const bloco = res.content.find((b) => b.type === 'text')
     if (!bloco || bloco.type !== 'text') return { texto: original, corrigida: false, problemas: fixos }
@@ -102,7 +104,11 @@ export async function verificarResposta(p: { texto: string; conversa: MensagemCo
     // Só aceita a correção se for um texto real, no mesmo idioma de sempre e sem link novo.
     const linksAntes = (original.match(/https?:\/\/\S+/g) ?? []).sort().join(' ')
     const linksDepois = (novo.match(/https?:\/\/\S+/g) ?? []).sort().join(' ')
-    if (o.aprovada || !novo || novo === original || novo.length < 2 || linksDepois !== linksAntes) return { texto: original, corrigida: false, problemas }
+    const ptNovo = /\b(obrigad[ao]|você|não|está|já|também|setor|reembolsos?\b.*\b(por aqui)|por aqui)\b/i.test(novo) && !/\b(obrigad[ao]|você|não|por aqui)\b/i.test(original)
+    const codigosAntes = original.match(/\b[A-Z]{2}\d{8,}\b/g) ?? []
+    const perdeuCodigo = codigosAntes.some((c) => !novo.includes(c))
+    // 05/11: a editora reescreveu em português e apagou "figuran como reembolsadas" (fato da Hotmart) — caso Agustina.
+    if (o.aprovada || !novo || novo === original || novo.length < 2 || linksDepois !== linksAntes || ptNovo || perdeuCodigo) return { texto: original, corrigida: false, problemas }
     return { texto: novo, corrigida: true, problemas }
   } catch (err) {
     console.error('[verificador] falhou, mandando original:', err)

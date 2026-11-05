@@ -6,7 +6,7 @@ import type { MensagemConversa } from './responder'
 import { resumoHotmart, hotmartConfigurada } from '@/lib/hotmart-api'
 
 export const SINAL_DINHEIRO =
-  /reembols|devoluci|devuelv|devolv|cobr|cargo|cobro|pag[oóaué]|dinero|dinheiro|tarjeta|cart[aã]o|banco|estaf|fraud|robo|roband|golpe|cancel|anul|suscrip|assinatur|mensualid|factur|transacci|refund|charge|scam|subscri|zwrot|oszust|p[łl]atno|pieni|anulow|subskryp|vr[aá]cen|podvod|platb|zru[sš]|rimbors|truffa|pagament|annull|abbonament|iade|dolandır|ödeme|iptal|abonelik/i
+  /re?embols|rembols|reembol|devoluci|devuelv|devolv|\bHP\d{6,}|cobr|cargo|cobro|pag[oóaué]|dinero|dinheiro|tarjeta|cart[aã]o|banco|estaf|fraud|robo|roband|golpe|cancel|anul|suscrip|assinatur|mensualid|factur|transacci|refund|charge|scam|subscri|zwrot|oszust|p[łl]atno|pieni|anulow|subskryp|vr[aá]cen|podvod|platb|zru[sš]|rimbors|truffa|pagament|annull|abbonament|iade|dolandır|ödeme|iptal|abonelik/i
 
 export function assuntoDeDinheiro(conversa: MensagemConversa[], horas = 72): boolean {
   const desde = Date.now() - horas * 3_600_000
