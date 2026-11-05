@@ -27,6 +27,7 @@ const MAPA_SYSTEM: [RegExp, Assunto[]][] = [
   [/^BRINDE DO DEPOIMENTO|^CONVITE DE DEPOIMENTO HOTMART|^PROVA SOCIAL/, ['depoimento']],
   [/^INDICAÇÃO/, ['venda', 'depoimento']],
   [/^FEEDBACK/, ['feedback']],
+  [/^ACERVO CIENTÍFICO/, ['treino', 'conteudo']],
 ]
 const MAPA_CONHECIMENTO: [RegExp, Assunto[]][] = [
   [/^## Acesso/, ['acesso']],

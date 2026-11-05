@@ -4,6 +4,7 @@
 import { verificarResposta, registrarVerificacao } from './verificador'
 import { prazoDaLista } from './lista-20h'
 import { ASSUNTOS, TODOS, classificarAssuntos, montarSystem, porAssuntoLigado, type Assunto } from './assuntos'
+import { buscarAcervo, blocoAcervo } from './acervo'
 import Anthropic from '@anthropic-ai/sdk'
 import { CONHECIMENTO } from './conhecimento'
 import MATERIAIS from './materiais.json'
@@ -92,7 +93,7 @@ COMO ESCREVER
   (CONHECIMENTO → BOTÕES DO APP), 2 frases + UMA pergunta.
 - "[imagem anexada]": OLHE e use o que aparece; "[imagem anterior, já respondida]" é histórico.
 - Nunca invente quantidade, receita, horário, ingrediente, preço, prazo, política ou recurso do app.
-- Se o material e o conhecimento não falam do assunto, diga isso com honestidade e TRANSFIRA. Errar para o lado de transferir
+- Se o material, o conhecimento e o ACERVO CIENTÍFICO (quando vier) não falam do assunto, diga isso com honestidade e TRANSFIRA. Errar para o lado de transferir
   é aceitável; "vou conferir e te respondo" sem transferir NUNCA (a aluna ficaria no vácuo).
 - Saúde (gravidez, amamentação, doença, remédio, alergia, dor, lesão): o que o material diz + "confirme com seu médico"; se
   ela quiser mais, transfira. Nunca orientação médica própria.
@@ -155,6 +156,13 @@ E-MAIL SEM COMPRA (o perfil diz, com o bloco HOTMART): não há conta nem compra
 que o bloco mostra (nada com esse e-mail; ou tentativa não paga: o pagamento não foi concluído, ofereça ajuda para concluir) e
 pergunte, uma vez, se comprou com outro e-mail. 2º e-mail sem compra, print de pagamento que o bloco não explica, ou compra em
 polonês/turco (Perfect Pay) → transfira com os e-mails no resumo.
+
+ACERVO CIENTÍFICO (bloco na mensagem, quando a dúvida bate; Bruno 05/11/2026: "respostas confiáveis, de fonte verdadeira,
+que ela possa aplicar com segurança"): dúvida de treino, corpo, alimentação, metabolismo, calorias, jejum, fases da vida
+(gravidez, pós-parto, menopausa, ciclo) → responda com os trechos do acervo, em blocos curtos e no idioma dela, citando a
+fonte em uma linha ("según la OMS…"), sem link e sem prescrever (números são faixas e referências, não receita para ela).
+Siga o "cuidado" de cada trecho (quando mandar ao médico). Regra do produto (CONHECIMENTO) vale acima do acervo. Sem trecho
+que responda e sem material: transfira, nunca invente.
 
 FEEDBACK ("feedback_resumo"; Bruno, 05/11/2026): ela deu opinião, sugestão, elogio ou reclamação sobre uma aula, o app ou o
 conteúdo (não é problema técnico nem dinheiro) → "feedback_resumo" = 1 frase em português com o que ela disse (ex.: "achou o dia 14
@@ -408,6 +416,9 @@ export async function decidirResposta(params: {
     : porAssuntoLigado() ? await classificarAssuntos(params.conversa) : { assuntos: new Set<Assunto>(TODOS), certeza: '-', fonte: 'off' }
   const { base, extra } = montarSystem(SYSTEM, cls.assuntos)
   const comMateriais = cls.assuntos.has('conteudo') || cls.assuntos.size >= ASSUNTOS.length
+  // Acervo científico (lib/whatsapp-agent/acervo.ts, q10): trechos que batem com as últimas mensagens dela, só em treino/conteúdo.
+  const comAcervo = cls.assuntos.has('treino') || cls.assuntos.has('conteudo') || cls.assuntos.size >= ASSUNTOS.length
+  const acervo = comAcervo ? blocoAcervo(buscarAcervo(params.conversa.filter((m) => m.autor === 'student').slice(-3).map((m) => m.texto).join(' '))) : ''
   const materiais = comMateriais ? blocoMateriais(p?.idioma ?? 'es', temProtocolo) : indiceMateriais(temProtocolo)
 
   const res = await anthropic().beta.messages.create({
@@ -434,6 +445,7 @@ export async function decidirResposta(params: {
           {
             type: 'text' as const,
             text:
+              (acervo ? `${acervo}\n\n` : '') +
               `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília): ${prazoDaLista(params.agora) === 'hoje' ? 'HOJE (es "hoy hasta las 20h")' : 'AMANHÃ (es "mañana hasta las 20h")'}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
               (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
