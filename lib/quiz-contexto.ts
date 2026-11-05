@@ -19,6 +19,7 @@ const ROTULO: Record<string, string> = {
   consumo_agua: 'água por dia', respuestas_parecidas: 'se identifica com', falta_aire_escaleras: 'fôlego na escada', frecuencia_caminar: 'caminha',
   nivel_energia: 'energia', calistenia_energia: 'calistenia e energia', horas_sueno: 'sono', malos_habitos: 'maus hábitos', eventos_aumento_peso: 'o que fez engordar',
   razon_principal: 'razão principal', evento_importante: 'evento importante à vista', proyeccion_resultados: 'projeção',
+  altura: 'altura (cm)', peso_actual: 'peso atual (kg)', peso_objetivo: 'peso objetivo (kg)', edad: 'idade', nombre: 'nome que digitou',
 }
 
 export interface QuizGuardado { sck: string; funil: string; respostas: Record<string, string>; em: string }
@@ -56,6 +57,13 @@ export function resumirQuiz(q: { funil: string; respostas: Record<string, string
     linhas.push(`${ROTULO[m.key] ?? m.key}: ${vals.join(', ')}`)
   }
   if (!linhas.length) return null
+  // IMC quando altura e peso vieram (telas de digitação, gravadas desde 05/11/2026)
+  const num = (tela: string) => parseFloat(String(q.respostas[tela] ?? '').replace(',', '.'))
+  const alt = num('25'), peso = num('26'), alvo = num('27')
+  if (alt > 100 && alt < 230 && peso > 30 && peso < 300) {
+    const imc = peso / (alt / 100) ** 2
+    linhas.push(`IMC calculado: ${imc.toFixed(1)}${alvo > 30 ? ` · quer chegar a ${alvo} kg (${(peso - alvo).toFixed(1)} kg a menos)` : ''}`)
+  }
   return `O QUE ELA RESPONDEU NO QUIZ antes de comprar${q.em ? ` (${q.em.slice(0, 10)})` : ''} — é quem ela é e o que quer; use para entender e personalizar, sem recitar de volta nem dizer "você respondeu no quiz" (só cite se ajudar na resposta):\n- ${linhas.join('\n- ')}`
 }
 

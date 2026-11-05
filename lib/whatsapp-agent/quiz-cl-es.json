@@ -213,5 +213,30 @@
 "otro": "Otro",
 "ningun_evento": "Ningún evento en el corto plazo"
 }
+},
+"25": {
+"key": "altura",
+"pergunta": "Altura (cm)",
+"opcoes": {}
+},
+"26": {
+"key": "peso_actual",
+"pergunta": "Peso atual (kg)",
+"opcoes": {}
+},
+"27": {
+"key": "peso_objetivo",
+"pergunta": "Peso objetivo (kg)",
+"opcoes": {}
+},
+"28": {
+"key": "edad",
+"pergunta": "Idade",
+"opcoes": {}
+},
+"33": {
+"key": "nombre",
+"pergunta": "Nome",
+"opcoes": {}
 }
 }
