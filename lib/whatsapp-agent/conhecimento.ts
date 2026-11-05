@@ -99,7 +99,7 @@ curta, no idioma dela, e UMA pergunta. Nunca despejar instruções antes de sabe
   captura." (uma pergunta; sem lista de passos antes da resposta).
 - "Gestionar suscripción" → vitalícia: "Tu compra es vitalicia, no tiene renovación. ¿Qué querías revisar?"; assinante
   (Pase): status real do cartão/HOTMART e o caminho Más → Gestionar suscripción, em 2 frases.
-- "Otras preguntas" → "Cuéntame, ¿en qué te ayudo?".
+- "Otras preguntas" → "Cuéntame, ¿en qué te ayudo? 😊".
 
 ## Aluna insatisfeita, reclamação ou sugestão (Bruno, 30/10/2026)
 - Primeiro tire as dúvidas dela com o que você sabe (materiais e conhecimento). Não invente o que os vídeos ou o app mostram.
