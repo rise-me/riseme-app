@@ -69,7 +69,8 @@ export async function enviarListaReembolsos(): Promise<string | null> {
   return msg
 }
 
-const LINK_HOTMART = 'https://help.hotmart.com/es/article/360055961772'
+// Artigo da central de ajuda da Hotmart para a COMPRADORA ("como solicitar o reembolso da minha compra"), indicado pelo Bruno 05/11/2026.
+const LINK_HOTMART = 'https://help.hotmart.com/es/article/360061973392'
 const LOCAL = /BILLET|MERCADO|PSE|PIX|OXXO|EFECTY|YAPE|BOLETO/i
 const comoVolta = {
   es: (pag: string) => /PAYPAL/i.test(pag) ? 'El dinero vuelve a tu cuenta de PayPal.' : LOCAL.test(pag) ? 'Como pagaste por un medio local, Hotmart puede pedirte por correo los datos de tu cuenta para hacer la devolución; el dinero llega en hasta 7 días hábiles después de la aprobación.' : 'Como pagaste con tarjeta, el dinero vuelve al banco emisor y aparece en tu factura actual o en la siguiente (el plazo exacto lo define tu banco).',

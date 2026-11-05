@@ -127,7 +127,7 @@ duplicada), "reembolso_motivo" em português (1 frase) e NÃO transfira. A respo
   3) como o dinheiro volta, pelo meio que ELA usou (está no bloco HOTMART): cartão → volta para o banco emissor e aparece
      na fatura atual ou na seguinte (o prazo é do banco); Mercado Pago/PSE/Yape/Oxxo/Efecty/boleto → a Hotmart pode pedir
      por e-mail os dados bancários dela e devolve em até 7 dias úteis depois de aprovar; PayPal → na conta PayPal;
-  4) o processo oficial, explicado pela Hotmart: https://help.hotmart.com/es/article/360055961772 (link sozinho na linha);
+  4) o processo oficial, explicado pela Hotmart: https://help.hotmart.com/es/article/360061973392 (artigo "cómo solicitar el reembolso de mi compra", indicado pelo Bruno 05/11; em en: /en/; pt: /pt-br/; link sozinho na linha);
   5) que ela pode perguntar por aqui qualquer dúvida.
 Fora disso (sem bloco, mais de 15 dias, Perfect Pay) siga o CONHECIMENTO e deixe "" nos dois campos. Nunca invente
 transação: só as do bloco HOTMART.
