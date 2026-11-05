@@ -6,6 +6,7 @@
 // O relatório inteiro fica guardado em whatsapp_outbox (kind 'revisao-semanal-relatorio', linha inerte) para o chat
 // do riseme aplicar as correções ("aplica a revisão").
 
+import { metricasDaSemana, htmlMetricas, type MetricasSemana } from './revisao-metricas'
 import Anthropic from '@anthropic-ai/sdk'
 import { admin, registrarMensagem } from '@/lib/whatsapp-agent/conversa'
 import { SYSTEM as REGRAS_DO_AGENTE } from '@/lib/whatsapp-agent/responder'
@@ -277,6 +278,8 @@ function htmlDoRelatorio(p: {
   dias: number
   atual: Numeros
   anterior: Numeros
+  metricas?: MetricasSemana | null
+  metricasAnt?: MetricasSemana | null
   pendentes: { id: number; nome: string | null; horas: number; resumo: string }[]
   analise: Analise
   conversas: Conversa[]
@@ -301,6 +304,7 @@ function htmlDoRelatorio(p: {
 <tr><td>Tempo p/ responder consulta (mediana · máx)</td><td><b>${a.horasMedianaConsulta ?? '—'} h · ${a.horasMaxConsulta ?? '—'} h</b>${delta(a.horasMedianaConsulta, b.horasMedianaConsulta)}</td></tr>
 <tr><td>Conversas com sinal de problema</td><td><b>${a.conversasComSinal}</b>${delta(a.conversasComSinal, b.conversasComSinal)}</td></tr>
 </table>
+${p.metricas ? htmlMetricas(p.metricas, p.metricasAnt) : ''}
 <h2>Consultas esperando há mais de 24 h (${p.pendentes.length})</h2>
 ${p.pendentes.map((c) => `<p>#${c.id} ${esc(c.nome ?? '')} — ${c.horas} h — ${esc(c.resumo.slice(0, 220))}</p>`).join('') || '<p style="color:#777">Nenhuma.</p>'}
 <h2>O que se repete</h2><ul>${p.analise.padroes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
@@ -365,6 +369,11 @@ export async function gerarRevisao(opcoes: { dias?: number; forcar?: boolean } =
   const desdeAnterior = new Date(desde.getTime() - dias * DIA_MS)
   const [msgs, msgsAnt] = await Promise.all([mensagensDesde(desde, agora), mensagensDesde(desdeAnterior, desde)])
   const [atual, anterior] = await Promise.all([numeros(desde, agora, msgs), numeros(desdeAnterior, desde, msgsAnt)])
+  // Medidor q6 (05/11/2026): desfecho, qualidade, velocidade, dinheiro, custo. Falha dele não derruba a revisão.
+  const [metricas, metricasAnt] = await Promise.all([
+    metricasDaSemana(desde, agora, msgs).catch((err) => { console.error('[revisao] métricas falharam:', err); return null }),
+    metricasDaSemana(desdeAnterior, desde, msgsAnt).catch(() => null),
+  ])
 
   // Consultas da janela por telefone, para anexar à conversa (o que o responsável respondeu = o certo).
   const consultas = await consultasDaJanela(desde, agora)
@@ -414,14 +423,14 @@ export async function gerarRevisao(opcoes: { dias?: number; forcar?: boolean } =
 
   const erros = analise.itens.filter((i) => i.veredito === 'erro_certo_conferivel').length
   const decisoes = analise.itens.filter((i) => i.veredito === 'erro_depende_do_responsavel' || i.veredito === 'estranho_sem_certeza').length
-  const html = htmlDoRelatorio({ dias, atual, anterior, pendentes, analise, conversas })
+  const html = htmlDoRelatorio({ dias, atual, anterior, metricas, metricasAnt, pendentes, analise, conversas })
   const email = await enviarEmail(`Revisão do atendimento: ${erros} erros, ${decisoes} decisões, ${pendentes.length} consultas paradas`, html)
 
   const agoraIso = new Date().toISOString()
   await db.from('whatsapp_outbox').insert({
     phone: 'revisao',
     kind: KIND_RELATORIO,
-    body: JSON.stringify({ geradoEm: agoraIso, dias, atual, anterior, pendentes, analise, conversas: conversas.map((c) => ({ id: c.id, phone: c.phone, sinais: c.sinais, transcricao: transcricao(c.msgs) })) }),
+    body: JSON.stringify({ geradoEm: agoraIso, dias, atual, anterior, metricas, metricasAnt, pendentes, analise, conversas: conversas.map((c) => ({ id: c.id, phone: c.phone, sinais: c.sinais, transcricao: transcricao(c.msgs) })) }),
     send_after: agoraIso,
     sent_at: agoraIso,
     attempts: 5,
@@ -429,6 +438,7 @@ export async function gerarRevisao(opcoes: { dias?: number; forcar?: boolean } =
 
   const whatsapp = await avisarNoWhatsapp(
     `📋 *Revisão semanal do atendimento* (${dias} dias)\n\n` +
+      (metricas ? `• Nota: *${metricas.desfecho.pctBem}% fecharam bem* (${metricas.desfecho.fechadasBem} bem · ${metricas.desfecho.fechadasMal} mal · ${metricas.desfecho.emAberto} em aberto)\n• Bot: ${metricas.qualidade.corrigidasPor100} respostas corrigidas por 100 · US$ ${metricas.custo.totalUsd} na semana\n• Reembolsos: ${metricas.dinheiro.registrados} registrados, ${metricas.dinheiro.aprovados} aprovados${metricas.dinheiro.passaramDo15 ? ` · ⚠️ ${metricas.dinheiro.passaramDo15} passaram do dia 15` : ''}\n` : '') +
       `• ${atual.alunasEscreveram} alunas escreveram, ${atual.consultas} transferidas (${atual.pctTransferidas}%)\n` +
       `• Consulta demora ${atual.horasMedianaConsulta ?? '—'} h (mediana), ${pendentes.length} parada(s) há mais de 24 h\n` +
       `• ${erros} erro(s) com correção clara, ${decisoes} para você decidir\n\n` +
