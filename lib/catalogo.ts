@@ -66,10 +66,11 @@ export const CATALOGO: Produto[] = [
     idioma: 'es',
     tipo: 'desafio',
     garantiaDias: 30,
-    oQueE: '28 dias de pilates na parede, um vídeo por dia no app, acesso vitalício.',
-    suporteVende: false,
+    oQueE: '28 dias de pilates na parede, um vídeo por dia no app, pagamento único e acesso vitalício. Vende-se avulso (Bruno, 05/11).',
+    suporteVende: true,
     ofertas: [
-      { codigo: 'dtl4s1cf', preco: 'US$ 7,90', status: 'order-bump', nota: 'só como order bump no checkout da Calistenia; sem link avulso conhecido — Bruno confirma se existe (?)' },
+      { codigo: '?', preco: 'US$ 12,90 (há oferta de 14,90)', status: 'vigente', nota: 'oferta avulsa existe na Hotmart (produto 4784921, várias ofertas); CÓDIGO E LINK a receber do Bruno — até lá o bot transfere o pedido com motivo "VENDA — link do Pilates avulso" (?)' },
+      { codigo: 'dtl4s1cf', preco: 'US$ 7,90', status: 'order-bump', nota: 'order bump no checkout da Calistenia (preço só ali)' },
     ],
   },
   {
@@ -98,8 +99,9 @@ export const CATALOGO: Produto[] = [
     suporteVende: true,
     ofertas: [
       { codigo: 'v4lltj3v', preco: '7 dias grátis, depois US$ 27 por ano', status: 'vigente', link: 'https://pay.hotmart.com/K100401831L?off=v4lltj3v&checkoutMode=10', nota: 'cobra no dia 8; cancelar antes = nada cobrado; é a oferta do upsell 2 e do convite do suporte' },
-      { codigo: 'peuqcm4o', preco: '? (mensal)', status: 'descontinuada', nota: 'HOTMART_OFFER_MONTHLY: assinantes antigos; preço a confirmar (?)' },
-      { codigo: '4wnszk9x', preco: '? (anual)', status: 'descontinuada', nota: 'HOTMART_OFFER_ANNUAL: assinantes antigos; preço a confirmar (?)' },
+      { codigo: 'gm2lcusd', preco: '7 dias grátis, depois US$ 27 por ano', status: 'vigente', nota: 'variante do trial (aparece em vendas de 2026); mesmo plano; sem link no suporte' },
+      { codigo: 'peuqcm4o', preco: 'mensal (valor: Bruno confirma ?)', status: 'descontinuada', nota: 'HOTMART_OFFER_MONTHLY: existe e tem assinantes antigos; o bot não oferece (Bruno 05/11)' },
+      { codigo: '4wnszk9x', preco: 'anual (valor: Bruno confirma ?)', status: 'descontinuada', nota: 'HOTMART_OFFER_ANNUAL: existe e tem assinantes antigos; o bot não oferece (Bruno 05/11)' },
     ],
   },
   {
@@ -133,9 +135,9 @@ export const CATALOGO: Produto[] = [
     idioma: 'es',
     tipo: 'desafio',
     garantiaDias: 30,
-    oQueE: 'Programa de 10 dias de fortalecimento íntimo (Kegel) no app; front próprio, ainda sem tráfego.',
+    oQueE: 'Saúde sexual feminina (exercícios de Kegel) no app; oferta em criação, ainda sem criativos nem venda (Bruno 05/11). Não oferecer.',
     suporteVende: false,
-    ofertas: [{ codigo: '?', preco: '?', status: 'vigente', nota: 'oferta e link do funil KGF-ES a preencher (?)' }],
+    ofertas: [{ codigo: '?', preco: '?', status: 'descontinuada', nota: 'em criação; preencher quando lançar' }],
   },
   {
     id: '1-pl',
@@ -157,7 +159,7 @@ export const CATALOGO: Produto[] = [
     idioma: 'cs',
     tipo: 'desafio',
     garantiaDias: 30,
-    oQueE: 'A Calistenia em tcheco; sem venda até 05/11.',
+    oQueE: 'A MESMA Calistenia, em tcheco (variação de idioma, não é outro produto): quem já tem a Calistenia não precisa; nunca oferecer a aluna.',
     suporteVende: false,
     ofertas: [{ codigo: '?', preco: '17 €', status: 'vigente', nota: 'link do funil kalistenika-cz a preencher (?)' }],
   },
@@ -169,7 +171,7 @@ export const CATALOGO: Produto[] = [
     idioma: 'it',
     tipo: 'desafio',
     garantiaDias: 30,
-    oQueE: 'A Calistenia em italiano; sem venda até 05/11.',
+    oQueE: 'A MESMA Calistenia, em italiano (variação de idioma, não é outro produto): quem já tem a Calistenia não precisa; nunca oferecer a aluna.',
     suporteVende: false,
     ofertas: [{ codigo: '?', preco: '17 €', status: 'vigente', nota: 'link do funil calistenia-it a preencher (?)' }],
   },
@@ -181,7 +183,7 @@ export const CATALOGO: Produto[] = [
     idioma: 'ro',
     tipo: 'desafio',
     garantiaDias: 30,
-    oQueE: 'A Calistenia em romeno; funil no ar, app ro a publicar.',
+    oQueE: 'A MESMA Calistenia, em romeno (variação de idioma, não é outro produto): quem já tem a Calistenia não precisa; nunca oferecer a aluna.',
     suporteVende: false,
     ofertas: [{ codigo: '?', preco: '?', status: 'vigente', nota: 'a preencher (?)' }],
   },
@@ -200,6 +202,11 @@ export function blocoCatalogo(idioma = 'es'): string {
   for (const p of CATALOGO.filter((p) => p.idioma === idioma)) {
     const vend = p.ofertas.filter((o) => o.link && (o.status === 'vigente' || o.status === 'teste'))
     linhas.push(`- ${p.nome}: ${p.oQueE}${p.garantiaDias ? ` Garantia Hotmart: ${p.garantiaDias} dias.` : ''}`)
+    const semLink = p.ofertas.filter((o) => !o.link && o.status === 'vigente')
+    if (p.suporteVende && !vend.length && semLink.length) {
+      linhas.push(`  Vende-se avulso por ${semLink[0].preco}, mas o LINK ainda não está cadastrado aqui: diga o preço e transfira com motivo "VENDA — link do ${p.nome}" (a equipe manda o link).`)
+      continue
+    }
     if (!p.suporteVende || !vend.length) {
       linhas.push(`  Não se vende por aqui${p.ofertas[0]?.status === 'order-bump' ? ' (só como order bump no checkout da Calistenia, ' + p.ofertas[0].preco + ')' : ''}: se ela quiser, diga o que é e que hoje entra pelo Pase Completo${p.tipo === 'bump' || p.ofertas[0]?.status === 'descontinuada' ? '; se já paga, cancela pelo app' : ''}.`)
       continue
