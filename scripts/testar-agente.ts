@@ -38,6 +38,11 @@ const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: 
   { nome: 'insatisfeita: sugestão sem reembolso de cara', perfil: base, msg: 'Muy mal su app, los videos no tienen calentamiento ni estiramiento y soy principiante de más de 40 años.' },
   { nome: 'link do app completo com https (WhatsApp só clica assim)', perfil: base, msg: 'Hola, ¿cómo entro mañana a la aplicación? ¿Cuál es la dirección?' },
   { nome: 'treinar em jejum (sem regra fixa)', perfil: base, msg: '¿Puedo hacer el entrenamiento en ayunas?' },
+  // q3/q5 (05/11/2026): mensagem curta → 1 linha; botão do app → resposta pronta + 1 pergunta.
+  { nome: 'q3 gracias de despedida = 1 linha', perfil: base, msg: 'muchas gracias por todo, buenas noches' },
+  { nome: 'q3 hola sozinha', perfil: base, msg: 'Hola' },
+  { nome: 'q5 botão problemas técnicos', perfil: base, msg: 'Hola, soy alumna de RiseMe 💛 Necesito ayuda con: Problemas técnicos' },
+  { nome: 'q5 botão facturación', perfil: base, msg: 'Hola, soy alumna de RiseMe 💛 Necesito ayuda con: Preguntas sobre facturación' },
   // Bloco HOTMART (04/11/2026): o agente responde com o que a Hotmart registra, sem pedir e-mail nem transferir.
   { nome: 'HOTMART: cobrança dupla = 1 paga + tentativas (responde na hora)', perfil: base, hotmart: HOTMART_DUPLA, msg: 'Me cobraron 4 veces!! veo 4 cargos de hotmart en mi tarjeta, esto es una estafa' },
   { nome: 'HOTMART: reembolso em análise (não pede de novo)', perfil: base, hotmart: HOTMART_PROTESTED, msg: 'pedí el reembolso y todavía no me llega el dinero, qué pasó?' },
