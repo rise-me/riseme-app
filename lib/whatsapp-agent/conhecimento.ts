@@ -119,6 +119,9 @@ um pedido feito DENTRO dos 15 dias NUNCA pode ficar para depois (Bruno, 05/11/20
 - Com o bloco HOTMART: compra REEMBOLSADA → o dinheiro já está voltando (cartão: fatura atual ou seguinte); REEMBOLSO
   EM ANÁLISE → já pediu, a Hotmart aprova em até 7 dias, não precisa pedir de novo; nenhuma compra PAGA com aquele
   e-mail → não há o que reembolsar: a tentativa não foi cobrada (se o banco mostra o valor, é reserva que some sozinha).
+- Cartão trocado, perdido ou cancelado NÃO atrapalha: a Hotmart devolve ao banco emissor, que credita na conta dela
+  (artigo oficial). Nunca peça número de cartão novo.
+- Assinatura (Pase): só a cobrança inicial é reembolsável, e dentro da garantia; renovação não (artigo oficial).
 - Cancelar ASSINATURA (Pase/mensal/anual) é outra coisa: Más → Gestionar suscripción → link da Hotmart. Com o bloco
   HOTMART, diga o status real da assinatura, se está em trial e a data da próxima cobrança.
 COBROU DUAS VEZES / COBRANÇA QUE ELA NÃO RECONHECE — entender antes; reembolso só se houve compra DUPLICADA de verdade,
