@@ -318,7 +318,8 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     const consultaPendente = silencioso ? await admin().from('whatsapp_consultas').select('id, resumo, motivo, created_at').eq('phone', phone).eq('status', 'pendente').order('created_at', { ascending: false }).limit(1).then((r) => (r.data?.[0] ? { id: r.data[0].id, resumo: r.data[0].resumo, motivo: r.data[0].motivo, desde: r.data[0].created_at } : null)) : null
     // Assunto de dinheiro no reprocessamento: a consulta pendente conta como sinal (a conversa pode ter esfriado).
     const hotmartSilencioso = consultaPendente && /cobr|reembols|dinheiro|duplic|assinatura|cancel/i.test(consultaPendente.motivo) && userId ? await blocoHotmart([...conversa, { autor: 'student', texto: consultaPendente.motivo, em: new Date().toISOString() }], await emailsDaConta(userId)).catch(() => null) : null
-    decisao = await decidirResposta({ phone, perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart: hotmart ?? hotmartSilencioso, emailSemConta: semCompra?.email, consultaPendente })
+    const emailsParaHotmart = userId ? await emailsDaConta(userId) : [emailNaConversa(conversa)].filter((e): e is string => Boolean(e))
+    decisao = await decidirResposta({ phone, perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart: hotmart ?? hotmartSilencioso, emailSemConta: semCompra?.email, consultaPendente, buscarHotmart: emailsParaHotmart.length ? () => blocoHotmart(conversa, emailsParaHotmart, { forcar: true }) : undefined })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
     // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).

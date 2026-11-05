@@ -24,7 +24,7 @@ const HOTMART_PROTESTED = `HOTMART (consultado agora pelo e-mail maria@example.c
 Resumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 1 reembolso(s) em análise.
 Assinaturas: nenhuma.`
 
-export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; emailSemConta?: string }[] = [
+export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; hotmartEmail?: string; emailSemConta?: string }[] = [
   { nome: 'plano 3 dias / merienda (real)', perfil: base, msg: 'Hola, soy alumna de RiseMe 💛 Necesito ayuda con el plan de 3 días para deshinchar...  En todo el día se come solo lo que dice ahí? Por ejemplo, desayuno yogurt con chia, almuerzo pollo con ensalada y cena vegetales? No hay merienda?' },
   { nome: 'qual chá (TEM protocolo)', perfil: comProtocolo, msg: 'Hola! qué té tengo que tomar en la mañana?' },
   { nome: 'qual chá (NÃO tem protocolo)', perfil: base, msg: 'Hola! qué té tengo que tomar en la mañana?' },
@@ -61,6 +61,8 @@ export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hot
   // Fila técnica (05/11/2026): bug conhecido → contorno + status, sem transferir; sem solução → ticket "TÉCNICO — …" com plano B.
   { nome: 'TÉCNICO: iPhone em branco pelo WhatsApp → contorno Safari, sem transferir', perfil: base, msg: 'Hola, abro riseme.app y la pantalla queda en blanco, tengo iPhone' },
   { nome: 'TÉCNICO: tela preta persiste após contorno → ticket TÉCNICO com plano B', perfil: base, msg: 'ya cerré y abrí la app, cambié de wifi a datos y el video del día 3 sigue en pantalla negra. Android, app instalada. te mando la captura' },
+  // 05/11 (caso Agustina): dinheiro é decidido pelo classificador, não por palavra; erro de grafia não pode travar a Hotmart.
+  { nome: 'DINHEIRO: "rembolso" com erro de grafia → consulta a Hotmart e responde REEMBOLSADA (verificador não apaga)', perfil: { ...base, nome: 'Agustina', confirmadaPorTelefone: false }, hotmartEmail: 'maria@example.com', msg: 'En que esta mi rembolso?' },
   { nome: 'E-MAIL SEM COMPRA: pergunta se usou outro e-mail', perfil: null, emailSemConta: 'rosa.perez@hotmail.com', hotmart: 'HOTMART (consultado agora pelo e-mail rosa.perez@hotmail.com; é o que a Hotmart REALMENTE registra, use como fato):\nNenhuma compra na Hotmart com o e-mail rosa.perez@hotmail.com (nem aprovada, nem tentativa).\nResumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.\nAssinaturas: nenhuma.', msg: 'rosa.perez@hotmail.com' },
 ]
 

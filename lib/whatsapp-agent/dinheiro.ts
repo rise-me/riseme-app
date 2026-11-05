@@ -23,8 +23,11 @@ export function emailNaConversa(conversa: MensagemConversa[]): string | null {
  * Bloco HOTMART para o agente, só quando o assunto é dinheiro e há um e-mail para consultar (o da conta ou o que ela
  * digitou). null = não consultou (sem assunto, sem e-mail, sem credencial ou API fora): o agente segue como antes.
  */
-export async function blocoHotmart(conversa: MensagemConversa[], emailDaConta: string | string[] | null): Promise<string | null> {
-  if (!hotmartConfigurada() || !assuntoDeDinheiro(conversa)) return null
+// `forcar` (05/11/2026, caso Agustina "rembolso"): quem decide se é dinheiro é o classificador com IA (assuntos.ts), não esta lista de
+// palavras; a lista fica só como atalho barato. Com forcar=true a consulta sai mesmo sem palavra reconhecida.
+export async function blocoHotmart(conversa: MensagemConversa[], emailDaConta: string | string[] | null, opts: { forcar?: boolean } = {}): Promise<string | null> {
+  if (!hotmartConfigurada()) return null
+  if (!opts.forcar && !assuntoDeDinheiro(conversa)) return null
   const digitado = emailNaConversa(conversa)
   // E-mail trocado pelo bot (lib/whatsapp-agent/acesso.ts): a Hotmart guarda a compra no e-mail antigo, por isso vêm os dois.
   const daConta = Array.isArray(emailDaConta) ? emailDaConta : [emailDaConta]

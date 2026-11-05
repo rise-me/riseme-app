@@ -392,6 +392,7 @@ export async function decidirResposta(params: {
   emailSemConta?: string | null // ela mandou este e-mail, não há conta nem compra paga com ele (lib/whatsapp-agent/acesso.ts)
   forcarAssuntos?: ReadonlySet<Assunto> // interno: 2ª rodada com os materiais quando a 1ª pediu (precisa_materiais)
   consultaPendente?: { id: number; resumo: string; motivo: string; desde: string } | null // reprocessamento: a pergunta que ficou sem resposta
+  buscarHotmart?: () => Promise<string | null> // chamado quando o CLASSIFICADOR diz 'dinheiro' e o bloco ainda não veio (não depende de palavra certa)
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -442,8 +443,7 @@ export async function decidirResposta(params: {
       'com o pedido do e-mail). Se é dinheiro/reclamação séria sem conta, transfira (e peça o e-mail na mesma mensagem). ' +
       'E-mail que ela mandou sem conta: o sistema consulta a Hotmart sozinho (veja E-MAIL SEM COMPRA quando aparecer). ' +
       'Exceções que não pedem e-mail: "no"/"stop" e resposta automática de outro WhatsApp.') +
-    (params.emailSemConta ? `\nELA MANDOU O E-MAIL ${params.emailSemConta} E NÃO HÁ CONTA NEM COMPRA PAGA COM ELE (o sistema consultou a Hotmart agora; bloco abaixo). Siga E-MAIL SEM COMPRA.` : '') + convite + video +
-    (params.hotmart ? `\n\n${params.hotmart}` : '')
+    (params.emailSemConta ? `\nELA MANDOU O E-MAIL ${params.emailSemConta} E NÃO HÁ CONTA NEM COMPRA PAGA COM ELE (o sistema consultou a Hotmart agora; bloco abaixo). Siga E-MAIL SEM COMPRA.` : '') + convite + video
 
   const p = params.perfil
   const temProtocolo = Boolean(p?.confirmadaPorTelefone && p.liberados.includes('Protocolo Metabólico'))
@@ -452,6 +452,11 @@ export async function decidirResposta(params: {
     ? { assuntos: new Set<Assunto>(params.forcarAssuntos), certeza: '-', fonte: 'materiais' }
     : porAssuntoLigado() ? await classificarAssuntos(params.conversa) : { assuntos: new Set<Assunto>(TODOS), certeza: '-', fonte: 'off' }
   const { base, extra } = montarSystem(SYSTEM, cls.assuntos)
+  // Dinheiro pelo classificador (IA), não por lista de palavras (Bruno 05/11): se ele diz dinheiro e a Hotmart ainda não foi
+  // consultada, consulta agora. O bloco entra no contexto abaixo.
+  if (!params.hotmart && params.buscarHotmart && (cls.assuntos.has('dinheiro') || cls.assuntos.size >= ASSUNTOS.length)) {
+    params = { ...params, hotmart: await params.buscarHotmart().catch(() => null) }
+  }
   const comMateriais = cls.assuntos.has('conteudo') || cls.assuntos.size >= ASSUNTOS.length
   // Acervo científico (lib/whatsapp-agent/acervo.ts, q10): trechos que batem com as últimas mensagens dela, só em treino/conteúdo.
   const comAcervo = cls.assuntos.has('treino') || cls.assuntos.has('conteudo') || cls.assuntos.size >= ASSUNTOS.length
@@ -486,6 +491,7 @@ export async function decidirResposta(params: {
               (params.consultaPendente ? `CONSULTA PENDENTE #${params.consultaPendente.id} (aberta em ${params.consultaPendente.desde.slice(0, 10)}, ainda sem resposta): ${params.consultaPendente.resumo}\nA aluna espera ESSA resposta, não um "de nada". Responda a isso agora com o que você sabe hoje (Hotmart, acervo, catálogo, acesso); se não souber resolver, passar_para_humano = true e diga que a equipe já está vendo, sem repetir "vou ver".\n\n` : '') +
               (aulas ? `${aulas}\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
+              (params.hotmart ? `${params.hotmart}\n\n` : '') +
               `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília): ${prazoDaLista(params.agora) === 'hoje' ? 'HOJE (es "hoy hasta las 20h")' : 'AMANHÃ (es "mañana hasta las 20h")'}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
               (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
