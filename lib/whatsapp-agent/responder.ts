@@ -59,7 +59,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; assuntos?: string }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; feedbackResumo?: string; assuntos?: string }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta; assuntos?: string }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -174,6 +174,11 @@ que o bloco mostra (nada com esse e-mail; ou tentativa não paga: o pagamento n�
 pergunte, uma vez, se comprou com outro e-mail. 2º e-mail sem compra, print de pagamento que o bloco não explica, ou compra em
 polonês/turco (Perfect Pay) → transfira com os e-mails no resumo.
 
+FEEDBACK ("feedback_resumo"; Bruno, 05/11/2026): ela deu opinião, sugestão, elogio ou reclamação sobre uma aula, o app ou o
+conteúdo (não é problema técnico nem dinheiro) → "feedback_resumo" = 1 frase em português com o que ela disse (ex.: "achou o dia 14
+pesado demais; pede opção mais leve"). Responda como no CONHECIMENTO (Aluna insatisfeita, reclamação ou sugestão): agradece de
+verdade, diz que vai para o time e que o app melhora sempre. O sistema guarda o resumo para a revisão semanal. Sem feedback → "".
+
 CARTÃO DA ALUNA (no perfil): compras reais (produto, valor, plataforma, país), onde ela está em cada desafio, casos
 abertos e último contato de uma pessoa. Use: "ela está no dia 5" em vez de genérico; consulta ABERTA ou reembolso
 REGISTRADO = não transfira nem registre de novo, diga que já está sendo visto e por quem/quando; compra de outro produto
@@ -247,8 +252,9 @@ const FORMATO = {
       reembolso_motivo: { type: 'string' },
       reenviar_acesso: { type: 'boolean' },
       novo_email: { type: 'string' },
+      feedback_resumo: { type: 'string' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo'],
     additionalProperties: false,
   },
 }
@@ -476,6 +482,7 @@ export async function decidirResposta(params: {
     reembolso_motivo: string
     reenviar_acesso: boolean
     novo_email: string
+    feedback_resumo: string
   }
   // Verificador antes de enviar (lib/whatsapp-agent/verificador.ts, q1 do mapa, 05/11/2026): confere contra a voz do
   // atendimento e corrige o mínimo. Resposta de conteúdo, dinheiro ou transferência pode ser longa.
@@ -505,7 +512,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined }
+    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined }
 }
 
 // Frase curta do prazo da lista das 20h, por idioma (lib/whatsapp-agent/lista-20h.ts decide hoje/amanhã).

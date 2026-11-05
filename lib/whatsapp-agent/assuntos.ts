@@ -10,7 +10,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import type { MensagemConversa } from './responder'
 import { SINAL_DINHEIRO } from './dinheiro'
 
-export const ASSUNTOS = ['acesso', 'dinheiro', 'tecnico', 'conteudo', 'treino', 'venda', 'depoimento'] as const
+export const ASSUNTOS = ['acesso', 'dinheiro', 'tecnico', 'conteudo', 'treino', 'venda', 'depoimento', 'feedback'] as const
 export type Assunto = (typeof ASSUNTOS)[number]
 export const TODOS: ReadonlySet<Assunto> = new Set(ASSUNTOS)
 
@@ -26,6 +26,7 @@ const MAPA_SYSTEM: [RegExp, Assunto[]][] = [
   [/^RECUPERAÇÃO DE COMPRA/, ['dinheiro', 'venda']],
   [/^BRINDE DO DEPOIMENTO|^CONVITE DE DEPOIMENTO HOTMART|^PROVA SOCIAL/, ['depoimento']],
   [/^INDICAÇÃO/, ['venda', 'depoimento']],
+  [/^FEEDBACK/, ['feedback']],
 ]
 const MAPA_CONHECIMENTO: [RegExp, Assunto[]][] = [
   [/^## Acesso/, ['acesso']],
@@ -35,6 +36,7 @@ const MAPA_CONHECIMENTO: [RegExp, Assunto[]][] = [
   [/^## CATÁLOGO/, ['venda']],
   [/^## Vendas que você faz/, ['venda', 'conteudo']], // dúvida de conteúdo que ela NÃO tem (chás sem Protocolo) vira link, não transferência
   [/^## Dinheiro/, ['dinheiro']],
+  [/^## Aluna insatisfeita, reclamação ou sugestão/, ['feedback', 'dinheiro', 'treino', 'conteudo']], // Bruno 05/11: feedback é assunto próprio
 ]
 
 interface Secao { titulo: string; corpo: string; assuntos: Assunto[] | null } // null = base
@@ -84,6 +86,7 @@ const SINAIS: [Assunto, RegExp][] = [
   ['treino', /ejercicio|rutina|entren|d[ií]a \d|repetic|descans|calentam|estiram|dolor|lesi[oó]n|rodilla|espalda|embaraz|lactan|edad|a[ñn]os|principiante|nivel|progres|serie|ćwicz|trening/i],
   ['venda', /precio|cu[aá]nto (cuesta|vale|sale)|comprar|compra\b|descuento|cup[oó]n|oferta|pase completo|pilates|yoga|amiga|hermana|regal|indicar|recomend|link de (compra|pago)|pagar/i],
   ['depoimento', /testimon|comentario|coment[eé]|captura|print|foto|\[IMAGEM|\[VÍDEO|v[ií]deo de|resultado|antes y despu/i],
+  ['feedback', /sugerencia|sugiero|sugerir|opini[oó]n|me gust[oó]|no me gust|me encant|mejorar|podr[ií]an|deber[ií]an|feedback|queja|quejar|aburrid|excelente|muy bueno|muy malo|malo\b|feo\b|falta (un|una|el|la)|ser[ií]a bueno|estar[ií]a bien|propuesta|sugestia|opinia|podoba/i],
 ]
 
 function sinaisFixos(conversa: MensagemConversa[]): Set<Assunto> {
@@ -119,6 +122,7 @@ conteudo = o que está nos materiais: chás, receitas, plano anti-inchaço, vina
 treino = como treinar: exercícios, dia X, repetições, descanso, aquecimento, dor/lesão, gravidez, idade, nível, aulas, TV.
 venda = preço, comprar outro produto (Pilates, Pase, Protocolo), desconto, link de compra, amiga/parente quer comprar, indicação.
 depoimento = ela manda print/foto/vídeo de resultado ou comentário, presente do depoimento, grupo/comunidade, brinde do cardápio.
+feedback = opinião, sugestão, elogio ou reclamação sobre as aulas, o app ou o conteúdo ("a aula X foi pesada", "deveria ter aquecimento", "adorei"), sem ser problema técnico nem dinheiro.
 social = só saudação/agradecimento/ok/emoji, sem pergunta.
 outro = não se encaixa ou não dá para saber.`
 

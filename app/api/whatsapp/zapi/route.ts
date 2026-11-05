@@ -433,6 +433,11 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     }
   }
 
+  // Feedback da aluna sobre aulas/app (Bruno 05/11/2026): fica registrado (kind 'feedback-aluna') para a revisão semanal e o backlog.
+  if (decisao.tipo === 'responder' && decisao.feedbackResumo) {
+    await marcarNaFila(phone, 'feedback-aluna', decisao.feedbackResumo.slice(0, 400)).catch((err) => console.error(`[feedback] registro falhou (${phone}):`, err))
+  }
+
   // Autosserviço de acesso (05/11/2026, lib/whatsapp-agent/acesso.ts): e-mail corrigido ANTES de enviar (a resposta já diz
   // que trocou); senha renovada DEPOIS do texto (a mensagem de acesso chega em seguida). Só conta confirmada pelo telefone.
   let reenviarDepois: string | null = null // e-mail com que o acesso novo sai
