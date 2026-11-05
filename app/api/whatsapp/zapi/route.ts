@@ -124,7 +124,7 @@ function ehResponsavel(phone: string): boolean {
 }
 
 // O que não pode esperar a lista das 20h: avisa na hora (chargeback/ameaça, erro do sistema, pedido explícito de urgência).
-const URGENTE = /chargeback|contesta|disput|denunc|amea[çc]|urgente|falhou|erro|fraude|golpe|estafa/i
+const URGENTE = /chargeback|contesta|disput|denunc|amea[çc]|urgente|fraude|golpe|estafa/i
 
 // Transferência = CONSULTA: quem é, o que disse, o resumo e 2 respostas possíveis. Desde 05/11/2026 a consulta comum
 // nasce em silêncio e entra na LISTA DAS 20H (lib/whatsapp-agent/lista-20h.ts); a aluna ouviu "te respondo hoy hasta las

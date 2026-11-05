@@ -27,14 +27,19 @@ const corta = (t: string | null | undefined, n: number) => {
 }
 
 /** Consultas pendentes (todas, da mais antiga para a mais nova; as mais velhas que o teto ficam só contadas). */
+// Tickets técnicos ("TÉCNICO — …") ficam na fila técnica (scripts/fila-tecnica.ts), não nesta lista: só o total aparece.
 async function consultasAbertas() {
-  const { data, count } = await admin()
-    .from('whatsapp_consultas')
-    .select('id, phone, nome, motivo, resumo, opcao_a, opcao_b, created_at', { count: 'exact' })
-    .eq('status', 'pendente')
-    .order('created_at', { ascending: true })
-    .limit(MAX_CONSULTAS)
-  return { lista: data ?? [], total: count ?? data?.length ?? 0 }
+  const [{ data, count }, { count: tecnicos }] = await Promise.all([
+    admin()
+      .from('whatsapp_consultas')
+      .select('id, phone, nome, motivo, resumo, opcao_a, opcao_b, created_at', { count: 'exact' })
+      .eq('status', 'pendente')
+      .not('motivo', 'ilike', 'TÉCNICO%')
+      .order('created_at', { ascending: true })
+      .limit(MAX_CONSULTAS),
+    admin().from('whatsapp_consultas').select('id', { count: 'exact', head: true }).eq('status', 'pendente').ilike('motivo', 'TÉCNICO%'),
+  ])
+  return { lista: data ?? [], total: count ?? data?.length ?? 0, tecnicos: tecnicos ?? 0 }
 }
 
 /** Monta e manda a lista unificada. Devolve o texto enviado (null = sem destino ou envio falhou). */
@@ -62,6 +67,7 @@ export async function enviarListaDiaria(): Promise<string | null> {
     }
     partes.push('', 'Responda livre, uma por mensagem: "ok 1 2", "não 2", "#131 A", "#133 manda o link e pede o print". Sem resposta, elas seguem esperando.')
   }
+  if (consultas.tecnicos) partes.push('', `🔧 ${consultas.tecnicos} ticket(s) técnico(s) na fila do chat do riseme (não precisam de você).`)
   const msg = partes.join('\n')
   const r = await sendZapiText({ phone: destino, message: msg })
   if (!r.ok) {

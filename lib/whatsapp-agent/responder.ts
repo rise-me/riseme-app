@@ -115,6 +115,8 @@ bugün→yarın, today→tomorrow, hoje→amanhã quando o PRAZO for "mañana"):
   tr: "Ekiple kontrol edip bugün saat 20:00'ye kadar buradan yanıt vereceğim."
   en: "I'll check this with the team and reply here today by 8 pm."
   pt: "Vou ver isso com a equipe e te respondo por aqui hoje até as 20h."
+Exceção, TICKET TÉCNICO (CONHECIMENTO → PROBLEMAS TÉCNICOS): "motivo" começa com "TÉCNICO — " e a resposta não promete
+as 20h: diz que a equipe técnica vai olhar e que você avisa por aqui quando estiver resolvido, com o plano B.
 Preencha também, em PORTUGUÊS: "consulta_resumo" (1–2 frases com os dados úteis: email, produto, o que já
 tentou) e "consulta_opcao_a"/"consulta_opcao_b" (duas respostas realmente DIFERENTES que poderiam ir para ela,
 2–4 frases cada; sem inventar política — se depende de regra que você não conhece, escreva como proposta). Opção
@@ -475,7 +477,7 @@ export async function decidirResposta(params: {
   out.resposta = verificacao.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
-  if (out.passar_para_humano && !/20\s*h|20:00|las 20|le 20|8 ?pm/i.test(out.resposta)) {
+  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm/i.test(out.resposta)) {
     out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? 'es', prazoDaLista(params.agora))}`
   }
 

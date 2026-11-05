@@ -58,6 +58,9 @@ const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: 
   { nome: 'CONTA CRIADA AGORA: acesso chega em instantes', perfil: { ...base, nome: 'Rosa', ultimoLogin: null, diasFeitos: 0, contaCriadaAgora: true, acessoAgendadoEm: new Date(Date.now() + 60_000).toISOString() }, msg: 'rosa.perez@hotmail.com' },
   // Lista das 20h (05/11/2026): ao transferir, o bot promete "hoy/mañana hasta las 20h", nunca "sector responsable".
   { nome: 'TRANSFERE com prazo (hoy hasta las 20h)', perfil: base, msg: 'Me cobraron un valor diferente al que decía la página, quiero hablar con una persona' },
+  // Fila técnica (05/11/2026): bug conhecido → contorno + status, sem transferir; sem solução → ticket "TÉCNICO — …" com plano B.
+  { nome: 'TÉCNICO: iPhone em branco pelo WhatsApp → contorno Safari, sem transferir', perfil: base, msg: 'Hola, abro riseme.app y la pantalla queda en blanco, tengo iPhone' },
+  { nome: 'TÉCNICO: tela preta persiste após contorno → ticket TÉCNICO com plano B', perfil: base, msg: 'ya cerré y abrí la app, cambié de wifi a datos y el video del día 3 sigue en pantalla negra. Android, app instalada. te mando la captura' },
   { nome: 'E-MAIL SEM COMPRA: pergunta se usou outro e-mail', perfil: null, emailSemConta: 'rosa.perez@hotmail.com', hotmart: 'HOTMART (consultado agora pelo e-mail rosa.perez@hotmail.com; é o que a Hotmart REALMENTE registra, use como fato):\nNenhuma compra na Hotmart com o e-mail rosa.perez@hotmail.com (nem aprovada, nem tentativa).\nResumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.\nAssinaturas: nenhuma.', msg: 'rosa.perez@hotmail.com' },
 ]
 
