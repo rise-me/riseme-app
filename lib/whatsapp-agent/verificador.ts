@@ -16,12 +16,13 @@ export const VOZ = `VOZ DO ATENDIMENTO RISEME (régua de toda resposta):
 2. Tamanho: no máximo o dobro da mensagem dela. Exceção: dúvida de conteúdo (receita, chá, treino, uso do app), em blocos curtos, no máximo 4.
 3. "Gracias", "ok", "listo", "buen día", "si": uma linha de volta, ou só um 💛. Nada de explicar coisas.
 4. Saudação ("Hola, Fulana") só na primeira mensagem do dia. Depois, direto ao assunto.
-5. Quem já comprou não ouve o que é o produto. Ela sabe.
+5. Não apresenta o produto a quem já comprou (ela sabe o que é), a menos que ELA pergunte: se perguntar o que inclui, como funciona ou sobre outros produtos, responde.
 6. Nunca "sector responsable" / "setor responsável" como muleta: dizer o que vai acontecer e quando.
-7. Uma pergunta por vez.
-8. Emoji: no máximo um, e nem sempre. Negrito só para o que ela precisa achar (botão, aba).
+7. Uma pergunta por vez: se precisa de duas informações (ex.: e-mail e número da transação), pede a primeira; a segunda vem na próxima mensagem.
+8. Emoji é bem-vindo quando deixa a conversa humana e carinhosa (😊 🥰 💛 🙌): 1 ou 2 por mensagem, no lugar certo, nunca em toda linha e nunca em assunto de dinheiro ou reclamação. Negrito só para o que ela precisa achar (botão, aba).
 9. Só o idioma dela. Nenhuma palavra em português numa resposta em espanhol, polonês, tcheco, italiano, turco ou inglês.
-10. Quando não sabe: diz em uma frase e encaminha com prazo. Não inventa, não enrola.`
+10. Quando não sabe: diz em uma frase e encaminha com prazo. Não inventa, não enrola.
+11. Quebra de linha: blocos de 1–2 frases separados por linha em branco. Nunca um bloco só de texto corrido com mais de 2 frases; lista de passos, um por linha.`
 
 // Palavras em português que já vazaram em respostas de outros idiomas (revisões de 31/10 e 05/11).
 const PT_VAZADO = /\b(chás?|aba|atendimiento|convite|cardápio|senha|aplicativo|você|obrigad[ao]|também|então|já está|está com|não)\b/i
@@ -47,7 +48,8 @@ export function checarFixo(texto: string, conversa: MensagemConversa[], agora: s
   if (/sector responsable|setor respons[aá]vel|dzia[łl] odpowiedzialn/i.test(texto)) problemas.push('sector_responsable')
   if (!/[ãçõ]|\bvocê\b|\bnão\b/.test(idioma) && PT_VAZADO.test(texto)) problemas.push('palavra_em_portugues')
   const emojis = (texto.match(/\p{Extended_Pictographic}/gu) ?? []).length
-  if (emojis > 2) problemas.push('emojis_demais')
+  if (emojis > 3) problemas.push('emojis_demais')
+  if (texto.length > 300 && !/\n\s*\n/.test(texto)) problemas.push('bloco_sem_quebra_de_linha')
   if ((texto.match(/\?/g) ?? []).length > 2) problemas.push('perguntas_demais')
   if (/\b(riseme\.app|consumer\.hotmart\.com|refund\.hotmart\.com)\b/i.test(texto) && !/https?:\/\//.test(texto)) problemas.push('link_sem_https')
   return problemas
@@ -84,7 +86,7 @@ export async function verificarResposta(p: { texto: string; conversa: MensagemCo
         'que precisam ficar; (c) mantenha o idioma da resposta; (d) se a resposta já está boa, aprovada=true e texto_corrigido="" ; ' +
         '(e) se corrigir, texto_corrigido é a mensagem INTEIRA pronta para enviar, natural, como uma pessoa escreve no WhatsApp; ' +
         '(f) problemas = lista curta em português do que estava errado (ex.: "longa demais", "saudação repetida", "reabriu assunto", ' +
-        '"explica o produto", "sector responsable", "palavra em português", "tom de robô", "duas perguntas").\n\n' + VOZ,
+        '"explica o produto sem ela perguntar", "sector responsable", "palavra em português", "tom de robô", "duas perguntas", "bloco sem quebra de linha").\n\n' + VOZ,
       messages: [{ role: 'user', content: `Conversa (últimas mensagens):\n${ultimas}\n\nProblemas já detectados por checagem fixa: ${fixos.length ? fixos.join(', ') : 'nenhum'}${p.permiteLongo ? '\n(Esta resposta pode ser longa: é de conteúdo/dinheiro.)' : ''}\n\nRESPOSTA DO BOT:\n«${original}»` }],
     })
     const bloco = res.content.find((b) => b.type === 'text')
