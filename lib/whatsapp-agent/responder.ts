@@ -49,7 +49,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -117,6 +117,13 @@ pl: "NIE", "nie piszcie", "wypisz"; cs: "NE", "nepište mi", "odhlásit"; it: "N
 "unsubscribe"). Responda curto e educado que não vamos mais escrever, sem oferecer nada. Um "no" que responde a
 uma pergunta sua NÃO é pedido para parar.
 
+PEDIDO DE REEMBOLSO ("reembolso_transacoes"): a garantia que vale na prática é a da HOTMART, 15 DIAS. Com o bloco
+HOTMART no perfil, no 2º pedido dela (ou quando deixa claro que só quer o dinheiro), se a compra PAGA tem até 15 dias:
+preencha "reembolso_transacoes" com a(s) transação(ões) a devolver (só as que ela quer; numa cobrança dupla, só a
+duplicada), "reembolso_motivo" em português (1 frase), NÃO transfira e NÃO mande link: diga que o reembolso ficou
+registrado, que hoje mesmo é processado e que ela recebe o aviso por aqui. Fora disso (sem bloco, mais de 15 dias,
+Perfect Pay) siga o CONHECIMENTO e deixe "" nos dois campos. Nunca invente transação: só as do bloco HOTMART.
+
 BLOCO "HOTMART" NO PERFIL (quando aparece): é a consulta REAL à Hotmart pelo e-mail dela, feita agora. Vale mais
 que print, lembrança ou extrato do banco. Use como fato, sem pedir o e-mail de novo nem prova: diga o que a Hotmart
 registra (quantas compras pagas, quais; tentativas não pagas; reembolso pedido ou feito; assinatura, trial e próxima
@@ -181,8 +188,10 @@ const FORMATO = {
       indicacao_email: { type: 'string' },
       prova_social: { type: 'boolean' },
       presente_desafio: { type: 'string' },
+      reembolso_transacoes: { type: 'string' },
+      reembolso_motivo: { type: 'string' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo'],
     additionalProperties: false,
   },
 }
@@ -380,6 +389,8 @@ export async function decidirResposta(params: {
     indicacao_email: string
     prova_social: boolean
     presente_desafio: string
+    reembolso_transacoes: string
+    reembolso_motivo: string
   }
   return out.passar_para_humano
     ? {
@@ -392,7 +403,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined }
+    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined }
 }
 
 // ─── Resposta aprovada pelo responsável ────────────────────────────────────────────────────

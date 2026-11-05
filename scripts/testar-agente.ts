@@ -40,6 +40,8 @@ const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: 
   { nome: 'HOTMART: cobrança dupla = 1 paga + tentativas (responde na hora)', perfil: base, hotmart: HOTMART_DUPLA, msg: 'Me cobraron 4 veces!! veo 4 cargos de hotmart en mi tarjeta, esto es una estafa' },
   { nome: 'HOTMART: reembolso em análise (não pede de novo)', perfil: base, hotmart: HOTMART_PROTESTED, msg: 'pedí el reembolso y todavía no me llega el dinero, qué pasó?' },
   { nome: 'HOTMART ausente: sem bloco pede e-mail e transfere', perfil: base, msg: 'Me cobraron dos veces 19 dólares' },
+  // 05/11: 2º pedido de reembolso com compra paga há 2 dias → reembolso_transacoes preenchido, sem link, sem transferir.
+  { nome: 'HOTMART: 2º pedido de reembolso = registra (reembolso_transacoes)', perfil: base, hotmart: HOTMART_DUPLA, msg: 'Ya te dije que no quiero ayuda, solo quiero mi dinero de vuelta. Es la segunda vez que lo pido.' },
 ]
 
 async function main() {
@@ -52,7 +54,7 @@ async function main() {
     agora: '2026-10-05T12:00:10Z',
     hotmart: c.hotmart,
   })
-  console.log(`\n━━━ ${c.nome} (${((Date.now() - t) / 1000).toFixed(1)}s) ${d.tipo === 'humano' ? '→ TRANSFERE: ' + d.motivo : ''}\nALUNA: ${c.msg}\n\n${d.texto}`)
+  console.log(`\n━━━ ${c.nome} (${((Date.now() - t) / 1000).toFixed(1)}s) ${d.tipo === 'humano' ? '→ TRANSFERE: ' + d.motivo : ''}${d.tipo === 'responder' && d.reembolsoTransacoes?.length ? ' → REEMBOLSO ' + d.reembolsoTransacoes.join(',') : ''}\nALUNA: ${c.msg}\n\n${d.texto}`)
 }
 }
 

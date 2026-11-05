@@ -6,7 +6,7 @@
 //    passar do dia 15 (depois o reembolso é manual, por fora). Perfect Pay não tem API: entra na lista como "no painel".
 // Depois de validado, a aprovação vira automática dentro de um teto (escada P5; ainda não).
 import { admin, registrarMensagem } from './conversa'
-import { reembolsarHotmart } from '@/lib/hotmart-api'
+import { reembolsarHotmart, comprasPorEmail } from '@/lib/hotmart-api'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
 
 export interface PedidoReembolso {
@@ -127,4 +127,33 @@ export async function aprovarReembolsos(d: { aprovar: boolean; todos: boolean; n
     }
   }
   return saida.join('\n')
+}
+
+export const DIAS_URGENTE = 13 // pedido com 13+ dias não espera as 20h: a lista vai na hora (prazo da Hotmart = 15)
+
+/**
+ * O bot decidiu reembolsar (reembolso_transacoes): confere cada transação na Hotmart pelo e-mail, cria o pedido e,
+ * se algum estiver perto do dia 15, manda a lista ao responsável agora. Devolve o que criou.
+ */
+export async function criarPedidosDaDecisao(d: { phone: string; nome: string; idioma: string; email: string; transacoes: string[]; motivo: string; consultaId?: number | null }): Promise<{ criados: string[]; ignorados: string[]; urgente: boolean }> {
+  const compras = (await comprasPorEmail(d.email)) ?? []
+  const criados: string[] = []
+  const ignorados: string[] = []
+  let urgente = false
+  for (const tx of d.transacoes) {
+    const c = compras.find((x) => x.transacao === tx)
+    if (!c || !['APPROVED', 'COMPLETE'].includes(c.status) || !c.pedidoEm) {
+      ignorados.push(tx)
+      continue
+    }
+    const id = await criarPedidoReembolso({
+      phone: d.phone, nome: d.nome, email: d.email, idioma: d.idioma, plataforma: 'hotmart', transacao: tx,
+      produto: c.produto, valor: `${c.valor ?? '?'} ${c.moeda ?? ''}`.trim(), pagamento: [c.pagamento, c.metodo].filter(Boolean).join('/'),
+      compradaEm: c.pedidoEm, motivo: d.motivo || 'pedido de reembolso pela aluna', consultaId: d.consultaId ?? null,
+    })
+    if (id) criados.push(tx)
+    if (dias(c.pedidoEm) >= DIAS_URGENTE) urgente = true
+  }
+  if (criados.length && urgente) await enviarListaReembolsos().catch((err) => console.error('[reembolsos] lista urgente falhou:', err))
+  return { criados, ignorados, urgente }
 }

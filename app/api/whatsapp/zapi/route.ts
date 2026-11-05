@@ -36,7 +36,8 @@ import {
   emailDaConta,
 } from '@/lib/whatsapp-agent/conversa'
 import { blocoHotmart } from '@/lib/whatsapp-agent/dinheiro'
-import { reembolsosPendentes, aprovarReembolsos } from '@/lib/whatsapp-agent/reembolsos'
+import { reembolsosPendentes, aprovarReembolsos, criarPedidosDaDecisao } from '@/lib/whatsapp-agent/reembolsos'
+import { emailNaConversa } from '@/lib/whatsapp-agent/dinheiro'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.
@@ -386,6 +387,28 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   if (urlVideo || (decisao.tipo === 'responder' && decisao.provaSocial)) {
     const dela = conversa.slice(ultimaNossa + 1).map((m) => m.texto).join(' / ')
     await marcarProvaSocial(phone, dela).catch((err) => console.error(`[prova-social] falhou (${phone}):`, err))
+  }
+
+  // Reembolso decidido pelo bot (2º pedido, compra paga até 15 dias, bloco HOTMART): vira pedido aguardando o "ok" do
+  // responsável (lista das 20h, ou na hora se estiver perto do dia 15). Sem pedido criado → vira consulta (05/11/2026).
+  if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.length) {
+    const txs = decisao.reembolsoTransacoes
+    const motivoReembolso = decisao.reembolsoMotivo ?? ''
+    const textoBot = decisao.texto
+    const email = (userId ? await emailDaConta(userId) : null) ?? emailNaConversa(conversa)
+    const r = email
+      ? await criarPedidosDaDecisao({ phone, nome: perfil?.nome ?? '', idioma: perfil?.idioma ?? 'es', email, transacoes: txs, motivo: motivoReembolso }).catch((err) => ({ criados: [] as string[], ignorados: txs, urgente: false, erro: String(err) }))
+      : { criados: [] as string[], ignorados: txs, urgente: false }
+    if (!r.criados.length) {
+      decisao = {
+        tipo: 'humano',
+        texto: textoBot,
+        motivo: `REEMBOLSO — o bot quis registrar ${txs.join(', ')} mas não achou compra paga na Hotmart${'erro' in r ? ` (${r.erro})` : ''}`,
+        consulta: { resumo: `Aluna pediu reembolso (${motivoReembolso || 'sem motivo'}); transações ${txs.join(', ')} não confirmadas na Hotmart.`, opcaoA: 'Conferir na Hotmart e reembolsar no painel.', opcaoB: 'Pedir a ela o e-mail/transação da compra.' },
+      }
+    } else {
+      console.log(`[reembolsos] pedido(s) criado(s) para ${phone}: ${r.criados.join(', ')}${r.urgente ? ' (URGENTE, lista enviada)' : ''}`)
+    }
   }
 
   if (decisao.texto && !(silencioso && decisao.tipo === 'humano')) {
