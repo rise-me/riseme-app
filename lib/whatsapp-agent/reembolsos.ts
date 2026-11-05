@@ -69,10 +69,37 @@ export async function enviarListaReembolsos(): Promise<string | null> {
   return msg
 }
 
+const LINK_HOTMART = 'https://help.hotmart.com/es/article/360055961772'
+const LOCAL = /BILLET|MERCADO|PSE|PIX|OXXO|EFECTY|YAPE|BOLETO/i
+const comoVolta = {
+  es: (pag: string) => /PAYPAL/i.test(pag) ? 'El dinero vuelve a tu cuenta de PayPal.' : LOCAL.test(pag) ? 'Como pagaste por un medio local, Hotmart puede pedirte por correo los datos de tu cuenta para hacer la devolución; el dinero llega en hasta 7 días hábiles después de la aprobación.' : 'Como pagaste con tarjeta, el dinero vuelve al banco emisor y aparece en tu factura actual o en la siguiente (el plazo exacto lo define tu banco).',
+  pl: (pag: string) => /PAYPAL/i.test(pag) ? 'Pieniądze wrócą na Twoje konto PayPal.' : 'Jeśli płaciłaś kartą, pieniądze wrócą do banku i pojawią się na bieżącym lub następnym wyciągu (dokładny termin zależy od banku).',
+  en: (pag: string) => /PAYPAL/i.test(pag) ? 'The money goes back to your PayPal account.' : LOCAL.test(pag) ? 'Since you paid with a local method, Hotmart may email you for your bank details; the money arrives within 7 business days after approval.' : 'Since you paid by card, the money goes back to the issuing bank and shows on your current or next statement (the exact timing depends on your bank).',
+}
+// Depois do "ok" do responsável: o que vai acontecer e como ela recebe (Bruno, 05/11/2026: claro, educado e tranquilizador).
 const CONFIRMA: Record<string, (p: PedidoReembolso) => string> = {
-  es: (p) => `Listo${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Tu reembolso de *${p.produto}* (${p.valor}) ya está en proceso en Hotmart (lo aprueban en hasta 7 días).\n\n${/BILLET|MERCADO|PSE|PIX|OXXO|EFECTY|YAPE/i.test(p.pagamento) ? 'Como pagaste por un medio local, el dinero vuelve en hasta 7 días hábiles después de la aprobación (Hotmart puede pedirte por correo los datos para la devolución).' : 'Si pagaste con tarjeta, el dinero aparece en tu factura actual o en la siguiente.'}\n\nGracias por darnos la oportunidad 💛`,
-  pl: (p) => `Gotowe${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Twój zwrot za *${p.produto}* (${p.valor}) jest już w trakcie realizacji w Hotmart (zatwierdzenie do 7 dni).\n\nJeśli płaciłaś kartą, pieniądze pojawią się na bieżącym lub następnym wyciągu.\n\nDziękujemy, że dałaś nam szansę 💛`,
-  en: (p) => `Done${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Your refund for *${p.produto}* (${p.valor}) is now being processed at Hotmart (approved within 7 days).\n\nIf you paid by card, it shows on your current or next statement; local payment methods take up to 7 business days.\n\nThank you for giving us a chance 💛`,
+  es: (p) => [
+    `Listo${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Ya abrimos tu reembolso de *${p.produto}* (${p.valor}) en Hotmart. No tienes que hacer nada más.`,
+    'Qué pasa ahora: Hotmart lo aprueba en hasta 7 días y te manda un correo de confirmación al email de tu compra.',
+    comoVolta.es(p.pagamento),
+    'Así explica Hotmart el proceso, por si quieres leerlo:',
+    LINK_HOTMART,
+    'Cualquier duda, me escribes por aquí. Gracias por darnos la oportunidad 💛',
+  ].join('\n\n'),
+  pl: (p) => [
+    `Gotowe${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Zgłosiliśmy zwrot za *${p.produto}* (${p.valor}). Nie musisz nic więcej robić.`,
+    'Co dalej: zatwierdzenie trwa do 7 dni i dostaniesz potwierdzenie e-mailem na adres z zakupu.',
+    comoVolta.pl(p.pagamento),
+    'W razie pytań pisz tutaj. Dziękujemy, że dałaś nam szansę 💛',
+  ].join('\n\n'),
+  en: (p) => [
+    `Done${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. We opened your refund for *${p.produto}* (${p.valor}) at Hotmart. Nothing else to do on your side.`,
+    'What happens now: Hotmart approves it within 7 days and emails a confirmation to your purchase email.',
+    comoVolta.en(p.pagamento),
+    'This is how Hotmart explains the process:',
+    LINK_HOTMART.replace('/es/', '/en/'),
+    'Any questions, just write here. Thank you for giving us a chance 💛',
+  ].join('\n\n'),
 }
 
 async function executarUm(id: number, p: PedidoReembolso): Promise<string> {
