@@ -497,6 +497,72 @@ export async function redigirRespostaAprovada(params: {
   }
 }
 
+// ─── Roteador das respostas do responsável ───────────────────────────────────────────────
+// Ele responde no WhatsApp do jeito dele ("aprovo os 3", "manda o B pra Nancy", "pode liberar"). Sem citação e sem
+// "#id", quem decide a que ele está respondendo é este roteador, com o que está aberto na mesa (05/11/2026: o
+// "ok 1" do 1º teste de reembolso caiu em "não sei de qual consulta é essa resposta").
+export interface RespostaResponsavel {
+  tipo: 'consulta' | 'reembolso' | 'nenhuma'
+  consultaId: number
+  orientacao: string
+  aprovar: boolean
+  todos: boolean
+  numeros: number[]
+}
+
+export async function interpretarRespostaResponsavel(p: {
+  texto: string
+  consultas: { id: number; nome: string; resumo: string }[]
+  reembolsos: { numero: number; nome: string; produto: string }[]
+}): Promise<RespostaResponsavel> {
+  const vazio: RespostaResponsavel = { tipo: 'nenhuma', consultaId: 0, orientacao: '', aprovar: false, todos: false, numeros: [] }
+  if (!p.consultas.length && !p.reembolsos.length) return vazio
+  const res = await anthropic().beta.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 1500,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    output_config: {
+      effort: 'low',
+      format: {
+        type: 'json_schema',
+        schema: {
+          type: 'object',
+          properties: {
+            tipo: { type: 'string', enum: ['consulta', 'reembolso', 'nenhuma'] },
+            consulta_id: { type: 'integer' },
+            orientacao: { type: 'string' },
+            aprovar: { type: 'boolean' },
+            todos: { type: 'boolean' },
+            numeros: { type: 'array', items: { type: 'integer' } },
+          },
+          required: ['tipo', 'consulta_id', 'orientacao', 'aprovar', 'todos', 'numeros'],
+          additionalProperties: false,
+        },
+      },
+    },
+    system:
+      'O dono do RiseMe respondeu no WhatsApp a algo que o sistema lhe perguntou. Decida A QUE ele responde, usando o que está aberto:\n' +
+      '- "reembolso": ele aprova ou recusa reembolsos da lista numerada (fala de reembolso, "aprovo", "libera", "pode fazer", "devolve", "os 3", "todos", ou números que batem com a lista). aprovar=true/false; todos=true se for todos; numeros = os da lista que ele citou (vazio se "todos").\n' +
+      '- "consulta": ele orienta uma consulta aberta (diz "A"/"B", o nome da aluna, ou o que responder a ela). consulta_id = a consulta a que se refere (pelo nome da aluna ou pelo assunto); orientacao = a resposta dele, inteira, sem o nome da aluna. Se houver mais de uma consulta possível e nada indicar qual, tipo="nenhuma".\n' +
+      '- "nenhuma": não dá para saber.\n' +
+      'Nunca invente número de consulta nem de reembolso que não esteja na lista.',
+    messages: [
+      {
+        role: 'user',
+        content:
+          `Consultas abertas:\n${p.consultas.map((c) => `#${c.id} — ${c.nome || 'aluna sem conta'}: ${c.resumo.slice(0, 160)}`).join('\n') || '(nenhuma)'}\n\n` +
+          `Reembolsos aguardando aprovação:\n${p.reembolsos.map((r) => `${r.numero} — ${r.nome}: ${r.produto}`).join('\n') || '(nenhum)'}\n\n` +
+          `Mensagem dele: «${p.texto}»`,
+      },
+    ],
+  })
+  const bloco = res.content.find((b) => b.type === 'text')
+  if (!bloco || bloco.type !== 'text') return vazio
+  const o = JSON.parse(bloco.text) as { tipo: RespostaResponsavel['tipo']; consulta_id: number; orientacao: string; aprovar: boolean; todos: boolean; numeros: number[] }
+  return { tipo: o.tipo, consultaId: o.consulta_id, orientacao: o.orientacao.trim(), aprovar: o.aprovar, todos: o.todos, numeros: o.numeros }
+}
+
 // ─── Comandos do responsável ──────────────────────────────────────────────────────────────
 // Ele escreve em português ("libera o Protocolo para fulana@gmail.com"); aqui só se ENTENDE o pedido.
 // Quem executa (depois do "sim") é lib/whatsapp-agent/comandos.ts.

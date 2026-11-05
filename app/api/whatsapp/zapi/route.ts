@@ -8,7 +8,7 @@ import { creditarIndicacao, textoIndicacaoFalhou } from '@/lib/whatsapp-agent/in
 import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
 import { contaDaConvidadaHotmart, conviteHotmartDela, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
-import { decidirResposta, redigirRespostaAprovada, type Consulta } from '@/lib/whatsapp-agent/responder'
+import { decidirResposta, redigirRespostaAprovada, interpretarRespostaResponsavel, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
   abrirChat,
   aprendizadosAtivos,
@@ -36,6 +36,7 @@ import {
   emailDaConta,
 } from '@/lib/whatsapp-agent/conversa'
 import { blocoHotmart } from '@/lib/whatsapp-agent/dinheiro'
+import { reembolsosPendentes, aprovarReembolsos } from '@/lib/whatsapp-agent/reembolsos'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.
@@ -159,7 +160,7 @@ async function responderConsulta(texto: string, citada: string | undefined) {
   if (!consulta) {
     await dizerAoResponsavel(
       pendentes.length
-        ? `Não sei de qual consulta é essa resposta. Abertas agora:\n${pendentes.map((p) => `• #${p.id} — ${p.nome ?? 'aluna sem conta'}: ${p.resumo.slice(0, 70)}…`).join('\n')}\n\nResponda *citando* a mensagem da consulta, ou comece com o número: "#${pendentes[pendentes.length - 1].id} A".`
+        ? `Não sei de qual consulta é essa resposta. Abertas agora:\n${pendentes.map((p) => `• #${p.id} — ${p.nome ?? 'aluna sem conta'}: ${p.resumo.slice(0, 70)}…`).join('\n')}\n\nResponda *citando* a mensagem da consulta, ou comece com o número: "#${pendentes[pendentes.length - 1].id} A". Para os reembolsos da lista: "ok 1 2", "ok todos" ou "não 2".`
         : 'Não há consulta pendente agora.'
     )
     return
@@ -526,12 +527,32 @@ export async function POST(request: NextRequest) {
       after(async () => {
         // Citou uma consulta ou começou com "#id" → é resposta de consulta. Senão, pode ser COMANDO
         // ("libera o Pilates para…", "resumo de hoje", "sim"); se não for, segue como resposta de consulta.
+        await registrarMensagem({ phone: phone.replace(/\D/g, ''), direction: 'in', author: 'human', body: fala, waMessageId }).catch(() => false)
         const ehConsulta = (citada && (await consultaPorAlerta(citada))) || /^#\d+/.test(fala.trim())
         if (!ehConsulta) {
           try {
             if (await tratarComando(fala, dizerAoResponsavel)) return
           } catch (err) {
             console.error('[comando] falhou:', err)
+          }
+          // Sem citação e sem "#id": quem decide a que ele responde é o roteador por intenção (05/11/2026).
+          try {
+            const [consultas, reembolsos] = await Promise.all([consultasPendentes(), reembolsosPendentes()])
+            const r = await interpretarRespostaResponsavel({
+              texto: fala,
+              consultas: consultas.map((c) => ({ id: c.id, nome: c.nome ?? '', resumo: c.resumo })),
+              reembolsos: reembolsos.map((x) => ({ numero: x.params.numero ?? 0, nome: x.params.nome, produto: x.params.produto })),
+            })
+            if (r.tipo === 'reembolso') {
+              await dizerAoResponsavel(await aprovarReembolsos({ aprovar: r.aprovar, todos: r.todos, numeros: r.numeros }))
+              return
+            }
+            if (r.tipo === 'consulta' && r.consultaId && r.orientacao) {
+              await responderConsulta(`#${r.consultaId} ${r.orientacao}`, undefined)
+              return
+            }
+          } catch (err) {
+            console.error('[roteador] falhou:', err)
           }
         }
         await responderConsulta(fala, citada)

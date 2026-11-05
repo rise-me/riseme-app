@@ -39,14 +39,14 @@ export async function criarPedidoReembolso(p: PedidoReembolso): Promise<number |
   return data.id
 }
 
-async function pendentes(): Promise<{ id: number; params: PedidoReembolso }[]> {
+export async function reembolsosPendentes(): Promise<{ id: number; params: PedidoReembolso }[]> {
   const { data } = await admin().from('whatsapp_comandos').select('id, params').eq('acao', 'reembolsar').eq('status', 'aguardando').order('id')
   return (data ?? []) as { id: number; params: PedidoReembolso }[]
 }
 
 /** Monta a lista numerada, grava o número em cada pedido e manda ao responsável. Devolve o texto (ou null se vazio). */
 export async function enviarListaReembolsos(): Promise<string | null> {
-  const lista = await pendentes()
+  const lista = await reembolsosPendentes()
   const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
   if (!lista.length || !destino) return null
   const linhas: string[] = []
@@ -102,16 +102,20 @@ export async function executarReembolso(id: number, p: PedidoReembolso): Promise
 const OK = /^(ok|sim|aprova|aprovar|pode|faz|manda)\s+(todos|todas|tudo|[\d\s,e]+)\s*$/i
 const NAO = /^(n[aã]o|nao|cancela|recusa|recusar)\s+(todos|todas|tudo|[\d\s,e]+)\s*$/i
 
-/** Resposta do responsável à lista ("ok 1 2", "ok todos", "não 2"). null = não é isso. */
+/** Resposta do responsável à lista ("ok 1 2", "ok todos", "não 2"). null = não é isso (aí o roteador por intenção decide). */
 export async function tratarAprovacaoReembolso(texto: string): Promise<string | null> {
   const t = texto.trim()
   const m = OK.exec(t) ?? NAO.exec(t)
   if (!m) return null
-  const aprovar = OK.test(t)
-  const lista = await pendentes()
+  return aprovarReembolsos({ aprovar: OK.test(t), todos: /^(todos|todas|tudo)$/i.test(m[2]), numeros: (m[2].match(/\d+/g) ?? []).map(Number) })
+}
+
+/** Executa (ou recusa) os reembolsos da última lista pelos números; usado pelo atalho acima e pelo roteador por intenção. */
+export async function aprovarReembolsos(d: { aprovar: boolean; todos: boolean; numeros: number[] }): Promise<string> {
+  const { aprovar, todos } = d
+  const lista = await reembolsosPendentes()
   if (!lista.length) return 'Não há reembolso aguardando.'
-  const todos = /^(todos|todas|tudo)$/i.test(m[2])
-  const nums = todos ? lista.map((x) => x.params.numero).filter((n): n is number => Boolean(n)) : (m[2].match(/\d+/g) ?? []).map(Number)
+  const nums = todos ? lista.map((x) => x.params.numero).filter((n): n is number => Boolean(n)) : d.numeros
   const alvo = lista.filter((x) => x.params.numero && nums.includes(x.params.numero))
   if (!alvo.length) return `Não achei esses números na última lista (${lista.map((x) => x.params.numero ?? '?').join(', ')}).`
   const saida: string[] = []
