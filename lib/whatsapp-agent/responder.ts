@@ -37,6 +37,9 @@ export interface PerfilAluna {
   quiz?: string | null
   // Cartão da aluna: compras, onde está em cada desafio, casos abertos, último contato humano (lib/cartao-aluna.ts).
   cartao?: string | null
+  // Autosserviço de acesso (lib/whatsapp-agent/acesso.ts): conta nasceu AGORA pela compra Hotmart que ela indicou; senha já renovada há pouco.
+  contaCriadaAgora?: boolean
+  reenvioRecente?: boolean
 }
 
 export interface MensagemConversa {
@@ -54,7 +57,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -143,6 +146,25 @@ duplicada), "reembolso_motivo" em português (1 frase) e NÃO transfira. A respo
 Fora disso (sem bloco, mais de 15 dias, Perfect Pay) siga o CONHECIMENTO e deixe "" nos dois campos. Nunca invente
 transação: só as do bloco HOTMART.
 
+ACESSO — VOCÊ MESMA RESOLVE (Bruno, 05/11/2026: criar conta, renovar senha e corrigir e-mail sem transferir):
+REENVIAR ACESSO ("reenviar_acesso" = true): conta "confirmada pelo telefone" e ela diz que não consegue entrar, "correo o
+contraseña incorrectos", esqueceu ou perdeu a senha, não achou ou não recebeu a mensagem de acesso → true já na 1ª vez, sem
+mandar tentar nada antes. Resposta em 1–2 frases: renovamos a senha e o acesso novo chega AQUI em seguida (a senha anterior
+deixa de valer); nunca escreva a senha. NÃO marque quando: o perfil diz que a mensagem de acesso ainda vai sair (diga que chega
+em instantes); o perfil diz "ACESSO REENVIADO HÁ POUCO" (aí é problema técnico: pergunte o que aparece na tela e peça um print,
+uma pergunta só); a conta foi achada só pelo e-mail digitado (não confirmada: oriente "¿Olvidaste tu contraseña?" no login, que
+manda o link para o e-mail da compra); ou ela só quer trocar a senha por vontade própria (Más → Mi perfil).
+CORRIGIR E-MAIL ("novo_email"): conta confirmada pelo telefone e ela diz que o e-mail da compra está errado (erro de digitação,
+e-mail que não usa) e qual é o certo. 1º passo: repita o e-mail novo por extenso e pergunte se está certo ("novo_email" = "").
+2º passo, ela confirmou ("sí", "correcto", repete o e-mail): "novo_email" = esse e-mail, e diga que trocamos e que o acesso novo
+chega aqui com o e-mail novo (senha nova). Sem o e-mail novo → pergunte qual é. Conta não confirmada → transfira.
+CONTA CRIADA AGORA (o perfil diz): ela mandou o e-mail, a Hotmart confirmou a compra e a conta acabou de nascer: diga que
+achamos a compra e que o acesso (e-mail da compra + senha + link) chega aqui em instantes. Não peça mais nada.
+E-MAIL SEM COMPRA (o perfil diz, com o bloco HOTMART): não há conta nem compra paga com o e-mail que ela mandou. Explique o
+que o bloco mostra (nada com esse e-mail; ou tentativa não paga: o pagamento não foi concluído, ofereça ajuda para concluir) e
+pergunte, uma vez, se comprou com outro e-mail. 2º e-mail sem compra, print de pagamento que o bloco não explica, ou compra em
+polonês/turco (Perfect Pay) → transfira com os e-mails no resumo.
+
 CARTÃO DA ALUNA (no perfil): compras reais (produto, valor, plataforma, país), onde ela está em cada desafio, casos
 abertos e último contato de uma pessoa. Use: "ela está no dia 5" em vez de genérico; consulta ABERTA ou reembolso
 REGISTRADO = não transfira nem registre de novo, diga que já está sendo visto e por quem/quando; compra de outro produto
@@ -214,8 +236,10 @@ const FORMATO = {
       presente_desafio: { type: 'string' },
       reembolso_transacoes: { type: 'string' },
       reembolso_motivo: { type: 'string' },
+      reenviar_acesso: { type: 'boolean' },
+      novo_email: { type: 'string' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email'],
     additionalProperties: false,
   },
 }
@@ -268,7 +292,7 @@ function descreverPerfil(p: PerfilAluna): string {
     `Idioma do perfil: ${p.idioma}`,
     ...(p.compraAntiga
       ? [
-          `Conta criada em: ${p.compradaEm ?? 'desconhecido'}, hoje ou há pouco, a partir de uma compra ANTIGA da área de membros Hotmart (convite de depoimento). ` +
+          `Conta criada em: ${p.compradaEm ?? 'desconhecido'}, hoje ou há pouco, a partir de uma compra ANTIGA na Hotmart (convite de depoimento ou e-mail que ela mandou). ` +
             'A data real da compra é anterior e desconhecida. NÃO é compra de hoje e NÃO houve cobrança nova: nunca diga "acabou de comprar". ' +
             'Se ela estranhar o email/mensagem de acesso ou achar que foi cobrada, explique isso com calma. ' +
             'Reembolso: a compra é antiga (fora da garantia de 30 dias, salvo exceção): não prometa; se pedir, transfira.',
@@ -296,6 +320,10 @@ function descreverPerfil(p: PerfilAluna): string {
             : 'Não prometa presente (exceção: CONVITE DE DEPOIMENTO HOTMART, siga aquele bloco). ') +
         'Se ela ainda não disse que autoriza usar o vídeo em redes e anúncios, pergunte com carinho.'
       : '',
+    p.contaCriadaAgora
+      ? 'CONTA CRIADA AGORA pela compra Hotmart no e-mail que ela mandou: o acesso (e-mail + senha + link) sai NESTA conversa em instantes. Siga CONTA CRIADA AGORA.'
+      : '',
+    p.reenvioRecente ? 'ACESSO REENVIADO HÁ POUCO (senha renovada nas últimas 2 h, mensagem de acesso já enviada aqui): não renove de novo; siga REENVIAR ACESSO.' : '',
     p.cartao && p.confirmadaPorTelefone ? p.cartao : '',
     p.quiz && p.confirmadaPorTelefone ? p.quiz : '',
     p.confirmadaPorTelefone
@@ -314,6 +342,7 @@ export async function decidirResposta(params: {
   conviteHotmart?: { presente: string | null } | null // recebeu o convite Hotmart (lib/whatsapp-agent/prova-social.ts)
   conviteVideo?: boolean // recebeu o convite do vídeo de 7 dias (lib/video-depoimento.ts)
   hotmart?: string | null // bloco HOTMART (lib/whatsapp-agent/dinheiro.ts): o que a Hotmart registra para o e-mail dela
+  emailSemConta?: string | null // ela mandou este e-mail, não há conta nem compra paga com ele (lib/whatsapp-agent/acesso.ts)
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -361,8 +390,10 @@ export async function decidirResposta(params: {
       '(Bruno, 05/11/2026: sem saber quem é, não dá para atender bem): na sua 1ª resposta, em uma linha simpática, peça o ' +
       'e-mail usado na compra; o sistema acha a conta sozinho quando ela mandar. Enquanto não identificar: não revele nem ' +
       'suponha nada da conta e não dê orientação que dependa dela (dúvida geral de uso do app pode responder curto, junto ' +
-      'com o pedido do e-mail). Se ela JÁ mandou um e-mail e ainda assim não há conta, ou se é dinheiro/reclamação séria, ' +
-      'transfira (e peça o e-mail na mesma mensagem). Exceções que não pedem e-mail: "no"/"stop" e resposta automática de outro WhatsApp.') + convite + video +
+      'com o pedido do e-mail). Se é dinheiro/reclamação séria sem conta, transfira (e peça o e-mail na mesma mensagem). ' +
+      'E-mail que ela mandou sem conta: o sistema consulta a Hotmart sozinho (veja E-MAIL SEM COMPRA quando aparecer). ' +
+      'Exceções que não pedem e-mail: "no"/"stop" e resposta automática de outro WhatsApp.') +
+    (params.emailSemConta ? `\nELA MANDOU O E-MAIL ${params.emailSemConta} E NÃO HÁ CONTA NEM COMPRA PAGA COM ELE (o sistema consultou a Hotmart agora; bloco abaixo). Siga E-MAIL SEM COMPRA.` : '') + convite + video +
     (params.hotmart ? `\n\n${params.hotmart}` : '')
 
   const p = params.perfil
@@ -424,6 +455,8 @@ export async function decidirResposta(params: {
     presente_desafio: string
     reembolso_transacoes: string
     reembolso_motivo: string
+    reenviar_acesso: boolean
+    novo_email: string
   }
   // Verificador antes de enviar (lib/whatsapp-agent/verificador.ts, q1 do mapa, 05/11/2026): confere contra a voz do
   // atendimento e corrige o mínimo. Resposta de conteúdo, dinheiro ou transferência pode ser longa.
@@ -446,7 +479,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined }
+    : { tipo: 'responder', texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined }
 }
 
 // ─── Registro de uso (tokens e custo por resposta) ──────────────────────────────────────────

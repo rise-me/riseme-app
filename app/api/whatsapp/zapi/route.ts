@@ -6,7 +6,8 @@ import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { creditarIndicacao, textoIndicacaoFalhou } from '@/lib/whatsapp-agent/indicacao'
 import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
-import { contaDaConvidadaHotmart, conviteHotmartDela, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
+import { conviteHotmartDela, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
+import { contaPelaCompraHotmart, reenviarAcesso, reenvioRecente, trocarEmail, emailsDaConta, textoVamosVer, textoOlvidaste, KIND_EMAIL_TROCADO } from '@/lib/whatsapp-agent/acesso'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
 import { decidirResposta, redigirRespostaAprovada, interpretarRespostaResponsavel, type Consulta } from '@/lib/whatsapp-agent/responder'
 import {
@@ -259,16 +260,29 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
 
   const conversa = await historico(phone)
   const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
-  // Aluna antiga do convite Hotmart (comprou antes do app existir, sem conta): respondeu algo que não é "NO" →
-  // cria a conta pela compra dela; o acesso chega por aqui em ~15 min e o agente avisa (27/10/2026).
+  // Número sem conta: aluna antiga do convite Hotmart (dados na fila; 27/10/2026) OU qualquer compradora que mandou o
+  // e-mail da compra → a Hotmart confirma a compra paga e a conta nasce agora, com o acesso saindo nesta conversa
+  // (autosserviço, lib/whatsapp-agent/acesso.ts, 05/11/2026). Sem compra paga → o agente recebe o e-mail e o bloco HOTMART.
   const ultimaDela = [...conversa].reverse().find((m) => m.autor === 'student')?.texto ?? ''
   const criada = chat.userId || porEmail || /^\s*(no|stop|baja)\W*$/i.test(ultimaDela) || (await pediuParaParar(phone))
     ? null
-    : await contaDaConvidadaHotmart(phone)
-  const userId = chat.userId ?? porEmail ?? criada
+    : await contaPelaCompraHotmart({ phone, conversa })
+  const userId = chat.userId ?? porEmail ?? criada?.userId ?? null
+  const semCompra = criada && criada.userId === null ? criada.semCompra : null
   const perfil = userId ? await perfilDaAluna(userId, !porEmail, phone) : null
-  // Escreveu antes de o acesso sair (ele espera ~15 min de propósito): o agente precisa saber (caso Madeleine, 18/10).
-  if (perfil) perfil.acessoAgendadoEm = await acessoPendente(phone)
+  if (perfil) {
+    // Escreveu antes de o acesso sair (ele espera ~15 min de propósito): o agente precisa saber (caso Madeleine, 18/10).
+    perfil.acessoAgendadoEm = await acessoPendente(phone)
+    perfil.reenvioRecente = await reenvioRecente(phone)
+    if (criada?.userId && criada.criadaAgora) {
+      perfil.contaCriadaAgora = true
+      if (criada.compradaEm) {
+        perfil.compradaEm = criada.compradaEm
+        perfil.compraAntiga = Date.now() - new Date(criada.compradaEm).getTime() > 2 * 86_400_000
+      }
+      await dizerAoResponsavel(`👤 Conta criada pelo bot pela compra Hotmart — ${criada.email} (+${phone.replace('@lid', '')}): ${criada.produto}; acesso saindo nesta conversa.`)
+    }
+  }
 
   // Depoimento em VÍDEO (21/10): vídeo novo (depois da nossa última fala) → guarda, dá os 3 meses do Pase a quem foi
   // convidada e manda o link ao responsável. O agente só agradece e pede a autorização de uso.
@@ -290,8 +304,8 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     const conviteHotmart = await conviteHotmartDela(phone).catch(() => null)
     const conviteVideo = await foiConvidadaParaVideo(phone, userId).catch(() => false)
     // Assunto de dinheiro: consulta a Hotmart pelo e-mail (da conta ou o que ela digitou) e entrega como fato (04/11/2026).
-    const hotmart = await blocoHotmart(conversa, userId ? await emailDaConta(userId) : null).catch(() => null)
-    decisao = await decidirResposta({ phone, perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart })
+    const hotmart = semCompra ? semCompra.bloco : await blocoHotmart(conversa, userId ? await emailsDaConta(userId) : null).catch(() => null)
+    decisao = await decidirResposta({ phone, perfil, conversa, agora: new Date().toISOString(), aprendizados: await aprendizadosAtivos(), conviteHotmart, conviteVideo, hotmart, emailSemConta: semCompra?.email })
   } catch (err) {
     // O texto do erro vai junto: sem ele, uma pane do agente (chave, saldo, limite) só aparece
     // como "erro no agente" e ninguém sabe a causa (10/10/2026: 16 alunas sem resposta por horas).
@@ -411,12 +425,50 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     }
   }
 
+  // Autosserviço de acesso (05/11/2026, lib/whatsapp-agent/acesso.ts): e-mail corrigido ANTES de enviar (a resposta já diz
+  // que trocou); senha renovada DEPOIS do texto (a mensagem de acesso chega em seguida). Só conta confirmada pelo telefone.
+  let reenviarDepois: string | null = null // e-mail com que o acesso novo sai
+  if (decisao.tipo === 'responder' && (decisao.novoEmail || decisao.reenviarAcesso)) {
+    const idioma = perfil?.idioma ?? 'es'
+    const pedido = decisao.novoEmail ? `trocar o e-mail para ${decisao.novoEmail}` : 'renovar a senha'
+    if (!userId || !perfil?.confirmadaPorTelefone) {
+      // O prompt não deveria marcar sem conta confirmada; segurança em profundidade (qualquer um digita um e-mail).
+      decisao = decisao.novoEmail
+        ? { tipo: 'humano', texto: textoVamosVer(idioma), motivo: `ACESSO — pediu ${pedido}, mas a conta não é confirmada pelo telefone`, consulta: { resumo: `Aluna (conta achada só pelo e-mail digitado, ou sem conta) pediu ${pedido}.`, opcaoA: 'Confirmar que é ela (e-mail e telefone da compra na Hotmart) e fazer a troca.', opcaoB: 'Pedir que escreva do telefone da compra ou use "¿Olvidaste tu contraseña?".' } }
+        : { ...decisao, texto: textoOlvidaste(idioma), reenviarAcesso: false }
+    } else {
+      const emailAtual = (await emailDaConta(userId)) ?? ''
+      if (decisao.novoEmail) {
+        const r = await trocarEmail({ userId, atual: emailAtual, novo: decisao.novoEmail })
+        if (r.ok) {
+          reenviarDepois = decisao.novoEmail
+          await marcarNaFila(phone, KIND_EMAIL_TROCADO, `${emailAtual} → ${decisao.novoEmail}`)
+          console.log(`[acesso] e-mail trocado pelo bot (${phone}): ${emailAtual} → ${decisao.novoEmail}`)
+        } else {
+          decisao = { tipo: 'humano', texto: textoVamosVer(idioma), motivo: `TROCA DE E-MAIL pelo bot falhou (${r.erro}): ${emailAtual} → ${decisao.novoEmail}`, consulta: { resumo: `Aluna confirmou o e-mail novo ${decisao.novoEmail} (atual ${emailAtual}); o sistema não trocou: ${r.erro === 'ja-existe' ? 'já existe outra conta com esse e-mail' : r.erro}.`, opcaoA: 'Juntar/trocar à mão e avisar que o acesso novo sai aqui.', opcaoB: 'Pedir outro e-mail a ela.' } }
+        }
+      } else if (decisao.reenviarAcesso && !perfil.reenvioRecente) {
+        reenviarDepois = emailAtual
+      }
+    }
+  }
+
   if (decisao.texto && !(silencioso && decisao.tipo === 'humano')) {
     const envio = await sendZapiText({ phone, message: decisao.texto, delayTyping: 2 })
     if (envio.ok) {
       await registrarMensagem({ phone, direction: 'out', author: 'agent', body: decisao.texto, waMessageId: envio.messageId })
     } else {
       console.error(`[whatsapp] envio da resposta falhou (${phone}):`, envio.error)
+    }
+  }
+
+  if (reenviarDepois && userId) {
+    try {
+      await reenviarAcesso({ userId, phone, email: reenviarDepois, idioma: perfil?.idioma ?? 'es' })
+    } catch (err) {
+      const detalhe = (err instanceof Error ? err.message : String(err)).slice(0, 200)
+      console.error(`[acesso] reenvio pelo bot falhou (${phone}):`, err)
+      await consultarResponsavel(phone, perfil?.nome, perfil?.idioma ?? '?', ultimaDela, `ACESSO — o bot prometeu o acesso novo (${reenviarDepois}) e o envio falhou: ${detalhe}`, { resumo: `O bot disse à aluna que a senha foi renovada e o acesso chegaria aqui, mas o envio falhou (${detalhe}).`, opcaoA: 'Reenviar o acesso (comando "reenvia o acesso de <e-mail>").', opcaoB: 'Pedir que use "¿Olvidaste tu contraseña?" no login.' })
     }
   }
 

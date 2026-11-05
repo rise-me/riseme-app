@@ -6,13 +6,12 @@ import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { sendWhatsAppAccess } from '@/lib/whatsapp-access'
 import { sendAccessEmail } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
-import { routing } from '@/i18n/routing'
-import { hasLocale } from 'next-intl'
 import { indicadoraDoSrc } from '@/lib/indicacao-link'
 import { darPaseDeIndicacao } from '@/lib/whatsapp-agent/indicacao'
 import { darCardapioBonus } from '@/lib/diet/quota'
 import { enfileirar } from '@/lib/whatsapp-outbox'
 import { deveRevogar, registrarCompra } from '@/lib/compras'
+import { getChallengeIdForProduct, getMappingForProduct } from '@/lib/hotmart-map'
 
 
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN
@@ -60,6 +59,7 @@ interface HotmartPayload {
       date_next_charge?: number // epoch ms da próxima cobrança (no teste grátis = fim do teste)
       origin?: { src?: string; sck?: string; xcod?: string } // rastreio do link (src=ind-<id> = indicação)
       price?: { value?: number; currency_value?: string } // o que ela pagou (vai pro cartão da aluna)
+      approved_date?: number // epoch ms da aprovação (cartão da aluna: data real da compra, não a de hoje)
     }
     subscription?: {
       subscriber: { code: string }
@@ -198,7 +198,8 @@ export async function POST(request: NextRequest) {
       try {
         await registrarCompraNaConta(supabase, userId, {
           plataforma: 'hotmart', transacao: purchase.transaction, produto: data.product?.name ?? String(productId), oferta: purchase.offer?.code ?? null,
-          valor: purchase.price?.value ?? null, moeda: purchase.price?.currency_value ?? null, pais: buyer.address?.country_iso ?? null, em: new Date().toISOString(),
+          valor: purchase.price?.value ?? null, moeda: purchase.price?.currency_value ?? null, pais: buyer.address?.country_iso ?? null,
+          em: purchase.approved_date && purchase.approved_date > 0 ? new Date(purchase.approved_date).toISOString() : new Date().toISOString(),
         })
       } catch (err) {
         console.error('[hotmart] compra não guardada no cartão:', err)
@@ -345,29 +346,6 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ ok: true })
-}
-
-// HOTMART_CHALLENGE_MAP="ID:challengeId[:locale],..." — locale opcional (default es), igual ao
-// PERFECTPAY_CHALLENGE_MAP. Ex.: "4784921:2,<ID_HOTMART_CZ>:1:cs". Idioma que o app não tem (ex.: mapa
-// trocado antes do deploy do idioma) cai em 'es' com erro no log — senão o link de acesso daria página
-// não encontrada.
-function getMappingForProduct(productId: string): { challengeId: string; locale: string } | null {
-  const map = process.env.HOTMART_CHALLENGE_MAP ?? ''
-  for (const entry of map.split(',')) {
-    const [pid, cid, loc] = entry.split(':').map((x) => x?.trim())
-    if (!pid || pid !== productId) continue
-    let locale = loc || 'es'
-    if (!hasLocale(routing.locales, locale)) {
-      console.error(`[hotmart] HOTMART_CHALLENGE_MAP: idioma '${locale}' do produto ${productId} não existe no app — usando 'es'`)
-      locale = 'es'
-    }
-    return { challengeId: cid ?? '', locale }
-  }
-  return null
-}
-
-function getChallengeIdForProduct(productId: string): string | null {
-  return getMappingForProduct(productId)?.challengeId || null
 }
 
 // Amiga comprou o desafio com o link de uma aluna (src=ind-<id da aluna>, lib/indicacao-link.ts): a aluna ganha

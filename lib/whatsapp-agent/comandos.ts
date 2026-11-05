@@ -2,17 +2,14 @@
 // mostra o que vai fazer e só executa depois do "sim". Lista FECHADA de ações — nada de código, deploy
 // ou configuração por aqui. Cada pedido fica em whatsapp_comandos.
 
-import { admin, passarParaHumano, registrarMensagem, perfilDaAluna } from './conversa'
+import { admin, passarParaHumano, perfilDaAluna } from './conversa'
 import { interpretarComando, type PedidoComando } from './responder'
 import { darCardapioBonus } from '@/lib/diet/quota'
-import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
-import { aberturaReenvio, mensagensDeAcesso } from '@/lib/whatsapp-access'
-import { sendZapiText, toZapiPhone } from '@/lib/zapi'
+import { reenviarAcesso, trocarEmail } from './acesso'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 import { tratarAprovacaoReembolso, executarReembolso, type PedidoReembolso } from './reembolsos'
 
 const VALIDADE_MIN = 30 // um "sim" depois disso não executa nada
-const APP_URL = 'https://riseme.app'
 
 const NOME_PRODUTO: Record<string, string> = {
   ...Object.fromEntries(mockChallenges.map((c) => [c.id, challengeNameEs(c.id) ?? c.id])),
@@ -135,11 +132,8 @@ async function executar(acao: string, p: Params, idAtual?: number): Promise<stri
       return `1 cardápio extra dado para ${p.nome || p.email}. Aparece na aba do cardápio.`
     }
     case 'trocar_email': {
-      const { data: existe } = await db.from('users').select('id').eq('email', p.novoEmail!).limit(1)
-      if (existe?.length) throw new Error(`já existe uma conta com ${p.novoEmail}`)
-      const { error } = await db.auth.admin.updateUserById(p.userId, { email: p.novoEmail!, email_confirm: true })
-      if (error) throw new Error(error.message)
-      await db.from('users').update({ email: p.novoEmail! }).eq('id', p.userId)
+      const r = await trocarEmail({ userId: p.userId, atual: p.email, novo: p.novoEmail! })
+      if (!r.ok) throw new Error(r.erro === 'ja-existe' ? `já existe uma conta com ${p.novoEmail}` : r.erro)
       return `Email de ${p.nome || p.email} trocado para ${p.novoEmail}. A senha continua a mesma.`
     }
     case 'pausar_bot': {
@@ -152,15 +146,7 @@ async function executar(acao: string, p: Params, idAtual?: number): Promise<stri
       const chat = await chatDaAluna(p.userId, p.phone)
       if (!chat) throw new Error('não achei o WhatsApp dela (sem telefone na conta e sem conversa)')
       const perfil = await perfilDaAluna(p.userId)
-      const locale = perfil?.idioma ?? 'es'
-      const code = generateAccessCode()
-      const { error } = await db.auth.admin.updateUserById(p.userId, { password: code })
-      if (error) throw new Error(error.message)
-      const [acesso] = mensagensDeAcesso({ locale, email: p.email, code, link: buildAccessLink(APP_URL, locale, p.email, code) })
-      const msg = `${aberturaReenvio(locale)}\n\n${acesso}`
-      const r = await sendZapiText({ phone: chat, message: msg, delayTyping: 2 })
-      if (!r.ok) throw new Error(`senha trocada, mas o envio falhou: ${r.error}`)
-      await registrarMensagem({ phone: toZapiPhone(chat), direction: 'out', author: 'system', body: msg.replaceAll(code, '••••••'), waMessageId: r.messageId })
+      await reenviarAcesso({ userId: p.userId, phone: chat, email: p.email, idioma: perfil?.idioma ?? 'es' })
       return `Acesso novo enviado para ${p.nome || p.email} (senha nova; a antiga não vale mais).`
     }
     case 'reembolsar':

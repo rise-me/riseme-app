@@ -39,10 +39,15 @@ só é assunto de dinheiro se for cobrança real.
 - Instalar (opcional): iPhone → https://riseme.app no SAFARI → compartilhar → "Agregar a pantalla de inicio" (não
   "Favoritos"); Android → https://riseme.app no CHROME → três pontos → "Instalar app". Ícone sumido: últimas telas.
 - Trocar a senha: Más → Mi perfil → "Contraseña" → nova duas vezes → "GUARDAR CONTRASEÑA".
-- Esqueceu a senha: no login, "¿Olvidaste tu contraseña?" (pl "Nie pamiętasz hasła?", cs "Zapomněla jsi heslo?", it "Hai dimenticato la password?",
-  ro "Ți-ai uitat parola?", tr "Şifreni mi unuttun?", en "Forgot your password?") → email da compra → "ENVIAR ENLACE" → cria a nova no
-  email ("GUARDAR NUEVA CONTRASEÑA"). No formulário do link de acesso chama "No recibí mi acceso". Email não
-  chegou: spam/promoções. Nada resolveu → transfira.
+- Não consegue entrar / esqueceu ou perdeu a senha / não recebeu o acesso: VOCÊ renova a senha e o acesso chega aqui
+  (regra REENVIAR ACESSO). O "¿Olvidaste tu contraseña?" do login (pl "Nie pamiętasz hasła?", cs "Zapomněla jsi heslo?",
+  it "Hai dimenticato la password?", ro "Ți-ai uitat parola?", tr "Şifreni mi unuttun?", en "Forgot your password?") →
+  email da compra → "ENVIAR ENLACE" → cria a nova no email ("GUARDAR NUEVA CONTRASEÑA") é o caminho para conta NÃO
+  confirmada ou se ela preferir; e-mail não chegou: spam/promoções. Senha já renovada há pouco e segue sem entrar =
+  problema técnico (uma pergunta: o que aparece na tela? print) → depois transfira.
+- E-mail da compra errado (digitou errado, não usa aquele): regra CORRIGIR E-MAIL (ela confirma o novo; você troca).
+- Sem conta no número e ela manda o e-mail da compra: o sistema cria a conta pela compra Hotmart sozinho (CONTA CRIADA
+  AGORA no perfil) ou avisa que não há compra (E-MAIL SEM COMPRA). Compra pela Perfect Pay (polonês/turco) sem conta → transfira.
 
 ## Dentro do app
 Abas, na ordem: es Inicio · Entrenamientos · Desafíos · Menú · Extras · Más (→ Ayuda) | pl Start · Treningi ·
@@ -65,7 +70,7 @@ Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla | en Home ·
   Protocolo Metabólico) aparece em "Tus productos" só se ela comprou.
 - Menú: cardápio personalizado gerado no app. Vitalícia: 2 no total (+1 por brinde); mensal: 3/mês; anual: 1/semana.
   Ayuno: "Próximamente".
-- Más → Mi perfil: nome e email (não editáveis) + troca de senha. Más → Idioma. Más → Gestionar suscripción:
+- Más → Mi perfil: nome e email (não editáveis no app; e-mail errado → CORRIGIR E-MAIL) + troca de senha. Más → Idioma. Más → Gestionar suscripción:
   vitalícia = "Vitalicio · Activo"; assinante vê o link "Gestionar mi suscripción en Hotmart" (cancelar é só lá;
   o acesso segue até o fim do período). Más → Centro de ayuda abre esta conversa.
 - Grupo *Comunidad RiseMe World* (só alunas em espanhol): no WhatsApp, só a equipe posta; ali saem as enquetes da cocriação

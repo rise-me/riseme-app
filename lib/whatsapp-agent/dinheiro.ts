@@ -23,10 +23,12 @@ export function emailNaConversa(conversa: MensagemConversa[]): string | null {
  * Bloco HOTMART para o agente, só quando o assunto é dinheiro e há um e-mail para consultar (o da conta ou o que ela
  * digitou). null = não consultou (sem assunto, sem e-mail, sem credencial ou API fora): o agente segue como antes.
  */
-export async function blocoHotmart(conversa: MensagemConversa[], emailDaConta: string | null): Promise<string | null> {
+export async function blocoHotmart(conversa: MensagemConversa[], emailDaConta: string | string[] | null): Promise<string | null> {
   if (!hotmartConfigurada() || !assuntoDeDinheiro(conversa)) return null
   const digitado = emailNaConversa(conversa)
-  const emails = [...new Set([emailDaConta, digitado].filter((e): e is string => Boolean(e)))]
+  // E-mail trocado pelo bot (lib/whatsapp-agent/acesso.ts): a Hotmart guarda a compra no e-mail antigo, por isso vêm os dois.
+  const daConta = Array.isArray(emailDaConta) ? emailDaConta : [emailDaConta]
+  const emails = [...new Set([...daConta, digitado].filter((e): e is string => Boolean(e)))]
   if (!emails.length) return null
   const blocos: string[] = []
   for (const e of emails) {

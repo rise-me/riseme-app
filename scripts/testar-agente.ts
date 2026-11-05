@@ -24,7 +24,7 @@ const HOTMART_PROTESTED = `HOTMART (consultado agora pelo e-mail maria@example.c
 Resumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 1 reembolso(s) em análise.
 Assinaturas: nenhuma.`
 
-const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string }[] = [
+const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; emailSemConta?: string }[] = [
   { nome: 'plano 3 dias / merienda (real)', perfil: base, msg: 'Hola, soy alumna de RiseMe 💛 Necesito ayuda con el plan de 3 días para deshinchar...  En todo el día se come solo lo que dice ahí? Por ejemplo, desayuno yogurt con chia, almuerzo pollo con ensalada y cena vegetales? No hay merienda?' },
   { nome: 'qual chá (TEM protocolo)', perfil: comProtocolo, msg: 'Hola! qué té tengo que tomar en la mañana?' },
   { nome: 'qual chá (NÃO tem protocolo)', perfil: base, msg: 'Hola! qué té tengo que tomar en la mañana?' },
@@ -49,6 +49,14 @@ const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: 
   { nome: 'HOTMART ausente: sem bloco pede e-mail e transfere', perfil: base, msg: 'Me cobraron dos veces 19 dólares' },
   // 05/11: 2º pedido de reembolso com compra paga há 2 dias → reembolso_transacoes preenchido, sem link, sem transferir.
   { nome: 'HOTMART: 2º pedido de reembolso = registra (reembolso_transacoes)', perfil: base, hotmart: HOTMART_DUPLA, msg: 'Ya te dije que no quiero ayuda, solo quiero mi dinero de vuelta. Es la segunda vez que lo pido.' },
+  // Autosserviço de acesso (05/11/2026, lib/whatsapp-agent/acesso.ts): senha, e-mail e conta pela compra sem transferir.
+  { nome: 'ACESSO: não consegue entrar (confirmada) → reenviar_acesso', perfil: base, msg: 'Hola, no puedo entrar a la app, me dice correo o contraseña incorrectos' },
+  { nome: 'ACESSO: conta só pelo e-mail (não confirmada) → orienta olvidaste, sem reenviar', perfil: { ...base, confirmadaPorTelefone: false }, msg: 'no me acuerdo de la contraseña, me la pueden mandar?' },
+  { nome: 'ACESSO: reenvio recente → pergunta o que aparece, sem reenviar', perfil: { ...base, reenvioRecente: true }, msg: 'sigo sin poder entrar, me dice error' },
+  { nome: 'ACESSO: acesso ainda agendado → chega em instantes, sem reenviar', perfil: { ...base, ultimoLogin: null, diasFeitos: 0, acessoAgendadoEm: new Date(Date.now() + 9 * 60_000).toISOString() }, msg: 'no me ha llegado nada del acceso' },
+  { nome: 'E-MAIL: passo 1 (repete e pergunta, novo_email vazio)', perfil: base, msg: 'mi correo está mal escrito, el correcto es maria.lopez@gmail.com' },
+  { nome: 'CONTA CRIADA AGORA: acesso chega em instantes', perfil: { ...base, nome: 'Rosa', ultimoLogin: null, diasFeitos: 0, contaCriadaAgora: true, acessoAgendadoEm: new Date(Date.now() + 60_000).toISOString() }, msg: 'rosa.perez@hotmail.com' },
+  { nome: 'E-MAIL SEM COMPRA: pergunta se usou outro e-mail', perfil: null, emailSemConta: 'rosa.perez@hotmail.com', hotmart: 'HOTMART (consultado agora pelo e-mail rosa.perez@hotmail.com; é o que a Hotmart REALMENTE registra, use como fato):\nNenhuma compra na Hotmart com o e-mail rosa.perez@hotmail.com (nem aprovada, nem tentativa).\nResumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.\nAssinaturas: nenhuma.', msg: 'rosa.perez@hotmail.com' },
 ]
 
 async function main() {
@@ -60,8 +68,9 @@ async function main() {
     conversa: [{ autor: 'student', texto: c.msg, em: '2026-10-05T12:00:00Z' }],
     agora: '2026-10-05T12:00:10Z',
     hotmart: c.hotmart,
+    emailSemConta: c.emailSemConta,
   })
-  console.log(`\n━━━ ${c.nome} (${((Date.now() - t) / 1000).toFixed(1)}s) ${d.tipo === 'humano' ? '→ TRANSFERE: ' + d.motivo : ''}${d.tipo === 'responder' && d.reembolsoTransacoes?.length ? ' → REEMBOLSO ' + d.reembolsoTransacoes.join(',') : ''}\nALUNA: ${c.msg}\n\n${d.texto}`)
+  console.log(`\n━━━ ${c.nome} (${((Date.now() - t) / 1000).toFixed(1)}s) ${d.tipo === 'humano' ? '→ TRANSFERE: ' + d.motivo : ''}${d.tipo === 'responder' && d.reembolsoTransacoes?.length ? ' → REEMBOLSO ' + d.reembolsoTransacoes.join(',') : ''}${d.tipo === 'responder' && d.reenviarAcesso ? ' → REENVIAR ACESSO' : ''}${d.tipo === 'responder' && d.novoEmail ? ' → NOVO E-MAIL ' + d.novoEmail : ''}\nALUNA: ${c.msg}\n\n${d.texto}`)
 }
 }
 

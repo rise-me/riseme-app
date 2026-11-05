@@ -76,6 +76,7 @@ export interface CompraHotmart {
   pedidoEm: string | null // ISO
   aprovadaEm: string | null // ISO
   garantiaAte: string | null // ISO
+  compradorNome: string | null // nome do comprador na Hotmart (cria a conta com ele quando a aluna não tem conta)
 }
 
 export interface AssinaturaHotmart {
@@ -126,6 +127,7 @@ export async function comprasPorEmail(email: string): Promise<CompraHotmart[] | 
         pedidoEm: iso(p.order_date),
         aprovadaEm: iso(p.approved_date),
         garantiaAte: iso(p.warranty_expire_date),
+        compradorNome: (((it.buyer ?? {}) as Record<string, unknown>).name as string | undefined) ?? null,
       }
     })
     .sort((a, b) => (b.pedidoEm ?? '').localeCompare(a.pedidoEm ?? ''))
