@@ -1,3 +1,4 @@
+import { registrarCompraNaConta } from '@/lib/cartao-aluna'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
@@ -154,6 +155,17 @@ export async function POST(request: NextRequest) {
         locale: mapping.locale,
       })
       await sendAccessEmail({ email: buyerEmail, code, link, locale: mapping.locale })
+    }
+
+    // Cartão da aluna: a compra fica na conta (lib/cartao-aluna.ts). Best-effort.
+    try {
+      const raw = payload as unknown as { sale_amount?: number; currency?: string; sale_status_enum_key?: string; date_approved?: string }
+      await registrarCompraNaConta(supabase, userId, {
+        plataforma: 'perfectpay', transacao: payload.code, produto: payload.plan?.name ?? payload.product?.name ?? productCode, oferta: payload.plan?.code ?? null,
+        valor: typeof raw.sale_amount === 'number' ? raw.sale_amount : null, moeda: raw.currency ?? null, pais: payload.customer?.country ?? null, em: new Date().toISOString(),
+      })
+    } catch (err) {
+      console.error('[perfectpay] compra não guardada no cartão:', err)
     }
 
     await supabase.from('user_challenges').upsert(

@@ -1,4 +1,5 @@
 import { buscarRespostasQuiz, guardarQuizNaConta } from '@/lib/quiz-contexto'
+import { registrarCompraNaConta } from '@/lib/cartao-aluna'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
@@ -58,6 +59,7 @@ interface HotmartPayload {
       recurrence_number?: number
       date_next_charge?: number // epoch ms da próxima cobrança (no teste grátis = fim do teste)
       origin?: { src?: string; sck?: string; xcod?: string } // rastreio do link (src=ind-<id> = indicação)
+      price?: { value?: number; currency_value?: string } // o que ela pagou (vai pro cartão da aluna)
     }
     subscription?: {
       subscriber: { code: string }
@@ -188,6 +190,18 @@ export async function POST(request: NextRequest) {
           locale,
         })
         await sendAccessEmail({ email: buyerEmail, code, link, locale })
+      }
+    }
+
+    // Cartão da aluna: a compra fica na conta (lib/cartao-aluna.ts). Best-effort.
+    if (event === 'PURCHASE_APPROVED' || event === 'PURCHASE_COMPLETE') {
+      try {
+        await registrarCompraNaConta(supabase, userId, {
+          plataforma: 'hotmart', transacao: purchase.transaction, produto: data.product?.name ?? String(productId), oferta: purchase.offer?.code ?? null,
+          valor: purchase.price?.value ?? null, moeda: purchase.price?.currency_value ?? null, pais: buyer.address?.country_iso ?? null, em: new Date().toISOString(),
+        })
+      } catch (err) {
+        console.error('[hotmart] compra não guardada no cartão:', err)
       }
     }
 

@@ -186,7 +186,7 @@ async function responderConsulta(texto: string, citada: string | undefined) {
     const conversa = await historico(consulta.phone)
     const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
     const userId = chat.userId ?? porEmail
-    const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
+    const perfil = userId ? await perfilDaAluna(userId, !porEmail, consulta.phone) : null
     const { enviar, nota, mensagem, aprendizado } = await redigirRespostaAprovada({
       perfil,
       conversa,
@@ -266,7 +266,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     ? null
     : await contaDaConvidadaHotmart(phone)
   const userId = chat.userId ?? porEmail ?? criada
-  const perfil = userId ? await perfilDaAluna(userId, !porEmail) : null
+  const perfil = userId ? await perfilDaAluna(userId, !porEmail, phone) : null
   // Escreveu antes de o acesso sair (ele espera ~15 min de propósito): o agente precisa saber (caso Madeleine, 18/10).
   if (perfil) perfil.acessoAgendadoEm = await acessoPendente(phone)
 

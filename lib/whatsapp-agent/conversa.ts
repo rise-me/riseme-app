@@ -1,6 +1,7 @@
 // Estado e histórico das conversas de WhatsApp (migration_008). Só servidor:
 // usa a service role — as tabelas não têm policy nenhuma.
 import { quizDaAluna } from '@/lib/quiz-contexto'
+import { cartaoDaAluna } from '@/lib/cartao-aluna'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Aprendizado, Consulta, MensagemConversa, PerfilAluna } from './responder'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
@@ -214,7 +215,7 @@ const NOME_PRODUTO: Record<string, string> = {
   'protocolo-metabolico': 'Protocolo Metabólico',
 }
 
-export async function perfilDaAluna(userId: string, confirmadaPorTelefone = true): Promise<PerfilAluna | null> {
+export async function perfilDaAluna(userId: string, confirmadaPorTelefone = true, phone?: string | null): Promise<PerfilAluna | null> {
   const db = admin()
   const [{ data: u }, { data: auth }, { data: progresso }, { data: acessos }] = await Promise.all([
     db.from('users').select('name, created_at').eq('id', userId).maybeSingle(),
@@ -257,6 +258,7 @@ export async function perfilDaAluna(userId: string, confirmadaPorTelefone = true
     ),
     // O que ela respondeu no quiz antes de comprar (lib/quiz-contexto.ts); null sem sck/credencial.
     quiz: await quizDaAluna(db, auth?.user),
+    cartao: await cartaoDaAluna(db, { userId, user: auth?.user, variantes: phone ? variantesTelefone(phone) : [] }),
   }
 }
 

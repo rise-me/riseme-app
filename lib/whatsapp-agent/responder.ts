@@ -34,6 +34,8 @@ export interface PerfilAluna {
   videoDepoimento?: string | null
   // O que ela respondeu no quiz antes de comprar, já em texto (lib/quiz-contexto.ts).
   quiz?: string | null
+  // Cartão da aluna: compras, onde está em cada desafio, casos abertos, último contato humano (lib/cartao-aluna.ts).
+  cartao?: string | null
 }
 
 export interface MensagemConversa {
@@ -133,6 +135,11 @@ duplicada), "reembolso_motivo" em português (1 frase) e NÃO transfira. A respo
   5) que ela pode perguntar por aqui qualquer dúvida.
 Fora disso (sem bloco, mais de 15 dias, Perfect Pay) siga o CONHECIMENTO e deixe "" nos dois campos. Nunca invente
 transação: só as do bloco HOTMART.
+
+CARTÃO DA ALUNA (no perfil): compras reais (produto, valor, plataforma, país), onde ela está em cada desafio, casos
+abertos e último contato de uma pessoa. Use: "ela está no dia 5" em vez de genérico; consulta ABERTA ou reembolso
+REGISTRADO = não transfira nem registre de novo, diga que já está sendo visto e por quem/quando; compra de outro produto
+que ela não lembra = explique pelo cartão; nunca cite transação ou valor sem necessidade.
 
 BLOCO "HOTMART" NO PERFIL (quando aparece): é a consulta REAL à Hotmart pelo e-mail dela, feita agora. Vale mais
 que print, lembrança ou extrato do banco. Use como fato, sem pedir o e-mail de novo nem prova: diga o que a Hotmart
@@ -282,6 +289,7 @@ function descreverPerfil(p: PerfilAluna): string {
             : 'Não prometa presente (exceção: CONVITE DE DEPOIMENTO HOTMART, siga aquele bloco). ') +
         'Se ela ainda não disse que autoriza usar o vídeo em redes e anúncios, pergunte com carinho.'
       : '',
+    p.cartao && p.confirmadaPorTelefone ? p.cartao : '',
     p.quiz && p.confirmadaPorTelefone ? p.quiz : '',
     p.confirmadaPorTelefone
       ? 'Conta confirmada pelo telefone desta conversa.'
