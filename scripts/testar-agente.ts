@@ -10,15 +10,17 @@ const base: PerfilAluna = {
 const comProtocolo = { ...base, liberados: ['Calistenia en Casa', 'Protocolo Metabólico'] }
 
 // Bloco HOTMART de mentira, no formato de lib/hotmart-api.ts resumoHotmart (caso real Miriam #76, 19/10: 1 paga + 3 tentativas).
+const D2 = new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10)
+const D4 = new Date(Date.now() - 4 * 86_400_000).toISOString().slice(0, 10)
 const HOTMART_DUPLA = `HOTMART (consultado agora pelo e-mail maria@example.com; é o que a Hotmart REALMENTE registra, use como fato):
-- 2026-10-03 (há 2 dias) · RiseMe™ - Desafío de 28 Días de Calistenia · 12.9 USD · CREDIT_CARD · APROVADA (paga) · transação HP2772692909
-- 2026-10-03 (há 2 dias) · Protocolo Metabólico · 19 USD · CREDIT_CARD · RECUSADA pelo banco (sem fundos) — não foi cobrada · transação HP2772700001
-- 2026-10-03 (há 2 dias) · Protocolo Metabólico · 19 USD · CREDIT_CARD · CANCELADA (não foi paga) · transação HP2772700002
-- 2026-10-03 (há 2 dias) · Protocolo Metabólico · 19 USD · CREDIT_CARD · CANCELADA (não foi paga) · transação HP2772700003
+- ${D2} (há 2 dias) · RiseMe™ - Desafío de 28 Días de Calistenia · 12.9 USD · CREDIT_CARD · APROVADA (paga) · transação HP2772692909
+- ${D2} (há 2 dias) · Protocolo Metabólico · 19 USD · CREDIT_CARD · RECUSADA pelo banco (sem fundos) — não foi cobrada · transação HP2772700001
+- ${D2} (há 2 dias) · Protocolo Metabólico · 19 USD · CREDIT_CARD · CANCELADA (não foi paga) · transação HP2772700002
+- ${D2} (há 2 dias) · Protocolo Metabólico · 19 USD · CREDIT_CARD · CANCELADA (não foi paga) · transação HP2772700003
 Resumo: 1 compra(s) PAGA(S) (RiseMe™ - Desafío de 28 Días de Calistenia); 3 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.
 Assinaturas: nenhuma.`
 const HOTMART_PROTESTED = `HOTMART (consultado agora pelo e-mail maria@example.com; é o que a Hotmart REALMENTE registra, use como fato):
-- 2026-10-01 (há 4 dias) · RiseMe™ - Desafío de 28 Días de Calistenia · 12.9 USD · CREDIT_CARD · REEMBOLSO PEDIDO, em análise na Hotmart (aprova em até 7 dias) · transação HP0491658410
+- ${D4} (há 4 dias) · RiseMe™ - Desafío de 28 Días de Calistenia · 12.9 USD · CREDIT_CARD · REEMBOLSO PEDIDO, em análise na Hotmart (aprova em até 7 dias) · transação HP0491658410
 Resumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 1 reembolso(s) em análise.
 Assinaturas: nenhuma.`
 
