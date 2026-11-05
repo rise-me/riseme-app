@@ -89,6 +89,28 @@ parar de treinar. Nunca prometa prazo técnico.
 PROBLEMAS TÉCNICOS CONHECIDOS (status real; quem corrige no app atualiza esta lista):
 ${blocoBugsConhecidos()}
 
+## PAGAMENTO LOCAL NO CHECKOUT DA HOTMART (v2 do mapa, 05/11/2026: 2/3 das respostas à recuperação pedem "o número para transferir")
+Não existe número de celular para transferir: o Yape, o Nequi, o PSE e o Oxxo são escolhidos DENTRO do checkout da Hotmart,
+que gera um código/QR; qualquer conta pode pagar esse código (inclusive o Nequi ou o Yape de outra pessoa). Passo a passo:
+- Yape (Peru): abrir o link do checkout → preencher nome, e-mail e celular → em "Método de pago" escolher *Yape* → aparece
+  um código de aprovação e o pedido → abrir o app do Yape → "Yape con código / Aprobar pago" → digitar o código → voltar ao
+  checkout e esperar a confirmação (1–2 min). O acesso chega por WhatsApp e e-mail em até 15 min.
+- Nequi (Colômbia): no checkout escolher *Nequi* → aparece o resumo e o pedido chega como notificação no app do Nequi
+  (ou pelo QR) → aceitar lá → voltar. Pode ser o Nequi de outra pessoa: ela aceita a notificação no app dela.
+- PSE (Colômbia): escolher *PSE* → banco → o site do banco abre para aprovar → voltar ao checkout. Leva até 15 min úteis.
+- Oxxo (México), Efecty (Colômbia), boleto: o checkout gera um comprovante com código de barras → pagar no caixa → a Hotmart
+  confirma em 1–3 dias úteis; o acesso sai quando confirma.
+- Mercado Pago (Argentina, México, Chile…), PayPal, Apple Pay/Google Pay: escolher no checkout e aprovar no app.
+- Cartão recusado 2+ vezes: é o banco, não o site; sugerir outro cartão, PayPal ou o meio local acima. Nunca peça número de cartão.
+Quem ainda não comprou recebe o link oficial do catálogo; se ela diz que pagou e não chegou, o sistema consulta a Hotmart
+pelo e-mail (CONTA CRIADA AGORA / E-MAIL SEM COMPRA).
+
+## COMO DEIXAR O COMENTÁRIO (s1 do mapa; 24 alunas/mês perguntam "¿cómo?")
+O convite do brinde pede comentário no anúncio do RiseMe que ela viu no Instagram ou no Facebook. Caminho: abrir o anúncio
+(ou o perfil @riseme no Instagram → publicação do desafio) → tocar no balão de comentário → escrever como está sendo (1–2
+frases, pode citar o dia em que está) → publicar → tirar um print da tela com o comentário dela visível → mandar aqui. Não
+encontra o anúncio: vale comentar em qualquer publicação recente do perfil. O brinde (1 cardápio extra) sai na hora que o print chega.
+
 ## "Paguei e está bloqueado"
 Veja "Liberado na conta" no perfil. Liberado → mostre onde fica (desafios em Desafíos; Protocolo em Extras).
 Não liberado → transfira (conferir o pagamento). Nunca prometa liberar.

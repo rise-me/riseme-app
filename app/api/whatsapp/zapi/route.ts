@@ -512,7 +512,9 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     else if (decisao.pedirDepoimento && !silencioso) await ofertasPosConversa(phone, perfil?.idioma ?? 'es', userId, Boolean(porEmail))
     // Reprocessamento de pendente antigo (05/11/2026): o bot respondeu sozinho com as capacidades novas (Hotmart, acesso, catálogo,
     // acervo) → a consulta sai da lista do responsável, com a resposta registrada; ele recebe uma linha.
-    if (silencioso && decisao.texto && decisao.texto.length > 80) {
+    // Só fecha se respondeu de verdade: não quando empurra ('ya está con el equipo', 'te respondemos', 'sigue con') nem quando é curta.
+    const evasiva = /est[aá] con el equipo|con el sector|te respondemos|respondemos por aqu|sigue con|lo revisamos|te escribo (mañana|hoy)|hasta las 20|jest już u|zespo[łl]em/i
+    if (silencioso && decisao.texto && decisao.texto.length > 80 && !evasiva.test(decisao.texto)) {
       const { data: abertas } = await admin().from('whatsapp_consultas').select('id').eq('phone', phone).eq('status', 'pendente')
       for (const c of abertas ?? []) {
         await fecharConsulta(c.id, { status: 'respondida', orientacao: 'bot respondeu sozinho (reprocessado)', respostaEnviada: decisao.texto })

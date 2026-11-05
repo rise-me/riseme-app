@@ -47,6 +47,8 @@ const COPY: Record<AppLocale, AccessCopy> = {
       '',
       '(Cuando toques, la aplicación se abrirá automáticamente, ni siquiera necesitas escribir la contraseña — ¡tu desafío ya está listo!) 💪',
       '',
+      '⚠️ Si la pantalla se abre en blanco o vuelve al inicio, ábrelo fuera de WhatsApp: en iPhone con Safari, en Android con Chrome.',
+      '',
       '📌 ¿Cómo ingresar otro día?',
       `👉 Ve a ${homeUrl}, inicia sesión con tu correo electrónico y la contraseña anterior.`,
       'Si lo deseas, puedes cambiar tu contraseña por una que elijas dentro de la aplicación.',
