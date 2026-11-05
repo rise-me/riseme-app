@@ -48,6 +48,19 @@ async function get(path: string, params: Record<string, string>): Promise<Record
   return (await res.json().catch(() => null)) as Record<string, unknown> | null
 }
 
+/**
+ * REEMBOLSA uma venda na Hotmart (irreversível; devolve o valor à compradora). Só roda depois do "ok" do responsável
+ * no WhatsApp (lib/whatsapp-agent/reembolsos.ts). Endpoint por fontes de terceiros (sem doc oficial lida): PUT
+ * sales/{transacao}/refund — o 1º uso real foi conferido com o Bruno olhando (05/11/2026).
+ */
+export async function reembolsarHotmart(transacao: string): Promise<{ ok: true } | { ok: false; erro: string }> {
+  const t = await token()
+  if (!t) return { ok: false, erro: 'credencial da Hotmart ausente' }
+  const res = await fetch(`${API}/sales/${encodeURIComponent(transacao)}/refund`, { method: 'PUT', headers: { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' } }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }) as { ok: boolean; status: number; text: () => Promise<string> })
+  if (!res.ok) return { ok: false, erro: `Hotmart respondeu ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}` }
+  return { ok: true }
+}
+
 export interface CompraHotmart {
   transacao: string
   produto: string

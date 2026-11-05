@@ -9,6 +9,7 @@ import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { aberturaReenvio, mensagensDeAcesso } from '@/lib/whatsapp-access'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
+import { tratarAprovacaoReembolso, executarReembolso, type PedidoReembolso } from './reembolsos'
 
 const VALIDADE_MIN = 30 // um "sim" depois disso não executa nada
 const APP_URL = 'https://riseme.app'
@@ -37,6 +38,13 @@ const NAO = /^(n[aã]o|cancela|cancelar|deixa|esquece)\b/i
 export async function tratarComando(texto: string, dizer: Dizer): Promise<boolean> {
   const t = texto.trim()
 
+  // 0) resposta à lista de reembolsos ("ok 1 2", "ok todos", "não 2") — lib/whatsapp-agent/reembolsos.ts
+  const reembolso = await tratarAprovacaoReembolso(t)
+  if (reembolso) {
+    await dizer(reembolso)
+    return true
+  }
+
   // 1) confirmação/cancelamento do último comando aguardando
   if (SIM.test(t) || NAO.test(t)) {
     const aguardando = await comandoAguardando()
@@ -47,7 +55,7 @@ export async function tratarComando(texto: string, dizer: Dizer): Promise<boolea
       return true
     }
     try {
-      const resultado = await executar(aguardando.acao, aguardando.params as Params)
+      const resultado = await executar(aguardando.acao, aguardando.params as Params, aguardando.id)
       await fechar(aguardando.id, 'executado', resultado)
       await dizer(`✅ ${resultado}`)
     } catch (err) {
@@ -112,7 +120,7 @@ function planejar(p: PedidoComando, a: Aluna): { resumo: string; params: Params 
   }
 }
 
-async function executar(acao: string, p: Params): Promise<string> {
+async function executar(acao: string, p: Params, idAtual?: number): Promise<string> {
   const db = admin()
   switch (acao) {
     case 'liberar_produto': {
@@ -155,6 +163,8 @@ async function executar(acao: string, p: Params): Promise<string> {
       await registrarMensagem({ phone: toZapiPhone(chat), direction: 'out', author: 'system', body: msg.replaceAll(code, '••••••'), waMessageId: r.messageId })
       return `Acesso novo enviado para ${p.nome || p.email} (senha nova; a antiga não vale mais).`
     }
+    case 'reembolsar':
+      return executarReembolso(idAtual!, p as unknown as PedidoReembolso)
     default:
       throw new Error(`ação desconhecida: ${acao}`)
   }
