@@ -1,6 +1,6 @@
 # Acervo científico do atendimento — gerado de `lib/whatsapp-agent/acervo.ts` (editar o .ts e rodar `npx tsx scripts/acervo-md.ts`)
 
-Gerado em 2026-11-05. 23 trechos. Regra (Bruno 05/11/2026): só fonte confiável e válida em qualquer região; resposta que a aluna possa aplicar com segurança. "Revisado" vazio = leva inicial, aguardando a leitura do Bruno.
+Gerado em 2026-11-05. 45 trechos. Regra (Bruno 05/11/2026): só fonte confiável e válida em qualquer região; resposta que a aluna possa aplicar com segurança. "Revisado" vazio = leva inicial, aguardando a leitura do Bruno.
 
 ## Calorias
 
@@ -269,3 +269,272 @@ Fontes:
 - AASM / Sleep Research Society — *Recommended amount of sleep for a healthy adult: a joint consensus statement* (2015) — <https://doi.org/10.5665/sleep.4716>
 
 Palavras que acionam: sueño, dormir, duermo mal, insomnio, cansancio, sono, estres, estrés, cortisol, ansiedad
+
+## Joelho
+
+### joe-02 · Como ganhar amplitude e alinhamento no agachamento (exercícios) · a revisar
+
+Amplitude se ganha aos poucos, sem dor: (1) agachar até uma cadeira ou caixa e levantar, descendo um pouco mais a cada semana; (2) agachar segurando num apoio (porta, mesa) para controlar a descida; (3) ponte de glúteo (deitada, pés no chão, subir o quadril) 2–3 séries de 12–15 para fortalecer glúteo e proteger o joelho; (4) "concha" deitada de lado (joelhos dobrados, abrir o joelho de cima) 2 séries de 15 por lado para o quadril, que é o que impede o joelho de cair para dentro; (5) alongar panturrilha e flexores do quadril 30–60 s depois do treino, porque tornozelo e quadril rígidos limitam o agachamento. Dica de execução: pés na largura do quadril, peso nos calcanhares, joelho apontando para a ponta do pé, descer só até onde não dói.
+
+**Cuidado:** Dor aguda, inchaço, estalo com dor ou joelho que "trava": parar e avaliar com médico/fisioterapeuta.
+
+Fontes:
+- Powers CM, Journal of Orthopaedic & Sports Physical Therapy — *The influence of abnormal hip mechanics on knee injury: a biomechanical perspective* (2010) — <https://doi.org/10.2519/jospt.2010.3337>
+- Crossley KM et al., British Journal of Sports Medicine — *Patellofemoral pain consensus statement (exercise and physical interventions)* (2016) — <https://doi.org/10.1136/bjsports-2016-096268>
+
+Palavras que acionam: amplitud, amplitude, rango de movimiento, movilidad, mobilidade, rodilla hacia adentro, bajar mas, no puedo bajar, sentadilla profunda, cadera, quadril, gluteo, glúteo, puente, ponte, tobillo
+
+## Coluna
+
+### cos-02 · Como fortalecer o core sem dor lombar (progressões) · a revisar
+
+Ordem segura para o abdômen e a lombar: (1) "inseto morto" (deitada, braços e pernas para cima, estender braço e perna opostos devagar, lombar encostada no chão) 2 séries de 8 por lado; (2) "cachorro-pássaro" (quatro apoios, estender braço e perna opostos, sem girar o tronco) 2 séries de 8 por lado; (3) prancha com joelhos no chão, 3 séries de 15–30 s, só então a prancha completa, aumentando 5–10 s por semana; (4) ponte de glúteo. Regra de ouro: coluna neutra (nem arqueada, nem arredondada), abdômen firme como se fosse levar um soco, respirar. Abdominais tradicionais com a lombar arqueando e pernas esticadas são os que mais dão dor; versões curtas e lentas rendem mais.
+
+**Cuidado:** Dor que desce para a perna, formigamento, fraqueza ou dor noturna: médico antes de continuar.
+
+Fontes:
+- McGill SM, Strength & Conditioning Journal — *Core training: evidence translating to better performance and injury prevention* (2010) — <https://doi.org/10.1519/SSC.0b013e3181df4521>
+- Owen PJ et al., British Journal of Sports Medicine — *Which specific modes of exercise training are most effective for treating low back pain? Network meta-analysis* (2020) — <https://doi.org/10.1136/bjsports-2019-100886>
+
+Palavras que acionam: core, abdomen, lumbar, lombar, espalda baja, plancha, prancha, bird dog, dead bug, columna neutra, postura, hernia
+
+## Ombro e punho
+
+### omb-01 · Flexão de braço: dor no punho ou no ombro e como progredir · a revisar
+
+Dor no punho na flexão costuma ser falta de mobilidade: apoiar as mãos em halteres fixos ou nos punhos fechados (punho reto), ou elevar as mãos num degrau, resolve na maioria. Dor no ombro costuma vir de cotovelos muito abertos: cotovelos a uns 45° do corpo, mãos um pouco mais largas que os ombros, omoplatas firmes. Progressão: flexão na parede → mãos no sofá ou mesa → joelhos no chão → completa → pés elevados. Trocar de nível quando fizer 12–15 repetições limpas.
+
+**Cuidado:** Dor no ombro ao levantar o braço no dia a dia, ou que acorda à noite: médico.
+
+Fontes:
+- ACSM — *Position stand: progression models in resistance training for healthy adults* (2009) — <https://doi.org/10.1249/MSS.0b013e3181915670>
+
+Palavras que acionam: flexiones, flexion, lagartijas, push up, muñeca, muñecas, punho, hombro, hombros, ombro, codos, no puedo hacer flexiones
+
+## Treino
+
+### pro-02 · Escada de progressão dos exercícios do desafio · a revisar
+
+Quando um exercício está fácil ou difícil demais, muda-se a versão, não o treino: agachamento (até a cadeira → livre → com pausa de 2 s embaixo → afundo → agachamento búlgaro com pé atrás no sofá); flexão (parede → inclinada → joelhos → completa); prancha (joelhos → completa → com toque no ombro); ponte de glúteo (duas pernas → uma perna); abdominal (inseto morto → elevação de pernas dobradas → prancha lateral). Regra: ficar numa versão até 12–15 repetições limpas (ou 30–45 s na prancha) e então subir um degrau. Fazer "até a falha" todo dia não é necessário; 1–3 repetições de reserva já estimulam.
+
+**Cuidado:** Regra do produto: o desafio tem um nível; aqui estão as variações para adaptar, sem pular dias.
+
+Fontes:
+- ACSM — *Position stand: progression models in resistance training for healthy adults* (2009) — <https://doi.org/10.1249/MSS.0b013e3181915670>
+- Schoenfeld BJ et al., Journal of Sports Sciences — *Loading recommendations for muscle strength, hypertrophy, and local endurance: a re-examination of the repetition continuum* (2021) — <https://doi.org/10.3390/sports9020032>
+
+Palavras que acionam: progresion, variacion, variación, version mas facil, más fácil, más difícil, mas dificil, no puedo hacer, no aguanto, bulgara, zancadas, plancha lateral, hasta el fallo, cuantas repeticiones
+
+## Flexibilidade
+
+### fle-01 · Como ganhar flexibilidade · a revisar
+
+Flexibilidade melhora com alongamento estático de 30–60 segundos por músculo, 2–3 vezes por semana, feito depois do treino ou em sessão separada, até um desconforto leve, nunca dor. Em 4–8 semanas a amplitude muda. Antes do treino, o melhor é aquecimento dinâmico (movimentos amplos e lentos, como balanços de perna e círculos de quadril). Mulheres a partir dos 40 e no pós-parto ganham mais com consistência do que com intensidade.
+
+Fontes:
+- ACSM, Garber CE et al., Medicine & Science in Sports & Exercise — *Quantity and quality of exercise for developing and maintaining cardiorespiratory, musculoskeletal, and neuromotor fitness in apparently healthy adults* (2011) — <https://doi.org/10.1249/MSS.0b013e318213fefb>
+
+Palavras que acionam: flexibilidad, flexibilidade, estirar, estiramientos, alongar, rigida, rígida, dura, tocar los pies, spagat, yoga
+
+## Calorias
+
+### cal-05 · Como estimar o próprio gasto (passo a passo) e ajustar · a revisar
+
+Equação de Mifflin-St Jeor para mulheres: basal = 10 × peso (kg) + 6,25 × altura (cm) − 5 × idade − 161. Exemplo: 70 kg, 165 cm, 40 anos → 700 + 1.031 − 200 − 161 ≈ 1.370 kcal. Multiplica-se pelo fator de atividade: 1,2 (sedentária), 1,375 (leve: o desafio diário), 1,55 (moderada: desafio + caminhadas), 1,725 (intensa). No exemplo, com fator leve: ≈ 1.880 kcal de gasto; déficit de 300–500 dá uma meta de 1.400–1.600 kcal. Ajuste: pesar 1 vez por semana nas mesmas condições; se em 3 semanas o peso não mexeu, cortar 100–200 kcal ou somar 2.000–3.000 passos por dia. Contar por 1–2 semanas num app de alimentos ensina as porções; depois dá para seguir por medidas de mão (proteína = palma, carboidrato = punho, gordura = polegar).
+
+**Cuidado:** É estimativa, não prescrição; condição de saúde, remédio, gravidez ou amamentação → nutricionista. Nunca abaixo de ~1.200 kcal sem profissional.
+
+Fontes:
+- Mifflin MD et al., American Journal of Clinical Nutrition — *A new predictive equation for resting energy expenditure in healthy individuals* (1990) — <https://doi.org/10.1093/ajcn/51.2.241>
+- NIH / NHLBI (EUA) — *Aim for a Healthy Weight — calorie guidance* (2022) — <https://www.nhlbi.nih.gov/health/educational/lose_wt/eat/calories.htm>
+
+Palavras que acionam: calcular, como calculo, formula, fórmula, ejemplo, factor de actividad, contar calorias, app de calorias, porciones, porções, mano, cuanto como
+
+## Alimentação
+
+### ali-06 · Prato simples para emagrecer sem contar: a regra das metades · a revisar
+
+Sem contar calorias: metade do prato de vegetais e verduras, um quarto de proteína (ovo, frango, peixe, carne magra, leguminosas), um quarto de carboidrato de boa qualidade (arroz, batata, milho, tortilla integral), uma colher de gordura boa (azeite, abacate, castanhas). Fruta 2–3 porções por dia. Açúcar adicionado abaixo de 10% das calorias (idealmente 5%): refrigerante, suco de caixinha e doces são a maior fonte. Fibra 25–30 g por dia (vegetais, frutas, feijão, aveia) dá saciedade e intestino regular.
+
+Fontes:
+- OMS — *Guideline: sugars intake for adults and children* (2015) — <https://www.who.int/publications/i/item/9789241549028>
+- EFSA — *Scientific Opinion on Dietary Reference Values for carbohydrates and dietary fibre* (2010) — <https://doi.org/10.2903/j.efsa.2010.1462>
+
+Palavras que acionam: que comer, qué como, plato, prato, porciones, azucar, azúcar, fibra, verduras, fruta, frutas, refresco, gaseosa, dulces, pan, tortilla, arroz
+
+### ali-07 · Ultraprocessados e por que "comida de verdade" emagrece mais · a revisar
+
+Num estudo controlado, pessoas com acesso livre a comida ultraprocessada comeram em média 500 kcal a mais por dia e ganharam peso em duas semanas, mesmo com os mesmos nutrientes na tabela, em comparação com comida minimamente processada. Ultraprocessado (salgadinho, biscoito, refrigerante, embutido, pronto para aquecer) é fácil de comer demais e sacia pouco. Trocar o que dá: não precisa ser perfeito, precisa ser a maioria das refeições.
+
+Fontes:
+- Hall KD et al., Cell Metabolism — *Ultra-processed diets cause excess calorie intake and weight gain: an inpatient randomized controlled trial* (2019) — <https://doi.org/10.1016/j.cmet.2019.05.008>
+
+Palavras que acionam: ultraprocesados, ultraprocessados, procesados, comida chatarra, galletas, papitas, snacks, embutidos, comida real, saludable
+
+### ali-08 · Adoçantes, "detox", sucos e chás emagrecedores · a revisar
+
+Adoçantes sem açúcar não ajudam a controlar o peso a longo prazo, segundo a diretriz da OMS de 2023; podem servir de transição, mas o objetivo é reduzir o doce em geral. "Detox", sucos de limpeza e chás emagrecedores não têm evidência: fígado e rins já fazem a limpeza, e os chás laxantes só tiram água. Suco, mesmo natural, concentra o açúcar da fruta sem a fibra: melhor a fruta inteira.
+
+Fontes:
+- OMS — *Use of non-sugar sweeteners: WHO guideline* (2023) — <https://www.who.int/publications/i/item/9789240073616>
+- NIH / NCCIH (EUA) — *"Detoxes" and "cleanses": what you need to know* (2019) — <https://www.nccih.nih.gov/health/detoxes-and-cleanses-what-you-need-to-know>
+
+Palavras que acionam: edulcorante, adoçante, stevia, sucralosa, detox, jugo, jugos, suco, te para adelgazar, té para adelgazar, laxante, limpieza
+
+### ali-09 · Álcool e emagrecimento · a revisar
+
+Álcool tem 7 kcal por grama (uma taça de vinho ou uma lata de cerveja ≈ 120–150 kcal), tira a prioridade do corpo de queimar gordura enquanto é metabolizado, piora o sono e aumenta o apetite. Não precisa zerar para emagrecer, mas reduzir frequência e dose é dos ajustes que mais rendem. Não há dose "saudável": a OMS considera que nenhum nível é isento de risco.
+
+Fontes:
+- OMS — *No level of alcohol consumption is safe for our health* (2023) — <https://www.who.int/europe/news/item/04-01-2023-no-level-of-alcohol-consumption-is-safe-for-our-health>
+
+Palavras que acionam: alcohol, álcool, vino, cerveza, trago, tragos, fin de semana, fiesta
+
+### ali-10 · Suplementos: o que tem evidência (creatina, proteína em pó, vitamina D) e o que não tem · a revisar
+
+Creatina (3–5 g por dia, qualquer horário) é o suplemento com mais evidência para força e massa muscular, segura em adultas saudáveis, e pode subir o peso em 0,5–1 kg por água no músculo, não gordura. Proteína em pó só substitui comida quando não dá para bater a meta de proteína. Vitamina D só com exame mostrando falta. Multivitamínico, colágeno, termogênico e "queimadores" não têm evidência para emagrecer. Para berberina, garcinia e afins, não há recomendação segura sem médico.
+
+**Cuidado:** Qualquer suplemento com doença renal, gravidez ou remédio de uso contínuo: médico antes. O bot não indica dose de suplemento fora destes.
+
+Fontes:
+- ISSN, Kreider RB et al. — *Position stand: safety and efficacy of creatine supplementation in exercise, sport, and medicine* (2017) — <https://doi.org/10.1186/s12970-017-0173-z>
+- ISSN, Jäger R et al. — *Position stand: protein and exercise* (2017) — <https://doi.org/10.1186/s12970-017-0177-8>
+
+Palavras que acionam: creatina, suplemento, suplementos, proteina en polvo, whey, colageno, colágeno, vitamina, vitaminas, multivitaminico, omega, berberina, garcinia, termogenico, quemador
+
+## Jejum
+
+### jej-03 · Como fazer jejum intermitente com segurança (se ela quiser) · a revisar
+
+Formato mais usado: 16/8 (comer num período de 8 horas, por exemplo 12h–20h), começando com 12/12 e alargando aos poucos. Dentro da janela, as refeições normais com proteína e vegetais, sem compensar. Água, café e chá sem açúcar são livres no jejum. Treinar pode ser antes ou dentro da janela. Sinais para parar: tontura, dor de cabeça persistente, irritabilidade forte, compulsão na janela, ciclo menstrual desregulado. Jejuns longos (24 h ou mais) não têm vantagem e aumentam risco.
+
+**Cuidado:** Não para grávidas, lactantes, diabéticas com remédio, adolescentes, pessoas com distúrbio alimentar ou abaixo do peso. Com qualquer doença, médico antes.
+
+Fontes:
+- Liu D et al., New England Journal of Medicine — *Calorie restriction with or without time-restricted eating in weight loss* (2022) — <https://doi.org/10.1056/NEJMoa2114833>
+- de Cabo R & Mattson MP, New England Journal of Medicine — *Effects of intermittent fasting on health, aging, and disease* (2019) — <https://doi.org/10.1056/NEJMra1905136>
+
+Palavras que acionam: como hacer ayuno, empezar ayuno, ventana, 12/12, 16/8, que puedo tomar en ayuno, cafe en ayunas, romper el ayuno, ayuno largo
+
+## Platô
+
+### pla-01 · O peso travou: o que fazer, em ordem · a revisar
+
+Depois de semanas perdendo, o corpo gasta menos (adaptação) e o peso para. Em ordem: (1) conferir se o déficit ainda existe: pesar as porções por uma semana, porque "esquecer" 200–300 kcal por dia é comum; (2) recalcular o gasto com o peso novo (quem pesa menos gasta menos); (3) subir a atividade do dia (passos, escada, ficar de pé), que pesa mais que o treino em si; (4) proteína e sono em dia; (5) se tudo está certo há 3–4 semanas, uma pausa de 1–2 semanas comendo na manutenção costuma destravar e aliviar a cabeça. Platô de 2 semanas não é platô; é a oscilação normal.
+
+Fontes:
+- Trexler ET et al., Journal of the International Society of Sports Nutrition — *Metabolic adaptation to weight loss: implications for the athlete* (2014) — <https://doi.org/10.1186/1550-2783-11-7>
+- Paluch AE et al., The Lancet Public Health — *Daily steps and all-cause mortality: a meta-analysis of 15 international cohorts* (2022) — <https://doi.org/10.1016/S2468-2667(21)00302-9>
+
+Palavras que acionam: estancada, estancamiento, meseta, plateau, no bajo mas, no bajo más, dejé de bajar, deje de bajar, pasos, caminar, caminata, descanso de la dieta
+
+## Gravidez
+
+### mul-05 · Como adaptar os exercícios na gravidez (com liberação médica) · a revisar
+
+Com o médico de acordo: trocar saltos por passos; agachamento com apoio e amplitude confortável; depois do 1º trimestre, nada deitada de costas por mais de 1–2 minutos (usar lado ou inclinada); prancha pode virar prancha na parede ou nos joelhos; evitar abdominais tradicionais (favorecem a diástase); treino do assoalho pélvico (contrair como se segurasse a urina, 8–12 vezes, 3 séries por dia) desde o início; intensidade em que dá para conversar; hidratar e evitar calor. Parar e ligar para o médico se: sangramento, perda de líquido, contrações regulares, tontura, dor no peito, falta de ar antes do esforço, dor ou inchaço na panturrilha.
+
+**Cuidado:** Sempre com liberação de quem acompanha a gestação. O desafio de calistenia não é para gestantes; o Preparto (Pase) é.
+
+Fontes:
+- ACOG — *Committee Opinion No. 804: Physical activity and exercise during pregnancy and the postpartum period* (2020) — <https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/04/physical-activity-and-exercise-during-pregnancy-and-the-postpartum-period>
+- Mottola MF et al., British Journal of Sports Medicine — *2019 Canadian guideline for physical activity throughout pregnancy* (2018) — <https://doi.org/10.1136/bjsports-2018-100056>
+
+Palavras que acionam: embarazada, embarazo, gravida, grávida, gestante, trimestre, boca arriba, saltos, suelo pelvico, suelo pélvico, kegel, contracciones
+
+## Pós-parto
+
+### mul-06 · Diástase e assoalho pélvico: como checar e por onde começar · a revisar
+
+Checar a diástase: deitada, joelhos dobrados, levantar a cabeça levemente e sentir com os dedos acima e abaixo do umbigo; 2 dedos ou mais de separação, ou a barriga "saltar" numa ponta, pede progressão lenta e fisioterapia pélvica. Começar por: respiração com o abdômen (expirar puxando o umbigo), contração do assoalho pélvico (8–12 vezes, 3 séries por dia, segurando 5–10 s), ponte de glúteo, inseto morto com pernas apoiadas, caminhada. Deixar abdominal tradicional, prancha completa e saltos para quando não houver vazamento de urina, peso no períneo nem a barriga saltando. Treino do assoalho pélvico reduz a incontinência na maioria das mulheres em 3 meses.
+
+**Cuidado:** Incontinência, dor pélvica, sensação de peso ou cesárea com dor: fisioterapeuta pélvica e médico antes de evoluir. No app, o Posparto (Pase) é o programa dessa fase.
+
+Fontes:
+- Cochrane (Woodley SJ et al.) — *Pelvic floor muscle training for preventing and treating urinary and faecal incontinence in antenatal and postnatal women* (2020) — <https://doi.org/10.1002/14651858.CD007471.pub4>
+- Evenson KR et al., Obstetrical & Gynecological Survey — *Summary of international guidelines for physical activity after pregnancy* (2014) — <https://doi.org/10.1097/OGX.0000000000000077>
+
+Palavras que acionam: diastasis, diástase, suelo pelvico, suelo pélvico, perdida de orina, pérdida de orina, incontinencia, kegel, posparto, cesarea, cesárea, cuarentena, barriga despues del parto
+
+## Menopausa
+
+### mul-07 · Menopausa: treino para osso, barriga e calorões (como fazer) · a revisar
+
+Para o osso e a massa muscular, o que funciona é treino de força progressivo (agachamento, afundo, flexão, ponte, com carga ou versões mais difíceis) 2–3 vezes por semana e algum impacto controlado (subir degrau, pequenos saltos se as articulações permitirem). A gordura abdominal responde a déficit moderado + proteína (1,2–1,6 g/kg) + força; cardio sozinho rende menos. Calorões: exercício regular ajuda muitas mulheres, mas treinar em ambiente fresco e hidratada evita piorar na hora. Sono costuma ser o maior gargalo: rotina fixa, quarto frio, sem álcool à noite.
+
+**Cuidado:** Osteoporose diagnosticada: liberar saltos e cargas com o médico. Sintomas fortes: ginecologista; o bot não opina sobre hormônios.
+
+Fontes:
+- Watson SL et al., Journal of Bone and Mineral Research — *High-intensity resistance and impact training improves bone mineral density and physical function in postmenopausal women with osteopenia and osteoporosis: the LIFTMOR randomized controlled trial* (2018) — <https://doi.org/10.1002/jbmr.3284>
+- NAMS (The Menopause Society) — *The 2022 Hormone Therapy Position Statement* (2022) — <https://doi.org/10.1097/GME.0000000000002028>
+
+Palavras que acionam: menopausia, menopausa, osteoporosis, huesos, ossos, sofocos, calores, barriga menopausia, grasa abdominal, perimenopausia
+
+## Condições comuns
+
+### mul-08 · Síndrome dos ovários policísticos (SOP) e hipotireoidismo: dá para emagrecer? · a revisar
+
+SOP: a diretriz internacional recomenda exatamente o que o desafio faz, atividade regular (150 min moderada ou 75 vigorosa por semana, com força 2 dias) e alimentação com déficit moderado; perder 5–10% do peso já melhora ciclo e insulina. Hipotireoidismo tratado e com dose ajustada não impede emagrecer; sem tratamento, o gasto cai e a retenção de líquido confunde a balança. Em ambos, o ritmo pode ser mais lento, não impossível.
+
+**Cuidado:** Diagnóstico e medicação são do médico; o bot não ajusta nem comenta dose. Sem diagnóstico e com ciclo irregular, pelos no rosto ou cansaço extremo: consultar.
+
+Fontes:
+- Teede HJ et al., Human Reproduction — *Recommendations from the international evidence-based guideline for the assessment and management of polycystic ovary syndrome* (2018) — <https://doi.org/10.1093/humrep/dey256>
+
+Palavras que acionam: ovario poliquistico, ovarios poliquisticos, sop, pcos, tiroides, hipotiroidismo, resistencia a la insulina, insulina, hormonal
+
+### mul-09 · Diabetes tipo 2 e pressão alta: treinar com segurança · a revisar
+
+Exercício regular é parte do tratamento das duas: melhora a glicose por 24–72 horas e reduz a pressão. Cuidados práticos: com remédio para glicose, ter um carboidrato rápido por perto e não treinar em jejum sem aval médico; com pressão alta, evitar prender a respiração nos esforços (expirar na força) e exercícios de cabeça para baixo; medir a pressão com regularidade. Não treinar com glicose muito alta com sintomas, ou com pressão descontrolada.
+
+**Cuidado:** Liberação e ajuste de remédio são do médico. Tontura, dor no peito, visão turva ou suor frio: parar e procurar atendimento.
+
+Fontes:
+- ADA (American Diabetes Association), Colberg SR et al., Diabetes Care — *Physical activity/exercise and diabetes: a position statement of the American Diabetes Association* (2016) — <https://doi.org/10.2337/dc16-1728>
+- OMS — *WHO guidelines on physical activity and sedentary behaviour (chronic conditions)* (2020) — <https://www.who.int/publications/i/item/9789240015128>
+
+Palavras que acionam: diabetes, glucosa, azucar en sangre, presion alta, presión alta, hipertension, hipertensión, metformina, insulina, mareo
+
+## Corpo
+
+### cor-01 · Celulite e flacidez · a revisar
+
+Celulite é estrutura da pele e da gordura sob ela, com forte componente genético e hormonal; nenhum creme, massagem ou "treino para celulite" a elimina. O que reduz a aparência é perder gordura, ganhar músculo embaixo da pele (glúteo e coxa) e manter hidratação e sono. Flacidez de braços e barriga melhora com força progressiva e com o tempo; pele muito esticada por perda grande de peso pode precisar de avaliação dermatológica.
+
+Fontes:
+- Luebberding S et al., American Journal of Clinical Dermatology — *Cellulite: an evidence-based review* (2015) — <https://doi.org/10.1007/s40257-015-0129-5>
+
+Palavras que acionam: celulitis, celulite, flacidez, flacida, flácida, piel suelta, estrias, estrías, crema, masaje
+
+### cor-02 · Estresse, cortisol e barriga · a revisar
+
+Estresse crônico eleva o cortisol, aumenta a vontade de comida calórica e piora o sono; o conjunto favorece gordura abdominal. Exercício regular é dos melhores reguladores de estresse, mas treino muito intenso em cima de pouco sono piora. O que funciona: treino moderado e constante, 7–9 horas de sono, refeições regulares com proteína, 10 minutos de caminhada ou respiração lenta nos dias ruins. "Cortisol alto" não é diagnóstico de WhatsApp: se há ganho de peso rápido, estrias roxas, fraqueza ou pressão alta, é médico.
+
+Fontes:
+- Tomiyama AJ, Annual Review of Psychology — *Stress and obesity* (2019) — <https://doi.org/10.1146/annurev-psych-010418-102936>
+
+Palavras que acionam: estres, estrés, cortisol, ansiedad, ansiedade, nervios, como por ansiedad, atracon, atracón, barriga de estres
+
+### cor-03 · Inchaço, gases e intestino · a revisar
+
+Barriga inchada no fim do dia costuma ser gás ou água, não gordura: comer rápido, refrigerante, excesso de sal, adoçantes e fibra aumentada de repente são as causas mais comuns. Ajuda: mastigar devagar, aumentar a fibra aos poucos com água, caminhar 10 minutos depois das refeições, reduzir sal e refrigerante, intestino regular. Inchaço com dor forte, sangue, perda de peso sem querer ou que dura semanas pede médico.
+
+**Cuidado:** Regra do produto: o bônus Plano Antiinchaço traz o protocolo de 3 dias; use-o como base e o acervo como explicação.
+
+Fontes:
+- NIH / NIDDK (EUA) — *Gas in the digestive tract: symptoms and causes* (2021) — <https://www.niddk.nih.gov/health-information/digestive-diseases/gas-digestive-tract>
+
+Palavras que acionam: hinchazon, hinchazón, hinchada, inchaço, inchada, gases, estreñimiento, estrenimiento, intestino, digestion, digestión, retencion de liquidos
+
+## Sinais de alerta
+
+### sin-01 · Quando parar de treinar e procurar atendimento · a revisar
+
+Parar na hora e procurar atendimento: dor ou pressão no peito, falta de ar desproporcional, tontura ou desmaio, palpitação forte que não passa, dor de cabeça súbita e intensa, dor aguda com inchaço numa articulação, perda de força num lado do corpo. Não são "frescura" nem "falta de costume". Enjoo leve, suor e cansaço em treino novo são normais e melhoram em 1–2 semanas.
+
+**Cuidado:** Diante de qualquer um desses sinais, o bot orienta a procurar atendimento e não tenta diagnosticar.
+
+Fontes:
+- ACSM, Riebe D et al., Medicine & Science in Sports & Exercise — *Updating ACSM's recommendations for exercise preparticipation health screening* (2015) — <https://doi.org/10.1249/MSS.0000000000000664>
+
+Palavras que acionam: dolor en el pecho, me falta el aire, mareo, mareada, desmayo, palpitaciones, taquicardia, nauseas, náuseas, vomito, me siento mal
