@@ -18,6 +18,9 @@ export interface MetricasSemana {
   velocidade: { consultas: number; horasMediana: number | null; acima24h: number; pendentesAgora: number; semRespostaDoBot12h: number }
   dinheiro: { registrados: number; aprovados: number; recusados: number; erros: number; horasAteAprovar: number | null; passaramDo15: number }
   custo: { chamadas: number; totalUsd: number; porRespostaUsd: number | null; cacheLido: number; entradaSemCache: number }
+  // Prompt por assunto (05/11/2026): respostas, custo e quantas caíram em 'na dúvida' (prompt inteiro), por assunto.
+  assuntos: { porAssunto: Record<string, { respostas: number; usd: number }>; naDuvida: number; soBase: number }
+  feedbacks: string[] // resumos de feedback das alunas na semana (kind 'feedback-aluna')
 }
 
 const mediana = (xs: number[]) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] : null)
@@ -123,10 +126,19 @@ export async function metricasDaSemana(desde: Date, ate: Date, msgs: Msg[]): Pro
 
   // ── Custo
   const uso = await todas<{ body: string }>((f, t) => db.from('whatsapp_outbox').select('body').eq('kind', 'uso-llm').gte('created_at', dIso).lt('created_at', aIso).range(f, t))
-  let totalUsd = 0, cacheLido = 0, entrada = 0
+  let totalUsd = 0, cacheLido = 0, entrada = 0, naDuvida = 0, soBase = 0
+  const porAssunto: Record<string, { respostas: number; usd: number }> = {}
   for (const u of uso) {
-    try { const b = JSON.parse(u.body) as { custo_usd: number; cache_lido: number; entrada: number }; totalUsd += b.custo_usd || 0; cacheLido += b.cache_lido || 0; entrada += b.entrada || 0 } catch { /* linha inválida */ }
+    try {
+      const b = JSON.parse(u.body) as { custo_usd: number; cache_lido: number; entrada: number; assuntos?: string; fonte?: string }
+      totalUsd += b.custo_usd || 0; cacheLido += b.cache_lido || 0; entrada += b.entrada || 0
+      if (b.fonte === 'duvida' || b.fonte === 'erro' || b.fonte === 'vazio') naDuvida++
+      else if (b.fonte === 'social') soBase++
+      const lista = (b.assuntos ?? '').split(',').map((a) => a.trim()).filter(Boolean)
+      for (const a of lista) { porAssunto[a] ??= { respostas: 0, usd: 0 }; porAssunto[a].respostas++; porAssunto[a].usd += (b.custo_usd || 0) / lista.length }
+    } catch { /* linha inválida */ }
   }
+  const fb = await todas<{ body: string }>((f, t) => db.from('whatsapp_outbox').select('body').eq('kind', 'feedback-aluna').gte('created_at', dIso).lt('created_at', aIso).range(f, t))
 
   return {
     janela: { desde: dIso, ate: aIso },
@@ -135,6 +147,8 @@ export async function metricasDaSemana(desde: Date, ate: Date, msgs: Msg[]): Pro
     velocidade: { consultas: consultas.length, horasMediana: mediana(horas) === null ? null : r1(mediana(horas)!), acima24h, pendentesAgora: pendentesAgora?.length ?? 0, semRespostaDoBot12h: semResposta12h },
     dinheiro: { registrados: reemb.length, aprovados: aprovados.length, recusados: reemb.filter((c) => c.status === 'cancelado').length, erros: reemb.filter((c) => c.status === 'erro').length, horasAteAprovar: mediana(hAprov) === null ? null : r1(mediana(hAprov)!), passaramDo15 },
     custo: { chamadas: uso.length, totalUsd: Math.round(totalUsd * 100) / 100, porRespostaUsd: uso.length ? Math.round((totalUsd / uso.length) * 10000) / 10000 : null, cacheLido, entradaSemCache: entrada },
+    assuntos: { porAssunto: Object.fromEntries(Object.entries(porAssunto).map(([k, v]) => [k, { respostas: v.respostas, usd: Math.round(v.usd * 100) / 100 }])), naDuvida, soBase },
+    feedbacks: fb.map((r) => r.body).filter(Boolean).slice(0, 15),
   }
 }
 
@@ -168,5 +182,10 @@ ${tr('Passaram do dia 15 sem decisão', `${m.dinheiro.passaramDo15}${m.dinheiro.
 <tr><td colspan="2" style="padding-top:8px"><b>Custo do bot</b></td></tr>
 ${tr('Chamadas · total · por resposta', `${m.custo.chamadas} · US$ ${m.custo.totalUsd} · US$ ${m.custo.porRespostaUsd ?? '—'}`)}
 ${tr('Tokens lidos do cache × sem cache', `${m.custo.cacheLido.toLocaleString('pt-BR')} × ${m.custo.entradaSemCache.toLocaleString('pt-BR')}`)}
+<tr><td colspan="2" style="padding-top:8px"><b>Por assunto (prompt por assunto, desde 05/11)</b></td></tr>
+${Object.entries(m.assuntos?.porAssunto ?? {}).sort((a, b) => b[1].respostas - a[1].respostas).map(([k, v]) => tr(k, `${v.respostas} respostas · US$ ${v.usd}`)).join('\n') || tr('(sem registro)', '—')}
+${tr('Caíram em "na dúvida" (prompt inteiro) · só base (social)', `${m.assuntos?.naDuvida ?? 0} · ${m.assuntos?.soBase ?? 0}`)}
+<tr><td colspan="2" style="padding-top:8px"><b>Feedback das alunas (aulas, app, conteúdo)</b></td></tr>
+${(m.feedbacks ?? []).length ? m.feedbacks.map((f) => tr('•', f)).join('\n') : tr('(nenhum)', '—')}
 </table>`
 }
