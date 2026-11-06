@@ -585,7 +585,7 @@ export async function decidirResposta(params: {
   const permiteLongo = Boolean(params.hotmart) || Boolean(params.consultaPendente) || Boolean(out.reembolso_transacoes?.trim()) || out.passar_para_humano ||
     /\?|receta|té\b|tes\b|men[uú]|plan\b|ejercicio|rutina|entren|d[ií]a \d|c[oó]mo|d[oó]nde|qu[eé]\b|puedo|cu[aá]nt|herbat|ćwicz|jak\b|gdzie|ile\b/i.test(ultimaDela) ||
     ultimaDela.length > 120
-  const verificacao = await verificarResposta({ texto: out.resposta, conversa: params.conversa, agora: params.agora, permiteLongo, contexto: [params.hotmart, params.perfil?.cartao, params.consultaPendente ? `CONSULTA PENDENTE: ${params.consultaPendente.resumo}` : '', acervo, aulas].filter(Boolean).join('\n\n') })
+  const verificacao = await verificarResposta({ texto: out.resposta, conversa: params.conversa, agora: params.agora, permiteLongo, regras: (extra || base).slice(0, 9000), contexto: [params.hotmart, params.perfil?.cartao, params.consultaPendente ? `CONSULTA PENDENTE: ${params.consultaPendente.resumo}` : '', acervo, aulas].filter(Boolean).join('\n\n') })
   if (verificacao.corrigida || verificacao.problemas.length) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, verificacao).catch(() => undefined)
   out.resposta = verificacao.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a

@@ -74,7 +74,7 @@ export function limparTexto(t: string): string {
   return t.replace(/[ \t]{2,}/g, ' ').replace(/ +([,.;:!?])/g, '$1').replace(/ +\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
 }
 
-export async function verificarResposta(p: { texto: string; conversa: MensagemConversa[]; agora: string; permiteLongo?: boolean; contexto?: string }): Promise<Verificacao> {
+export async function verificarResposta(p: { texto: string; conversa: MensagemConversa[]; agora: string; permiteLongo?: boolean; contexto?: string; regras?: string }): Promise<Verificacao> {
   const original = limparTexto(p.texto)
   if (!original) return { texto: original, corrigida: false, problemas: [] }
   const fixos = checarFixo(original, p.conversa, p.agora).filter((x) => !(p.permiteLongo && /longa|maior|900/.test(x)))
@@ -93,8 +93,9 @@ export async function verificarResposta(p: { texto: string; conversa: MensagemCo
         '(f) problemas = lista curta em português do que estava errado (ex.: "longa demais", "saudação repetida", "reabriu assunto", ' +
         '"explica o produto sem ela perguntar", "sector responsable", "palavra em português", "tom de robô", "duas perguntas", "bloco sem quebra de linha"); ' +
         '(g) o bot recebeu FATOS DO SISTEMA (abaixo, quando houver: consulta real à Hotmart, cartão da aluna, acervo, aula): o que a resposta diz com base neles NÃO é invenção — nunca corte nem contradiga esses fatos; ' +
-        '(h) texto_corrigido SEMPRE no mesmo idioma da resposta original (nunca em português, que é só o idioma destas instruções).\n\n' + VOZ,
-      messages: [{ role: 'user', content: `${p.contexto ? `FATOS DO SISTEMA que o bot recebeu (não são invenção):\n${p.contexto.slice(0, 4000)}\n\n` : ''}Conversa (últimas mensagens):\n${ultimas}\n\nProblemas já detectados por checagem fixa: ${fixos.length ? fixos.join(', ') : 'nenhum'}${p.permiteLongo ? '\n(Esta resposta pode ser longa: é de conteúdo/dinheiro.)' : ''}\n\nRESPOSTA DO BOT:\n«${original}»` }],
+        '(h) texto_corrigido SEMPRE no mesmo idioma da resposta original (nunca em português, que é só o idioma destas instruções); ' +
+        '(i) o bot segue REGRAS DO PRODUTO (abaixo, quando houver): oferta, explicação, passo, prazo, valor ou link que essas regras mandam dar NÃO é invenção nem "venda sem ela pedir" — nunca corte nem contradiga (06/11/2026: a editora apagou a oferta do Pase no lugar do reembolso, que é regra do dono).\n\n' + VOZ,
+      messages: [{ role: 'user', content: `${p.regras ? `REGRAS DO PRODUTO que o bot recebeu (o que elas mandam fazer não é invenção):\n${p.regras}\n\n` : ''}${p.contexto ? `FATOS DO SISTEMA que o bot recebeu (não são invenção):\n${p.contexto.slice(0, 4000)}\n\n` : ''}Conversa (últimas mensagens):\n${ultimas}\n\nProblemas já detectados por checagem fixa: ${fixos.length ? fixos.join(', ') : 'nenhum'}${p.permiteLongo ? '\n(Esta resposta pode ser longa: é de conteúdo/dinheiro.)' : ''}\n\nRESPOSTA DO BOT:\n«${original}»` }],
     })
     const bloco = res.content.find((b) => b.type === 'text')
     if (!bloco || bloco.type !== 'text') return { texto: original, corrigida: false, problemas: fixos }
