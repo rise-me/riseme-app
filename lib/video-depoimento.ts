@@ -91,7 +91,11 @@ export async function convidarParaVideo(): Promise<number> {
     const { data: u } = await db.from('users').select('phone, name').eq('id', id).maybeSingle()
     const tel = (u?.phone ?? '').replace(/\D/g, '')
     if (!tel || convidadas.has(tel.slice(-9))) continue
-    const idioma = tel.startsWith('48') ? 'pl' : tel.startsWith('90') || tel.startsWith('420') || tel.startsWith('39') ? null : 'es'
+    // Idioma = o da compra (user_metadata.locale, gravado pelo webhook); DDI só se a conta não tiver.
+    // Idioma sem texto de convite (cs, it, tr…) fica de fora: antes, tcheca com +421/+49 recebia em espanhol.
+    const { data: au } = await db.auth.admin.getUserById(id)
+    const loc = (au?.user?.user_metadata?.locale as string | undefined) ?? null
+    const idioma = loc ? (CONVITE[loc] ? loc : null) : tel.startsWith('48') ? 'pl' : tel.startsWith('90') || tel.startsWith('420') || tel.startsWith('39') ? null : 'es'
     if (!idioma) continue
     const hora = horaLocal(tel)
     if (hora < HORA_INICIO || hora >= HORA_FIM) continue // de noite lá: fica pra uma rodada de dia
