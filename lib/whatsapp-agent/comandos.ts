@@ -178,7 +178,7 @@ async function executar(acao: string, p: Params, idAtual?: number): Promise<stri
         const tel = chat.replace(/\D/g, '')
         const hora = horaLocal(tel)
         const esperaH = hora >= 8 && hora < 22 ? 0 : hora >= 22 ? 24 - hora + 9 : 9 - hora // de madrugada lá, sai às 9h
-        await enfileirar({ phone: chat, kind: 'manual', body: textoCancelada(perfil?.idioma ?? 'es', p.nome, p.produtoAssinatura ?? 'Pase Completo', p.fimAcesso), sendAfter: new Date(Date.now() + esperaH * 3600_000) })
+        await enfileirar({ phone: chat, kind: 'manual', body: textoCancelada(perfil?.idioma ?? 'es', p.nome, p.produtoAssinatura ?? 'Pase Completo', p.fimAcesso ?? null), sendAfter: new Date(Date.now() + esperaH * 3600_000) })
       }
       return `Assinatura ${p.codigo} de ${p.nome || p.email} cancelada na Hotmart${chat ? '; ela recebe a confirmação no WhatsApp' : ' (sem WhatsApp dela: avise por e-mail)'}.`
     }
