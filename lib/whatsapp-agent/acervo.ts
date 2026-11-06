@@ -455,6 +455,17 @@ export const ACERVO: Trecho[] = [
     ],
     tags: ['que trabaja', 'qué trabaja', 'que musculo', 'qué músculo', 'para que sirve', 'para qué sirve', 'plancha lateral', 'plancha', 'sentadilla', 'puente', 'estocada', 'zancada', 'superman', 'bird dog', 'dead bug', 'flexiones', 'abdominales', 'core', 'oblicuos', 'gluteo', 'glúteo'],
   },
+  {
+    id: 'les-01', tema: 'Lesão', titulo: 'Treinar com lesão ou dor crônica numa articulação (ombro/manguito rotador, joelho, lombar, punho): o que adaptar no desafio',
+    pontos: 'Lesão numa articulação não impede o desafio: adapta-se o que carrega essa articulação e o resto segue normal. Ombro (manguito rotador, bursite, tendinite): o que carrega é apoiar o peso nas mãos (flexões, pranchas altas, bear/down dog, inchworm, toque no ombro) e levar os braços acima da cabeça com força; trocar por flexão na parede, prancha nos antebraços ou joelhos, e pular o exercício nos dias de dor; pernas, glúteo e abdominal no chão vão normais. Joelho: amplitude menor (agachar até a cadeira), sem saltos, afundo curto. Lombar/hérnia: abdominais com pernas dobradas (inseto morto, cachorro-pássaro) no lugar de pernas estendidas e superman; sem flexão de tronco com peso. Punho: punhos fechados, halteres fixos ou mãos num degrau; prancha nos antebraços. Regra geral consolidada: movimento sem dor ou com dor leve (até 3 de 10) que não piora até o dia seguinte é aceitável; dor que aumenta durante, que fica depois ou que acorda à noite = parar esse exercício.',
+    cuidado: 'Infiltração, cirurgia ou tratamento em curso: o que o médico ou fisioterapeuta dela proibiu vale acima disto. Dor aguda, inchaço, perda de força ou de movimento, ou formigamento: médico.',
+    fontes: [
+      { org: 'AAOS (American Academy of Orthopaedic Surgeons), OrthoInfo', titulo: 'Rotator Cuff Tears; Rotator Cuff and Shoulder Conditioning Program', ano: 2022, url: 'https://orthoinfo.aaos.org/en/diseases--conditions/rotator-cuff-tears/' },
+      { org: 'NHS (Reino Unido)', titulo: 'Shoulder pain: how to ease it and when to get help', ano: 2023, url: 'https://www.nhs.uk/conditions/shoulder-pain/' },
+      { org: 'ACSM', titulo: 'Position stand: progression models in resistance training for healthy adults', ano: 2009, url: 'https://doi.org/10.1249/MSS.0b013e3181915670' },
+    ],
+    tags: ['lesion', 'lesión', 'lesionada', 'manguito', 'rotador', 'tendinitis', 'bursitis', 'hernia', 'infiltracion', 'infiltración', 'operada', 'cirugia', 'cirugía', 'puedo hacer los ejercicios', 'tengo mal el hombro', 'tengo mal la rodilla', 'lumbar', 'ciatica', 'ciática'],
+  },
 ]
 
 // ─── Busca simples por tags (sem IA): normaliza acentos e pontua por tag encontrada ──────────────────────────────────────
