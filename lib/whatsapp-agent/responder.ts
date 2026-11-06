@@ -798,7 +798,7 @@ export async function interpretarRespostaResponsavel(p: {
 // Ele escreve em português ("libera o Protocolo para fulana@gmail.com"); aqui só se ENTENDE o pedido.
 // Quem executa (depois do "sim") é lib/whatsapp-agent/comandos.ts.
 
-export const ACOES_COMANDO = ['liberar_produto', 'reenviar_acesso', 'trocar_email', 'cardapio_extra', 'pausar_bot', 'resumo', 'nenhuma'] as const
+export const ACOES_COMANDO = ['liberar_produto', 'reenviar_acesso', 'trocar_email', 'cardapio_extra', 'pausar_bot', 'cancelar_assinatura', 'resumo', 'nenhuma'] as const
 export type AcaoComando = (typeof ACOES_COMANDO)[number]
 // Desafios vêm do catálogo (lib/mock-challenges + lib/desafios): desafio novo entra aqui sozinho
 export const PRODUTOS_COMANDO: string[] = ['', ...mockChallenges.map((c) => c.id), 'protocolo-metabolico']
@@ -842,6 +842,7 @@ export async function interpretarComando(texto: string): Promise<PedidoComando> 
       '- trocar_email: trocar o email da conta (precisa do email atual ou nome, e do novo email).\n' +
       '- cardapio_extra: dar 1 cardápio extra / menu a mais.\n' +
       '- pausar_bot: parar o bot na conversa de uma aluna.\n' +
+      '- cancelar_assinatura: cancelar na Hotmart a assinatura (Pase Completo) de uma aluna ("cancela a assinatura da…").\n' +
       '- resumo: pedir o resumo do dia / como estão as coisas.\n' +
       '- nenhuma: qualquer outra coisa (ex.: resposta a uma consulta como "A", "B", ou instrução do que dizer a uma aluna).\n' +
       `Produtos: ${mockChallenges.map((c) => `${c.id} = ${challengeNameEs(c.id)}`).join('; ')}; ` +

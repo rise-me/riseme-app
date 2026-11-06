@@ -8,8 +8,14 @@ import { darCardapioBonus } from '@/lib/diet/quota'
 import { reenviarAcesso, trocarEmail } from './acesso'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 import { tratarAprovacaoReembolso, executarReembolso, type PedidoReembolso } from './reembolsos'
+import { assinaturasPorEmail, cancelarAssinaturaHotmart } from '@/lib/hotmart-api'
+import { enfileirar } from '@/lib/whatsapp-outbox'
+import { horaLocal } from '@/lib/video-depoimento'
+import { sendZapiText, toZapiPhone } from '@/lib/zapi'
+import { registrarMensagem } from './conversa'
 
 const VALIDADE_MIN = 30 // um "sim" depois disso não executa nada
+const VALIDADE_APROVACAO_MIN = 12 * 60 // pedido de aprovação que o SISTEMA manda ao responsável (cancelar assinatura): vale 12 h
 
 const NOME_PRODUTO: Record<string, string> = {
   ...Object.fromEntries(mockChallenges.map((c) => [c.id, challengeNameEs(c.id) ?? c.id])),
@@ -84,7 +90,7 @@ export async function tratarComando(texto: string, dizer: Dizer): Promise<boolea
     await dizer(alvo)
     return true
   }
-  const plano = planejar(pedido, alvo)
+  const plano = await planejar(pedido, alvo)
   if (typeof plano === 'string') {
     await dizer(plano)
     return true
@@ -98,9 +104,9 @@ export async function tratarComando(texto: string, dizer: Dizer): Promise<boolea
   return true
 }
 
-type Params = { userId: string; email: string; nome: string; produto?: string; novoEmail?: string; phone?: string | null }
+type Params = { userId: string; email: string; nome: string; produto?: string; novoEmail?: string; phone?: string | null; codigo?: string; produtoAssinatura?: string; fimAcesso?: string | null }
 
-function planejar(p: PedidoComando, a: Aluna): { resumo: string; params: Params } | string {
+async function planejar(p: PedidoComando, a: Aluna): Promise<{ resumo: string; params: Params } | string> {
   const quem = `${a.nome || 'aluna'} (${a.email})`
   const base: Params = { userId: a.id, email: a.email, nome: a.nome, phone: a.phone }
   switch (p.acao) {
@@ -119,6 +125,11 @@ function planejar(p: PedidoComando, a: Aluna): { resumo: string; params: Params 
       return { resumo: `Vou dar *1 cardápio extra* para ${quem}.`, params: base }
     case 'pausar_bot':
       return { resumo: `Vou *parar o bot* por 24 h na conversa de ${quem} (você responde pelo celular).`, params: base }
+    case 'cancelar_assinatura': {
+      const ativa = ((await assinaturasPorEmail(a.email)) ?? []).find((s) => s.status === 'ACTIVE')
+      if (!ativa) return `Não achei assinatura ativa na Hotmart para ${quem}.`
+      return { resumo: resumoCancelamento(quem, ativa.produto, ativa.codigo, ativa.proximaCobranca), params: { ...base, codigo: ativa.codigo, produtoAssinatura: ativa.produto, fimAcesso: ativa.proximaCobranca } }
+    }
     default:
       return 'Não sei fazer isso por aqui.'
   }
@@ -158,6 +169,19 @@ async function executar(acao: string, p: Params, idAtual?: number): Promise<stri
     }
     case 'reembolsar':
       return executarReembolso(idAtual!, p as unknown as PedidoReembolso)
+    case 'cancelar_assinatura': {
+      const r = await cancelarAssinaturaHotmart(p.codigo!)
+      if (!r.ok) throw new Error(`Hotmart recusou o cancelamento de ${p.codigo}: ${r.erro}`)
+      const chat = await chatDaAluna(p.userId, p.phone)
+      if (chat) {
+        const perfil = await perfilDaAluna(p.userId)
+        const tel = chat.replace(/\D/g, '')
+        const hora = horaLocal(tel)
+        const esperaH = hora >= 8 && hora < 22 ? 0 : hora >= 22 ? 24 - hora + 9 : 9 - hora // de madrugada lá, sai às 9h
+        await enfileirar({ phone: chat, kind: 'manual', body: textoCancelada(perfil?.idioma ?? 'es', p.nome, p.produtoAssinatura ?? 'Pase Completo', p.fimAcesso), sendAfter: new Date(Date.now() + esperaH * 3600_000) })
+      }
+      return `Assinatura ${p.codigo} de ${p.nome || p.email} cancelada na Hotmart${chat ? '; ela recebe a confirmação no WhatsApp' : ' (sem WhatsApp dela: avise por e-mail)'}.`
+    }
     default:
       throw new Error(`ação desconhecida: ${acao}`)
   }
@@ -195,12 +219,43 @@ async function acharAluna(p: PedidoComando): Promise<Aluna | string> {
 async function comandoAguardando(): Promise<{ id: number; acao: string; params: unknown; resumo: string } | null> {
   const { data } = await admin()
     .from('whatsapp_comandos')
-    .select('id, acao, params, resumo')
+    .select('id, acao, params, resumo, created_at')
     .eq('status', 'aguardando')
-    .gte('created_at', new Date(Date.now() - VALIDADE_MIN * 60_000).toISOString())
+    .neq('acao', 'reembolsar') // reembolso tem a própria aprovação ("ok 1 2")
     .order('created_at', { ascending: false })
     .limit(1)
-  return data?.[0] ?? null
+  const c = data?.[0]
+  if (!c) return null
+  const validade = c.acao === 'cancelar_assinatura' ? VALIDADE_APROVACAO_MIN : VALIDADE_MIN
+  if (new Date(c.created_at).getTime() < Date.now() - validade * 60_000) return null
+  return c
+}
+
+function resumoCancelamento(quem: string, produto: string, codigo: string, fimAcesso: string | null): string {
+  return `Vou *cancelar na Hotmart* a assinatura *${produto}* (${codigo}) de ${quem}: nada mais é cobrado e o acesso segue até ${fimAcesso ? fimAcesso.slice(0, 10).split('-').reverse().join('/') : 'o fim do período pago'}.`
+}
+
+function textoCancelada(idioma: string, nome: string, produto: string, fimAcesso: string | null): string {
+  const data = fimAcesso ? fimAcesso.slice(0, 10).split('-').reverse().join('/') : null
+  const n = nome ? `${nome.split(' ')[0]}, ` : ''
+  if (idioma === 'pl') return `${n}Twoja subskrypcja ${produto} została anulowana. Nie będzie już żadnych opłat${data ? `, a dostęp masz do ${data}` : ''}. Hotmart wyśle Ci e-mail z potwierdzeniem. 💛`
+  if (idioma === 'en') return `${n}your ${produto} subscription is now cancelled. No further charges${data ? `, and you keep access until ${data}` : ''}. Hotmart will email you a confirmation. 💛`
+  return `${n}tu suscripción al ${produto} ya está cancelada. No habrá ningún cobro más${data ? ` y sigues con acceso hasta el ${data}` : ''}. Hotmart te manda un correo de confirmación. 💛`
+}
+
+/** O SISTEMA pede ao responsável a aprovação de um cancelamento (aluna pediu e o botão do app não resolveu). Bruno 06/11/2026:
+ *  "cancelamento também entra na categoria do reembolso, eu preciso aprovar". Ele responde sim ou não no WhatsApp. */
+export async function pedirAprovacaoCancelamento(a: Aluna & { codigo: string; produto: string; fimAcesso: string | null; motivo: string }): Promise<string | null> {
+  const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
+  if (!destino) return null
+  const quem = `${a.nome || 'aluna'} (${a.email})`
+  const resumo = resumoCancelamento(quem, a.produto, a.codigo, a.fimAcesso)
+  const params: Params = { userId: a.id, email: a.email, nome: a.nome, phone: a.phone, codigo: a.codigo, produtoAssinatura: a.produto, fimAcesso: a.fimAcesso }
+  await admin().from('whatsapp_comandos').insert({ pedido: `sistema: ${a.motivo}`, acao: 'cancelar_assinatura', params, resumo })
+  const msg = `🛠️ *Aprovação pendente*\n${a.motivo}\n\n${resumo}\n\nConfirma? Responda *sim* para cancelar ou *não* para deixar como está.`
+  const r = await sendZapiText({ phone: destino, message: msg })
+  if (r.ok) await registrarMensagem({ phone: toZapiPhone(destino), direction: 'out', author: 'system', body: msg, waMessageId: r.messageId })
+  return r.ok ? msg : null
 }
 
 async function fechar(id: number, status: 'executado' | 'cancelado' | 'erro', resultado: string) {
