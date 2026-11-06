@@ -25,7 +25,7 @@ const FUSO_DDI: [string, string][] = [
   ['34', 'Europe/Madrid'], ['48', 'Europe/Warsaw'], ['1', 'America/New_York'],
 ]
 
-function horaLocal(tel: string): number {
+export function horaLocal(tel: string): number {
   const tz = FUSO_DDI.find(([ddi]) => tel.startsWith(ddi))?.[1] ?? 'America/Mexico_City'
   return Number(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', hourCycle: 'h23' }).format(new Date()))
 }

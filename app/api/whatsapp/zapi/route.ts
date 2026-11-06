@@ -476,7 +476,16 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     }
   }
 
-  if (decisao.texto && !(silencioso && decisao.tipo === 'humano')) {
+  // Reprocessamento de pendente antigo (silencioso): a aluna NÃO escreveu agora. Só sai mensagem se for a resposta de
+  // verdade à consulta; "sigue con el equipo", "💛", "con gusto" ficam no servidor. (05/11/2026 à noite: Giovanna, que
+  // perguntou do ombro em 01/11, recebeu 4 mensagens vazias em 47 min, à 1h da manhã na Espanha.)
+  const evasiva = /est[aá] con el equipo|con el sector|te respondemos|respondemos por aqu|sigue con|lo revisamos|te escribo (mañana|hoy)|hasta las 20|perdona la espera|jest już u|zespo[łl]em/i
+  const respostaDeVerdade = Boolean(decisao.texto) && decisao.tipo !== 'humano' && decisao.texto.length > 80 && !evasiva.test(decisao.texto)
+  if (silencioso && !respostaDeVerdade) {
+    console.log(`[reprocessar] ${phone}: sem resposta de verdade (${decisao.tipo}, ${decisao.texto?.length ?? 0} chars) — nada enviado, consulta segue pendente`)
+    return
+  }
+  if (decisao.texto) {
     const envio = await sendZapiText({ phone, message: decisao.texto, delayTyping: 2 })
     if (envio.ok) {
       await registrarMensagem({ phone, direction: 'out', author: 'agent', body: decisao.texto, waMessageId: envio.messageId })
@@ -514,8 +523,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     // Reprocessamento de pendente antigo (05/11/2026): o bot respondeu sozinho com as capacidades novas (Hotmart, acesso, catálogo,
     // acervo) → a consulta sai da lista do responsável, com a resposta registrada; ele recebe uma linha.
     // Só fecha se respondeu de verdade: não quando empurra ('ya está con el equipo', 'te respondemos', 'sigue con') nem quando é curta.
-    const evasiva = /est[aá] con el equipo|con el sector|te respondemos|respondemos por aqu|sigue con|lo revisamos|te escribo (mañana|hoy)|hasta las 20|jest już u|zespo[łl]em/i
-    if (silencioso && decisao.texto && decisao.texto.length > 80 && !evasiva.test(decisao.texto)) {
+    if (silencioso && respostaDeVerdade) {
       const { data: abertas } = await admin().from('whatsapp_consultas').select('id').eq('phone', phone).eq('status', 'pendente')
       for (const c of abertas ?? []) {
         await fecharConsulta(c.id, { status: 'respondida', orientacao: 'bot respondeu sozinho (reprocessado)', respostaEnviada: decisao.texto })

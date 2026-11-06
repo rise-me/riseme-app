@@ -8,6 +8,7 @@ import { admin, registrarMensagem, variantesTelefone } from './conversa'
 import { linhasReembolsos } from './reembolsos'
 import { marcarNaFila } from '@/lib/whatsapp-outbox'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
+import { horaLocal } from '@/lib/video-depoimento'
 
 export const KIND_ADIADA = 'consulta-adiada' // linha inerte: body = id da consulta avisada às 21h
 
@@ -101,11 +102,14 @@ const idiomaPeloDdi = (phone: string) => (/^48/.test(phone) ? 'pl' : /^90/.test(
 
 export async function avisarConsultasSemResposta(): Promise<{ avisadas: number[] }> {
   const db = admin()
-  // Só o que já estava na lista das 20h de hoje (criada antes das 20h BRT = 23:00 UTC de hoje, ou ontem se for madrugada).
+  // Só consulta aberta HOJE antes das 19h BRT: é a única que ouviu "te respondo hoy hasta las 20h". Consulta de dias atrás
+  // não ganha "te escribo mañana" (05/11/2026: 6 alunas com consulta de 2 a 5 dias receberam a linha, uma delas à 1h da
+  // manhã na Espanha, outra que o responsável tinha mandado NÃO responder). Essas são problema da lista das 20h, não dela.
   const agora = new Date()
-  const corte = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth(), agora.getUTCDate(), 23, 0, 0))
-  if (corte > agora) corte.setUTCDate(corte.getUTCDate() - 1)
-  const { data } = await db.from('whatsapp_consultas').select('id, phone').eq('status', 'pendente').not('motivo', 'ilike', 'TÉCNICO%').lt('created_at', corte.toISOString()).order('created_at')
+  const fim = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth(), agora.getUTCDate(), 22, 0, 0)) // 19h BRT
+  if (fim > agora) fim.setUTCDate(fim.getUTCDate() - 1)
+  const inicio = new Date(fim); inicio.setUTCHours(3, 0, 0, 0) // 0h BRT do mesmo dia
+  const { data } = await db.from('whatsapp_consultas').select('id, phone').eq('status', 'pendente').not('motivo', 'ilike', 'TÉCNICO%').gte('created_at', inicio.toISOString()).lt('created_at', fim.toISOString()).order('created_at')
   const lista = data ?? []
   if (!lista.length) return { avisadas: [] }
   const { data: ja } = await db.from('whatsapp_outbox').select('body').eq('kind', KIND_ADIADA).in('body', lista.map((c) => String(c.id)))
@@ -116,6 +120,10 @@ export async function avisarConsultasSemResposta(): Promise<{ avisadas: number[]
     const phone = String(c.phone)
     const { data: chat } = await db.from('whatsapp_chats').select('user_id, mode, human_until').in('phone', variantesTelefone(phone)).limit(1)
     if (chat?.[0]?.mode === 'human' && (!chat[0].human_until || new Date(chat[0].human_until) > agora)) continue // pessoa atendendo
+    const hora = horaLocal(phone.replace(/\D/g, ''))
+    if (hora < 8 || hora >= 22) continue // madrugada lá: não acorda ninguém pra dizer que não tem resposta
+    const { data: recente } = await db.from('whatsapp_messages').select('id').in('phone', variantesTelefone(phone)).eq('direction', 'out').gte('created_at', new Date(agora.getTime() - 3600_000).toISOString()).limit(1)
+    if (recente?.length) continue // ela ouviu de nós na última hora: mais uma linha é ruído
     let idioma = idiomaPeloDdi(phone)
     if (chat?.[0]?.user_id) {
       const { data: u } = await db.auth.admin.getUserById(chat[0].user_id)
