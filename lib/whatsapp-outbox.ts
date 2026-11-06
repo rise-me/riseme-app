@@ -264,6 +264,21 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       continue
     }
 
+    // 'pedir-cancelamento' não manda texto à aluna: pede ao responsável, no WhatsApp dele, a aprovação de um cancelamento de
+    // assinatura (body = JSON da aluna + código da assinatura; lib/whatsapp-agent/comandos.ts). Ele responde sim/não (06/11/2026).
+    if (item.kind === 'pedir-cancelamento') {
+      let saida: string
+      try {
+        const { pedirAprovacaoCancelamento } = await import('@/lib/whatsapp-agent/comandos')
+        const a = JSON.parse(item.body) as Parameters<typeof pedirAprovacaoCancelamento>[0]
+        saida = (await pedirAprovacaoCancelamento(a)) ?? 'FALHOU: sem WHATSAPP_HANDOFF_PHONE ou envio recusado'
+      } catch (err) {
+        saida = `erro: ${String(err).slice(0, 300)}`
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
     // 'reembolsos-lista' não manda texto à aluna: manda ao responsável a lista das 20h (consultas + reembolsos; 05/11/2026).
     if (item.kind === 'reembolsos-lista') {
       const { enviarListaDiaria } = await import('@/lib/whatsapp-agent/lista-20h')
