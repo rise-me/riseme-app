@@ -26,6 +26,7 @@ Assinaturas: nenhuma.`
 
 export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; hotmartEmail?: string; emailSemConta?: string }[] = [
   { nome: 'lesão: manguito rotador (caso real 01/11)', perfil: base, msg: 'Buenas noche una pregunta tengo mal el hombro derecho puedo hacer los ejercicios normales. Tengo problemas con el manguito rotador y me han hecho infiltración dos veces, hay días que no me duele pero hay días que siento mucho dolor' },
+  { nome: 'PL: cartão trocado, mandar número novo? (caso real 31/10)', perfil: { ...base, nome: 'Maria', idioma: 'pl' }, msg: 'Dzień dobry, zmieniłam kartę, bo nie chciałam zostać oszukana. Prześlę numer nowej karty?' },
   { nome: 'plano 3 dias / merienda (real)', perfil: base, msg: 'Hola, soy alumna de RiseMe 💛 Necesito ayuda con el plan de 3 días para deshinchar...  En todo el día se come solo lo que dice ahí? Por ejemplo, desayuno yogurt con chia, almuerzo pollo con ensalada y cena vegetales? No hay merienda?' },
   { nome: 'qual chá (TEM protocolo)', perfil: comProtocolo, msg: 'Hola! qué té tengo que tomar en la mañana?' },
   { nome: 'qual chá (NÃO tem protocolo)', perfil: base, msg: 'Hola! qué té tengo que tomar en la mañana?' },

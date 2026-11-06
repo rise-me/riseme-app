@@ -109,8 +109,12 @@ COMO ESCREVER
   equipe"; se ela perguntar se é robô, não minta (atendimento automático do RiseMe) e ofereça transferir. Nunca o nome do
   dono ("Bruno"): "nós"/"a equipe"; para autoridade, "nosso CEO".
 
-TRANSFERIR ("passar_para_humano" = true): quando o CONHECIMENTO mandar ou ela pedir para falar com alguém. "motivo" curto em
-português. "resposta", no idioma dela: o que vai acontecer e quando, nunca "sector responsable" — a equipe revisa tudo às 20h,
+TRANSFERIR ("passar_para_humano" = true): SÓ quando existe uma AÇÃO que só uma pessoa pode fazer, escrita em "acao_humana"
+("estornar no painel da Perfect Pay", "aprovar desconto", "decidir caso fora da regra", "responder ameaça de disputa"), quando o
+CONHECIMENTO mandar ou ela pedir para falar com alguém. Pergunta de INFORMAÇÃO (como funciona o reembolso, prazo, cartão trocado,
+o que é X, política pública do meio de pagamento, do app ou do produto, dúvida de treino) NUNCA se transfere: responda (Bruno
+05/11/2026: "resposta a que a internet tem acesso imediato não pode ficar pendente"). Sem "acao_humana", o sistema recusa a
+transferência e exige a resposta. "motivo" curto em português. "resposta", no idioma dela: o que vai acontecer e quando, nunca "sector responsable" — a equipe revisa tudo às 20h,
 e o PRAZO (hoy/mañana) vem no fim da mensagem. Modelo es: "Lo reviso con el equipo y te respondo por aquí hoy hasta las 20h."
 (mesma frase nos outros idiomas; "mañana" quando o PRAZO disser). Exceção, TICKET TÉCNICO (CONHECIMENTO → PROBLEMAS
 TÉCNICOS), "motivo" começa com "TÉCNICO — " e a resposta diz que a equipe técnica vai olhar e você avisa quando resolver, com
@@ -121,7 +125,8 @@ que você não conhece vai como proposta). Opção que supõe algo JÁ FEITO na 
 "troca o email de <atual> para <novo>", "libera o <produto> para <email>", "reenvia o acesso de <email>", "dá um cardápio
 extra para <email>", "reembolsar no painel". Sem transferir, os três ficam "".
 Nunca diga à aluna que JÁ fizemos algo na conta (trocar e-mail, liberar, reenviar, reembolsar) se o sistema não fez. Depois de
-transferir a conversa continua com você: responda o que souber; no MESMO assunto ainda sem resposta, uma frase: a equipe já
+transferir a conversa continua com você: responda o que souber; "ya está con el equipo" SÓ quando ela pergunta PELO ESTADO do caso;
+pergunta nova dentro do assunto (ex.: "preciso mandar o cartão novo?") tem resposta própria, agora. No MESMO assunto ainda sem resposta, uma frase: a equipe já
 está vendo e você responde no PRAZO (pedido de reembolso repetido segue a regra de reembolso, nunca "já está com a equipe").
 Bloco "RESPOSTAS APROVADAS PELO RESPONSÁVEL" vale como conhecimento oficial: pergunta equivalente, responda com ele.
 
@@ -259,8 +264,9 @@ const FORMATO = {
       novo_email: { type: 'string' },
       feedback_resumo: { type: 'string' },
       precisa_materiais: { type: 'boolean' },
+      acao_humana: { type: 'string' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo', 'precisa_materiais'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo', 'precisa_materiais', 'acao_humana'],
     additionalProperties: false,
   },
 }
@@ -402,6 +408,7 @@ export async function decidirResposta(params: {
   buscarHotmart?: () => Promise<string | null> // chamado quando o CLASSIFICADOR diz 'dinheiro' e o bloco ainda não veio (não depende de palavra certa)
   diaAula?: number // interno (2ª rodada): dia e trechos já escolhidos na 1ª
   acervoIds?: string[]
+  recusouTransferencia?: boolean // interno (2ª rodada): a 1ª quis transferir sem ação humana; o sistema exige a resposta
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -501,6 +508,7 @@ export async function decidirResposta(params: {
           {
             type: 'text' as const,
             text:
+              (params.recusouTransferencia ? 'TRANSFERÊNCIA RECUSADA PELO SISTEMA: na rodada anterior você quis transferir sem apontar nenhuma ação que só uma pessoa possa fazer. Logo a resposta existe (política pública do meio de pagamento, regra do produto, acervo, fato do sistema, conhecimento geral). RESPONDA a pergunta dela agora, direto, na primeira frase. Só transfira se houver uma ação humana concreta, escrita em "acao_humana".\n\n' : '') +
               (params.consultaPendente ? `CONSULTA PENDENTE #${params.consultaPendente.id} (aberta em ${params.consultaPendente.desde.slice(0, 10)}, ainda sem resposta): ${params.consultaPendente.resumo}\nA aluna espera ESSA resposta, não um "de nada". Responda a isso agora com o que você sabe hoje (Hotmart, acervo, catálogo, acesso); se não souber resolver, passar_para_humano = true e diga que a equipe já está vendo, sem repetir "vou ver".\n\n` : '') +
               (aulas ? `${aulas}\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
@@ -541,11 +549,19 @@ export async function decidirResposta(params: {
     novo_email: string
     feedback_resumo: string
     precisa_materiais: boolean
+    acao_humana: string
   }
   // A 1ª rodada não tinha os materiais e precisava deles: refaz uma vez com o assunto 'conteudo' (prompt por assunto, 05/11/2026).
   if (out.precisa_materiais && !comMateriais && !params.forcarAssuntos) {
     console.log(`[assuntos] precisa_materiais: refazendo com conteudo (${params.phone ?? '?'})`)
     return decidirResposta({ ...params, forcarAssuntos: new Set<Assunto>([...cls.assuntos, 'conteudo']), diaAula: cls.dia, acervoIds: cls.acervoIds })
+  }
+  // Transferência sem ação humana = pergunta que tem resposta (Bruno 05/11/2026: "resposta a que a internet tem acesso imediato
+  // não pode ficar pendente"). O sistema recusa uma vez e exige a resposta; só transfere com uma ação concreta de pessoa.
+  const semAcao = !out.acao_humana?.trim() || /^(nenhuma|nada|informar|responder|explicar|esclarecer|confirmar|-|n\/a)\b/i.test(out.acao_humana.trim())
+  if (out.passar_para_humano && semAcao && !/^t[ée]cnico/i.test(out.motivo.trim()) && !params.recusouTransferencia) {
+    console.log(`[transferir] recusada sem ação humana (${params.phone ?? '?'}): ${out.motivo.slice(0, 80)}`)
+    return decidirResposta({ ...params, recusouTransferencia: true, forcarAssuntos: params.forcarAssuntos ?? cls.assuntos, diaAula: cls.dia, acervoIds: cls.acervoIds })
   }
   // Verificador antes de enviar (lib/whatsapp-agent/verificador.ts, q1 do mapa, 05/11/2026): confere contra a voz do
   // atendimento e corrige o mínimo. Resposta de conteúdo, dinheiro ou transferência pode ser longa.
@@ -570,7 +586,7 @@ export async function decidirResposta(params: {
         texto: out.resposta.trim(),
         motivo: out.motivo || 'sem motivo',
         consulta: {
-          resumo: out.consulta_resumo.trim() || out.motivo,
+          resumo: `${out.acao_humana?.trim() ? `AÇÃO: ${out.acao_humana.trim()} · ` : ''}${out.consulta_resumo.trim() || out.motivo}`,
           opcaoA: out.consulta_opcao_a.trim(),
           opcaoB: out.consulta_opcao_b.trim(),
         },

@@ -183,8 +183,12 @@ um pedido feito DENTRO dos 15 dias NUNCA pode ficar para depois (Bruno, 05/11/20
 - Com o bloco HOTMART: compra REEMBOLSADA → o dinheiro já está voltando (cartão: fatura atual ou seguinte); REEMBOLSO
   EM ANÁLISE → já pediu, a Hotmart aprova em até 7 dias, não precisa pedir de novo; nenhuma compra PAGA com aquele
   e-mail → não há o que reembolsar: a tentativa não foi cobrada (se o banco mostra o valor, é reserva que some sozinha).
-- Cartão trocado, perdido ou cancelado NÃO atrapalha: a Hotmart devolve ao banco emissor, que credita na conta dela
-  (artigo oficial). Nunca peça número de cartão novo.
+- Depois de ordenado (Hotmart ou Perfect Pay), o reembolso volta SEMPRE pelo mesmo meio da compra: cartão → fatura atual ou
+  seguinte (prazo do banco, em geral até 10 dias úteis); PayPal → conta PayPal; BLIK/Przelewy24/transferência → conta de
+  origem. Nunca pedimos número de cartão nem dados bancários por e-mail ou WhatsApp.
+- Cartão trocado, perdido ou cancelado NÃO atrapalha, em qualquer meio: o estorno vai ao banco emissor, que credita na
+  conta dela (regra das bandeiras; artigo oficial da Hotmart). Se ela oferece mandar o número do cartão novo: não é preciso
+  e não deve mandar. Responda isso; não transfira.
 - Assinatura (Pase): só a cobrança inicial é reembolsável, e dentro da garantia; renovação não (artigo oficial).
 - PASE COMPLETO (assinatura; 05/11/2026): 7 dias grátis e, no dia 8, cobrança ÚNICA de US$ 27 por UM ANO (não é mensal);
   renova no ano seguinte se não cancelar. Cancelar antes do dia 8 = nada é cobrado. Cancelar depois = não cobra mais e o
