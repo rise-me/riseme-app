@@ -95,7 +95,7 @@ export const CATALOGO: Produto[] = [
     idioma: 'es',
     tipo: 'assinatura',
     garantiaDias: 30,
-    oQueE: 'Assinatura que abre todos os desafios do app (Calistenia, Pilates, Yoga Facial, Yoga en la Silla, Cuerpo Sexy de Verano, Preparto, Posparto e os próximos).',
+    oQueE: 'Assinatura que abre todos os desafios do app (Calistenia, Pilates, Yoga Facial, Yoga en la Silla, Cuerpo Sexy de Verano, Preparto, Posparto e os próximos). Valor de referência para o suporte citar: US$ 57 por ano (Bruno 06/11/2026); como presente no lugar do reembolso: 1 ano grátis (lib/whatsapp-agent/pase-presente.ts).',
     suporteVende: true,
     ofertas: [
       { codigo: 'v4lltj3v', preco: '7 dias grátis, depois US$ 27 por ano', status: 'vigente', link: 'https://pay.hotmart.com/K100401831L?off=v4lltj3v&checkoutMode=10', nota: 'cobra no dia 8; cancelar antes = nada cobrado; é a oferta do upsell 2 e do convite do suporte' },

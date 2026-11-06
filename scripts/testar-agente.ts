@@ -19,6 +19,11 @@ const HOTMART_DUPLA = `HOTMART (consultado agora pelo e-mail maria@example.com; 
 - ${D2} (há 2 dias) · Protocolo Metabólico · 19 USD · CREDIT_CARD · CANCELADA (não foi paga) · transação HP2772700003
 Resumo: 1 compra(s) PAGA(S) (RiseMe™ - Desafío de 28 Días de Calistenia); 3 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.
 Assinaturas: nenhuma.`
+const HOTMART_RECOMENDA = `HOTMART (consultado agora pelo e-mail maria@example.com; é o que a Hotmart REALMENTE registra, use como fato):
+- ${D2} (há 2 dias) · RiseMe™ - Desafío de 28 Días de Calistenia · 14 PAB · CREDIT_CARD · APROVADA (paga) · transação HP2291658261
+- ${D2} (há 2 dias) · RiseMe™ - 28 Günlük Kalistenik Meydan Okuması · 14 PAB · CREDIT_CARD · APROVADA (paga) · transação HP2409006675
+Resumo: 2 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.
+Assinaturas: nenhuma.`
 const HOTMART_PROTESTED = `HOTMART (consultado agora pelo e-mail maria@example.com; é o que a Hotmart REALMENTE registra, use como fato):
 - ${D4} (há 4 dias) · RiseMe™ - Desafío de 28 Días de Calistenia · 12.9 USD · CREDIT_CARD · REEMBOLSO PEDIDO, em análise na Hotmart (aprova em até 7 dias) · transação HP0491658410
 Resumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 1 reembolso(s) em análise.
@@ -50,6 +55,7 @@ export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hot
   { nome: 'HOTMART: reembolso em análise (não pede de novo)', perfil: base, hotmart: HOTMART_PROTESTED, msg: 'pedí el reembolso y todavía no me llega el dinero, qué pasó?' },
   { nome: 'HOTMART ausente: sem bloco pede e-mail e transfere', perfil: base, msg: 'Me cobraron dos veces 19 dólares' },
   // 05/11: 2º pedido de reembolso com compra paga há 2 dias → reembolso_transacoes preenchido, sem link, sem transferir.
+  { nome: 'RECOMENDA: 2 pagas (ES + turca) → explica o 1 clique e OFERECE o Pase, sem registrar', perfil: base, hotmart: HOTMART_RECOMENDA, msg: 'Me cobraron dos veces, una en español y otra en turco. Quiero el reembolso de la que no pedí.' },
   { nome: 'HOTMART: 2º pedido de reembolso = registra (reembolso_transacoes)', perfil: base, hotmart: HOTMART_DUPLA, msg: 'Ya te dije que no quiero ayuda, solo quiero mi dinero de vuelta. Es la segunda vez que lo pido.' },
   // Autosserviço de acesso (05/11/2026, lib/whatsapp-agent/acesso.ts): senha, e-mail e conta pela compra sem transferir.
   { nome: 'ACESSO: não consegue entrar (confirmada) → reenviar_acesso', perfil: base, msg: 'Hola, no puedo entrar a la app, me dice correo o contraseña incorrectos' },

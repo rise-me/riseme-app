@@ -417,6 +417,23 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     await marcarProvaSocial(phone, dela).catch((err) => console.error(`[prova-social] falhou (${phone}):`, err))
   }
 
+  // Pase por um ano no lugar do reembolso (Bruno 06/11/2026): ela aceitou a troca → acesso entra agora e os pedidos de
+  // reembolso dela que aguardavam o "ok" saem da lista. Sem conta: vira consulta.
+  if (decisao.tipo === 'responder' && decisao.paseEmVezDeReembolso) {
+    const { darPaseUmAno, cancelarReembolsosPendentesDela } = await import('@/lib/whatsapp-agent/pase-presente')
+    const r = userId ? await darPaseUmAno({ userId, phone, origem: `recomenda-${phone.replace('@lid', '')}-${Date.now()}` }) : 'sem-conta'
+    const cancelados = r === 'liberado' || r === 'ja-tinha' ? await cancelarReembolsosPendentesDela(phone) : 0
+    await dizerAoResponsavel(`🎁 Pase por 1 ano no lugar do reembolso — ${perfil?.nome ?? 'aluna'} (+${phone.replace('@lid', '')}): ${r}${cancelados ? `; ${cancelados} pedido(s) de reembolso cancelado(s)` : ''}`)
+    if (r === 'erro' || r === 'sem-conta') {
+      decisao = {
+        tipo: 'humano',
+        texto: decisao.texto,
+        motivo: `PASE NO LUGAR DO REEMBOLSO — a aluna aceitou e o sistema não conseguiu liberar (${r})`,
+        consulta: { resumo: `Aluna aceitou o Pase por um ano no lugar do reembolso; o sistema não liberou (${r}).`, opcaoA: 'Liberar o Pase à mão (subscriptions + user_challenges) e avisar.', opcaoB: 'Pedir o e-mail da conta.' },
+      }
+    }
+  }
+
   // Reembolso decidido pelo bot (2º pedido, compra paga até 15 dias, bloco HOTMART): vira pedido aguardando o "ok" do
   // responsável (lista das 20h, ou na hora se estiver perto do dia 15). Sem pedido criado → vira consulta (05/11/2026).
   if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.length) {

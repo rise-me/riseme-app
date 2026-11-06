@@ -61,7 +61,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; feedbackResumo?: string; assuntos?: string }
+  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; feedbackResumo?: string; assuntos?: string; paseEmVezDeReembolso?: boolean }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta; assuntos?: string }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -148,6 +148,18 @@ duplicada), "reembolso_motivo" em português (1 frase) e NÃO transfira. A respo
      por e-mail os dados bancários dela e devolve em até 7 dias úteis depois de aprovar; PayPal → na conta PayPal;
   4) o processo oficial, explicado pela Hotmart: https://help.hotmart.com/es/article/360061973392 (artigo "cómo solicitar el reembolso de mi compra", indicado pelo Bruno 05/11; em en: /en/; pt: /pt-br/; link sozinho na linha);
   5) que ela pode perguntar por aqui qualquer dúvida.
+PASE NO LUGAR DO REEMBOLSO (Bruno 06/11/2026): compra "repetida" em outro idioma ou outro desafio minutos depois da principal
+NÃO é erro de cobrança: é o Hotmart Recomenda (oferta de 1 clique na página de obrigado, aceita por ela, muitas vezes sem
+perceber). Explique isso sem culpar ("al terminar tu compra Hotmart te mostró una oferta adicional y se aceptó con un clic")
+e, ANTES de registrar o reembolso dessa compra extra, ofereça a troca: em vez de devolver o valor, ativamos o *Pase Completo
+por um ano, grátis* (todos os desafios: Calistenia, Pilates en la Pared, Yoga Facial, Yoga en la Silla, Cuerpo Sexy de Verano,
+Preparto, Posparto, e os novos que entram todo mês; normalmente US$ 57 por ano). Pergunte o que ela prefere.
+  · Ela escolhe o Pase → "pase_em_vez_de_reembolso" = true, "reembolso_transacoes" = "" e diga que o Pase já está ativo na
+    conta dela (aba Desafios), por um ano, e que a compra extra fica como está.
+  · Ela prefere o reembolso → "reembolso_transacoes" como acima, sem insistir.
+  · Ela não respondeu ainda → não registre nada; a oferta fica aberta. EXCEÇÃO: compra com 13 dias ou mais → registre o
+    reembolso já (a janela da Hotmart fecha) e mencione que, se preferir o Pase, é só dizer.
+  · Compra que ela pediu de volta por arrependimento (não é extra do Recomenda) → caminho normal, sem a oferta.
 Fora disso (sem bloco, mais de 15 dias, Perfect Pay) siga o CONHECIMENTO e deixe "" nos dois campos. Nunca invente
 transação: só as do bloco HOTMART.
 
@@ -267,8 +279,9 @@ const FORMATO = {
       feedback_resumo: { type: 'string' },
       precisa_materiais: { type: 'boolean' },
       acao_humana: { type: 'string' },
+      pase_em_vez_de_reembolso: { type: 'boolean' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo', 'precisa_materiais', 'acao_humana'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo', 'precisa_materiais', 'acao_humana', 'pase_em_vez_de_reembolso'],
     additionalProperties: false,
   },
 }
@@ -552,6 +565,7 @@ export async function decidirResposta(params: {
     feedback_resumo: string
     precisa_materiais: boolean
     acao_humana: string
+    pase_em_vez_de_reembolso: boolean
   }
   // A 1ª rodada não tinha os materiais e precisava deles: refaz uma vez com o assunto 'conteudo' (prompt por assunto, 05/11/2026).
   if (out.precisa_materiais && !comMateriais && !params.forcarAssuntos) {
@@ -593,7 +607,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined }
+    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined, paseEmVezDeReembolso: Boolean(out.pase_em_vez_de_reembolso) }
 }
 
 // Frase curta do prazo da lista das 20h, por idioma (lib/whatsapp-agent/lista-20h.ts decide hoje/amanhã).
