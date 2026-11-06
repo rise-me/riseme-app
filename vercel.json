@@ -15,10 +15,6 @@
     {
       "path": "/api/whatsapp/reembolsos",
       "schedule": "0 23 * * *"
-    },
-    {
-      "path": "/api/whatsapp/fechamento",
-      "schedule": "0 0 * * *"
     }
   ]
 }
