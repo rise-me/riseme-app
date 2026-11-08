@@ -7,7 +7,7 @@
 // 3) E-MAIL: conta confirmada + ela confirmou o e-mail novo → troca + acesso novo com o e-mail novo.
 // Conta achada só pelo e-mail digitado (não confirmada) nunca ganha senha nem troca de e-mail por aqui (qualquer um
 // digita um e-mail): o caminho é o "¿Olvidaste tu contraseña?" do login, que prova a posse do e-mail.
-import { admin, registrarMensagem, telefoneDoLid, variantesTelefone } from './conversa'
+import { admin, perfilDaAluna, registrarMensagem, telefoneDoLid, variantesTelefone } from './conversa'
 import type { MensagemConversa } from './responder'
 import { contaDaConvidadaHotmart } from './prova-social'
 import { comprasPorEmail, hotmartConfigurada, resumoHotmart, type CompraHotmart } from '@/lib/hotmart-api'
@@ -28,6 +28,7 @@ const EMAIL = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g
 
 export type ResultadoConta =
   | { userId: string; criadaAgora: false } // convidada do convite Hotmart (dados já na fila): como antes
+  | { userId: string; criadaAgora: false; religada: true; email: string } // conta já existia com telefone 1 dígito diferente: ligada a esta conversa e acesso reenviado
   | { userId: string; criadaAgora: true; email: string; compradaEm: string | null; produto: string }
   | { userId: null; semCompra: { email: string; bloco: string | null } }
 
@@ -90,7 +91,10 @@ export async function contaPelaCompraHotmart(p: { phone: string; conversa: Mensa
     if (!hotmartConfigurada()) return null
     const emails = [...new Set(p.conversa.filter((m) => m.autor === 'student').flatMap((m) => m.texto.match(EMAIL) ?? []).map((e) => e.toLowerCase()))]
     const email = emails[emails.length - 1]
-    if (!email || (await contaPorEmail(email)) || (await consultouHaPouco(p.phone, email))) return null
+    if (!email) return null
+    const existente = await contaPorEmail(email)
+    if (existente) return religarPorTelefoneQuaseIgual(existente, email, p.phone)
+    if (await consultouHaPouco(p.phone, email)) return null
 
     const compras = await comprasPorEmail(email)
     if (!compras) return null // API fora: o agente segue como antes
@@ -125,6 +129,43 @@ export async function contaPelaCompraHotmart(p: { phone: string; conversa: Mensa
     console.error(`[acesso] conta pela compra falhou (${p.phone}):`, err)
     return null
   }
+}
+
+/** Conta criada pelo webhook com o telefone do checkout errado em 1 dígito (caso real 08/11/2026: Hotmart …660, WhatsApp …668):
+ *  o acesso foi para o número errado e ela escreve do certo dizendo o e-mail. Telefone a 1 dígito de distância = é ela:
+ *  liga a conversa à conta e reenvia o acesso aqui. Qualquer outra diferença mantém a regra (conta só por e-mail não ganha senha). */
+async function religarPorTelefoneQuaseIgual(userId: string, email: string, phone: string): Promise<ResultadoConta | null> {
+  const { data: chat } = await admin().from('whatsapp_chats').select('user_id').eq('phone', phone).maybeSingle()
+  if (chat?.user_id) return null // já ligada: nada a fazer
+  const meu = await telefoneReal(phone)
+  const { data: u } = await admin().from('users').select('phone').eq('id', userId).maybeSingle()
+  const dela = (u?.phone ?? '').replace(/\D/g, '')
+  if (!meu || !dela || !quaseIgual(meu, dela)) return null
+  const { data: outro } = await admin().from('whatsapp_chats').select('phone').eq('user_id', userId).limit(1)
+  if (outro?.length) return null // a conta já conversa por outro número: não mexe
+  await admin().from('whatsapp_chats').update({ user_id: userId, updated_at: new Date().toISOString() }).eq('phone', phone)
+  await admin().from('users').update({ phone: `+${meu}` }).eq('id', userId)
+  await marcarNaFila(phone, 'conta-religada', `${email}: telefone do checkout ${dela} → ${meu}`)
+  const perfil = await perfilDaAluna(userId).catch(() => null)
+  await reenviarAcesso({ userId, phone, email, idioma: perfil?.idioma ?? 'es', nova: true })
+  return { userId, criadaAgora: false, religada: true, email }
+}
+
+/** Distância de edição ≤ 1 entre dois telefones só com dígitos (um dígito trocado, a mais ou a menos). */
+export function quaseIgual(a: string, b: string): boolean {
+  if (a === b) return true
+  if (Math.abs(a.length - b.length) > 1) return false
+  if (a.length === b.length) {
+    let d = 0
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i] && ++d > 1) return false
+    return true
+  }
+  const [curto, longo] = a.length < b.length ? [a, b] : [b, a]
+  let i = 0, j = 0, pulos = 0
+  while (i < curto.length && j < longo.length) {
+    if (curto[i] === longo[j]) { i++; j++ } else if (++pulos > 1) return false; else j++
+  }
+  return true
 }
 
 /** Senha nova + mensagem de acesso nesta conversa (usado pelo bot e pelo comando "reenvia o acesso"). Lança em erro. */
