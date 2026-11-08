@@ -100,6 +100,11 @@ Completo** (7 dias, todos os desafios).
 - Divisão: post/Reel com a chamada = chat do Instagram (`~/Ferramentas/riseme-redes-sociais`); webhook, DM e
   presente = este app.
 
+## Encadeamento de desafios que se complementam (ideia do Bruno 08/11/2026, não iniciado)
+- Origem: Maribel (consulta 158) perguntou como combinar Calistenia + Pilates/Yoga. Hoje não existe regra: pode fazer dois no mesmo dia se se sentir bem, sem se machucar; combinar desafios de exercício é bom pela continuidade.
+- Ideia: uma metodologia ou trilha que encadeie os desafios (ex.: Calistenia → Pilates en la Pared → Cuerpo Sexy) para que se complementem e gerem mais resultado; o bot passaria a sugerir o próximo desafio no dia certo (liga com o fluxo 5, n1).
+- Nada construído; registrado para quando o fluxo de venda entrar.
+
 ## Outros pendentes já conhecidos
 - Tela de assinatura mostra "Starter" para quem cancelou mas ainda está no período pago
   (consulta só `status='active'` em `more/subscription`).

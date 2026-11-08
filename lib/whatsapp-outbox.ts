@@ -286,6 +286,20 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       continue
     }
 
+    // 'aprovar-comando' (08/11/2026): body = JSON {id}; executa um comando aguardando (aprovação dada pelo Bruno no chat).
+    if (item.kind === 'aprovar-comando') {
+      let saida: string
+      try {
+        const { id } = JSON.parse(item.body) as { id: number }
+        const { aprovarComando } = await import('@/lib/whatsapp-agent/comandos')
+        saida = `✅ ${await aprovarComando(id)}`
+      } catch (err) {
+        saida = `erro: ${String(err).slice(0, 300)}`
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
     // 'pedir-cancelamento' não manda texto à aluna: pede ao responsável, no WhatsApp dele, a aprovação de um cancelamento de
     // assinatura (body = JSON da aluna + código da assinatura; lib/whatsapp-agent/comandos.ts). Ele responde sim/não (06/11/2026).
     if (item.kind === 'pedir-cancelamento') {

@@ -30,6 +30,45 @@ export async function cancelarRecuperacao(p: { phone?: string; email?: string })
   await admin().from('whatsapp_outbox').delete().eq('kind', KIND).is('sent_at', null).or(filtros.join(','))
 }
 
+// v3 do mapa (Bruno 08/11/2026: "ok, pode fazer"): 2º toque 24–36 h depois da recuperação, uma vez, só se ela não comprou,
+// não respondeu nada e não pediu para parar; de dia no fuso dela; poucas por hora. Só CL-ES (link da Hotmart no texto).
+export const KIND_2 = 'recuperacao-2'
+const TOQUE2_MINUTO = 41
+const TOQUE2_POR_HORA = 10
+const TOQUE2 = (link: string) =>
+  'Hola 💛 Ayer intentaste entrar al Desafío de Calistenia y el pago no se completó.\n\n' +
+  `Si todavía quieres, tu enlace sigue aquí, con el mismo precio: ${link}\n\n` +
+  'Si el problema fue la tarjeta, en el mismo checkout puedes elegir PayPal, Nequi, Yape, PSE u Oxxo, según tu país. ¿Te ayudo con algo?'
+
+export async function segundoToqueRecuperacao(): Promise<number> {
+  if (new Date().getMinutes() !== TOQUE2_MINUTO) return 0
+  const { horaLocal } = await import('@/lib/video-depoimento')
+  const db = admin()
+  const ate = new Date(Date.now() - 24 * 3600_000).toISOString()
+  const desde = new Date(Date.now() - 36 * 3600_000).toISOString()
+  const { data: primeiras } = await db.from('whatsapp_outbox').select('phone, body, sent_at').eq('kind', KIND).gte('sent_at', desde).lte('sent_at', ate).order('sent_at', { ascending: false })
+  let n = 0
+  let t = Date.now() + 60_000
+  const vistos = new Set<string>()
+  for (const r of primeiras ?? []) {
+    if (n >= TOQUE2_POR_HORA) break
+    const tel = String(r.phone).replace(/\D/g, '')
+    if (!tel || vistos.has(tel.slice(-9))) continue
+    vistos.add(tel.slice(-9))
+    const link = String(r.body).match(/https:\/\/pay\.hotmart\.com\/\S+/)?.[0]
+    if (!link) continue // Perfect Pay (CL-PL) fica de fora por enquanto
+    const hora = horaLocal(tel)
+    if (hora < 10 || hora >= 20) continue
+    if ((await jaEnfileirou(tel, KIND_2)) || (await jaEnfileirou(tel, 'acesso')) || (await pediuParaParar(tel))) continue
+    const { count: falou } = await db.from('whatsapp_messages').select('id', { count: 'exact', head: true }).in('phone', variantesTelefone(tel)).eq('direction', 'in').gte('created_at', r.sent_at)
+    if ((falou ?? 0) > 0) continue // respondeu: o bot já está com ela
+    await enfileirar({ phone: tel, kind: KIND_2, body: TOQUE2(link), sendAfter: new Date(t) })
+    t += 90_000
+    n++
+  }
+  return n
+}
+
 /** Enfileira a mensagem respeitando as regras. Devolve o motivo quando pula. */
 export async function agendarRecuperacao(p: { phone?: string; email?: string; body: string }): Promise<{ ok: true } | { skipped: string }> {
   const { phone, email, body } = p

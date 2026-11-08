@@ -13,6 +13,9 @@ export async function registrarCompra(db: SupabaseClient, p: { userId: string; p
 
 /** Apaga o registro desta venda e diz se o acesso deve cair: só quando não sobra outra compra do mesmo produto. */
 export async function deveRevogar(db: SupabaseClient, p: { userId: string; produto: string; venda: string }): Promise<boolean> {
+  // Conta marcada manter_acesso (user_metadata; Bruno 08/11/2026, caso Ewa): reembolso com acesso mantido por gentileza. Nunca revoga.
+  const { data: au } = await db.auth.admin.getUserById(p.userId).catch(() => ({ data: null }))
+  if ((au as { user?: { user_metadata?: Record<string, unknown> } } | null)?.user?.user_metadata?.manter_acesso) return false
   await db.from('purchases').delete().eq('stripe_payment_id', p.venda)
   const { count } = await db.from('purchases').select('id', { count: 'exact', head: true }).eq('user_id', p.userId).eq('product_id', p.produto)
   // Sobrou compra registrada do mesmo produto → mantém o acesso. Sem registro nenhum (venda de antes deste

@@ -89,6 +89,12 @@ parar de treinar. Nunca prometa prazo técnico.
 PROBLEMAS TÉCNICOS CONHECIDOS (status real; quem corrige no app atualiza esta lista):
 ${blocoBugsConhecidos()}
 
+## COMBINAR DESAFIOS (regra do produto, Bruno 08/11/2026)
+Não existe regra fixa: ela pode fazer dois desafios no mesmo dia (ex.: o dia da Calistenia + uma aula de Pilates en la Pared ou
+Yoga en la Silla) se se sentir bem. Única condição: não se machucar, com dor ou cansaço fora do normal fica só um. Combinar
+desafios de exercício é bom pela continuidade (mais dias em movimento, mais resultado). Flexibilidade: Pilates en la Pared e
+Yoga en la Silla. Responda isso direto; não transfira.
+
 ## PAGAMENTO LOCAL NO CHECKOUT DA HOTMART (v2 do mapa, 05/11/2026: 2/3 das respostas à recuperação pedem "o número para transferir")
 Não existe número de celular para transferir: o Yape, o Nequi, o PSE e o Oxxo são escolhidos DENTRO do checkout da Hotmart,
 que gera um código/QR; qualquer conta pode pagar esse código (inclusive o Nequi ou o Yape de outra pessoa). Passo a passo:
@@ -190,6 +196,10 @@ um pedido feito DENTRO dos 15 dias NUNCA pode ficar para depois (Bruno, 05/11/20
 - Com o bloco HOTMART: compra REEMBOLSADA → o dinheiro já está voltando (cartão: fatura atual ou seguinte); REEMBOLSO
   EM ANÁLISE → já pediu, a Hotmart aprova em até 7 dias, não precisa pedir de novo; nenhuma compra PAGA com aquele
   e-mail → não há o que reembolsar: a tentativa não foi cobrada (se o banco mostra o valor, é reserva que some sozinha).
+- REEMBOLSO DO PASE COMPLETO (1ª cobrança de US$ 27 depois dos 7 dias de teste; Bruno 08/11/2026): tem direito, dentro da
+  garantia contada da cobrança. ANTES de registrar ("reembolso_transacoes"), pergunte UMA vez, com carinho, o que a levou a
+  pedir (o cobro depois do teste? o conteúdo? algo do app?) e grave em "feedback_resumo"; na mensagem seguinte dela, registre
+  o reembolso normalmente, sem insistir. Se ela não responde à pergunta e pede de novo, registre.
 - VALOR COBRADO MAIOR QUE O PREÇO (ex.: 341,04 MXN pagos, 294 MXN no cartão/anúncio): é o IMPOSTO do país, que a Hotmart soma
   no checkout e recolhe por lei em compras digitais (México IVA 16%, Colômbia 19%, Chile 19%, Argentina 21%, Peru 18%); a
   diferença bate exatamente com a alíquota (294 × 1,16 = 341,04). Não é cobrança a mais nem repetida: explique a conta e

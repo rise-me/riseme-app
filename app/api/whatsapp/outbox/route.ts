@@ -4,6 +4,7 @@ import { verificarConexao } from '@/lib/whatsapp-alarme'
 import { processarEmailsIndicacao } from '@/lib/email-indicacao'
 import { convidarParaVideo } from '@/lib/video-depoimento'
 import { lembrarQuemNaoEntrou } from '@/lib/lembrete-24h'
+import { segundoToqueRecuperacao } from '@/lib/recuperacao-fila'
 
 // GET /api/whatsapp/outbox — cron da Vercel a cada minuto (vercel.json). Envia as
 // mensagens de WhatsApp que já venceram na fila (lib/whatsapp-outbox.ts).
@@ -30,6 +31,9 @@ export async function GET(request: NextRequest) {
   // Lembrete de 24 h para quem recebeu o acesso e nunca entrou (c1 do mapa, Bruno 08/11/2026; 1x/hora, poucas por vez).
   const lembretes = await lembrarQuemNaoEntrou().catch((err) => (console.error('[lembrete-24h] falhou:', err), 0))
   if (lembretes) console.log(`[lembrete-24h] enfileirados=${lembretes}`)
+  // 2º toque da recuperação de compra, 24 h depois (v3 do mapa, Bruno 08/11/2026).
+  const toques = await segundoToqueRecuperacao().catch((err) => (console.error('[recuperacao-2] falhou:', err), 0))
+  if (toques) console.log(`[recuperacao-2] enfileirados=${toques}`)
   if (r.enviados || r.falhas) console.log(`[outbox] enviados=${r.enviados} falhas=${r.falhas}`)
   return NextResponse.json({ ok: true, ...r })
 }

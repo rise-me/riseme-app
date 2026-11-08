@@ -216,6 +216,22 @@ async function acharAluna(p: PedidoComando): Promise<Aluna | string> {
   return 'De qual aluna? Manda o email (ou o nome).'
 }
 
+/** Aprovação dada fora do WhatsApp (Bruno no chat: "pode cancelar"): executa um comando aguardando pelo id. */
+export async function aprovarComando(id: number): Promise<string> {
+  const { data: c } = await admin().from('whatsapp_comandos').select('id, acao, params, status').eq('id', id).maybeSingle()
+  if (!c) throw new Error(`comando #${id} não existe`)
+  if (c.status !== 'aguardando') throw new Error(`comando #${id} está ${c.status}`)
+  try {
+    const resultado = await executar(c.acao, c.params as Params, c.id)
+    await fechar(c.id, 'executado', resultado)
+    return resultado
+  } catch (err) {
+    const detalhe = (err instanceof Error ? err.message : String(err)).slice(0, 250)
+    await fechar(c.id, 'erro', detalhe)
+    throw new Error(detalhe)
+  }
+}
+
 async function comandoAguardando(): Promise<{ id: number; acao: string; params: unknown; resumo: string } | null> {
   const { data } = await admin()
     .from('whatsapp_comandos')
