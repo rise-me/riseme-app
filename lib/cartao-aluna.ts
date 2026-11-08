@@ -40,6 +40,7 @@ const data = (iso?: string | null) => (iso ? iso.slice(0, 10) : '?')
 export async function cartaoDaAluna(db: SupabaseClient, p: { userId: string; user?: User | null; variantes: string[] }): Promise<string> {
   const linhas: string[] = []
   const meta = (p.user?.user_metadata ?? {}) as Record<string, unknown>
+  if (meta.manter_acesso) linhas.push('ACESSO MANTIDO por decisão da equipe, mesmo com reembolso (gentileza, 08/11/2026): o acesso dela NÃO será retirado. Se ela perguntar, confirme que fica; nunca diga que será revisado.')
   const compras = (meta.compras as CompraGuardada[] | undefined) ?? []
   if (compras.length) {
     linhas.push('Compras (o que ela pagou, de onde):')
