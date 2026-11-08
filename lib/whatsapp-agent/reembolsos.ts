@@ -8,6 +8,7 @@
 import { admin, registrarMensagem } from './conversa'
 import { reembolsarHotmart, comprasPorEmail } from '@/lib/hotmart-api'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
+import { bandeira, nomeCurto, produtoCurto, valorBonito, pagamentoBonito, corta } from './formato-lista'
 
 export interface PedidoReembolso {
   phone: string // chat dela (dígitos ou LID)
@@ -53,9 +54,15 @@ export async function linhasReembolsos(): Promise<string[]> {
     const n = i + 1
     await admin().from('whatsapp_comandos').update({ params: { ...p, numero: n } }).eq('id', id)
     const d = dias(p.compradaEm)
-    const prazo = d >= 15 ? ' ⛔ *passou dos 15 dias (manual, por fora)*' : d >= 13 ? ` ⚠️ *vence em ${15 - d} dia(s)*` : ''
-    const painel = p.plataforma === 'perfectpay' ? ' · 🖐 Perfect Pay: fazer no painel' : ''
-    linhas.push(`*${n}* · ${p.nome || p.email} · ${p.produto} ${p.valor} · ${p.pagamento} · comprou há ${d} dias${prazo}${painel}\n   motivo: ${p.motivo}`)
+    const prazo = d >= 15 ? '\n⛔ *Passou dos 15 dias: manual, por fora*' : d >= 13 ? `\n⚠️ *Vence em ${15 - d} dia(s)*` : ''
+    const painel = p.plataforma === 'perfectpay' ? '\n🖐 *Perfect Pay: fazer no painel*' : ''
+    // Um pedido = um bloco curto: quem, o que, quanto, como pagou, há quanto tempo, e o porquê em itálico (Bruno 08/11/2026).
+    linhas.push(
+      `*${n} · ${nomeCurto(p.nome, p.email)}* ${bandeira(p.phone)}`.trim() +
+        `\n${produtoCurto(p.produto)} · ${valorBonito(p.valor)} · ${pagamentoBonito(p.pagamento)} · comprou há ${d} dias` +
+        prazo + painel +
+        `\n_${corta(p.motivo, 170)}_`,
+    )
   }
   return linhas
 }

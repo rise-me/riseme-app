@@ -7,6 +7,7 @@
 import { admin, registrarMensagem } from './conversa'
 import { linhasReembolsos } from './reembolsos'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
+import { bandeira, nomeCurto, haQuanto, dataHoje, separaAcao, corta as cortaTexto } from './formato-lista'
 
 
 const MAX_CONSULTAS = 20
@@ -49,26 +50,40 @@ export async function enviarListaDiaria(): Promise<string | null> {
   if (!destino) return null
   const [reembolsos, consultas] = await Promise.all([linhasReembolsos(), consultasAbertas()])
   const partes: string[] = []
+  // Formato (Bruno 08/11/2026): blocos curtos separados por linha em branco, negrito só em quem e no número, emoji de
+  // seção e bandeira, o porquê em itálico; mesma informação de antes, sem linha comprida.
+  const plural = (n: number, s: string, p: string) => `${n} ${n === 1 ? s : p}`
   if (!reembolsos.length && !consultas.total) {
-    partes.push('✅ *Lista das 20h*: nada pendente. Nenhuma consulta aberta nem reembolso aguardando.')
+    partes.push(`✅ *Lista das 20h* · ${dataHoje()}`, '', 'Nada pendente: nenhuma consulta aberta nem reembolso aguardando.')
   } else {
-    partes.push(`📋 *Lista das 20h* — ${reembolsos.length} reembolso(s) · ${consultas.total} consulta(s)`)
-    if (reembolsos.length) partes.push('', '💸 *Reembolsos* (aprovado = reembolso na Hotmart pela API + aviso à aluna)', ...reembolsos)
-    if (consultas.total) {
-      partes.push('', '🟡 *Consultas* (responda "#id A", "#id B" ou "#id <o que responder>"; eu escrevo no idioma dela)')
-      for (const c of consultas.lista) {
-        partes.push(
-          `*#${c.id}* · ${c.nome || 'aluna sem conta'} (${idade(c.created_at)}) +${String(c.phone).replace('@lid', ' · sem número')}`,
-          `   ${corta(c.resumo || c.motivo, 260)}`,
-          ...(c.opcao_a ? [`   *A)* ${corta(c.opcao_a, 180)}`] : []),
-          ...(c.opcao_b ? [`   *B)* ${corta(c.opcao_b, 180)}`] : []),
-        )
-      }
-      if (consultas.total > consultas.lista.length) partes.push(`   (+${consultas.total - consultas.lista.length} mais antigas; responda pelo #id)`)
+    const resumo = [
+      reembolsos.length ? `💸 ${plural(reembolsos.length, 'reembolso', 'reembolsos')}` : '',
+      consultas.total ? `🟡 ${plural(consultas.total, 'consulta', 'consultas')}` : '',
+      consultas.tecnicos ? `🔧 ${plural(consultas.tecnicos, 'ticket técnico', 'tickets técnicos')} (com o chat)` : '',
+    ].filter(Boolean).join(' · ')
+    partes.push(`📋 *Lista das 20h* · ${dataHoje()}`, resumo)
+    if (reembolsos.length) {
+      partes.push('', '💸 *REEMBOLSOS* · "ok 1 2" aprova · "não 2" recusa', '')
+      partes.push(reembolsos.join('\n\n'))
     }
-    partes.push('', 'Responda livre, uma por mensagem: "ok 1 2", "não 2", "#131 A", "#133 manda o link e pede o print". Sem resposta, elas seguem esperando.')
+    if (consultas.total) {
+      partes.push('', '🟡 *CONSULTAS* · "#141 A", "#141 B" ou escreva a resposta', '')
+      const blocos: string[] = []
+      for (const c of consultas.lista) {
+        const { acao, resto } = separaAcao(c.resumo)
+        const linhas = [`*#${c.id} · ${nomeCurto(c.nome)}* ${bandeira(String(c.phone))} · ${haQuanto(c.created_at)}`.replace(/\s+·/, ' ·')]
+        if (acao) linhas.push(`🧭 *Ação:* ${cortaTexto(acao, 140)}`)
+        const contexto = cortaTexto(resto || c.motivo, 220)
+        if (contexto) linhas.push(`_${contexto}_`)
+        if (c.opcao_a) linhas.push(`*A)* ${cortaTexto(c.opcao_a, 160)}`)
+        if (c.opcao_b) linhas.push(`*B)* ${cortaTexto(c.opcao_b, 160)}`)
+        blocos.push(linhas.join('\n'))
+      }
+      if (consultas.total > consultas.lista.length) blocos.push(`_+${consultas.total - consultas.lista.length} mais antigas; responda pelo #id._`)
+      partes.push(blocos.join('\n\n'))
+    }
+    partes.push('', '_Uma resposta por mensagem. Sem resposta, seguem esperando._')
   }
-  if (consultas.tecnicos) partes.push('', `🔧 ${consultas.tecnicos} ticket(s) técnico(s) na fila do chat do riseme (não precisam de você).`)
   const msg = partes.join('\n')
   const r = await sendZapiText({ phone: destino, message: msg })
   if (!r.ok) {
