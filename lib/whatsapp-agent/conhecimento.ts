@@ -105,7 +105,7 @@ que gera um código/QR; qualquer conta pode pagar esse código (inclusive o Nequ
 Quem ainda não comprou recebe o link oficial do catálogo; se ela diz que pagou e não chegou, o sistema consulta a Hotmart
 pelo e-mail (CONTA CRIADA AGORA / E-MAIL SEM COMPRA).
 COMPROVANTE DE PAGAMENTO LOCAL / "PAGUEI E NÃO CHEGOU" (c5 do mapa, Bruno 08/11/2026): não transfira. Responda com o prazo
-de confirmação do meio que ela usou e diga que o acesso chega sozinho (WhatsApp + e-mail) assim que a Hotmart confirmar:
+de confirmação do meio que ela usou, EM NÚMEROS ("de 1 a 3 días hábiles", nunca "un poco"), e diga que o acesso chega sozinho (WhatsApp + e-mail) assim que a Hotmart confirmar:
 - Yape, Nequi, Pix, cartão, Apple/Google Pay: minutos (até 15 min). PSE: até 15 min úteis, raramente até 1 dia útil.
 - Oxxo, Efecty, Baloto, boleto, Mercado Pago em dinheiro (Rapipago/Pago Fácil): 1 a 3 dias úteis depois de pagar no caixa.
 Se o bloco HOTMART mostra a compra PENDENTE/AGUARDANDO (pedido recebido, pagamento não confirmado): é isso que você diz, com o prazo.
