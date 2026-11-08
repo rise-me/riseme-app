@@ -69,7 +69,7 @@ export const CATALOGO: Produto[] = [
     oQueE: '28 dias de pilates na parede, um vídeo por dia no app, pagamento único e acesso vitalício. Vende-se avulso (Bruno, 05/11).',
     suporteVende: true,
     ofertas: [
-      { codigo: '?', preco: 'US$ 12,90 (há oferta de 14,90)', status: 'vigente', nota: 'oferta avulsa existe na Hotmart (produto 4784921, várias ofertas); CÓDIGO E LINK a receber do Bruno — até lá o bot transfere o pedido com motivo "VENDA — link do Pilates avulso" (?)' },
+      { codigo: 'n6ulieba', preco: 'US$ 12,90', status: 'vigente', link: 'https://pay.hotmart.com/A96799048T?off=n6ulieba&checkoutMode=10', nota: 'oferta avulsa do Pilates (lida na Hotmart pelo Chrome em 08/11/2026); há também ssyj6tyt a US$ 14,90 (sem uso no suporte)' },
       { codigo: 'dtl4s1cf', preco: 'US$ 7,90', status: 'order-bump', nota: 'order bump no checkout da Calistenia (preço só ali)' },
     ],
   },
@@ -100,8 +100,9 @@ export const CATALOGO: Produto[] = [
     ofertas: [
       { codigo: 'v4lltj3v', preco: '7 dias grátis, depois US$ 27 por ano', status: 'vigente', link: 'https://pay.hotmart.com/K100401831L?off=v4lltj3v&checkoutMode=10', nota: 'cobra no dia 8; cancelar antes = nada cobrado; é a oferta do upsell 2 e do convite do suporte' },
       { codigo: 'gm2lcusd', preco: '7 dias grátis, depois US$ 27 por ano', status: 'vigente', nota: 'variante do trial (aparece em vendas de 2026); mesmo plano; sem link no suporte' },
-      { codigo: 'peuqcm4o', preco: 'mensal (valor: Bruno confirma ?)', status: 'descontinuada', nota: 'HOTMART_OFFER_MONTHLY: existe e tem assinantes antigos; o bot não oferece (Bruno 05/11)' },
-      { codigo: '4wnszk9x', preco: 'anual (valor: Bruno confirma ?)', status: 'descontinuada', nota: 'HOTMART_OFFER_ANNUAL: existe e tem assinantes antigos; o bot não oferece (Bruno 05/11)' },
+      { codigo: 'peuqcm4o', preco: 'US$ 14,90 por mês (1º mês US$ 7 com o cupom 7OFF)', status: 'descontinuada', nota: 'HOTMART_OFFER_MONTHLY, plano "MENSAL US$ 14,90 (Inside App)"; lido na Hotmart em 08/11/2026; tem assinantes antigos; o bot não oferece' },
+      { codigo: '4wnszk9x', preco: 'US$ 47 por ano (1º ano US$ 19 com o cupom 19OFF)', status: 'descontinuada', nota: 'HOTMART_OFFER_ANNUAL, plano "ANUAL US$47 (Inside App)"; lido na Hotmart em 08/11/2026; tem assinantes antigos; o bot não oferece' },
+      { codigo: '4me1ipa9', preco: 'US$ 9,90 por mês', status: 'descontinuada', nota: 'plano mensal antigo (preço base); 6ieo95rr é o mesmo valor pelo YouTube; tiq0qhj8 mensal US$ 14,90 Inside App; z821w7mn anual US$ 37; 33lbe9qq anual US$ 47; 37temfdv trial PL; b9eu3q4l anual com desconto (US$ 4,99 na tela, conferir). O bot só fala do trial v4lltj3v' },
     ],
   },
   {
