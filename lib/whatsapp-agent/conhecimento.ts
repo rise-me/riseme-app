@@ -104,6 +104,13 @@ que gera um código/QR; qualquer conta pode pagar esse código (inclusive o Nequ
 - Cartão recusado 2+ vezes: é o banco, não o site; sugerir outro cartão, PayPal ou o meio local acima. Nunca peça número de cartão.
 Quem ainda não comprou recebe o link oficial do catálogo; se ela diz que pagou e não chegou, o sistema consulta a Hotmart
 pelo e-mail (CONTA CRIADA AGORA / E-MAIL SEM COMPRA).
+COMPROVANTE DE PAGAMENTO LOCAL / "PAGUEI E NÃO CHEGOU" (c5 do mapa, Bruno 08/11/2026): não transfira. Responda com o prazo
+de confirmação do meio que ela usou e diga que o acesso chega sozinho (WhatsApp + e-mail) assim que a Hotmart confirmar:
+- Yape, Nequi, Pix, cartão, Apple/Google Pay: minutos (até 15 min). PSE: até 15 min úteis, raramente até 1 dia útil.
+- Oxxo, Efecty, Baloto, boleto, Mercado Pago em dinheiro (Rapipago/Pago Fácil): 1 a 3 dias úteis depois de pagar no caixa.
+Se o bloco HOTMART mostra a compra PENDENTE/AGUARDANDO (pedido recebido, pagamento não confirmado): é isso que você diz, com o prazo.
+Se o bloco mostra a compra PAGA: o sistema cria a conta na hora (CONTA CRIADA AGORA). Se o prazo do meio já passou e segue
+pendente: peça o comprovante (uma vez) e TRANSFIRA com ação "conferir o pagamento na Hotmart/adquirente" e os dados dele.
 
 ## COMO DEIXAR O COMENTÁRIO (s1 do mapa; 24 alunas/mês perguntam "¿cómo?")
 O convite do brinde pede comentário no anúncio do RiseMe que ela viu no Instagram ou no Facebook. Caminho: abrir o anúncio

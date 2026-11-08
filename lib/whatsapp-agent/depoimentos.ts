@@ -29,7 +29,12 @@ export const LINKS: Record<string, { url: string; versao: Versao }[]> = {
   // (Bruno, 19/10: "pode falar anúncio, não tem problema" — todas chegam pelo anúncio). Comentário é do post
   // inteiro, o card só muda o que ela lê.
   // Ao chegar a 100: voltar a lista de anúncios abaixo (comentada).
-  es: [{ url: 'https://www.instagram.com/p/DerPwaqlg_U/?img_index=2', versao: 'v2' }],
+  // 08/11/2026 (Bruno): volta pros anúncios (o post fixado já encheu de comentários). Os dois posts do V42, alternando.
+  es: [
+    { url: 'https://www.facebook.com/365563009981105/posts/122203707488483220', versao: 'v2' },
+    { url: 'https://www.instagram.com/p/DeIs5uJAIfW/', versao: 'v2' },
+  ],
+  // es (post fixado 'quiénes somos', usado de 2x/10 a 08/11): { url: 'https://www.instagram.com/p/DerPwaqlg_U/?img_index=2', versao: 'v2' },
   // Lista dos anúncios (até 19/10/2026) — voltar quando o post fixado tiver 100 comentários:
   // es: [
   //   { url: 'https://www.facebook.com/365563009981105/posts/122203707488483220', versao: 'v2' },
