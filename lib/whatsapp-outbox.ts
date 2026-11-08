@@ -264,6 +264,28 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       continue
     }
 
+    // 'reenviar-acesso' (08/11/2026): body = JSON {email}; liga a conversa (item.phone) à conta desse e-mail, corrige o telefone da
+    // conta e reenvia o acesso com senha nova NESTA conversa. Para o caso em que o acesso foi para outro número (checkout errado).
+    if (item.kind === 'reenviar-acesso') {
+      let saida: string
+      try {
+        const { email } = JSON.parse(item.body) as { email: string }
+        const { data: u } = await db.from('users').select('id').ilike('email', email).limit(1).maybeSingle()
+        if (!u) throw new Error(`sem conta com ${email}`)
+        const { reenviarAcesso } = await import('@/lib/whatsapp-agent/acesso')
+        const { perfilDaAluna } = await import('@/lib/whatsapp-agent/conversa')
+        await db.from('whatsapp_chats').upsert({ phone: item.phone, user_id: u.id, updated_at: new Date().toISOString() }, { onConflict: 'phone' })
+        if (!item.phone.endsWith('@lid')) await db.from('users').update({ phone: `+${item.phone.replace(/\D/g, '')}` }).eq('id', u.id)
+        const perfil = await perfilDaAluna(u.id).catch(() => null)
+        await reenviarAcesso({ userId: u.id, phone: item.phone, email, idioma: perfil?.idioma ?? 'es', nova: true })
+        saida = `acesso reenviado para ${email} em ${item.phone}`
+      } catch (err) {
+        saida = `erro: ${String(err).slice(0, 300)}`
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
     // 'pedir-cancelamento' não manda texto à aluna: pede ao responsável, no WhatsApp dele, a aprovação de um cancelamento de
     // assinatura (body = JSON da aluna + código da assinatura; lib/whatsapp-agent/comandos.ts). Ele responde sim/não (06/11/2026).
     if (item.kind === 'pedir-cancelamento') {

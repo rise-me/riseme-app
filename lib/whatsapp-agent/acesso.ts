@@ -89,8 +89,11 @@ export async function contaPelaCompraHotmart(p: { phone: string; conversa: Mensa
     const convidada = await contaDaConvidadaHotmart(p.phone)
     if (convidada) return { userId: convidada, criadaAgora: false }
     if (!hotmartConfigurada()) return null
-    const emails = [...new Set(p.conversa.filter((m) => m.autor === 'student').flatMap((m) => m.texto.match(EMAIL) ?? []).map((e) => e.toLowerCase()))]
-    const email = emails[emails.length - 1]
+    // E-mail dela em texto; se não houver, o que o bot leu numa imagem e repetiu na conversa (08/11/2026: ".com.co" só estava no print).
+    const deTexto = p.conversa.filter((m) => m.autor === 'student').flatMap((m) => m.texto.match(EMAIL) ?? [])
+    const doBot = p.conversa.filter((m) => m.autor === 'agent').flatMap((m) => m.texto.match(EMAIL) ?? [])
+    const emails = [...new Set([...deTexto, ...doBot].map((e) => e.toLowerCase()))]
+    const email = emails.find((e) => deTexto.some((t) => t.toLowerCase() === e) && !doBot.some((b) => b.toLowerCase().startsWith(e + '.'))) ?? emails[emails.length - 1]
     if (!email) return null
     const existente = await contaPorEmail(email)
     if (existente) return religarPorTelefoneQuaseIgual(existente, email, p.phone)
