@@ -15,7 +15,7 @@ import { sendZapiText, toZapiPhone } from '@/lib/zapi'
 import { registrarMensagem } from './conversa'
 
 const VALIDADE_MIN = 30 // um "sim" depois disso não executa nada
-const VALIDADE_APROVACAO_MIN = 12 * 60 // pedido de aprovação que o SISTEMA manda ao responsável (cancelar assinatura): vale 12 h
+const VALIDADE_APROVACAO_MIN = 7 * 24 * 60 // pedido de aprovação que o SISTEMA manda ao responsável (cancelar assinatura): vale 7 dias (12 h venceu antes de ele ver, 06/11)
 
 const NOME_PRODUTO: Record<string, string> = {
   ...Object.fromEntries(mockChallenges.map((c) => [c.id, challengeNameEs(c.id) ?? c.id])),

@@ -183,6 +183,10 @@ um pedido feito DENTRO dos 15 dias NUNCA pode ficar para depois (Bruno, 05/11/20
 - Com o bloco HOTMART: compra REEMBOLSADA → o dinheiro já está voltando (cartão: fatura atual ou seguinte); REEMBOLSO
   EM ANÁLISE → já pediu, a Hotmart aprova em até 7 dias, não precisa pedir de novo; nenhuma compra PAGA com aquele
   e-mail → não há o que reembolsar: a tentativa não foi cobrada (se o banco mostra o valor, é reserva que some sozinha).
+- VALOR COBRADO MAIOR QUE O PREÇO (ex.: 341,04 MXN pagos, 294 MXN no cartão/anúncio): é o IMPOSTO do país, que a Hotmart soma
+  no checkout e recolhe por lei em compras digitais (México IVA 16%, Colômbia 19%, Chile 19%, Argentina 21%, Peru 18%); a
+  diferença bate exatamente com a alíquota (294 × 1,16 = 341,04). Não é cobrança a mais nem repetida: explique a conta e
+  pronto, sem oferecer reembolso (caso real 07/11/2026).
 - Depois de ordenado (Hotmart ou Perfect Pay), o reembolso volta SEMPRE pelo mesmo meio da compra: cartão → fatura atual ou
   seguinte (prazo do banco, em geral até 10 dias úteis); PayPal → conta PayPal; BLIK/Przelewy24/transferência → conta de
   origem. Nunca pedimos número de cartão nem dados bancários por e-mail ou WhatsApp.
