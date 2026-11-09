@@ -87,7 +87,7 @@ const SINAIS: [Assunto, RegExp][] = [
   ['tecnico', /v[ií]deo|pantalla|carga|no abre|no funciona|error|bug|sonido|audio|negra|blanco|app no|aplicaci[oó]n|navegador|safari|chrome|iphone|android|instal/i],
   ['conteudo', /\bt[eé]s?\b|infusi|receta|men[uú]|plan\b|desayun|almuerz|cena\b|vinagre|hielo|fruta|protocolo|pdf|bono|bonus|extras|ayuno|comida|alimentac|calor[ií]a|herbat|dieta|diet\b/i],
   ['treino', /ejercicio|rutina|entren|d[ií]a \d|plancha|sentadilla|puente|abdominal|estocada|zancada|flexi[oó]n|clase|video del d[ií]a|repetic|descans|calentam|estiram|dolor|lesi[oó]n|rodilla|espalda|embaraz|lactan|edad|a[ñn]os|principiante|nivel|progres|serie|ćwicz|trening/i],
-  ['venda', /precio|cu[aá]nto (cuesta|vale|sale)|comprar|compra\b|descuento|cup[oó]n|oferta|pase completo|pilates|yoga|amiga|hermana|regal|indicar|recomend|link de (compra|pago)|pagar/i],
+  ['venda', /precio|cu[aá]nto (cuesta|vale|sale)|comprar|compra\b|descuento|cup[oó]n|oferta|pase completo|pilates|yoga|amiga|hermana|regal|indicar|recomend|link de (compra|pago)|pagar|afiliad|comisi[oó]n|ganar (dinero|d[oó]lares)/i],
   ['depoimento', /testimon|comentario|coment[eé]|captura|print|foto|\[IMAGEM|\[VÍDEO|v[ií]deo de|resultado|antes y despu/i],
   ['feedback', /sugerencia|sugiero|sugerir|opini[oó]n|me gust[oó]|no me gust|me encant|mejorar|podr[ií]an|deber[ií]an|feedback|queja|quejar|aburrid|excelente|muy bueno|muy malo|malo\b|feo\b|falta (un|una|el|la)|ser[ií]a bueno|estar[ií]a bien|propuesta|sugestia|opinia|podoba/i],
 ]
@@ -125,7 +125,7 @@ dinheiro = cobrança, reembolso, cancelar, valor cobrado, duplicidade, golpe, as
 tecnico = vídeo não carrega/corta/sem som, tela em branco, erro, app travando, instalação, progresso não registra.
 conteudo = o que está nos materiais: chás, receitas, plano anti-inchaço, vinagre, frutas, cardápio/menú, Protocolo, bônus, jejum, comida.
 treino = como treinar: exercícios, dia X, repetições, descanso, aquecimento, dor/lesão, gravidez, idade, nível, aulas, TV.
-venda = preço, comprar outro produto (Pilates, Pase, Protocolo), desconto, link de compra, amiga/parente quer comprar, indicação.
+venda = preço, comprar outro produto (Pilates, Pase, Protocolo), desconto, link de compra, amiga/parente quer comprar, indicação, ser afiliada / ganhar comissão indicando.
 depoimento = ela manda print/foto/vídeo de resultado ou comentário, presente do depoimento, grupo/comunidade, brinde do cardápio.
 feedback = opinião, sugestão, elogio ou reclamação sobre as aulas, o app ou o conteúdo ("a aula X foi pesada", "deveria ter aquecimento", "adorei"), sem ser problema técnico nem dinheiro.
 social = só saudação/agradecimento/ok/emoji, sem pergunta.

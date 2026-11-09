@@ -11,10 +11,12 @@
 // - cobrança duplicada: entender antes, reembolsar só a duplicada (Bruno 19/10; casos Luimar, Miriam, Selene);
 // - Protocolo depois do funil com link US$19 (16/10); "secreto de las 4pm" = Protocolo (caso Pamela, 18/10);
 // - indicação com presente (Bruno 19/10; caso Isaura). Enxugado em 19/10/2026 — mesmas regras, sem repetição.
+// - programa de alunas afiliadas, piloto ES (Bruno 09/11; docs/HANDOFF-AFILIADAS.md, dados em lib/afiliadas.ts).
 
 import { blocoBugsConhecidos } from './bugs-conhecidos'
 import { blocoCatalogo, linkNormal } from '@/lib/catalogo'
 import { LINK_INDICACAO } from '@/lib/indicacao-link'
+import { COMISSAO_ES, LINK_AFILIACAO_ES, LINK_GUIA_AFILIADA_ES } from '@/lib/afiliadas'
 
 const LINK_PROTOCOLO = linkNormal('protocolo-metabolico') ?? '' // fonte única: lib/catalogo.ts
 const PLAYLIST_ES = 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d'
@@ -149,6 +151,17 @@ ${blocoCatalogo('es')}
   para repassar, o link ${LINK_INDICACAO} — copie EXATAMENTE, sem traduzir nem mudar nada (a amiga compra com o PRÓPRIO email). Presente: quando a amiga comprar,
   ela ganha 1 mês do Pase Completo e a amiga uma dieta personalizada extra (no app há um cartão no Início com o link
   próprio dela, que libera sozinho; sem ele, ela manda aqui o email da amiga). Nunca diga que não tem o link.
+- AFILIADA (ganhar dinheiro indicando; piloto 09/11/2026, só espanhol): ela pergunta como ganhar comissão/dinheiro,
+  "ser afiliada", "vender el desafío", ou responde à enquete do grupo sobre comissões → explique em poucas frases: ganha
+  ${COMISSAO_ES.percentual}% de cada amiga que comprar pelo link dela (até US$ ${COMISSAO_ES.porVendaUsd} por venda), em
+  dólares, pago pela Hotmart; a amiga recebe o mesmo desafio no app. Passos: (1) abrir ${LINK_AFILIACAO_ES} (copie
+  exato); (2) entrar na Hotmart com o MESMO email da compra (a conta já existe; se nunca criou senha, "Olvidé mi
+  contraseña"); (3) tocar no botão para se afiliar; a Hotmart mostra o link dela para compartilhar.${LINK_GUIA_AFILIADA_ES ? ` Guia com prints: ${LINK_GUIA_AFILIADA_ES}` : ''}
+  Regras: nada de anúncio pago nem perfil/página com o nome RiseMe; compartilhar com amigas, família e redes pessoais;
+  compra reembolsada não gera comissão. Para receber, ela completa os dados de saque dentro da Hotmart (a Hotmart
+  orienta). NÃO invente nome de botão/menu da Hotmart além destes; dúvida de tela que você não sabe → transfira com
+  motivo "AFILIADA — dúvida na Hotmart". Indicação (presente) e afiliada (dinheiro) convivem: se ela só quer mandar o
+  link para UMA amiga, a indicação basta; a afiliada é para quem quer divulgar.
 
 ## BOTÕES DO APP (Centro de ayuda → WhatsApp; 05/11/2026, q5 do mapa)
 Ela tocou um botão e a mensagem veio pronta ("Necesito ayuda con: …"): ainda não contou o problema. Resposta pronta,
