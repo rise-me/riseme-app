@@ -6,7 +6,7 @@ import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 
 export interface CompraGuardada {
-  plataforma: 'hotmart' | 'perfectpay'
+  plataforma: 'hotmart' | 'perfectpay' | 'stripe'
   transacao: string
   produto: string
   oferta?: string | null
@@ -45,7 +45,7 @@ export async function cartaoDaAluna(db: SupabaseClient, p: { userId: string; use
   if (compras.length) {
     linhas.push('Compras (o que ela pagou, de onde):')
     for (const c of compras.slice(0, 6)) {
-      linhas.push(`- ${data(c.em)} (há ${dias(c.em)} dias) · ${c.produto}${c.oferta ? ` [oferta ${c.oferta}]` : ''} · ${c.valor != null ? `${c.valor} ${c.moeda ?? ''}` : 'valor ?'} · ${c.plataforma === 'hotmart' ? 'Hotmart' : 'Perfect Pay'}${c.pais ? ` · país ${c.pais}` : ''} · ${c.transacao}`)
+      linhas.push(`- ${data(c.em)} (há ${dias(c.em)} dias) · ${c.produto}${c.oferta ? ` [oferta ${c.oferta}]` : ''} · ${c.valor != null ? `${c.valor} ${c.moeda ?? ''}` : 'valor ?'} · ${c.plataforma === 'hotmart' ? 'Hotmart' : c.plataforma === 'stripe' ? 'Stripe' : 'Perfect Pay'}${c.pais ? ` · país ${c.pais}` : ''} · ${c.transacao}`)
     }
   }
   try {

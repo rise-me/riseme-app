@@ -91,6 +91,10 @@ const PRESENTE: Record<string, string> = {
   pl: 'I tak jak obiecaliśmy, bo w RiseMe robimy to inaczej: zachowujesz dostęp do wyzwania, które kupiłaś. Potraktuj to jako prezent od nas! 💛',
   en: "And as we promised, because at RiseMe we do things differently: you keep access to the challenge you bought. Take it as a gift from us! 💛",
 }
+/** Frase do presente do acesso (fonte única; o webhook da Stripe também usa). */
+export function textoPresente(idioma: string): string {
+  return PRESENTE[idioma] ?? PRESENTE.en
+}
 /** Fecho da confirmação: presente do acesso (desafio) ou o agradecimento de sempre (Pase). */
 const fecho = (idioma: string, produto: string, padrao: string): string => (ehPase(produto) ? padrao : PRESENTE[idioma] ?? PRESENTE.es)
 

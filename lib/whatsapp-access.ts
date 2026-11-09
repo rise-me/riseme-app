@@ -439,6 +439,8 @@ export async function sendWhatsAppAccess(params: {
   code: string
   link: string
   locale: string
+  /** Compra da Stripe: a 2ª mensagem diz como pedir reembolso (Bruno 09/11: zero chargeback). */
+  comoReembolsar?: boolean
 }): Promise<void> {
   if (process.env.WHATSAPP_PROVIDER !== 'zapi') {
     await sendVoxuyAccess(params)
@@ -492,6 +494,12 @@ const NOME_DO_DESAFIO: Record<string, Partial<Record<AppLocale, string>>> = {
   '9': { es: 'Plan de Bienestar Íntimo' },
 }
 
+// Compras da Stripe (Bruno 09/11/2026): deixar claro como pedir reembolso, para ela nunca ir ao banco antes de nós.
+const COMO_REEMBOLSAR: Partial<Record<string, (homeUrl: string) => string>> & { en: (homeUrl: string) => string } = {
+  pl: (h) => `Gdybyś kiedyś chciała zwrot pieniędzy, wystarczy napisać tutaj albo wejść na: ${h}/refund`,
+  en: (h) => `If you ever want a refund, just write to us here or go to: ${h}/refund`,
+}
+
 /** As 2 mensagens da sequência, prontas — exportado também pra pré-visualizar/testar o texto. */
 export function mensagensDeAcesso(p: {
   locale: string
@@ -499,6 +507,7 @@ export function mensagensDeAcesso(p: {
   code: string
   link: string
   challengeId?: string
+  comoReembolsar?: boolean
 }): [string, string] {
   const locale = p.locale as AppLocale
   const copy = COPY[locale] ?? COPY.es
@@ -511,7 +520,7 @@ export function mensagensDeAcesso(p: {
     nome ? acesso.replace('Desafío de Calistenia', nome) : acesso,
     // Sem playlist desde 16/10/2026: ela existia para tapar a falta de suporte, mas tirava a aluna do app
     // (~60% nunca faziam o dia 1 lá). Agora o suporte responde; a playlist fica só como plano B do agente.
-    support({}),
+    p.comoReembolsar ? `${support({})}\n\n${(COMO_REEMBOLSAR[locale] ?? COMO_REEMBOLSAR.en)(homeUrl)}` : support({}),
   ]
 }
 

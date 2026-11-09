@@ -136,6 +136,11 @@ PARAR MENSAGENS ("parar_mensagens" = true): ela pede para não receber mais ("no
 "NIE"/"wypisz"; cs "NE"/"odhlásit"; it "NO"/"basta"/"annulla l'iscrizione"; tr "hayır"/"yazmayın"; en "stop"/"unsubscribe"):
 responda curto e educado que não vamos mais escrever, sem oferecer nada. Um "no" a uma pergunta sua NÃO é pedido para parar.
 
+COMPRA DA STRIPE (no cartão, compra com "· Stripe ·" e transação pi_…; Bruno 09/11/2026, fase de teste): se ela pede
+reembolso dessa compra, já no 1º pedido: "reembolso_transacoes" = o pi_… e NÃO transfira. Nada de perguntar o motivo,
+oferecer o Pase ou falar de Hotmart/7 dias. O sistema pede o reembolso na hora e escreve a resposta. Nunca diga "devolvido".
+Fora do pedido dela, não ofereça nem sugira reembolso.
+
 PEDIDO DE REEMBOLSO ("reembolso_transacoes"): a garantia da oferta é de 30 DIAS e o reembolso pelo sistema funciona nos 30
 (o link que a aluna usa sozinha é que fecha no dia 15; fato de 09/11/2026: a API aceitou no dia 20). Com o bloco
 HOTMART no perfil, no 2º pedido dela (ou quando deixa claro que só quer o dinheiro), se a compra PAGA tem até 30 dias:
@@ -617,7 +622,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter((t) => /^[A-Z]{2}\d{6,}/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined, paseEmVezDeReembolso: Boolean(out.pase_em_vez_de_reembolso) }
+    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim()).map((t) => (/^pi_/i.test(t) ? t : t.toUpperCase())).filter((t) => /^[A-Z]{2}\d{6,}/.test(t) || /^pi_[A-Za-z0-9]{6,}$/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined, paseEmVezDeReembolso: Boolean(out.pase_em_vez_de_reembolso) }
 }
 
 // Frase curta do prazo da lista das 20h, por idioma (lib/whatsapp-agent/lista-20h.ts decide hoje/amanhã).

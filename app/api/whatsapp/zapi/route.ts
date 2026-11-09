@@ -40,6 +40,19 @@ import {
 import { blocoHotmart } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsosPendentes, aprovarReembolsos, criarPedidosDaDecisao } from '@/lib/whatsapp-agent/reembolsos'
 import { emailNaConversa } from '@/lib/whatsapp-agent/dinheiro'
+import { reembolsarStripe } from '@/lib/stripe-api'
+
+/** Resposta imediata ao pedido de reembolso da Stripe (texto do [Alunas Stripe], 09/11). Sem "devolvido". */
+function textoReembolsoStripe(idioma: string, nome: string | undefined, ok: boolean): string {
+  const n = nome?.trim().split(/\s+/)[0]
+  const pl = idioma === 'pl'
+  if (!ok) return pl
+    ? `${n ? `${n}, t` : 'T'}woja prośba o zwrot jest zapisana. Nasz zespół sprawdza to teraz i napiszemy do Ciebie tutaj. 💛`
+    : `${n ? `${n}, y` : 'Y'}our refund request is registered. Our team is checking it now and we'll write to you here. 💛`
+  return pl
+    ? `Jasne${n ? `, ${n}` : ''}. Twój zwrot jest już w trakcie realizacji — nie musisz nic więcej robić. Wszystkie informacje znajdziesz tutaj:\nhttps://riseme.app/pl/refund\nGdy zwrot zostanie zrealizowany, wyślę Ci tutaj potwierdzenie. 💛`
+    : `Of course${n ? `, ${n}` : ''}. Your refund is already being processed — you don't need to do anything else. All the details are here:\nhttps://riseme.app/en/refund\nOnce the refund is completed, I'll send you a confirmation here. 💛`
+}
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.
@@ -436,6 +449,18 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
 
   // Reembolso decidido pelo bot (2º pedido, compra paga até 15 dias, bloco HOTMART): vira pedido aguardando o "ok" do
   // responsável (lista das 20h, ou na hora se estiver perto do dia 15). Sem pedido criado → vira consulta (05/11/2026).
+  // Compra da Stripe (Bruno 09/11/2026, teste CL-PL; zero chargeback): reembolso AUTOMÁTICO, sem lista nem aprovação.
+  // O texto é fixo (nunca "devolvido"); a confirmação final, com o presente do acesso, sai pelo webhook da Stripe.
+  if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))) {
+    const pis = decisao.reembolsoTransacoes.filter((t) => t.startsWith('pi_'))
+    const idioma = perfil?.idioma ?? 'pl'
+    const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
+    const falhas = res.map((r, i) => (r.ok ? null : `${pis[i]}: ${r.erro}`)).filter(Boolean)
+    decisao = { ...decisao, texto: textoReembolsoStripe(idioma, perfil?.nome, falhas.length === 0), reembolsoTransacoes: decisao.reembolsoTransacoes.filter((t) => !t.startsWith('pi_')) }
+    if (falhas.length) await avisarHumano(phone, perfil?.nome, `REEMBOLSO STRIPE falhou (${falhas.join('; ')}) — conferir no painel da Stripe`).catch(() => {})
+    console.log(`[stripe] reembolso pedido pelo WhatsApp ${phone}: ${pis.join(', ')}${falhas.length ? ` (FALHOU: ${falhas.join('; ')})` : ''}`)
+  }
+
   if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.length) {
     const txs = decisao.reembolsoTransacoes
     const motivoReembolso = decisao.reembolsoMotivo ?? ''
