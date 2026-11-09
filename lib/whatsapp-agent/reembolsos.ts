@@ -83,6 +83,15 @@ const comoVolta = {
   en: (pag: string) => /PAYPAL/i.test(pag) ? 'The money goes back to your PayPal account.' : LOCAL.test(pag) ? 'Since you paid with a local method, Hotmart may email you for your bank details; the money arrives within 7 business days after approval.' : 'Since you paid by card, the money goes back to the issuing bank and shows on your current or next statement (the exact timing depends on your bank).',
 }
 // Depois do "ok" do responsável: o que vai acontecer e como ela recebe (Bruno, 05/11/2026: claro, educado e tranquilizador).
+// Reembolso mantém o acesso ao produto comprado (promessa do vídeo; Bruno 09/11/2026). Pase é assinatura: não entra.
+const ehPase = (produto: string) => /pase|pass/i.test(produto)
+const ACESSO_FICA: Record<string, string> = {
+  es: 'Y tu acceso al desafío sigue activo, como prometimos: puedes volver cuando quieras.',
+  pl: 'A Twój dostęp do wyzwania zostaje aktywny, tak jak obiecaliśmy: możesz wrócić, kiedy zechcesz.',
+  en: 'And your access to the challenge stays active, as promised: you can come back whenever you like.',
+}
+const acessoFica = (idioma: string, produto: string): string[] => (ehPase(produto) ? [] : [ACESSO_FICA[idioma] ?? ACESSO_FICA.es])
+
 const CONFIRMA: Record<string, (p: PedidoReembolso) => string> = {
   es: (p) => [
     `Listo${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Ya abrimos tu reembolso de *${p.produto}* (${p.valor}) en Hotmart. No tienes que hacer nada más.`,
@@ -90,12 +99,14 @@ const CONFIRMA: Record<string, (p: PedidoReembolso) => string> = {
     comoVolta.es(p.pagamento),
     'Así explica Hotmart el proceso, por si quieres leerlo:',
     LINK_HOTMART,
+    ...acessoFica('es', p.produto),
     'Cualquier duda, me escribes por aquí. Gracias por darnos la oportunidad 💛',
   ].join('\n\n'),
   pl: (p) => [
     `Gotowe${p.nome ? ', ' + p.nome.split(' ')[0] : ''}. Zgłosiliśmy zwrot za *${p.produto}* (${p.valor}). Nie musisz nic więcej robić.`,
     'Co dalej: zatwierdzenie trwa do 7 dni i dostaniesz potwierdzenie e-mailem na adres z zakupu.',
     comoVolta.pl(p.pagamento),
+    ...acessoFica('pl', p.produto),
     'W razie pytań pisz tutaj. Dziękujemy, że dałaś nam szansę 💛',
   ].join('\n\n'),
   en: (p) => [
@@ -104,6 +115,7 @@ const CONFIRMA: Record<string, (p: PedidoReembolso) => string> = {
     comoVolta.en(p.pagamento),
     'This is how Hotmart explains the process:',
     LINK_HOTMART.replace('/es/', '/en/'),
+    ...acessoFica('en', p.produto),
     'Any questions, just write here. Thank you for giving us a chance 💛',
   ].join('\n\n'),
 }

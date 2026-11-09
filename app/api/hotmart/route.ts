@@ -332,8 +332,10 @@ export async function POST(request: NextRequest) {
     } else {
       const challengeId = getChallengeIdForProduct(productId)
       const transacao = data.purchase?.transaction
+      // REEMBOLSO MANTÉM O ACESSO ao produto comprado: é o que o vídeo de venda promete (Bruno, 09/11/2026: "a gente oferece
+      // o reembolso e mantém o acesso"; caso Ewa, que ouviu do bot o contrário). Só contestação no cartão (chargeback) revoga.
       // Estorno de UMA venda não tira o acesso se ela tem outra compra válida do mesmo produto (lib/compras.ts).
-      const revoga = !transacao || (await deveRevogar(supabase, { userId, produto: productId, venda: `hm:${transacao}` }))
+      const revoga = event === 'PURCHASE_CHARGEBACK' && (!transacao || (await deveRevogar(supabase, { userId, produto: productId, venda: `hm:${transacao}` })))
       if (challengeId && revoga) {
         await supabase
           .from('user_challenges')

@@ -13,7 +13,8 @@ const PERFECTPAY_TOKEN = process.env.PERFECTPAY_WEBHOOK_TOKEN
 // sale_status_enum da Perfect Pay
 const STATUS_APPROVED = 2
 const STATUS_COMPLETED = 10 // 30 dias pós-aprovação — regrava idempotente
-const REVOKE_STATUSES = new Set([6, 7, 9]) // cancelled, refunded, charged_back
+// 7 (refunded) saiu em 09/11/2026: reembolso MANTÉM o acesso ao produto comprado, como o vídeo de venda promete (Bruno).
+const REVOKE_STATUSES = new Set([6, 9]) // cancelled, charged_back
 
 interface PerfectPayPayload {
   token: string
