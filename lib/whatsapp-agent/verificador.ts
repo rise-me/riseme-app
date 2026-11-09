@@ -94,7 +94,8 @@ export async function verificarResposta(p: { texto: string; conversa: MensagemCo
         '"explica o produto sem ela perguntar", "sector responsable", "palavra em português", "tom de robô", "duas perguntas", "bloco sem quebra de linha"); ' +
         '(g) o bot recebeu FATOS DO SISTEMA (abaixo, quando houver: consulta real à Hotmart, cartão da aluna, acervo, aula): o que a resposta diz com base neles NÃO é invenção — nunca corte nem contradiga esses fatos; ' +
         '(h) texto_corrigido SEMPRE no mesmo idioma da resposta original (nunca em português, que é só o idioma destas instruções); ' +
-        '(i) o bot segue REGRAS DO PRODUTO (abaixo, quando houver): oferta, explicação, passo, prazo, valor ou link que essas regras mandam dar NÃO é invenção nem "venda sem ela pedir" — nunca corte nem contradiga (06/11/2026: a editora apagou a oferta do Pase no lugar do reembolso, que é regra do dono).\n\n' + VOZ,
+        '(i) o bot segue REGRAS DO PRODUTO (abaixo, quando houver): oferta, explicação, passo, prazo, valor ou link que essas regras mandam dar NÃO é invenção nem "venda sem ela pedir" — nunca corte nem contradiga (06/11/2026: a editora apagou a oferta do Pase no lugar do reembolso, que é regra do dono); ' +
+        '(j) nunca troque a resposta por uma promessa de responder depois ("te respondo en seguida", "lo reviso"): se o original não adiava, o corrigido também não adia; se você não sabe melhorar, aprove.\n\n' + VOZ,
       messages: [{ role: 'user', content: `${p.regras ? `REGRAS DO PRODUTO que o bot recebeu (o que elas mandam fazer não é invenção):\n${p.regras}\n\n` : ''}${p.contexto ? `FATOS DO SISTEMA que o bot recebeu (não são invenção):\n${p.contexto.slice(0, 4000)}\n\n` : ''}Conversa (últimas mensagens):\n${ultimas}\n\nProblemas já detectados por checagem fixa: ${fixos.length ? fixos.join(', ') : 'nenhum'}${p.permiteLongo ? '\n(Esta resposta pode ser longa: é de conteúdo/dinheiro.)' : ''}\n\nRESPOSTA DO BOT:\n«${original}»` }],
     })
     const bloco = res.content.find((b) => b.type === 'text')
@@ -109,7 +110,13 @@ export async function verificarResposta(p: { texto: string; conversa: MensagemCo
     const codigosAntes = original.match(/\b[A-Z]{2}\d{8,}\b/g) ?? []
     const perdeuCodigo = codigosAntes.some((c) => !novo.includes(c))
     // 05/11: a editora reescreveu em português e apagou "figuran como reembolsadas" (fato da Hotmart) — caso Agustina.
-    if (o.aprovada || !novo || novo === original || novo.length < 2 || linksDepois !== linksAntes || ptNovo || perdeuCodigo) return { texto: original, corrigida: false, problemas }
+    // A editora só corta: nunca pode TROCAR a resposta por um adiamento ("te respondo en seguida") que o original não tinha.
+    // Caso real 09/11/2026: a resposta certa virou "Sobre el reembolso y tu acceso, te respondo por aquí en seguida".
+    const ADIA = /te respondo|te respondemos|te escribo|te confirmo|te aviso|en seguida|enseguida|lo reviso|lo revisamos|m[aá]s tarde|odpisz[ęe]|napisz[ęe]|i'?ll get back|get back to you/i
+    const adiouSemBase = ADIA.test(novo) && !ADIA.test(original)
+    // Corte que joga fora quase tudo de uma resposta que respondia também não é edição: é outra resposta.
+    const encolheuDemais = original.length >= 80 && novo.length < original.length * 0.35 && /\?/.test(original) === false
+    if (o.aprovada || !novo || novo === original || novo.length < 2 || linksDepois !== linksAntes || ptNovo || perdeuCodigo || adiouSemBase || encolheuDemais) return { texto: original, corrigida: false, problemas }
     return { texto: novo, corrigida: true, problemas }
   } catch (err) {
     console.error('[verificador] falhou, mandando original:', err)
