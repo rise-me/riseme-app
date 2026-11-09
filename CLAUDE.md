@@ -11,3 +11,10 @@
 - **Critério de exceção (volta ao degrau 2):** o relatório não chegar numa segunda, ou 3 revisões seguidas sem item útil (aí vira
   burocracia e se rebaixa). Rodar manual: inserir em `whatsapp_outbox` uma linha `kind='revisao-semanal'`, `body='{"dias":14}'`.
 - Feedback de aluna sobre o app/aulas vai para `docs/feedback-alunas.md`.
+
+## Dono do bot de WhatsApp (Bruno, 09/11/2026)
+- **Um chat só é dono do bot.** Hoje: o chat do suporte que construiu o agente (nome atual registrado na linha "DONO DO BOT" do `~/.claude/EM-ABERTO.md`).
+- **Área do dono** (só ele edita): `lib/whatsapp-agent/`, `app/api/whatsapp/`, `lib/whatsapp-outbox.ts`, `lib/whatsapp-access.ts`, `lib/lembrete-24h.ts`, `lib/recuperacao-fila.ts`, `lib/cartao-aluna.ts`, `scripts/testar-agente.ts`.
+- **Outros chats não editam esses arquivos.** Precisou de algo no bot → manda mensagem ao dono (SendMessage) ou escreve um handoff em `docs/` e avisa. Motivo: vários chats mexendo no bot ao mesmo tempo desorganizaram regras e textos.
+- **Mudança de regra do bot** vem do Bruno e entra com caso real + teste em `scripts/testar-agente.ts` (ver revisão semanal acima).
+- **Passagem de bastão:** quando o dono for trocado (contexto cheio, chat novo), o novo lê este bloco, a linha do quadro e a memória `onboarding-whatsapp-zapi`, e assume. Atualizar o nome na linha do quadro no mesmo turno.
