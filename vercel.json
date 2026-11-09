@@ -15,6 +15,10 @@
     {
       "path": "/api/whatsapp/reembolsos",
       "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/stripe/conferencia",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

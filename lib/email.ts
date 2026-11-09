@@ -109,8 +109,8 @@ const COPY: Record<AppLocale, Copy> = {
   },
 }
 
-function renderHtml(c: Copy, params: { email: string; code: string; link: string }): string {
-  const { email, code, link } = params
+function renderHtml(c: Copy, params: { email: string; code: string; link: string; notaHtml?: string }): string {
+  const { email, code, link, notaHtml: nota } = params
   return `<!doctype html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -146,6 +146,7 @@ function renderHtml(c: Copy, params: { email: string; code: string; link: string
           </table>
 
           <p style="margin:24px 0 0;font-size:13px;line-height:1.5;color:#999;">${c.changeNote}</p>
+          ${nota ? `<p style="margin:16px 0 0;font-size:13px;line-height:1.5;color:#777;">${nota}</p>` : ''}
         </td></tr>
         <tr><td style="padding:20px 32px;border-top:1px solid #eee;">
           <p style="margin:0;font-size:12px;line-height:1.5;color:#bbb;">${c.footer}</p>
@@ -157,7 +158,7 @@ function renderHtml(c: Copy, params: { email: string; code: string; link: string
 </html>`
 }
 
-function renderText(c: Copy, params: { email: string; code: string; link: string }): string {
+function renderText(c: Copy, params: { email: string; code: string; link: string; notaTexto?: string }): string {
   return [
     c.greeting,
     '',
@@ -170,19 +171,26 @@ function renderText(c: Copy, params: { email: string; code: string; link: string
     `${c.cta}: ${params.link}`,
     '',
     c.changeNote,
+    ...(params.notaTexto ? ['', params.notaTexto] : []),
   ].join('\n')
 }
+
+/** Resultado do envio: ok = o Resend aceitou (id para conferir a entrega depois). Quem não precisa, ignora. */
+export type ResultadoEmail = { ok: true; id: string | null } | { ok: false; erro: string }
 
 export async function sendAccessEmail(params: {
   email: string
   code: string
   link: string
   locale?: string
-}): Promise<void> {
+  /** Parágrafo extra no fim (HTML já pronto, e a versão em texto). Ex.: como pedir reembolso nas vendas da Stripe. */
+  notaHtml?: string
+  notaTexto?: string
+}): Promise<ResultadoEmail> {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
     console.warn('[email] pulando email de acesso — RESEND_API_KEY ausente. Backup: WhatsApp/Voxuy')
-    return
+    return { ok: false, erro: 'RESEND_API_KEY ausente' }
   }
   const from = process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>'
   const c = COPY[params.locale as AppLocale] ?? COPY.es
@@ -205,8 +213,28 @@ export async function sendAccessEmail(params: {
     if (!res.ok) {
       const body = await res.text().catch(() => '')
       console.error('[email] envio falhou:', res.status, body.slice(0, 200))
+      return { ok: false, erro: `Resend ${res.status}: ${body.slice(0, 200)}` }
     }
+    const json = (await res.json().catch(() => ({}))) as { id?: string }
+    return { ok: true, id: json.id ?? null }
   } catch (err) {
     console.error('[email] erro no envio:', err)
+    return { ok: false, erro: String(err).slice(0, 200) }
   }
+}
+
+/**
+ * Estado da entrega de um e-mail no Resend (GET /emails/:id). 'falhou' = devolvido/rejeitado; 'entregue';
+ * 'aguardando' = ainda em trânsito; null = não deu para consultar (chave só de envio ou Resend fora): quem chama
+ * trata o "aceito pelo Resend" como suficiente.
+ */
+export async function estadoEmail(id: string): Promise<'entregue' | 'falhou' | 'aguardando' | null> {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) return null
+  const res = await fetch(`https://api.resend.com/emails/${id}`, { headers: { Authorization: `Bearer ${apiKey}` } }).catch(() => null)
+  if (!res?.ok) return null
+  const ev = (((await res.json().catch(() => ({}))) as { last_event?: string }).last_event ?? '').toLowerCase()
+  if (ev === 'delivered' || ev === 'opened' || ev === 'clicked') return 'entregue'
+  if (ev === 'bounced' || ev === 'complained' || ev === 'failed' || ev === 'canceled') return 'falhou'
+  return 'aguardando'
 }

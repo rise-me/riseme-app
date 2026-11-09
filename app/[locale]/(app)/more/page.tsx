@@ -1,8 +1,13 @@
 import { getTranslations } from 'next-intl/server'
-import { Timer, User, HelpCircle, CreditCard, Globe, ChevronRight } from 'lucide-react'
+import { Timer, User, HelpCircle, CreditCard, Globe, ChevronRight, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/layout/LogoutButton'
 import { getCurrentUser } from '@/lib/current-user-server'
+import { vendasStripeDaConta } from '@/lib/stripe-api'
+
+// Reembolso no app: só para quem comprou pela Stripe (zero chargeback, Bruno 09/11/2026). Rótulo fora do messages/*.json
+// porque só existe nessas vendas (pl hoje; en de reserva).
+const ROTULO_REEMBOLSO: Record<string, string> = { pl: 'Zwrot pieniędzy', en: 'Refund' }
 
 export default async function MorePage({
   params,
@@ -12,6 +17,7 @@ export default async function MorePage({
   const { locale } = await params
   const t = await getTranslations('more')
   const user = await getCurrentUser()
+  const compraStripe = user ? (await vendasStripeDaConta(user.id).catch(() => [])).length > 0 : false
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-6">
@@ -53,6 +59,9 @@ export default async function MorePage({
         </p>
         <MoreGroup>
           <MoreLink href={`/${locale}/more/help`} icon={<HelpCircle size={18} />} label={t('helpCenter')} />
+          {compraStripe && (
+            <MoreLink href={`/${locale}/more/refund`} icon={<RotateCcw size={18} />} label={ROTULO_REEMBOLSO[locale] ?? ROTULO_REEMBOLSO.en} />
+          )}
         </MoreGroup>
       </section>
 

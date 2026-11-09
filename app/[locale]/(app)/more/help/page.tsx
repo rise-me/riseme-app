@@ -1,9 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-
-// WhatsApp do suporte (Iza) — +55 31 98379-2759
-const SUPPORT_WHATSAPP = '5531983792759'
+import { linkWhatsAppSuporte } from '@/lib/suporte'
 
 const HELP_KEYS = [
   { emoji: '💪', key: 'trainingDoubts' },
@@ -44,7 +42,7 @@ export default async function HelpPage({
       <div className="space-y-2">
         {HELP_KEYS.map((item) => {
           const message = t('whatsappIntro', { topic: t(item.key) })
-          const href = `https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(message)}`
+          const href = linkWhatsAppSuporte(message)
           return (
             <a
               key={item.key}
