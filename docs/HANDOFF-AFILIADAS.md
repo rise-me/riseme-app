@@ -36,6 +36,7 @@ O chat que executa é aberto pelo Bruno; ele aprova cada passo que mexe na Hotma
 - Passo 4 (prints do lado da aluna): precisa de uma conta Hotmart que NÃO seja a produtora (a do Bruno não se afilia ao próprio produto). O Claude não cria conta. Bruno loga uma conta de compradora no Chrome (ex.: a de teste da esposa) → o chat faz o passo a passo e os prints → PDF → `LINK_GUIA_AFILIADA_ES` em `lib/afiliadas.ts`.
 - Dash: ligar o produto 8926725 ao funil CL-ES depois da 1ª venda (o produto chega pelo webhook) → dashboard-lucro.
 - Post no grupo (texto para o Bruno aprovar) + linha no MAPA-TESTES (critério proposto, falta ok).
+- BOT TEM DONO ÚNICO desde 09/11 (riseme/CLAUDE.md, "Dono do bot"): o chat [Arquiteto dos Fluxos no WhatsAPp]. A regra AFILIADA (já no ar, 8f4ce82) passou para ele em 09/11; link do PDF guia e post no grupo vão POR ELE.
 - H4: 1ª venda real conferida (acesso no app + webhook 200).
 
 ## Ordem sugerida (original)
