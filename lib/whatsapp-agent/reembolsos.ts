@@ -54,7 +54,8 @@ export async function linhasReembolsos(): Promise<string[]> {
     const n = i + 1
     await admin().from('whatsapp_comandos').update({ params: { ...p, numero: n } }).eq('id', id)
     const d = dias(p.compradaEm)
-    const prazo = d >= 15 ? '\n⛔ *Passou dos 15 dias: manual, por fora*' : d >= 13 ? `\n⚠️ *Vence em ${15 - d} dia(s)*` : ''
+    // 09/11/2026: a API do produtor aceitou reembolso no dia 20 (Gloria). O que fecha no dia 15 é só o link da aluna; a garantia da oferta é 30.
+    const prazo = d >= 30 ? '\n⛔ *Passou dos 30 dias da garantia*' : d >= 27 ? `\n⚠️ *Garantia de 30 dias vence em ${30 - d} dia(s)*` : d >= 15 ? '\nℹ️ Passou do dia 15: pela API ainda sai (aceitou no dia 20 em 09/11)' : ''
     const painel = p.plataforma === 'perfectpay' ? '\n🖐 *Perfect Pay: fazer no painel*' : ''
     // Um pedido = um bloco curto: quem, o que, quanto, como pagou, há quanto tempo, e o porquê em itálico (Bruno 08/11/2026).
     linhas.push(
@@ -161,7 +162,7 @@ export async function aprovarReembolsos(d: { aprovar: boolean; todos: boolean; n
   return saida.join('\n')
 }
 
-export const DIAS_URGENTE = 13 // pedido com 13+ dias não espera as 20h: a lista vai na hora (prazo da Hotmart = 15)
+export const DIAS_URGENTE = 27 // pedido com 27+ dias não espera as 20h: a lista vai na hora (garantia da oferta = 30; a API aceita depois do dia 15, fato de 09/11/2026)
 
 /**
  * O bot decidiu reembolsar (reembolso_transacoes): confere cada transação na Hotmart pelo e-mail, cria o pedido e,
