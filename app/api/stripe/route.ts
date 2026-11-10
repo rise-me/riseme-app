@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { eventoAssinado } from '@/lib/stripe-api'
-import { processarSessaoPaga, atualizarReembolso, registrarDisputa, tratarAvisoDeFraude } from '@/lib/stripe-vendas'
+import { processarSessaoPaga, atualizarReembolso, registrarDisputa, registrarDisputaFechada, tratarAvisoDeFraude } from '@/lib/stripe-vendas'
 
 // POST /api/stripe — webhook da Stripe (conta da LLC). Endpoint criado pelo Bruno no painel (Desenvolvedores → Webhooks)
-// com 7 eventos: checkout.session.completed, checkout.session.async_payment_succeeded, charge.refunded,
-// charge.dispute.created, radar.early_fraud_warning.created, refund.updated, refund.failed.
+// com 8 eventos: checkout.session.completed, checkout.session.async_payment_succeeded, charge.refunded,
+// charge.dispute.created, charge.dispute.closed, radar.early_fraud_warning.created, refund.updated, refund.failed.
 // A lógica mora em lib/stripe-vendas.ts; aqui só valida a assinatura (corpo CRU) e roteia.
 // Erro inesperado → 500 e a Stripe reenvia (até 3 dias). A entrega é idempotente pela sessão.
 
@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
       }
       case 'charge.dispute.created':
         await registrarDisputa(evento.data.object)
+        break
+      case 'charge.dispute.closed':
+        await registrarDisputaFechada(evento.data.object)
         break
       case 'radar.early_fraud_warning.created':
         await tratarAvisoDeFraude(evento.data.object)

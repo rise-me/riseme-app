@@ -541,3 +541,27 @@ export async function tratarAvisoDeFraude(w: Stripe.Radar.EarlyFraudWarning): Pr
     !w.actionable ? 'Já não dá pra agir (reembolsado ou em disputa).' : r?.ok ? `Reembolso pedido automaticamente (${r.refundId}). Acesso mantido.` : `❌ Reembolso automático FALHOU: ${r?.erro ?? 'sem payment_intent'}. Devolver no painel.`,
   ].join('\n'))
 }
+
+/**
+ * charge.dispute.closed: disputa decidida. Ganhou (status 'won') → a compra vale de novo, devolve o acesso que a
+ * abertura tirou e avisa (Bruno 10/11/2026, opção recomendada). Perdeu → só avisa; o acesso continua tirado.
+ */
+export async function registrarDisputaFechada(d: Stripe.Dispute): Promise<void> {
+  const pi = typeof d.payment_intent === 'string' ? d.payment_intent : d.payment_intent?.id
+  const db = createServiceClient()
+  const { data } = pi ? await db.from('stripe_vendas').select('*').eq('payment_intent', pi).maybeSingle() : { data: null }
+  const v = data as Venda | null
+  const ganhou = d.status === 'won'
+  if (ganhou && v?.user_id) {
+    await db.from('user_challenges').upsert(
+      { user_id: v.user_id, challenge_id: v.challenge_id, access_type: 'lifetime' },
+      { onConflict: 'user_id,challenge_id', ignoreDuplicates: true },
+    )
+    await registrarCompra(db, { userId: v.user_id, produto: v.payment_link ?? v.oferta ?? 'stripe', venda: `st:${v.session_id}`, valorCentavos: v.valor_centavos ?? undefined })
+  }
+  await avisarResponsavel([
+    ganhou ? '✅ Stripe: chargeback GANHO — acesso devolvido' : `ℹ️ Stripe: chargeback encerrado (${d.status}) — acesso continua tirado`,
+    v ? quem(v) : `pagamento ${pi ?? '?'} (sem venda registrada aqui)`,
+    `${valorBonito(d.amount, d.currency)} · motivo: ${d.reason}`,
+  ].join('\n'))
+}
