@@ -1,0 +1,242 @@
+{
+ "1": {
+  "key": "objetivo",
+  "pergunta": "Co chcesz osiągnąć dzięki kalistenice?",
+  "opcoes": {
+   "perder_peso": "Schudnąć",
+   "ganar_fuerza": "Wzmocnić i ujędrnić całe ciało",
+   "ganar_flexibilidad": "Zyskać większą elastyczność",
+   "eliminar_tensiones": "Pozbyć się stresu i napięcia",
+   "controlar_azucar": "Unormować poziom cukru we krwi, poprawić zdrowie i zapobiec cukrzycy typu 2"
+  }
+ },
+ "3": {
+  "key": "tipo_cuerpo_actual",
+  "pergunta": "Która opcja najlepiej opisuje twoją obecną sylwetkę?",
+  "opcoes": {
+   "delgada": "Szczupła",
+   "media": "Średnia",
+   "grande": "Masywna",
+   "con_sobrepeso": "Z nadwagą"
+  }
+ },
+ "4": {
+  "key": "pais",
+  "pergunta": "W jakim kraju mieszkasz?",
+  "opcoes": {
+   "mexico": "Polska",
+   "colombia": "Wielka Brytania",
+   "argentina": "Niemcy",
+   "chile": "Holandia",
+   "peru": "Irlandia",
+   "estados_unidos": "Stany Zjednoczone",
+   "bolivia": "Norwegia",
+   "otro": "Inny"
+  }
+ },
+ "6": {
+  "key": "rango_edad",
+  "pergunta": "Ile masz lat?",
+  "opcoes": {
+   "edad_18_29": "18 - 29 lat",
+   "edad_30_39": "30 - 39 lat",
+   "edad_40_49": "40 - 49 lat",
+   "edad_mas_50": "Powyżej 50 lat"
+  }
+ },
+ "7": {
+  "key": "experiencia_calistenia",
+  "pergunta": "Czy próbowałaś już kalisteniki?",
+  "opcoes": {
+   "si_algunas_veces": "Tak, próbowałam kilka razy.",
+   "nunca_lo_intente": "Nie, nigdy nie próbowałam."
+  }
+ },
+ "9": {
+  "key": "experiencia_cuerpo",
+  "pergunta": "Jak Twoje ciało reaguje na zmiany?",
+  "opcoes": {
+   "cuesta_ganar_peso": "Trudno mi przytyć i nabrać mięśni",
+   "gano_pierdo_facil": "Łatwo chudnę, ale i szybko tyję",
+   "gano_rapido_pierdo_lento": "Szybko tyję, ale bardzo wolno chudnę",
+   "ninguna_de_estas": "Żadne z powyższych"
+  }
+ },
+ "10": {
+  "key": "ultima_satisfaccion_cuerpo",
+  "pergunta": "Kiedy ostatnio czułaś się w pełni zadowolona ze swojego ciała?",
+  "opcoes": {
+   "menos_1_ano": "Mniej niż rok temu",
+   "entre_1_2_anos": "Od 1 do 2 lat temu",
+   "mas_3_anos": "Ponad 3 lata temu",
+   "nunca": "Nigdy"
+  }
+ },
+ "11": {
+  "key": "areas_trabajar",
+  "pergunta": "Wybierz partie ciała, nad którymi chcesz popracować:",
+  "opcoes": {
+   "vientre": "Brzuch",
+   "gluteos": "Pośladki",
+   "piernas": "Nogi",
+   "pecho": "Klatka piersiowa",
+   "todo": "Całe ciało"
+  }
+ },
+ "12": {
+  "key": "tipo_cuerpo_deseado",
+  "pergunta": "Wybierz sylwetkę, którą chcesz osiągnąć!",
+  "opcoes": {
+   "delgada": "Szczupła",
+   "tonificada": "Ujędrniona",
+   "con_curvas": "Z krągłościami",
+   "promedio": "Normalna"
+  }
+ },
+ "13": {
+  "key": "problemas_fisicos",
+  "pergunta": "Czy masz problem z którymś z poniższych?",
+  "opcoes": {
+   "espalda_sensible": "Problemy z plecami",
+   "rodillas_sensibles": "Problemy z kolanami",
+   "ninguna_de_las_anteriores": "Żadne z powyższych"
+  }
+ },
+ "14": {
+  "key": "frecuencia_ejercicio",
+  "pergunta": "Jak często ćwiczysz?",
+  "opcoes": {
+   "casi_todos_los_dias": "Prawie codziennie",
+   "varias_veces_semana": "Kilka razy w tygodniu",
+   "algunas_veces_mes": "Kilka razy w miesiącu",
+   "nunca": "Nigdy"
+  }
+ },
+ "15": {
+  "key": "consumo_agua",
+  "pergunta": "Ile wody pijesz każdego dnia?",
+  "opcoes": {
+   "solo_cafe_o_te": "Piję tylko kawę lub herbatę",
+   "dos_vasos": "Dwie szklanki",
+   "dos_a_seis_vasos": "Od dwóch do sześciu szklanek",
+   "mas_de_seis_vasos": "Powyżej sześciu szklanek"
+  }
+ },
+ "17": {
+  "key": "falta_aire_escaleras",
+  "pergunta": "Czy łapiesz zadyszkę wchodząc po schodach?",
+  "opcoes": {
+   "sin_aliento_no_hablo": "Mam tak silną zadyszkę, że nie mogę mówić",
+   "poco_aire_puedo_hablar": "Mam lekką zadyszkę, ale mogę mówić",
+   "bien_un_tramo": "Czuję się dobrze po jednym piętrze",
+   "varios_tramos": "Mogę wejść na kilka pięter bez problemu"
+  }
+ },
+ "18": {
+  "key": "frecuencia_caminar",
+  "pergunta": "Jak często chodzisz na spacery?",
+  "opcoes": {
+   "casi_todos_los_dias": "Prawie codziennie",
+   "varias_veces_semana": "Kilka razy w tygodniu",
+   "algunas_veces_mes": "Kilka razy w miesiącu",
+   "nunca": "Nigdy"
+  }
+ },
+ "19": {
+  "key": "nivel_energia",
+  "pergunta": "Jak oceniasz swój poziom energii w ciągu dnia?",
+  "opcoes": {
+   "bajos_cansada_todo_dia": "Niski, czuję się zmęczona przez cały dzień",
+   "caida_despues_almuerzo": "Czuję spadek energii po obiedzie",
+   "me_arrastro_entre_comidas": "Ledwo funkcjonuję między posiłkami",
+   "altos_y_estables": "Wysoki i stabilny"
+  }
+ },
+ "21": {
+  "key": "horas_sueno",
+  "pergunta": "Ile godzin zazwyczaj śpisz?",
+  "opcoes": {
+   "menos_5_horas": "Mniej niż 5 godzin",
+   "de_5_a_6_horas": "5-6 godzin",
+   "de_7_a_8_horas": "7-8 godzin",
+   "mas_8_horas": "Ponad 8 godzin"
+  }
+ },
+ "22": {
+  "key": "malos_habitos",
+  "pergunta": "Czy masz któryś z tych złych nawyków?",
+  "opcoes": {
+   "comer_por_emocion": "Zajadanie stresu lub nudy",
+   "comer_en_exceso": "Przejadanie się",
+   "bocadillos_de_noche": "Podjadanie późno w nocy",
+   "saltar_comidas": "Zbyt częste pomijanie posiłków",
+   "ninguna_de_las_anteriores": "Żadne z powyższych"
+  }
+ },
+ "23": {
+  "key": "eventos_aumento_peso",
+  "pergunta": "Czy któreś z tych wydarzeń wpłynęło na Twój przyrost wagi w ostatnich latach?",
+  "opcoes": {
+   "presion_laboral": "Stres w pracy",
+   "vida_familiar_ocupada": "Natłok obowiązków rodzinnych",
+   "divorcio_o_ruptura": "Rozwód lub rozstanie",
+   "metabolismo_lento": "Wolniejszy metabolizm z wiekiem",
+   "menopausia": "Menopauza",
+   "embarazo_posparto": "Ciąża lub czas po porodzie",
+   "desafios_financieros": "Problemy finansowe",
+   "otros_eventos_estresantes": "Inne stresujące sytuacje",
+   "pandemia_covid": "Pandemia Covid-19",
+   "ninguno_de_los_anteriores": "Żadne z powyższych"
+  }
+ },
+ "24": {
+  "key": "razon_principal",
+  "pergunta": "Jaki jest Twój główny powód, by zadbać o formę?",
+  "opcoes": {
+   "mas_confianza_cuerpo": "Chcę czuć się pewniej w swoim ciele",
+   "mas_saludable_energia": "Chcę być zdrowsza i mieć więcej energii",
+   "ropa_quede_mejor": "Chcę, by ubrania lepiej na mnie leżały",
+   "recuperar_forma_posparto": "Chcę wrócić do formy po porodzie",
+   "otra": "Inny powód"
+  }
+ },
+ "25": {
+  "key": "altura",
+  "pergunta": "Ile masz wzrostu?",
+  "opcoes": {}
+ },
+ "26": {
+  "key": "peso_actual",
+  "pergunta": "Ile obecnie ważysz?",
+  "opcoes": {}
+ },
+ "27": {
+  "key": "peso_objetivo",
+  "pergunta": "Jasne! A jaka jest Twoja waga docelowa?",
+  "opcoes": {}
+ },
+ "28": {
+  "key": "edad",
+  "pergunta": "Ile masz lat?",
+  "opcoes": {}
+ },
+ "30": {
+  "key": "evento_importante",
+  "pergunta": "Zbliża się jakieś ważne dla Ciebie wydarzenie?",
+  "opcoes": {
+   "vacaciones": "Wakacje",
+   "boda": "Ślub / Wesele",
+   "reunion": "Spotkanie ze znajomymi",
+   "cumpleanos": "Urodziny",
+   "dia_festivo": "Święta",
+   "evento_deportivo": "Wydarzenie sportowe",
+   "otro": "Inne",
+   "ningun_evento": "Brak wydarzeń w najbliższym czasie"
+  }
+ },
+ "33": {
+  "key": "nombre",
+  "pergunta": "Jak masz na imię?",
+  "opcoes": {}
+ }
+}

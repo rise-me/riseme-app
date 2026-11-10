@@ -23,6 +23,7 @@ import { deveRevogar, registrarCompra } from '@/lib/compras'
 import { registrarCompraNaConta } from '@/lib/cartao-aluna'
 import { textoPresente } from '@/lib/whatsapp-agent/reembolsos'
 import { stripe, stripeConfigurada, reembolsarStripe } from '@/lib/stripe-api'
+import { buscarRespostasQuiz, guardarQuizNaConta } from '@/lib/quiz-contexto'
 
 const APP_URL = () => (process.env.NEXT_PUBLIC_APP_URL ?? 'https://riseme.app').replace(/\/$/, '')
 const MAX_WA = 2 // envios de WhatsApp por venda (o 1º + 1 reenvio); cada envio tem 5 tentativas na fila
@@ -45,6 +46,7 @@ export interface Venda {
   oferta: string | null
   valor_centavos: number | null
   moeda: string | null
+  rastreio: string | null
   user_id: string | null
   conta_nova: boolean | null
   codigo: string | null
@@ -242,11 +244,38 @@ async function entregar(db: Db, v: Venda): Promise<void> {
     console.error('[stripe] compra não guardada no cartão:', err)
   }
 
+  await ligarQuiz(db, userId!, v.rastreio)
+
   if (codigo) {
     if (!v.wa_outbox_id) await enviarWhatsApp(db, { ...v, user_id: userId, codigo }, true)
     if (!v.email_id && !v.email_ok) await enviarEmail(db, { ...v, user_id: userId, codigo })
   }
   await db.from('stripe_vendas').update({ entregue_em: agora(), updated_at: agora() }).eq('session_id', v.session_id)
+}
+
+/**
+ * Chave do quiz no client_reference_id (formato do dash: c<camp>_s<conj>_a<anúncio>_k<sck>; o _v<vid> do quiz entra onde
+ * o funil não tem sck, como no CL-PL). Bruno 10/11/2026: o quiz é a ficha da cliente; ligar à conta como no CL-ES.
+ */
+export function chaveDoQuiz(ref: string | null | undefined): string | null {
+  if (!ref) return null
+  const partes = ref.match(/^(?:c\d+_)?(?:s\d+_)?(?:a\d+_)?(.*)$/)?.[1] ?? ''
+  const k = partes.match(/(?:^|_)k([A-Za-z0-9_-]+?)(?:_v[A-Za-z0-9]+)?$/)?.[1]
+  if (k) return k
+  const vid = partes.match(/(?:^|_)v([A-Za-z0-9]+)$/)?.[1]
+  return vid ? `vid:${vid}` : null
+}
+
+/** Guarda a chave do quiz na conta e, se a sessão já existe, as respostas (o bot lê em quizDaAluna). Nunca lança. */
+async function ligarQuiz(db: Db, userId: string, ref: string | null): Promise<void> {
+  const chave = chaveDoQuiz(ref)
+  if (!chave) return
+  try {
+    const achado = await buscarRespostasQuiz(chave)
+    await guardarQuizNaConta(db, userId, { sck: chave, quiz: achado ? { ...achado, em: new Date().toISOString() } : undefined })
+  } catch (err) {
+    console.error('[stripe] quiz não ligado à conta:', userId, err)
+  }
 }
 
 /** 1º envio: a sequência completa (acesso + apoio + convite). Reenvio: só a mensagem de acesso. Grava o id da fila. */

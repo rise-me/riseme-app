@@ -7,10 +7,12 @@
 // compradoras dos últimos 30 dias com conta no app têm sessão do quiz com respostas (31% das vendas com sck).
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import mapaClEs from './whatsapp-agent/quiz-cl-es.json'
+// Mapas de outros funis: gerados do copy.<idioma>.json com scripts/gerar-mapa-quiz.mts (fora da pasta do bot).
+import mapaClPl from './quiz-mapas/cl-pl.json'
 
 type Mapa = Record<string, { key: string; pergunta: string; opcoes: Record<string, string> }>
 // CL-ES-BR (camuflagem do geo-gate) tem numeração de telas diferente: fica fora até ter mapa próprio (05/11/2026).
-const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa }
+const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa, 'CL-PL': mapaClPl as Mapa }
 
 // Rótulo curto por chave: a pergunta inteira é longa demais pro perfil.
 const ROTULO: Record<string, string> = {
@@ -36,10 +38,15 @@ function metricas(): SupabaseClient | null {
   return _quiz
 }
 
-/** Sessão do quiz com respostas para um sck (qualquer funil), ou null. */
+/**
+ * Sessão do quiz com respostas (qualquer funil), ou null. Chave: o sck do Tag Manager (CL-ES/Hotmart) ou, onde o funil
+ * não tem sck (CL-PL na Stripe, 10/11/2026), o id de visitante do próprio quiz (utm._vid), passado como 'vid:<id>'.
+ */
 export async function buscarRespostasQuiz(sck: string, cliente: SupabaseClient | null = metricas()): Promise<Omit<QuizGuardado, 'em'> | null> {
   if (!cliente || !sck) return null
-  const { data } = await cliente.from('quiz_sessoes').select('funil, respostas, respondeu, inicio').eq('sck', sck).eq('respondeu', true).order('inicio', { ascending: false }).limit(1)
+  const base = cliente.from('quiz_sessoes').select('funil, respostas, respondeu, inicio')
+  const filtrada = sck.startsWith('vid:') ? base.eq('utm->>_vid', sck.slice(4)) : base.eq('sck', sck)
+  const { data } = await filtrada.eq('respondeu', true).order('inicio', { ascending: false }).limit(1)
   const s = data?.[0]
   if (!s || Object.keys(s.respostas ?? {}).length < 3) return null
   return { sck, funil: s.funil, respostas: s.respostas as Record<string, string> }
