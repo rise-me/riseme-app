@@ -95,6 +95,8 @@ interface ZapiCallback {
   video?: { caption?: string; videoUrl?: string }
   document?: { fileName?: string }
   sticker?: unknown
+  participantPhone?: string
+  pollVote?: { pollMessageId?: string; options?: { name?: string }[] }
 }
 
 const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -649,6 +651,15 @@ export async function POST(request: NextRequest) {
   const m = (await request.json().catch(() => null)) as ZapiCallback | null
   if (!m || m.instanceId !== process.env.ZAPI_INSTANCE_ID) {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+  }
+
+  // Voto em enquete (grupo da comunidade, Bruno 10/11/2026): só GUARDA quem votou e em quê (kind 'enquete-voto'), nunca responde.
+  // Antes os votos eram descartados com o resto do grupo e só dava para ler no celular.
+  if (m.type === 'ReceivedCallback' && m.pollVote && !m.fromMe) {
+    const quem = (m.participantPhone ?? m.participantLid ?? m.phone ?? '').replace(/[^\d@lid]/g, '') || 'desconhecido'
+    const voto = { grupo: m.phone ?? null, enquete: m.pollVote.pollMessageId ?? null, opcoes: (m.pollVote.options ?? []).map((o) => o.name ?? ''), nome: m.senderName ?? null }
+    await marcarNaFila(quem, 'enquete-voto', JSON.stringify(voto)).catch((err) => console.error('[enquete] voto não gravado:', err))
+    return NextResponse.json({ ok: true, enquete: 'voto registrado' })
   }
 
   if (m.type !== 'ReceivedCallback' || m.isGroup || m.isNewsletter || m.broadcast || m.isStatusReply) {
