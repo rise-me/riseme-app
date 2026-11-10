@@ -264,6 +264,34 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       continue
     }
 
+    // 'apagar-mensagem' (10/11/2026): body = JSON {messageId}; apaga "para todos" uma mensagem nossa na conversa item.phone
+    // (Z-API DELETE /messages). Caso de origem: acesso da Stripe que saiu errado para 22 compradoras polonesas (Bruno: "apaga").
+    if (item.kind === 'apagar-mensagem') {
+      let saida: string
+      try {
+        const { messageId } = JSON.parse(item.body) as { messageId: string }
+        const instance = process.env.ZAPI_INSTANCE_ID
+        const token = process.env.ZAPI_TOKEN
+        const headers: Record<string, string> = process.env.ZAPI_CLIENT_TOKEN ? { 'Client-Token': process.env.ZAPI_CLIENT_TOKEN } : {}
+        const url = `https://api.z-api.io/instances/${instance}/token/${token}/messages?messageId=${encodeURIComponent(messageId)}&phone=${toZapiPhone(item.phone)}&owner=true`
+        const res = await fetch(url, { method: 'DELETE', headers })
+        const corpo = await res.text()
+        saida = res.ok ? `apagada ${messageId}` : `FALHOU ${res.status} ${corpo.slice(0, 200)}`
+      } catch (err) {
+        saida = `erro: ${String(err).slice(0, 300)}`
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
+    // 'avisar-responsavel' (10/11/2026): body = texto livre; manda ao WHATSAPP_HANDOFF_PHONE (o chat não tem o número localmente).
+    if (item.kind === 'avisar-responsavel') {
+      const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
+      const r = destino ? await sendZapiText({ phone: destino, message: item.body, delayTyping: 1 }) : { ok: false as const, error: 'sem WHATSAPP_HANDOFF_PHONE' }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, last_error: r.ok ? null : r.error }).eq('id', item.id)
+      continue
+    }
+
     // 'reenviar-acesso' (08/11/2026): body = JSON {email}; liga a conversa (item.phone) à conta desse e-mail, corrige o telefone da
     // conta e reenvia o acesso com senha nova NESTA conversa. Para o caso em que o acesso foi para outro número (checkout errado).
     if (item.kind === 'reenviar-acesso') {
