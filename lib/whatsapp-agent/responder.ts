@@ -606,7 +606,7 @@ export async function decidirResposta(params: {
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
   if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm/i.test(out.resposta)) {
-    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? 'es', prazoDaLista(params.agora))}`
+    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? idiomaPeloTelefone(params.phone), prazoDaLista(params.agora))}`
   }
 
   const assuntos = `${[...cls.assuntos].join(',')} (${cls.fonte})`
@@ -635,6 +635,13 @@ const PRAZO: Record<string, [string, string]> = {
   en: ['I will reply here today by 8 pm.', 'I will reply here tomorrow by 8 pm.'],
   ro: ['Îți răspund aici azi până la ora 20.', 'Îți răspund aici mâine până la ora 20.'],
   'pt-BR': ['Te respondo por aqui hoje até as 20h.', 'Te respondo por aqui amanhã até as 20h.'],
+}
+/** Aluna sem conta: idioma pelo DDI (10/11/2026: polonesa sem conta ouviu o prazo em espanhol). */
+export function idiomaPeloTelefone(phone?: string): string {
+  const t = (phone ?? '').replace(/\D/g, '')
+  if (!t || (phone ?? '').includes('@lid')) return 'es'
+  const ddi: [string, string][] = [['48', 'pl'], ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['1', 'es']]
+  return ddi.find(([d]) => t.startsWith(d))?.[1] ?? 'es'
 }
 export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha'): string {
   return (PRAZO[idioma] ?? PRAZO.es)[prazo === 'hoje' ? 0 : 1]

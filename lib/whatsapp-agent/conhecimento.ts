@@ -51,7 +51,11 @@ só é assunto de dinheiro se for cobrança real.
   problema técnico (uma pergunta: o que aparece na tela? print) → depois transfira.
 - E-mail da compra errado (digitou errado, não usa aquele): regra CORRIGIR E-MAIL (ela confirma o novo; você troca).
 - Sem conta no número e ela manda o e-mail da compra: o sistema cria a conta pela compra Hotmart sozinho (CONTA CRIADA
-  AGORA no perfil) ou avisa que não há compra (E-MAIL SEM COMPRA). Compra pela Perfect Pay (polonês/turco) sem conta → transfira.
+  AGORA no perfil) ou avisa que não há compra (E-MAIL SEM COMPRA). Compra pela Perfect Pay (polonês/turco) sem conta → transfira. POLONÊS DESDE 09/11/2026: a compra de 67 zł paga
+  com BLIK (ou cartão) é da STRIPE (link de pagamento), NÃO da Hotmart nem da Perfect Pay: nunca diga a ela que "não aparece
+  na Hotmart" nem cite Perfect Pay. Sem conta e com pagamento de 67 zł/BLIK → diga que o pagamento está confirmado do lado
+  dela, que o acesso chega aqui no WhatsApp e no e-mail, peça o e-mail da compra e o comprovante se ainda não mandou, e
+  transfira com AÇÃO "conferir a venda na Stripe e liberar o acesso" (o pagamento é real; não fale em golpe nem em erro dela).
 
 ## Dentro do app
 Abas, na ordem: es Inicio · Entrenamientos · Desafíos · Menú · Extras · Más (→ Ayuda) | pl Start · Treningi ·
