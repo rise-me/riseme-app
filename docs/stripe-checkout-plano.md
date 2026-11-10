@@ -123,10 +123,11 @@ Motivo, nas palavras dele: a Stripe é "extremamente restritiva" com chargeback 
 
 **Pendências do Bruno**
 - [x] Análise da Stripe FECHADA em 09/11 ~19h30 (API: `requirements` vazio, `charges_enabled` e `payouts_enabled` true, BLIK/cartão/Link/Apple Pay ativos). Bruno fez a verificação de identidade pelo Stripe Verified.
-- [ ] CONTA BANCÁRIA DE REPASSE: nenhuma cadastrada (`external_accounts` vazio). Sem ela o dinheiro fica parado no saldo.
-- [ ] Site da conta está como Instagram (`business_profile.url`) → trocar pra https://www.riseme.co; `support_email` vazio.
-- [ ] Dados públicos da conta: nome no extrato `RISEME`, site `https://www.riseme.co`, e-mail de suporte.
-- [ ] Dizer qual é o e-mail de suporte (entra também no site institucional).
+- [ ] CONTA BANCÁRIA DE REPASSE: nenhuma cadastrada (`external_accounts` vazio); é a única exigência aberta na conta (`past_due: external_account`), SEM prazo e SEM bloqueio (API 10/11: `current_deadline` null, `disabled_reason` null; cobrança e repasse habilitados). O saldo só acumula (US$ 657,79 em 10/11 16h). Bruno 10/11: vai abrir conta pra LLC (Mercury × Payoneer comparados; decisão dele) e cadastrar no mesmo dia em que sair.
+- [x] 10/11: cronograma de repasse trocado de DIÁRIO pra SEMANAL às SEXTAS (pedido do Bruno: "7 dias tá excelente"; API: `interval: weekly`, `weekly_anchor: friday`, `delay_days: 2`). Não tira o aviso amarelo: ele só some com a conta bancária.
+- [x] Site da conta trocado de Instagram pra https://www.riseme.co; `support_email` preenchido (09/11).
+- [x] Dados públicos da conta (09/11 ~22h, pelo painel): extrato `RISEME`, site https://www.riseme.co, nome público "RiseMe", e-mail contact.riseme@gmail.com, URLs de atendimento (/refund/), privacidade e termos.
+- [x] E-mail de suporte: `contact.riseme@gmail.com` (já era público na página de obrigado do CL-PL); no site institucional e nos dados públicos da Stripe (09/11).
 - [ ] Reconectar o conector Stripe (`/mcp`) escolhendo a conta de PRODUÇÃO (hoje o chat só vê o sandbox).
 - [ ] Dar o ok ao plano no chat [Alunas Stripe].
 - [ ] Apontar um chat do dashboard pro `dashboard-lucro/HANDOFF-STRIPE-CL-PL.md`.
@@ -138,11 +139,10 @@ Motivo, nas palavras dele: a Stripe é "extremamente restritiva" com chargeback 
 - [ ] À parte: `quiz.riseme.co` está com certificado vencido na Vercel.
 
 **Pendências dos chats**
-- [ ] [Alunas Stripe] (app): rota do webhook com acesso garantido nos 2 canais, reembolso sem atrito (regras do Bruno, seção 4b),
-      página explicativa de reembolso em polonês (mandar o link pro chat da pasta `~`).
-- [ ] dashboard-lucro: ler a venda da Stripe com o anúncio e escolher como o rastreio viaja (opção A ou B do handoff).
-- [ ] Chat da pasta `~` (funil CL-PL), depois do dash: botão → link de produção com `locale=pl` e `client_reference_id`;
-      InitiateCheckout no clique; Purchase na página de obrigado; linha "como pedir reembolso"; `checklist_pagina.py` (L0).
+- [x] [Alunas Stripe] (app): rota `https://riseme.app/api/stripe` NO AR, webhook de 7 eventos em produção, página https://riseme.app/pl/refund no ar. Chave restrita e `STRIPE_CHALLENGE_MAP` só se provam na compra-teste.
+- [x] dashboard-lucro: leitor NO AR em produção (09/11), formato A (`client_reference_id`), líquido pela `balance_transaction`.
+- [x] Funil CL-PL NO AR com a Stripe (09/11 ~21h): botão → link de produção com `locale=pl` e `client_reference_id`; IC no clique;
+      Purchase na obrigado; linha de garantia com https://riseme.app/pl/refund; checklist do modelador ✅. L0 PROVADO pela 1ª venda real (10/11 00:37, BLIK, ligada ao AD05_H1.V3 no dash). Compra-teste do Bruno em 10/11 passa a servir pra testar o reembolso sem atrito.
 - [ ] lancador-ads: subir o CL-PL T3 só com checklist ✅ e conta Stripe liberada. Teste = 3 dias (critério em `CL-PL/TESTES.md`).
 
 **Só se o teste der ROI (versão completa, seções 1 a 5 deste plano)**
