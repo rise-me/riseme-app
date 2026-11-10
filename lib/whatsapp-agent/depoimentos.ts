@@ -41,14 +41,11 @@ export const LINKS: Record<string, { url: string; versao: Versao }[]> = {
   //   { url: 'https://www.instagram.com/p/DeieiRigCK7/', versao: 'v1' }, // V93
   // ],
   // CL-PL — AD07_H2-H1_CL_PL, o melhor anúncio da CL-PL (CA 2 - LATAM). Facebook e Instagram alternados.
-  // CL-PL (Bruno 10/11/2026: "rotacionar nos dois anúncios de ROAS mais alto", bola de neve de prova social no próprio anúncio).
-  // 09–10/11 pela régua do dash: AD07_H2-H1 ROAS 7,85 (15 vendas) e AD05_H1.V3 ROAS 7,00 (13). AD05 com 0 comentários → v1 (volume).
-  pl: [
-    { url: 'https://www.facebook.com/365563009981105/posts/122203962470483220', versao: 'v2' }, // AD07_H2-H1
-    { url: 'https://www.instagram.com/p/DeN89o7glF-/', versao: 'v2' }, // AD07_H2-H1
-    { url: 'https://www.facebook.com/365563009981105/posts/122203961786483220', versao: 'v1' }, // AD05_H1.V3
-    { url: 'https://www.instagram.com/p/DeN8Gt1gHnt/', versao: 'v1' }, // AD05_H1.V3
-  ],
+  // CL-PL (Bruno 10/11/2026): UM link só, no canal de onde vêm as vendas, até juntar comentários; depois o próximo.
+  // 09–10/11 (Meta, por plataforma): Facebook = 88% do gasto e 24 de 29 compras. Foco: AD07_H2-H1 (ROAS 7,85) no FB.
+  // Próximo da fila, quando este tiver volume: AD05_H1.V3 (ROAS 7,00) FB 365563009981105/posts/122203961786483220.
+  // Reserva (IG, ~10% das vendas): AD07 /p/DeN89o7glF-/ · AD05 /p/DeN8Gt1gHnt/
+  pl: [{ url: 'https://www.facebook.com/365563009981105/posts/122203962470483220', versao: 'v1' }], // AD07_H2-H1 · FB
 }
 
 // v1 — guardada para anúncios novos (ver LINKS).
