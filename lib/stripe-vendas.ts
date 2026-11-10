@@ -131,10 +131,12 @@ export async function processarSessaoPaga(s: Stripe.Checkout.Session): Promise<{
   const email = s.customer_details?.email?.trim().toLowerCase()
   const mapa = desafioDaSessao(s)
   if (!mapa) {
-    const msg = `⚠️ Stripe: venda PAGA sem desafio no mapa (STRIPE_CHALLENGE_MAP). Ninguém recebeu acesso.\nSessão ${s.id} · link ${String(s.payment_link)} · ${email ?? 'sem e-mail'}\nAdicionar ao mapa na Vercel, republicar e reenviar o evento no painel da Stripe.`
+    const msg = `🚨 Stripe: venda PAGA sem desafio no mapa (STRIPE_CHALLENGE_MAP). Ela ainda NÃO recebeu acesso.\nSessão ${s.id} · link ${String(s.payment_link)} · ${email ?? 'sem e-mail'}\nGravar o mapa na Vercel e republicar: a Stripe reenvia sozinha e a venda entra.`
     console.error('[stripe]', msg)
     await avisarResponsavel(msg)
-    return { ok: false, motivo: 'sem mapa' }
+    // Lança (500): a Stripe reenvia por até 3 dias, e a venda entra sozinha quando o mapa for corrigido. Responder "ok"
+    // aqui descartou 26 vendas em 10/11/2026 (a variável não tinha sido gravada na Vercel).
+    throw new Error(`venda paga sem desafio no mapa (${s.id})`)
   }
   if (!email) {
     await avisarResponsavel(`⚠️ Stripe: venda PAGA sem e-mail (sessão ${s.id}). Conferir no painel da Stripe.`)
