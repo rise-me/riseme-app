@@ -41,9 +41,13 @@ export const LINKS: Record<string, { url: string; versao: Versao }[]> = {
   //   { url: 'https://www.instagram.com/p/DeieiRigCK7/', versao: 'v1' }, // V93
   // ],
   // CL-PL — AD07_H2-H1_CL_PL, o melhor anúncio da CL-PL (CA 2 - LATAM). Facebook e Instagram alternados.
+  // CL-PL (Bruno 10/11/2026: "rotacionar nos dois anúncios de ROAS mais alto", bola de neve de prova social no próprio anúncio).
+  // 09–10/11 pela régua do dash: AD07_H2-H1 ROAS 7,85 (15 vendas) e AD05_H1.V3 ROAS 7,00 (13). AD05 com 0 comentários → v1 (volume).
   pl: [
-    { url: 'https://www.facebook.com/365563009981105/posts/122203962470483220', versao: 'v2' },
-    { url: 'https://www.instagram.com/p/DeN89o7glF-/', versao: 'v2' },
+    { url: 'https://www.facebook.com/365563009981105/posts/122203962470483220', versao: 'v2' }, // AD07_H2-H1
+    { url: 'https://www.instagram.com/p/DeN89o7glF-/', versao: 'v2' }, // AD07_H2-H1
+    { url: 'https://www.facebook.com/365563009981105/posts/122203961786483220', versao: 'v1' }, // AD05_H1.V3
+    { url: 'https://www.instagram.com/p/DeN8Gt1gHnt/', versao: 'v1' }, // AD05_H1.V3
   ],
 }
 
