@@ -500,6 +500,25 @@ const COMO_REEMBOLSAR: Partial<Record<string, (homeUrl: string) => string>> & { 
   en: (h) => `If you ever want a refund, just write to us here or go to: ${h}/refund`,
 }
 
+/**
+ * Negrito do WhatsApp (*…*) no título, nos rótulos e nos subtítulos (Bruno, 10/11/2026: "só um monte de texto corrido,
+ * está muito feio"). Regra única para os 7 idiomas, pela forma das linhas, não pelo texto: 1ª linha; linhas que começam
+ * com 📌/📱 inteiras; rótulo até os dois-pontos em 📲/📧/🔑; a 1ª linha que termina em 👇 ("aqui está tu información").
+ */
+export function destacar(texto: string): string {
+  let seta = false
+  return texto
+    .split('\n')
+    .map((l, i) => {
+      if (i === 0 && l.trim()) return `*${l.trim()}*`
+      if (/^(📌|📱) /.test(l)) return `*${l.trim()}*`
+      if (/^(📲|📧|🔑) [^:]+:/.test(l)) return l.replace(/^(\S+ )([^:]+:)/, '$1*$2*')
+      if (!seta && l.trim().endsWith('👇')) { seta = true; return `*${l.trim()}*` }
+      return l
+    })
+    .join('\n')
+}
+
 /** As 2 mensagens da sequência, prontas — exportado também pra pré-visualizar/testar o texto. */
 export function mensagensDeAcesso(p: {
   locale: string
@@ -515,12 +534,12 @@ export function mensagensDeAcesso(p: {
   // Raiz do app no idioma dela (mesmo prefixo do link de acesso: /tr, /pl…; es sem prefixo).
   const homeUrl = p.link.split('/entrar')[0]
   const nome = p.challengeId ? NOME_DO_DESAFIO[p.challengeId]?.[locale] : undefined
-  const acesso = copy({ email: p.email, code: p.code, link: p.link, homeUrl })
+  const acesso = destacar(copy({ email: p.email, code: p.code, link: p.link, homeUrl }))
   return [
     nome ? acesso.replace('Desafío de Calistenia', nome) : acesso,
     // Sem playlist desde 16/10/2026: ela existia para tapar a falta de suporte, mas tirava a aluna do app
     // (~60% nunca faziam o dia 1 lá). Agora o suporte responde; a playlist fica só como plano B do agente.
-    p.comoReembolsar ? `${support({})}\n\n${(COMO_REEMBOLSAR[locale] ?? COMO_REEMBOLSAR.en)(homeUrl)}` : support({}),
+    destacar(p.comoReembolsar ? `${support({})}\n\n${(COMO_REEMBOLSAR[locale] ?? COMO_REEMBOLSAR.en)(homeUrl)}` : support({})),
   ]
 }
 
