@@ -36,6 +36,8 @@ PY_FABRICA = FABRICA / "pipeline" / ".venv" / "bin" / "python"
 REMOTE = "gdrive-full"
 PASTA_MAE = "1udip5N5aRAaq-9UE-TBzgTm22bjN0j2W"  # "Todos os módulos" (conta admriseme)
 IDIOMAS = ["es", "en"]  # decisão do Bruno, 15/10/2026: desafio novo sai em es + en
+# Por módulo dá para mudar no baixar (--idiomas en,es,pl), gravado no esteira.json: o Tu cuidado
+# (Joelhos/Costas, 11/11/2026) sai em es + pl, com o en original para os outros países.
 # Registro das aulas no R2: um só, o da main (combinado com o chat do R2, 15/10). O publish-hls.py
 # lê a mesma variável; sem ela, os dois usam o arquivo deste checkout.
 HLS_LESSONS = Path(os.environ.get("HLS_LESSONS_PATH", ROOT / "lib" / "hls-lessons.json"))
@@ -64,6 +66,12 @@ def ler_estado(slug):
     if not p.exists():
         sys.exit(f"[erro] {slug}: rode 'baixar' primeiro")
     return json.loads(p.read_text())
+
+
+def idiomas(est):
+    """Idiomas do módulo (en primeiro: é o áudio original e o vídeo base do publicar)."""
+    ids = est.get("idiomas") or IDIOMAS
+    return ["en"] + [i for i in ids if i != "en"]
 
 
 def gravar_estado(slug, est):
@@ -105,6 +113,8 @@ def baixar(a):
            "aulas": [{"dia": i + 1, "aula": n, "arquivo": v} for i, (n, v) in enumerate(zip(nums, videos))]}
     if estado_path(a.slug).exists():
         est = {**ler_estado(a.slug), **{k: est[k] for k in ("modulo", "drive_id", "aulas")}}
+    if a.idiomas:
+        est["idiomas"] = [i.strip() for i in a.idiomas.split(",") if i.strip()]
     gravar_estado(a.slug, est)
     normalizar(ent, videos)
     print(f"{len(videos)} aulas → dias 1–{len(videos)}. Transcrevendo fala por fala (Whisper; demora)…")
@@ -201,19 +211,20 @@ def produzir(a):
     if a.descanso > 0:
         pontos_por_transicao(est, so_aulas(a.aulas))
     # Inglês primeiro: ele define os pontos de descanso que o espanhol reaproveita
-    for idioma in ["en"] + [i for i in IDIOMAS if i != "en"]:
+    for idioma in idiomas(est):
         sh([PY_FABRICA, lote, "--desafio", a.slug, "--idioma", idioma, *extra])
 
     print("\nconferência (vídeo único: mesma duração; áudio presente):")
     so = so_aulas(a.aulas)
     problemas = 0
-    fin = {i: finais(est, i) for i in IDIOMAS}
+    IDS = idiomas(est)
+    fin = {i: finais(est, i) for i in IDS}
     for x in est["aulas"]:
         if so and x["aula"] not in so:
             continue
         linha = [f"dia {x['dia']:2d} (aula {x['aula']})"]
         durs = {}
-        for i in IDIOMAS:
+        for i in IDS:
             f = fin[i][x["dia"]]
             if not f.exists():
                 linha.append(f"{i}: FALTA"); problemas += 1; continue
@@ -222,7 +233,7 @@ def produzir(a):
             linha.append(f"{i}: {durs[i]:.1f}s {vol:.0f}dB")
             if vol < -45:
                 linha.append("⚠ áudio mudo?"); problemas += 1
-        if len(durs) == len(IDIOMAS) and max(durs.values()) - min(durs.values()) > 0.5:
+        if len(durs) == len(IDS) and max(durs.values()) - min(durs.values()) > 0.5:
             linha.append("⚠ durações diferentes"); problemas += 1
         print("  " + " · ".join(linha))
     print("✅ conferido" if not problemas else f"⚠ {problemas} problema(s) — ver acima")
@@ -234,22 +245,23 @@ def publicar(a):
     est = ler_estado(a.slug)
     est["desafio"] = a.desafio
     gravar_estado(a.slug, est)
-    fin = {i: finais(est, i) for i in IDIOMAS}
+    IDS = idiomas(est)
+    fin = {i: finais(est, i) for i in IDS}
     ja = json.loads(HLS_LESSONS.read_text())["lessons"].get(a.desafio, {})
     for x in est["aulas"]:
         dia = x["dia"]
-        if set(IDIOMAS) <= set(ja.get(str(dia), {}).get("languages", [])):
+        if set(IDS) <= set(ja.get(str(dia), {}).get("languages", [])):
             print(f"dia {dia:2d}: já publicado"); continue
-        faltam = [i for i in IDIOMAS if not fin[i][dia].exists()]
+        faltam = [i for i in IDS if not fin[i][dia].exists()]
         if faltam:
             print(f"dia {dia:2d}: ⚠ sem final em {faltam}, pulando"); continue
         with tempfile.TemporaryDirectory(dir=FABRICA / "trabalho" / a.slug) as td:
             pkg = Path(td) / f"d{dia:02d}"
-            audios = [arg for i in IDIOMAS for arg in ("--audio", f"{i}={fin[i][dia]}")]
+            audios = [arg for i in IDS for arg in ("--audio", f"{i}={fin[i][dia]}")]
             sh([sys.executable, ROOT / "scripts" / "package-lesson.py",
                 "--video", fin["en"][dia], *audios, "--out", pkg])
             sh([sys.executable, ROOT / "scripts" / "publish-hls.py", "--dir", pkg,
-                "--challenge", a.desafio, "--day", str(dia), "--languages", ",".join(IDIOMAS)])
+                "--challenge", a.desafio, "--day", str(dia), "--languages", ",".join(IDS)])
     print(f"\n✅ publicado. Commitar lib/hls-lessons.json (desafio {a.desafio}).")
 
 
@@ -273,8 +285,9 @@ def titulos(slug, idioma, n_aulas):
 def ficha(a):
     est = ler_estado(a.slug)
     aulas = [x["aula"] for x in est["aulas"]]
+    IDS = idiomas(est)
     dias = {}
-    for i in IDIOMAS:
+    for i in IDS:
         t = titulos(a.slug, i, len(aulas))
         faltam = [n for n in aulas if n not in t]
         if faltam:
@@ -283,9 +296,9 @@ def ficha(a):
     nome_arq = f"{int(a.desafio):02d}-{a.slug}.json"
     dados = {
         "id": a.desafio, "modulo": est["modulo"].strip(), "emoji": a.emoji, "gratis": False,
-        "idiomas": IDIOMAS,
-        "titulo": {"es": a.titulo_es, "en": a.titulo_en},
-        "categoria": {"es": a.categoria_es, "en": a.categoria_en},
+        "idiomas": sorted(IDS, key=lambda i: (i != "es", i != "en", i)),
+        "titulo": {i: getattr(a, f"titulo_{i}") for i in IDS},
+        "categoria": {i: getattr(a, f"categoria_{i}") for i in IDS},
         "dias": dias,
     }
     (DESAFIOS / nome_arq).write_text(json.dumps(dados, ensure_ascii=False, indent=2) + "\n")
@@ -310,7 +323,7 @@ def ficha(a):
 
 def arquivar(a):
     est = ler_estado(a.slug)
-    for i in IDIOMAS:
+    for i in idiomas(est):
         local = FABRICA / "saida" / a.slug / i
         destino = remote(est["drive_id"], i.upper())
         sh(["rclone", "copy", local, destino, "--include", "*.mp4", "-P"])
@@ -324,16 +337,17 @@ def arquivar(a):
 
 def status(a):
     est = ler_estado(a.slug)
-    fin = {i: finais(est, i) for i in IDIOMAS}
+    IDS = idiomas(est)
+    fin = {i: finais(est, i) for i in IDS}
     hls = json.loads(HLS_LESSONS.read_text())["lessons"].get(est.get("desafio", ""), {})
     tra = FABRICA / "trabalho" / a.slug
     print(f"{est['modulo']} · desafio {est.get('desafio', '—')} · {len(est['aulas'])} aulas")
     for x in est["aulas"]:
         n = x["aula"]
-        tr = (tra / f"aula-{n:02d}.es.tr.json").exists()
+        tr = "".join(i for i in IDS if i != "en" and (tra / f"aula-{n:02d}.{i}.tr.json").exists()) or "·"
         print(f"  dia {x['dia']:2d} (aula {n:2d})  transcrito {'✓' if (tra / 'transcricao-real' / f'aula-{n:02d}.falas.json').exists() else '·'}"
-              f"  es traduzido {'✓' if tr else '·'}"
-              f"  finais {''.join(i if fin[i][x['dia']].exists() else '·' for i in IDIOMAS)}"
+              f"  traduzido {tr}"
+              f"  finais {' '.join(i if fin[i][x['dia']].exists() else '··' for i in IDS)}"
               f"  R2 {','.join(hls.get(str(x['dia']), {}).get('languages', [])) or '·'}")
 
 
@@ -341,6 +355,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="etapa", required=True)
     p = sub.add_parser("baixar"); p.add_argument("--modulo", type=int, required=True); p.add_argument("--slug", required=True)
+    p.add_argument("--idiomas", help="ex.: en,es,pl (padrão es,en; gravado no esteira.json do módulo)")
     p = sub.add_parser("produzir"); p.add_argument("--slug", required=True); p.add_argument("--aulas")
     # 10 s = cartão de descanso padrão; 0 = módulo que já tem descanso nativo (telas "Next Up")
     p.add_argument("--descanso", type=float, default=10)
@@ -348,6 +363,8 @@ def main():
     p = sub.add_parser("ficha")
     for arg in ["--slug", "--desafio", "--emoji", "--titulo-es", "--titulo-en", "--categoria-es", "--categoria-en"]:
         p.add_argument(arg, required=True)
+    for arg in ["--titulo-pl", "--categoria-pl"]:  # módulo com pl nos idiomas (Tu cuidado)
+        p.add_argument(arg)
     p = sub.add_parser("arquivar"); p.add_argument("--slug", required=True); p.add_argument("--apagar", action="store_true")
     p = sub.add_parser("status"); p.add_argument("--slug", required=True)
     a = ap.parse_args()
