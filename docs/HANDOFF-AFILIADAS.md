@@ -52,6 +52,12 @@ O chat que executa é aberto pelo Bruno; ele aprova cada passo que mexe na Hotma
 - BOT TEM DONO ÚNICO desde 09/11 (riseme/CLAUDE.md, "Dono do bot"): o chat [Arquiteto dos Fluxos no WhatsAPp]. A regra AFILIADA (já no ar, 8f4ce82) passou para ele em 09/11; link do PDF guia e post no grupo vão POR ELE.
 - H4: 1ª venda real conferida (acesso no app + webhook 200).
 
+## 🚨 11/11 — afiliação travada fora do Brasil (achado pelo dono do bot)
+- 1º caso real: Llilda (Peru, WhatsApp final 897), logo depois do post no grupo. A página de afiliação mostra: "Solamente Afiliados que residen en Brasil y tienen dirección fiscal en el país pueden afiliarse a este producto."
+- Causa provável: o produto 8926725 está na conta de produtor BRASILEIRA do Bruno; pela regra do Banco Central que a Hotmart aplica, produtor brasileiro só aceita afiliado residente no Brasil. Respostas do suporte da Hotmart (Reclame Aqui) dizem que afiliado estrangeiro consegue se afiliar quando o PRODUTOR é estrangeiro.
+- Caminho em análise (Bruno 11/11): conta de produtor da Hotmart em nome da LLC (RiseMe & CO LLC) → recriar o produto "Amigas" lá (mesmo conteúdo, 40% + degraus, afiliação de 1 clique, fora do mercado) → webhook do app + HOTMART_CHALLENGE_MAP com o ID novo → trocar LINK_AFILIACAO_ES / PRODUTO_AFILIADAS_ES em lib/afiliadas.ts (avisar o dono do bot) → refazer o guia PDF com o link novo. Bruno perguntou à gerente de contas da Hotmart antes; a conta da LLC quem cria é ele.
+- Enquanto isso: o bot explica a trava quando a aluna mostra o aviso e oferece a indicação (1 mês de Pase).
+
 ## Ordem sugerida (original)
 1. Criar o produto na Hotmart pelo Chrome (Bruno logado), copiando a Calistenia ES; ofertas; programa de afiliados automático.
 2. Checklist de produto novo: `docs/checklist-novo-produto.md` seções H1–H4 (webhook `https://riseme.app/api/hotmart` no produto novo + `ID:1` no `HOTMART_CHALLENGE_MAP` da Vercel + conferir uma venda real). Sem isso a compradora não recebe acesso.
