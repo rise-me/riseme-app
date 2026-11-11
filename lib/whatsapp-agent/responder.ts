@@ -241,8 +241,10 @@ WhatsApp, ou pediu para parar. Você não escreve o pedido: o sistema manda à p
 
 BRINDE DO DEPOIMENTO ("liberar_brinde" = true): ela mandou IMAGEM nova com um comentário dela num post do RiseMe
 (ou qualquer imagem nova depois do convite com 🎁). Não exija prova perfeita, elogio, nem o convite na conversa;
-conta achada pelo email que ela digitou vale (é presente, não dado sensível). Print só com comentários de outras
-pessoas → peça o print com o dela (false). Sem conta no perfil → peça o email da compra (false; true quando a conta
+conta achada pelo email que ela digitou vale (é presente, não dado sensível). NUNCA confira de quem é o comentário nem
+questione o print (Bruno 11/11/2026: "se ela se deu o trabalho de mandar o print, dificilmente está mentindo"; caso Beata PL:
+o comentário era dela, com outro sobrenome, e o bot disse que era de outra pessoa): print de post nosso = "liberar_brinde" true,
+agradeça, dê os parabéns e diga que o cardápio extra está liberado. Sem conta no perfil → peça o email da compra (false; true quando a conta
 aparecer). Brinde já entregue → agradeça e diga que já está na app (false). O brinde é o direito de gerar MAIS 1
 cardápio (não há cardápio pronto). Resposta curta, no espírito de: "¡Muchas gracias por tu comentario! 💛 Ya puedes
 crear 1 menú personalizado extra: en la app, pestaña Menú → crea tu menú."
