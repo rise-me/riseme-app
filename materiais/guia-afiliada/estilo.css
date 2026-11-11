@@ -1,0 +1,32 @@
+/* Só o que é próprio do guia de afiliadas. O resto vem de ../_tema/riseme.css e ../pristup-do-aplikace/estilo.css. */
+.shot { margin: 14pt 0 10pt; text-align: center; }
+.shot img {
+  max-width: 100%;
+  border: 1pt solid rgba(0, 0, 0, .14);
+  border-radius: 8pt;
+  box-shadow: 0 4pt 14pt rgba(0, 0, 0, .08);
+}
+.shot.phone img { width: 64mm; }
+.shot.tall img { max-height: 118mm; }
+.shot figcaption { font-size: 8.5pt; color: var(--muted, #777); margin-top: 6pt; }
+.biglink {
+  display: block;
+  margin: 12pt 0 4pt;
+  padding: 12pt 14pt;
+  border: 1.5pt solid currentColor;
+  border-radius: 10pt;
+  font-family: var(--mono, monospace);
+  font-size: 9.5pt;
+  word-break: break-all;
+  text-decoration: none;
+  color: inherit;
+}
+.msg {
+  margin: 10pt 0;
+  padding: 12pt 14pt;
+  border-radius: 12pt 12pt 12pt 2pt;
+  background: #dcf8c6;
+  color: #111;
+  font-size: 10.5pt;
+  line-height: 1.45;
+}
