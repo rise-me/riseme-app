@@ -10,3 +10,9 @@ export const PRODUTO_AFILIADAS_ES = 8926725 // "RiseMe™ - Desafío de 28 Días
 export const LINK_AFILIACAO_ES = 'https://affiliate.hotmart.com/affiliate-recruiting/view/4565R108410711'
 export const COMISSAO_ES = { percentual: 50, porVendaUsd: '6,46' } // o que a Hotmart mostra: "Receba até US$ 6,46"
 export const LINK_GUIA_AFILIADA_ES = '' // PDF passo a passo (a fazer, com prints da conta de uma aluna)
+
+// "Página de vendas" do produto na Hotmart = https://riseme.app/api/amigas (app/api/amigas/route.ts), que só repassa a amiga
+// para este checkout. Motivo (10/11): a Hotmart não aceita pay.hotmart.com como página externa e, sem página externa, o link da
+// afiliada caía no marketplace da Hotmart (título "(Amigas)", "Ir al carrito", preço convertido, outros produtos nossos).
+// A comissão não depende desta página: o go.hotmart.com da afiliada já marcou a amiga antes de chegar aqui.
+export const CHECKOUT_AFILIADAS_ES = 'https://pay.hotmart.com/J108410690N?off=a6ybtkbv&checkoutMode=10'
