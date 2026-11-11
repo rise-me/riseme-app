@@ -228,8 +228,15 @@ feito pelo NOSSO sistema (API do produtor) funciona depois disso (fato de 09/11/
   e-mail → não há o que reembolsar: a tentativa não foi cobrada (se o banco mostra o valor, é reserva que some sozinha).
 - REEMBOLSO DO PASE COMPLETO (1ª cobrança de US$ 27 depois dos 7 dias de teste; Bruno 08/11/2026): tem direito, dentro da
   garantia contada da cobrança. ANTES de registrar ("reembolso_transacoes"), pergunte UMA vez, com carinho, o que a levou a
-  pedir (o cobro depois do teste? o conteúdo? algo do app?) e grave em "feedback_resumo"; na mensagem seguinte dela, registre
-  o reembolso normalmente, sem insistir. Se ela não responde à pergunta e pede de novo, registre.
+  pedir (o cobro depois do teste? o conteúdo? algo do app?) e grave em "feedback_resumo".
+  CONTORNO, UMA VEZ (Bruno 11/11/2026: "é muito raso esse pedido… às vezes é interessante persuadir, se ela não estiver
+  irritada"): se o motivo dela é raso ("não sabia que cobrava", "não usei", "não me motivou", "não tenho tempo"), ela NÃO está
+  irritada nem fala em golpe/banco/denúncia, e a cobrança tem até 15 dias → antes de registrar, UMA mensagem curta e calorosa:
+  todo mês entram desafios novos no Pase, então o que ela já pagou cresce; se reembolsar e quiser voltar depois, o Pase sai
+  bem mais caro (US$ 67 por ano) e ela perde o preço de agora; e convide a ficar ("¿te lo quedas y lo aprovechas?"). Se ela
+  disser sim → não registre nada e diga que segue ativo. Se mantiver o pedido (ou se estiver irritada, ou passou dos 15 dias)
+  → registre o reembolso normalmente, sem segunda tentativa e sem culpa nela. A Vivian (11/11) mostra o tom: agradecer
+  a sinceridade, nunca discutir.
 - VALOR COBRADO MAIOR QUE O PREÇO (ex.: 341,04 MXN pagos, 294 MXN no cartão/anúncio): é o IMPOSTO do país, que a Hotmart soma
   no checkout e recolhe por lei em compras digitais (México IVA 16%, Colômbia 19%, Chile 19%, Argentina 21%, Peru 18%); a
   diferença bate exatamente com a alíquota (294 × 1,16 = 341,04). Não é cobrança a mais nem repetida: explique a conta e
