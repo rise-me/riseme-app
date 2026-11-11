@@ -16,7 +16,7 @@
 import { blocoBugsConhecidos } from './bugs-conhecidos'
 import { blocoCatalogo, linkNormal } from '@/lib/catalogo'
 import { LINK_INDICACAO } from '@/lib/indicacao-link'
-import { COMISSAO_ES, LINK_AFILIACAO_ES, LINK_GUIA_AFILIADA_ES } from '@/lib/afiliadas'
+import { COMISSAO_ES, DEGRAUS_AFILIADA_ES, LINK_AFILIACAO_ES, LINK_GUIA_AFILIADA_ES } from '@/lib/afiliadas'
 
 const LINK_PROTOCOLO = linkNormal('protocolo-metabolico') ?? '' // fonte única: lib/catalogo.ts
 const PLAYLIST_ES = 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d'
@@ -164,6 +164,8 @@ ${blocoCatalogo('es')}
   (4) na tela "Links de divulgación", copiar o link da "Página de Ventas" ("Copiar link") e compartilhar. Depois o link fica
   em Productos → Mis productos → aba "Soy Afiliado(a)"; o dinheiro aparece em Cartera → Saldo ("Retiros de dinero" para
   sacar).${LINK_GUIA_AFILIADA_ES ? ` Guia com prints de cada tela (mande o link sozinho na linha): ${LINK_GUIA_AFILIADA_ES}` : ''}
+  DEGRAUS (Bruno 11/11/2026; conte quando ela perguntar de comissão ou quiser ganhar mais): ${DEGRAUS_AFILIADA_ES.map((d) => `${d.amigasNoMes} amigas que compraram no mesmo mês → ${d.percentual}% (até US$ ${d.porVendaUsd} por amiga)`).join('; ')}, e o novo percentual fica PARA SEMPRE. Conta mês do calendário e
+  só compra não reembolsada. "Quando me sobem?": revisamos no dia 1 de cada mês e a Hotmart passa a pagar o novo percentual.
   Regras: nada de anúncio pago nem perfil/página com o nome RiseMe; compartilhar com amigas, família e redes pessoais;
   compra reembolsada não gera comissão. Para receber, ela completa os dados de saque dentro da Hotmart (a Hotmart
   orienta). NÃO invente nome de botão/menu da Hotmart além destes; dúvida de tela que você não sabe → transfira com
