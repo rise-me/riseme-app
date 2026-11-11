@@ -9,7 +9,7 @@
 export const PRODUTO_AFILIADAS_ES = 8926725 // "RiseMe™ - Desafío de 28 Días de Calistenia (Amigas)", US$ 14,90, oferta a6ybtkbv
 export const LINK_AFILIACAO_ES = 'https://affiliate.hotmart.com/affiliate-recruiting/view/4565R108410711'
 export const COMISSAO_ES = { percentual: 50, porVendaUsd: '6,46' } // o que a Hotmart mostra: "Receba até US$ 6,46"
-export const LINK_GUIA_AFILIADA_ES = '' // PDF passo a passo (a fazer, com prints da conta de uma aluna)
+export const LINK_GUIA_AFILIADA_ES = 'https://riseme.app/guias/afiliadas-es.pdf' // PDF passo a passo, 9 págs., prints reais (11/11; fonte materiais/guia-afiliada/es.html)
 
 // "Página de vendas" do produto na Hotmart = https://riseme.app/api/amigas (app/api/amigas/route.ts), que só repassa a amiga
 // para este checkout. Motivo (10/11): a Hotmart não aceita pay.hotmart.com como página externa e, sem página externa, o link da

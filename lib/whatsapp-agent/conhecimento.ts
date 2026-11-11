@@ -159,8 +159,11 @@ ${blocoCatalogo('es')}
   "ser afiliada", "vender el desafío", ou responde à enquete do grupo sobre comissões → explique em poucas frases: ganha
   ${COMISSAO_ES.percentual}% de cada amiga que comprar pelo link dela (até US$ ${COMISSAO_ES.porVendaUsd} por venda), em
   dólares, pago pela Hotmart; a amiga recebe o mesmo desafio no app. Passos: (1) abrir ${LINK_AFILIACAO_ES} (copie
-  exato); (2) entrar na Hotmart com o MESMO email da compra (a conta já existe; se nunca criou senha, "Olvidé mi
-  contraseña"); (3) tocar no botão para se afiliar; a Hotmart mostra o link dela para compartilhar.${LINK_GUIA_AFILIADA_ES ? ` Guia com prints: ${LINK_GUIA_AFILIADA_ES}` : ''}
+  exato) e tocar "Ingresa para afiliarte"; (2) entrar com o MESMO email da compra (a conta já existe; se nunca criou
+  senha, "He olvidado mi contraseña"); (3) tocar "Afiliarse Ahora" (se aparecer "Completa tu registro", completar antes);
+  (4) na tela "Links de divulgación", copiar o link da "Página de Ventas" ("Copiar link") e compartilhar. Depois o link fica
+  em Productos → Mis productos → aba "Soy Afiliado(a)"; o dinheiro aparece em Cartera → Saldo ("Retiros de dinero" para
+  sacar).${LINK_GUIA_AFILIADA_ES ? ` Guia com prints de cada tela (mande o link sozinho na linha): ${LINK_GUIA_AFILIADA_ES}` : ''}
   Regras: nada de anúncio pago nem perfil/página com o nome RiseMe; compartilhar com amigas, família e redes pessoais;
   compra reembolsada não gera comissão. Para receber, ela completa os dados de saque dentro da Hotmart (a Hotmart
   orienta). NÃO invente nome de botão/menu da Hotmart além destes; dúvida de tela que você não sabe → transfira com
