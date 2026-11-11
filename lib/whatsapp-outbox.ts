@@ -287,7 +287,13 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     // 'avisar-responsavel' (10/11/2026): body = texto livre; manda ao WHATSAPP_HANDOFF_PHONE (o chat não tem o número localmente).
     if (item.kind === 'avisar-responsavel') {
       const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
-      const r = destino ? await sendZapiText({ phone: destino, message: item.body, delayTyping: 1 }) : { ok: false as const, error: 'sem WHATSAPP_HANDOFF_PHONE' }
+      // body = texto livre, ou JSON {imagem, legenda} para mandar imagem (prévia do post do grupo, 11/11/2026)
+      let img: { imagem?: string; legenda?: string } | null = null
+      try { img = item.body.trim().startsWith('{') ? JSON.parse(item.body) : null } catch { img = null }
+      const { sendZapiImage } = await import('@/lib/zapi')
+      const r = !destino ? { ok: false as const, error: 'sem WHATSAPP_HANDOFF_PHONE' }
+        : img?.imagem ? await sendZapiImage({ phone: destino, image: img.imagem, caption: img.legenda })
+        : await sendZapiText({ phone: destino, message: item.body, delayTyping: 1 })
       await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, last_error: r.ok ? null : r.error }).eq('id', item.id)
       continue
     }
@@ -355,7 +361,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       let saida: string
       try {
         const { zapiGet, renomearGrupo, enviarEnquete } = await import('@/lib/zapi')
-        const p = JSON.parse(item.body) as { acao: 'buscar' | 'renomear' | 'enquete' | 'texto' | 'ajustes'; nome: string; groupId?: string; opcoes?: string[]; ajustes?: Record<string, boolean> }
+        const p = JSON.parse(item.body) as { acao: 'buscar' | 'renomear' | 'enquete' | 'texto' | 'imagem' | 'ajustes'; nome: string; groupId?: string; opcoes?: string[]; ajustes?: Record<string, boolean>; imagem?: string }
         if (p.acao === 'ajustes') {
           // a Z-API exige todos os campos: mantém os atuais e troca só os que vierem em p.ajustes
           const m = (await zapiGet(`group-metadata/${p.groupId}`)) as Record<string, unknown> | null
@@ -365,6 +371,10 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
         } else if (p.acao === 'texto') {
           const { sendZapiText } = await import('@/lib/zapi')
           saida = JSON.stringify({ ...p, r: await sendZapiText({ phone: p.groupId!, message: p.nome }) })
+        } else if (p.acao === 'imagem') {
+          // imagem = URL; nome = legenda (10/11/2026: post das afiliadas com o print da enquete)
+          const { sendZapiImage } = await import('@/lib/zapi')
+          saida = JSON.stringify({ ...p, r: await sendZapiImage({ phone: p.groupId!, image: p.imagem!, caption: p.nome }) })
         } else if (p.acao === 'enquete') {
           // nome = pergunta; sem pollMaxOptions = várias respostas (doc send-poll da Z-API)
           saida = JSON.stringify({ ...p, ok: await enviarEnquete(p.groupId!, p.nome, p.opcoes ?? []) })

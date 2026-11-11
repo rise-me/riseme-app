@@ -18,6 +18,26 @@ export function toZapiPhone(phone: string): string {
   return phone.endsWith('@lid') ? `${d}@lid` : d
 }
 
+/** Imagem com legenda (Z-API send-image; image = URL pública/assinada ou data:base64). Usado no grupo e no aviso ao responsável. */
+export async function sendZapiImage(params: { phone: string; image: string; caption?: string }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
+  const instance = process.env.ZAPI_INSTANCE_ID
+  const token = process.env.ZAPI_TOKEN
+  if (!instance || !token) return { ok: false, error: 'zapi env ausente' }
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (process.env.ZAPI_CLIENT_TOKEN) headers['Client-Token'] = process.env.ZAPI_CLIENT_TOKEN
+  try {
+    const res = await fetch(`https://api.z-api.io/instances/${instance}/token/${token}/send-image`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ phone: params.phone.includes('-group') ? params.phone : toZapiPhone(params.phone), image: params.image, ...(params.caption ? { caption: params.caption } : {}) }),
+    })
+    const body = await res.text()
+    if (!res.ok) return { ok: false, error: `${res.status} ${body.slice(0, 200)}` }
+    return { ok: true, messageId: (JSON.parse(body) as { messageId?: string }).messageId ?? '' }
+  } catch (err) {
+    return { ok: false, error: String(err) }
+  }
+}
+
 export async function sendZapiText(params: {
   phone: string
   message: string
