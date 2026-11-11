@@ -38,7 +38,9 @@ def job(name, out, crop, blurs=(), marks=()):
     print(out, im.size)
 
 # 1. página de afiliação no celular (sem login)
+# valor por venda borrado (11/11): a comissão mudou de 50% para 40% com degraus; o número certo fica no texto do guia
 job('01-pagina-afiliacao.jpg', 'p1-link.jpg', (0, 0, 606, 723),
+    blurs=[(282, 458, 548, 557)],
     marks=[((320, 677, 526, 718), 'down')])
 # 2. tela de entrada (e-mail e senha da conta de teste borrados)
 job('03-login-es.jpg', 'p2-entrar.jpg', (150, 190, 700, 690),
@@ -46,6 +48,7 @@ job('03-login-es.jpg', 'p2-entrar.jpg', (150, 190, 700, 690),
     marks=[((175, 566, 554, 606), 'right'), ((175, 504, 346, 526), 'right')])
 # 3. Afiliarse Ahora
 job('04-afiliarse-ahora.jpg', 'p3-afiliarse.jpg', (157, 186, 1134, 420),
+    blurs=[(338, 248, 602, 294)],
     marks=[((896, 252, 1121, 283), 'down')])
 # 4. copiar o link (código da afiliada de teste borrado)
 job('05-hotlinks.jpg', 'p4-copiar.jpg', (88, 448, 1052, 562),
