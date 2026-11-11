@@ -31,9 +31,22 @@ O chat que executa é aberto pelo Bruno; ele aprova cada passo que mexe na Hotma
 - H2: `HOTMART_CHALLENGE_MAP` += `8926725:1` em Production (Bruno autorizou; a Vercel passou a mostrar como Sensitive, valor não legível). Vale no deploy seguinte ao commit do bot.
 - Bot: regra "AFILIADA" em `lib/whatsapp-agent/conhecimento.ts` (seção Vendas), dados em `lib/afiliadas.ts`, assunto `venda` reconhece afiliad/comisión/ganar dinero, caso na bateria (`scripts/testar-agente.ts`).
 
-## Falta
 - Funil de upsell na oferta `a6ybtkbv`: handoff `~/Ferramentas/modelador-funis/HANDOFF-FUNIL-AFILIADAS.md` (o funil ativo 286612 não mostra os detalhes sem desativar).
-- Passo 4 (prints do lado da aluna): precisa de uma conta Hotmart que NÃO seja a produtora (a do Bruno não se afilia ao próprio produto). O Claude não cria conta. Bruno loga uma conta de compradora no Chrome (ex.: a de teste da esposa) → o chat faz o passo a passo e os prints → PDF → `LINK_GUIA_AFILIADA_ES` em `lib/afiliadas.ts`.
+## Feito em 10/11
+- Passo a passo feito com a conta de teste do Bruno (brunosouzamart7, idioma da conta trocado para ES): afiliação INSTANTÂNEA, sem cadastro extra nessa conta (outra conta dele, com cadastro incompleto, mostrou 'Complete seu cadastro' antes do botão: o PDF cobre). Depois de afiliar, a Hotmart cai em 'Links de divulgación' com 'Página de Ventas' (go.hotmart.com/…) e 'Página de Producto' (?dp=1); NÃO há link de 'Página de pagamento' para afiliada.
+- Sem página externa, o link da afiliada caía no MARKETPLACE da Hotmart (título '(Amigas)', 'Ir al carrito', preço convertido, outros produtos nossos). Corrigido: página de vendas do produto = `https://riseme.app/api/amigas` (app/api/amigas/route.ts, commit 18b971d) → 302 para `pay.hotmart.com/J108410690N?off=a6ybtkbv&checkoutMode=10` levando os parâmetros. Conferido por curl: go.hotmart.com/E108438052K → checkout com `ref=E108438052K`.
+- Rótulos reais da Hotmart em ES: 'Ingresa para afiliarte', 'He olvidado mi contraseña' (NÃO 'Olvidé'), 'Afiliarse Ahora', 'Página de Ventas' → 'Copiar link', Productos → Mis productos → 'Soy Afiliado(a)', Cartera → Saldo / 'Retiros de dinero'.
+- GUIA PDF (ES, 9 págs.) NO AR: https://riseme.app/guias/afiliadas-es.pdf (fonte `materiais/guia-afiliada/es.html`, prints `materiais/guia-afiliada/img/` com nome/e-mail/foto/código BORRADOS, script `prepara_prints.py`; commit 12216c2). Bruno revisa → com o ok, o link vai ao dono do bot (LINK_GUIA_AFILIADA_ES + rótulo 'He olvidado mi contraseña').
+- A conta de teste (brunosouzamart7) ficou AFILIADA ao 8926725 (código E108438052K) e com idioma ES. Não vale como venda de teste de afiliada sem o Bruno decidir.
+
+## Decidido pelo Bruno em 11/11 — comissão em degraus
+- Base 40% (até US$ 5,17), "para poder premiar alunas com a narrativa de que você pode chegar até 50%… ou um pouquinho mais".
+- 5 amigas no mesmo mês (mês do calendário, sem reembolso) → 50% (US$ 6,46); 15 no mês → 55% (US$ 7,10). Quem sobe FICA para sempre.
+- Aplicação: à mão na Hotmart (Programa de afiliados → Lista de afiliados → ⋮ → "Editar comissão"); conferência todo dia 1º. Fonte dos números: `lib/afiliadas.ts` (COMISSAO_ES, DEGRAUS_AFILIADA_ES).
+- Feito 11/11 (8490922): comissão do produto = 40% (a Hotmart aplica a partir de 14/11; redução leva 3 dias), texto da página de afiliação com os degraus, guia PDF com o bloco "Sube de nivel" (valor por venda borrado nos prints), dono do bot avisado (ele põe os degraus na regra AFILIADA).
+
+## Falta (atualizado 10/11)
+- FEITO 11/11: Bruno 'tá tudo certo'; link do PDF + rótulo 'He olvidado mi contraseña' enviados ao [Arquiteto dos Fluxos no WhatsAPp] e NO BOT (dfa2281, testado no servidor).
 - Dash: ligar o produto 8926725 ao funil CL-ES depois da 1ª venda (o produto chega pelo webhook) → dashboard-lucro.
 - Post no grupo (texto para o Bruno aprovar) + linha no MAPA-TESTES (critério proposto, falta ok).
 - BOT TEM DONO ÚNICO desde 09/11 (riseme/CLAUDE.md, "Dono do bot"): o chat [Arquiteto dos Fluxos no WhatsAPp]. A regra AFILIADA (já no ar, 8f4ce82) passou para ele em 09/11; link do PDF guia e post no grupo vão POR ELE.
