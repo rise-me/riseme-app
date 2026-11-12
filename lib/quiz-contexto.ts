@@ -9,10 +9,11 @@ import { createClient, type SupabaseClient, type User } from '@supabase/supabase
 import mapaClEs from './whatsapp-agent/quiz-cl-es.json'
 // Mapas de outros funis: gerados do copy.<idioma>.json com scripts/gerar-mapa-quiz.mts (fora da pasta do bot).
 import mapaClPl from './quiz-mapas/cl-pl.json'
+import mapaClNl from './quiz-mapas/cl-nl.json'
 
 type Mapa = Record<string, { key: string; pergunta: string; opcoes: Record<string, string> }>
 // CL-ES-BR (camuflagem do geo-gate) tem numeração de telas diferente: fica fora até ter mapa próprio (05/11/2026).
-const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa, 'CL-PL': mapaClPl as Mapa }
+const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa, 'CL-PL': mapaClPl as Mapa, 'CL-NL': mapaClNl as Mapa }
 
 // Rótulo curto por chave: a pergunta inteira é longa demais pro perfil.
 const ROTULO: Record<string, string> = {

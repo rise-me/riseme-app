@@ -1,0 +1,244 @@
+{
+ "1": {
+  "key": "objetivo",
+  "pergunta": "Wat is je belangrijkste doel met calisthenics?",
+  "opcoes": {
+   "perder_peso": "Afvallen",
+   "ganar_fuerza": "Meer spierkracht en een strakker lichaam",
+   "ganar_flexibilidad": "Soepeler worden",
+   "eliminar_tensiones": "Spanning en zorgen loslaten",
+   "controlar_azucar": "Mijn bloedsuiker onder controle krijgen en diabetes type 2 voorkomen of behandelen"
+  }
+ },
+ "3": {
+  "key": "tipo_cuerpo_actual",
+  "pergunta": "Welke omschrijving past het best bij je lichaam?",
+  "opcoes": {
+   "delgada": "Slank",
+   "media": "Gemiddeld",
+   "grande": "Mollig",
+   "con_sobrepeso": "Overgewicht"
+  }
+ },
+ "4": {
+  "key": "pais",
+  "pergunta": "In welk land woon je?",
+  "opcoes": {
+   "nederland": "Nederland",
+   "belgie": "België",
+   "suriname": "Suriname",
+   "curacao": "Curaçao",
+   "aruba": "Aruba",
+   "duitsland": "Duitsland",
+   "spanje": "Spanje",
+   "verenigd_koninkrijk": "Verenigd Koninkrijk",
+   "estados_unidos": "Verenigde Staten",
+   "otro": "Ander land"
+  }
+ },
+ "6": {
+  "key": "rango_edad",
+  "pergunta": "Hoe oud ben je?",
+  "opcoes": {
+   "edad_18_29": "18-29 jaar",
+   "edad_30_39": "30-39 jaar",
+   "edad_40_49": "40-49 jaar",
+   "edad_mas_50": "50 jaar of ouder"
+  }
+ },
+ "7": {
+  "key": "experiencia_calistenia",
+  "pergunta": "Heb je al eens calisthenics gedaan?",
+  "opcoes": {
+   "si_algunas_veces": "Ja, een paar keer.",
+   "nunca_lo_intente": "Nee, nog nooit."
+  }
+ },
+ "9": {
+  "key": "experiencia_cuerpo",
+  "pergunta": "Wat herken je het meest bij je lichaam?",
+  "opcoes": {
+   "cuesta_ganar_peso": "Ik kom moeilijk aan en bouw lastig spieren op",
+   "gano_pierdo_facil": "Ik kom makkelijk aan én val makkelijk af",
+   "gano_rapido_pierdo_lento": "Ik kom snel aan, maar val langzaam af",
+   "ninguna_de_estas": "Geen van bovenstaande"
+  }
+ },
+ "10": {
+  "key": "ultima_satisfaccion_cuerpo",
+  "pergunta": "Wanneer was je voor het laatst tevreden met je lichaam?",
+  "opcoes": {
+   "menos_1_ano": "Minder dan 1 jaar geleden",
+   "entre_1_2_anos": "Tussen 1 en 2 jaar geleden",
+   "mas_3_anos": "Meer dan 3 jaar geleden",
+   "nunca": "Nog nooit"
+  }
+ },
+ "11": {
+  "key": "areas_trabajar",
+  "pergunta": "Aan welke lichaamsdelen wil je vooral werken?",
+  "opcoes": {
+   "vientre": "Buik",
+   "gluteos": "Billen",
+   "piernas": "Benen",
+   "pecho": "Borst",
+   "todo": "Alles"
+  }
+ },
+ "12": {
+  "key": "tipo_cuerpo_deseado",
+  "pergunta": "Kies het figuur dat je wilt bereiken!",
+  "opcoes": {
+   "delgada": "Slank",
+   "tonificada": "Strak",
+   "con_curvas": "Met rondingen",
+   "promedio": "Gemiddeld"
+  }
+ },
+ "13": {
+  "key": "problemas_fisicos",
+  "pergunta": "Heb je last van een van de volgende klachten?",
+  "opcoes": {
+   "espalda_sensible": "Gevoelige rug",
+   "rodillas_sensibles": "Gevoelige knieën",
+   "ninguna_de_las_anteriores": "Geen van bovenstaande"
+  }
+ },
+ "14": {
+  "key": "frecuencia_ejercicio",
+  "pergunta": "Hoe vaak sport je?",
+  "opcoes": {
+   "casi_todos_los_dias": "Bijna elke dag",
+   "varias_veces_semana": "Een paar keer per week",
+   "algunas_veces_mes": "Een paar keer per maand",
+   "nunca": "Nooit"
+  }
+ },
+ "15": {
+  "key": "consumo_agua",
+  "pergunta": "Hoeveel water drink je per dag?",
+  "opcoes": {
+   "solo_cafe_o_te": "Ik drink alleen koffie of thee",
+   "dos_vasos": "Twee glazen",
+   "dos_a_seis_vasos": "Twee tot zes glazen",
+   "mas_de_seis_vasos": "Meer dan zes glazen"
+  }
+ },
+ "17": {
+  "key": "falta_aire_escaleras",
+  "pergunta": "Raak je buiten adem als je de trap oploopt?",
+  "opcoes": {
+   "sin_aliento_no_hablo": "Ik ben dan zo buiten adem dat ik niet kan praten",
+   "poco_aire_puedo_hablar": "Ik ben een beetje buiten adem, maar kan nog praten",
+   "bien_un_tramo": "Na één trap gaat het nog prima",
+   "varios_tramos": "Een paar trappen achter elkaar lukt me prima"
+  }
+ },
+ "18": {
+  "key": "frecuencia_caminar",
+  "pergunta": "Hoe vaak ga je wandelen?",
+  "opcoes": {
+   "casi_todos_los_dias": "Bijna elke dag",
+   "varias_veces_semana": "Een paar keer per week",
+   "algunas_veces_mes": "Een paar keer per maand",
+   "nunca": "Nooit"
+  }
+ },
+ "19": {
+  "key": "nivel_energia",
+  "pergunta": "Hoe is je energie in de loop van de dag?",
+  "opcoes": {
+   "bajos_cansada_todo_dia": "Laag, ik ben de hele dag moe",
+   "caida_despues_almuerzo": "Na de lunch zak ik helemaal in",
+   "me_arrastro_entre_comidas": "Ik sleep me van maaltijd naar maaltijd",
+   "altos_y_estables": "Hoog en stabiel"
+  }
+ },
+ "21": {
+  "key": "horas_sueno",
+  "pergunta": "Hoeveel slaap je meestal?",
+  "opcoes": {
+   "menos_5_horas": "Minder dan 5 uur",
+   "de_5_a_6_horas": "5-6 uur",
+   "de_7_a_8_horas": "7-8 uur",
+   "mas_8_horas": "Meer dan 8 uur"
+  }
+ },
+ "22": {
+  "key": "malos_habitos",
+  "pergunta": "Heb je een van de volgende slechte gewoontes?",
+  "opcoes": {
+   "comer_por_emocion": "Eten uit emotie of verveling",
+   "comer_en_exceso": "Te veel eten",
+   "bocadillos_de_noche": "'s Avonds laat nog snacken",
+   "saltar_comidas": "Te vaak maaltijden overslaan",
+   "ninguna_de_las_anteriores": "Geen van bovenstaande"
+  }
+ },
+ "23": {
+  "key": "eventos_aumento_peso",
+  "pergunta": "Ben je de afgelopen jaren aangekomen door een van deze gebeurtenissen?",
+  "opcoes": {
+   "presion_laboral": "Werkdruk",
+   "vida_familiar_ocupada": "Druk gezinsleven",
+   "divorcio_o_ruptura": "Scheiding of relatiebreuk",
+   "metabolismo_lento": "Tragere stofwisseling door het ouder worden",
+   "menopausia": "De overgang (menopauze)",
+   "embarazo_posparto": "Veranderingen door zwangerschap of na de bevalling",
+   "desafios_financieros": "Geldzorgen",
+   "otros_eventos_estresantes": "Andere stressvolle gebeurtenissen",
+   "pandemia_covid": "De coronapandemie",
+   "ninguno_de_los_anteriores": "Geen van bovenstaande"
+  }
+ },
+ "24": {
+  "key": "razon_principal",
+  "pergunta": "Wat is je belangrijkste reden om in vorm te komen?",
+  "opcoes": {
+   "mas_confianza_cuerpo": "Me zekerder voelen over mijn lichaam",
+   "mas_saludable_energia": "Me gezonder en energieker voelen",
+   "ropa_quede_mejor": "Dat mijn kleren beter zitten",
+   "recuperar_forma_posparto": "Mijn figuur terugkrijgen na de bevalling",
+   "otra": "Iets anders"
+  }
+ },
+ "25": {
+  "key": "altura",
+  "pergunta": "Hoe lang ben je?",
+  "opcoes": {}
+ },
+ "26": {
+  "key": "peso_actual",
+  "pergunta": "Wat is je huidige gewicht?",
+  "opcoes": {}
+ },
+ "27": {
+  "key": "peso_objetivo",
+  "pergunta": "Top! En wat is je streefgewicht?",
+  "opcoes": {}
+ },
+ "28": {
+  "key": "edad",
+  "pergunta": "Hoe oud ben je?",
+  "opcoes": {}
+ },
+ "30": {
+  "key": "evento_importante",
+  "pergunta": "Staat er binnenkort iets belangrijks op de planning?",
+  "opcoes": {
+   "vacaciones": "Vakantie",
+   "boda": "Bruiloft",
+   "reunion": "Reünie",
+   "cumpleanos": "Verjaardag",
+   "dia_festivo": "Feestdagen",
+   "evento_deportivo": "Sportevenement",
+   "otro": "Iets anders",
+   "ningun_evento": "Niets op korte termijn"
+  }
+ },
+ "33": {
+  "key": "nombre",
+  "pergunta": "Hoe heet je?",
+  "opcoes": {}
+ }
+}
