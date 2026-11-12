@@ -545,7 +545,7 @@ export async function decidirResposta(params: {
               (aulas ? `${aulas}\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
               (params.hotmart ? `${params.hotmart}\n\n` : '') +
-              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília): ${prazoDaLista(params.agora) === 'hoje' ? 'HOJE (es "hoy hasta las 20h")' : 'AMANHÃ (es "mañana hasta las 20h")'}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
+              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília; NUNCA prometa outro horário): use esta frase no idioma dela: "${frasePrazo(params.perfil?.idioma ?? idiomaPeloTelefone(params.phone), prazoDaLista(params.agora))}"\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
               (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
               'Escreva a próxima mensagem para a aluna (respondendo o que ela mandou por último).',
@@ -607,7 +607,7 @@ export async function decidirResposta(params: {
   out.resposta = verificacao.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
-  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm/i.test(out.resposta)) {
+  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
     out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? idiomaPeloTelefone(params.phone), prazoDaLista(params.agora))}`
   }
 
@@ -629,13 +629,15 @@ export async function decidirResposta(params: {
 
 // Frase curta do prazo da lista das 20h, por idioma (lib/whatsapp-agent/lista-20h.ts decide hoje/amanhã).
 const PRAZO: Record<string, [string, string]> = {
+  // Europa sem hora (11/11/2026, achado da revisão da CL-NL): "20h" é de Brasília = meia-noite em Varsóvia/Roma/Praga, a
+  // promessa quebrava todo dia. Lá vale "em poucas horas" (hoje) / "em até um dia" (amanhã). Américas seguem com 20h.
   es: ['Te respondo por aquí hoy hasta las 20h.', 'Te respondo por aquí mañana hasta las 20h.'],
-  pl: ['Odpowiem Ci tutaj dziś do 20:00.', 'Odpowiem Ci tutaj jutro do 20:00.'],
-  it: ['Ti rispondo qui oggi entro le 20.', 'Ti rispondo qui domani entro le 20.'],
-  cs: ['Odpovím ti tady dnes do 20:00.', 'Odpovím ti tady zítra do 20:00.'],
-  tr: ["Bugün saat 20:00'ye kadar buradan yanıt vereceğim.", "Yarın saat 20:00'ye kadar buradan yanıt vereceğim."],
+  pl: ['Odpowiem Ci tutaj w ciągu kilku godzin.', 'Odpowiem Ci tutaj w ciągu jednego dnia.'],
+  it: ['Ti rispondo qui entro poche ore.', 'Ti rispondo qui entro un giorno.'],
+  cs: ['Odpovím ti tady během několika hodin.', 'Odpovím ti tady do jednoho dne.'],
+  tr: ['Birkaç saat içinde buradan yanıt vereceğim.', 'Bir gün içinde buradan yanıt vereceğim.'],
   en: ['I will reply here today by 8 pm.', 'I will reply here tomorrow by 8 pm.'],
-  ro: ['Îți răspund aici azi până la ora 20.', 'Îți răspund aici mâine până la ora 20.'],
+  ro: ['Îți răspund aici în câteva ore.', 'Îți răspund aici în cel mult o zi.'],
   'pt-BR': ['Te respondo por aqui hoje até as 20h.', 'Te respondo por aqui amanhã até as 20h.'],
 }
 /** Aluna sem conta: idioma pelo DDI (10/11/2026: polonesa sem conta ouviu o prazo em espanhol). */
