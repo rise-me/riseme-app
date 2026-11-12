@@ -59,7 +59,7 @@ termos de saúde, regionalismo e consistência.
 - Títulos dos bônus 3 e 5 ("3-dagen anti-opgeblazen-plan", "3D-platte-buikmethode"): o dono é o `CL-NL/NOMES.md`.
   O NOMES trocou os dois em 11/11 ~20h30, e o app já usa os títulos novos:
   - «Het Driedagenplan: Nooit Meer Opgeblazen»;
-  - «De 3D-methode voor een platte buik».
+  - «3 verborgen schakelaars voor een platte buik» (12/11, Bruno: o título passa a ser o conteúdo do PDF; era «De 3D-methode voor een platte buik»).
 - "Eindchallenge" → "De grote finale" (LEVE): ficou como está, porque "Eindchallenge" é aceitável.
 - Promessa "geen robots, alleen mensen" no bônus WhatsApp-support. É fiel à fonte PL, mas o atendimento é feito por agente de IA. **Decisão do Bruno/dono da oferta.**
 
