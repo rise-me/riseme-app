@@ -708,5 +708,54 @@
     "then": "Listo: vuelve a la app y dale play.",
     "note": "Funciona con TVs compatibles con AirPlay (Apple TV, Samsung, LG) o con Chromecast / Google TV.",
     "gotIt": "Entendido"
+  },
+  "cuidado": {
+    "tabName": "Tu cuidado",
+    "back": "Volver",
+    "doneCount": "Hiciste {done} de {total}",
+    "lessonLabel": "Clase {n}",
+    "rodillas": {
+      "name": "Rodillas",
+      "topLine": "Clases extra para cuidar tus rodillas. Hazlas cuando quieras, además de tu desafío.",
+      "cardLine": "{n, plural, one {# clase suave} other {# clases suaves}} para tus rodillas"
+    },
+    "espalda": {
+      "name": "Espalda",
+      "topLine": "Clases extra para cuidar tu espalda. Hazlas cuando quieras, además de tu desafío.",
+      "cardLine": "{n, plural, one {# clase suave} other {# clases suaves}} para tu espalda"
+    },
+    "card": {
+      "title": "Tu cuidado: {name}",
+      "progress": "Hiciste {done} de {total} clases"
+    },
+    "place": {
+      "silla": "🪑 Necesitas una silla",
+      "sofa": "🛋️ Se hace en el sofá",
+      "cama": "🛏️ Se hace en la cama"
+    },
+    "equipment": {
+      "rodillo": "¿No tienes rodillo de espuma? Usa una toalla grande bien enrollada.",
+      "tobillera": "¿No tienes peso para el tobillo? Hazlo sin peso: también sirve."
+    },
+    "towelTip": "Si apoyar las rodillas te molesta, pon una toalla doblada debajo.",
+    "question": {
+      "title": "¿Te duele alguna parte del cuerpo al hacer ejercicio?",
+      "why": "Si nos dices, te regalamos clases suaves para cuidarla.",
+      "knees": "Rodillas",
+      "back": "Espalda",
+      "both": "Las dos",
+      "no": "No"
+    },
+    "gift": {
+      "title": "Un regalo para ti",
+      "body": {
+        "rodillas": "Nos contaste que te duelen las rodillas. Por eso preparamos {n, plural, one {# clase suave} other {# clases suaves}} para cuidarlas.",
+        "espalda": "Nos contaste que te duele la espalda. Por eso preparamos {n, plural, one {# clase suave} other {# clases suaves}} para cuidarla.",
+        "both": "Nos contaste que te duelen las rodillas y la espalda. Por eso preparamos {n, plural, one {# clase suave} other {# clases suaves}} para cuidarlas."
+      },
+      "same": "Tu desafío sigue igual: esto es un extra.",
+      "cta": "Ver mis clases",
+      "later": "Ahora no"
+    }
   }
 }

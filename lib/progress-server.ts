@@ -30,7 +30,8 @@ export async function getProgressSummary(locale: string): Promise<ProgressSummar
     totalCompleted: progress.length,
     streak,
     progressByChallenge,
-    activeChallengeId: progress[0]?.challenge_id ?? null,
+    // Aula do "Tu cuidado" (challenge_id 'cuidado:…', lib/cuidado.ts) conta na sequência, mas não é desafio ativo
+    activeChallengeId: progress.find((p) => !p.challenge_id.startsWith('cuidado:'))?.challenge_id ?? null,
   }
 }
 

@@ -40,6 +40,9 @@ export interface MockDay {
   duration_minutes?: number
   video?: LessonVideo
   completed?: boolean
+  // Onde o player grava a conclusão quando NÃO é o próprio desafio/dia (aulas do "Tu cuidado": a aula é a nº N da
+  // lista, mas o progresso fica numa chave estável por aula; lib/cuidado.ts). Ausente = desafio.id + day_number.
+  progresso?: { challengeId: string; dayNumber: number }
 }
 
 // Aulas no Cloudflare Stream, por idioma → desafio → dia. GERADO por
@@ -120,6 +123,23 @@ export function fallbackAudio(challengeId: string, locale: string): string | nul
   if (hasLocalizedVideos(challengeId, locale)) return null
   const temPadrao = Object.values(HLS_LESSONS[challengeId] ?? {}).some((e) => e.languages.includes(AUDIO_PADRAO))
   return temPadrao ? AUDIO_PADRAO : 'es'
+}
+
+// Aula de um desafio SÓ no idioma pedido, sem cair em outro (o "Tu cuidado" mostra a aula apenas quando ela existe na
+// língua da aluna; lib/cuidado.ts). Ordem igual à do getMockDays: R2 > Stream > YouTube (o YouTube é o espanhol).
+export function videoNoIdioma(
+  challengeId: string,
+  day: number,
+  locale: string
+): { video: LessonVideo; seconds?: number } | null {
+  const lang = audioLang(locale)
+  const hls = hlsFor(challengeId, day, lang)
+  if (hls) return { video: { provider: 'hls', id: `${hls.path}/master_${lang}.m3u8` }, seconds: hls.seconds }
+  const stream = STREAM_LESSONS[locale]?.[challengeId]?.[String(day)]
+  if (stream) return { video: { provider: 'stream', id: stream.uid }, seconds: stream.seconds ?? undefined }
+  const youtubeId = VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId]?.[day - 1] ?? (lang === 'es' ? VIDEOS_BY_CHALLENGE[challengeId]?.[day - 1] : undefined)
+  if (youtubeId) return { video: { provider: 'youtube', id: youtubeId }, seconds: VIDEO_DURATIONS_SECONDS[youtubeId] }
+  return null
 }
 
 export function getMockDays(challengeId: string, dayTitles: string[], locale?: string): MockDay[] {

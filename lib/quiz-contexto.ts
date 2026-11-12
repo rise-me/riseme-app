@@ -75,6 +75,19 @@ export function resumirQuiz(q: { funil: string; respostas: Record<string, string
   return `O QUE ELA RESPONDEU NO QUIZ antes de comprar${q.em ? ` (${q.em.slice(0, 10)})` : ''} — é quem ela é e o que quer; use para entender e personalizar, sem recitar de volta nem dizer "você respondeu no quiz" (só cite se ajudar na resposta):\n- ${linhas.join('\n- ')}`
 }
 
+/**
+ * Opções marcadas numa pergunta do quiz, achada pela CHAVE (ex.: 'problemas_fisicos'), não pelo nº da tela: cada funil
+ * numera do seu jeito. null = o funil não tem mapa, não tem essa pergunta ou ela ficou sem resposta.
+ */
+export function respostaDoQuiz(q: { funil: string; respostas: Record<string, string> }, chave: string): string[] | null {
+  const mapa = MAPAS[q.funil]
+  if (!mapa) return null
+  const tela = Object.keys(mapa).find((t) => mapa[t].key === chave)
+  const resp = tela ? q.respostas[tela] : undefined
+  if (!resp) return null
+  return String(resp).split(',').map((s) => s.trim()).filter(Boolean)
+}
+
 /** Guarda sck e/ou respostas em user_metadata (sem migração; o perfil já lê o metadata). */
 export async function guardarQuizNaConta(db: SupabaseClient, userId: string, dados: { sck?: string; quiz?: QuizGuardado }, atual?: Record<string, unknown>): Promise<void> {
   const meta = atual ?? ((await db.auth.admin.getUserById(userId)).data.user?.user_metadata ?? {})

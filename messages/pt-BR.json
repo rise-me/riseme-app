@@ -679,5 +679,54 @@
     "then": "Pronto: volte pro app e dê play.",
     "note": "Funciona em TVs com AirPlay (Apple TV, Samsung, LG) ou com Chromecast / Google TV.",
     "gotIt": "Entendi"
+  },
+  "cuidado": {
+    "tabName": "Seu cuidado",
+    "back": "Voltar",
+    "doneCount": "Você fez {done} de {total}",
+    "lessonLabel": "Aula {n}",
+    "rodillas": {
+      "name": "Joelhos",
+      "topLine": "Aulas extras para cuidar dos seus joelhos. Faça quando quiser, além do seu desafio.",
+      "cardLine": "{n, plural, one {# aula leve} other {# aulas leves}} para os seus joelhos"
+    },
+    "espalda": {
+      "name": "Costas",
+      "topLine": "Aulas extras para cuidar das suas costas. Faça quando quiser, além do seu desafio.",
+      "cardLine": "{n, plural, one {# aula leve} other {# aulas leves}} para as suas costas"
+    },
+    "card": {
+      "title": "Seu cuidado: {name}",
+      "progress": "Você fez {done} de {total} aulas"
+    },
+    "place": {
+      "silla": "🪑 Você precisa de uma cadeira",
+      "sofa": "🛋️ É feita no sofá",
+      "cama": "🛏️ É feita na cama"
+    },
+    "equipment": {
+      "rodillo": "Não tem rolo de espuma? Use uma toalha grande bem enrolada.",
+      "tobillera": "Não tem caneleira com peso? Faça sem peso: também funciona."
+    },
+    "towelTip": "Se apoiar os joelhos incomodar, coloque uma toalha dobrada embaixo.",
+    "question": {
+      "title": "Alguma parte do seu corpo dói quando você se exercita?",
+      "why": "Se você contar, a gente te dá aulas leves de presente para cuidar dela.",
+      "knees": "Joelhos",
+      "back": "Costas",
+      "both": "Os dois",
+      "no": "Não"
+    },
+    "gift": {
+      "title": "Um presente para você",
+      "body": {
+        "rodillas": "Você contou que seus joelhos doem. Por isso preparamos {n, plural, one {# aula leve} other {# aulas leves}} para cuidar deles.",
+        "espalda": "Você contou que suas costas doem. Por isso preparamos {n, plural, one {# aula leve} other {# aulas leves}} para cuidar delas.",
+        "both": "Você contou que seus joelhos e suas costas doem. Por isso preparamos {n, plural, one {# aula leve} other {# aulas leves}} para cuidar deles."
+      },
+      "same": "Seu desafio continua igual: isto é um extra.",
+      "cta": "Ver minhas aulas",
+      "later": "Agora não"
+    }
   }
 }

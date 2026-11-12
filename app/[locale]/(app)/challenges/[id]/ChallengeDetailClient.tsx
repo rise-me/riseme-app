@@ -11,14 +11,17 @@ import { PaywallModal } from '@/components/subscription/PaywallModal'
 import { CastTvHelp } from '@/components/challenges/CastTvHelp'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { track } from '@/lib/posthog/track'
+import { CuidadoNoDesafio } from '@/components/challenges/CuidadoNoDesafio'
+import type { EstadoCuidado } from '@/lib/cuidado-server'
 
 interface Props {
   challenge: MockChallenge
   days: MockDay[]
   locale: string
+  cuidado?: EstadoCuidado
 }
 
-export function ChallengeDetailClient({ challenge, days, locale }: Props) {
+export function ChallengeDetailClient({ challenge, days, locale, cuidado }: Props) {
   const router = useRouter()
   const t = useTranslations('challenges')
   const audioFallback = fallbackAudio(challenge.id, locale)
@@ -128,6 +131,9 @@ export function ChallengeDetailClient({ challenge, days, locale }: Props) {
             </button>
           )}
         </div>
+
+        {/* Presente "Tu cuidado" (joelho/costas), só em desafio que ela tem */}
+        {!isLocked && cuidado && <CuidadoNoDesafio estado={cuidado} locale={locale} />}
 
         <div className="px-4 pt-4 pb-2">
           <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">

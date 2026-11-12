@@ -20,6 +20,9 @@ interface Props {
   locale: string
   hasPase: boolean
   hlsPath?: string | null
+  // Aulas fora de um desafio ("Tu cuidado", lib/cuidado.ts): rota própria e nenhuma oferta do Pase no meio.
+  basePath?: string
+  semOferta?: boolean
 }
 
 // O que o poll de progresso precisa, igual pros dois provedores
@@ -231,7 +234,10 @@ function loadYouTubeAPI(): Promise<void> {
   return apiLoadingPromise
 }
 
-export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase, hlsPath }: Props) {
+export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase: temPase, hlsPath, basePath, semOferta }: Props) {
+  // Sem oferta = como quem já tem o Pase: nenhuma das 3 ofertas abre.
+  const hasPase = temPase || semOferta === true
+  const base = basePath ?? `/${locale}/challenges/${challenge.id}`
   const router = useRouter()
   const t = useTranslations('challenges')
   const tTv = useTranslations('castTv')
@@ -356,8 +362,8 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
           setDayDone(true)
           const watchedPct = Math.round((t / d) * 100)
           markDayComplete({
-            challengeId: challenge.id,
-            dayNumber: currentDayNumber,
+            challengeId: currentDay.progresso?.challengeId ?? challenge.id,
+            dayNumber: currentDay.progresso?.dayNumber ?? currentDayNumber,
             watchedPct,
           })
             .then(({ error }) => {
@@ -412,7 +418,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
 
   function navigate(day: MockDay | undefined) {
     if (!day) return
-    leave(() => router.push(`/${locale}/challenges/${challenge.id}/player/${day.day_number}`))
+    leave(() => router.push(`${base}/player/${day.day_number}`))
   }
 
   const SEGMENTS = 20
@@ -481,7 +487,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
           <Tv size={18} className="text-white" />
         </button>
         <button
-          onClick={() => leave(() => router.push(`/${locale}/challenges/${challenge.id}`))}
+          onClick={() => leave(() => router.push(base))}
           className="absolute top-12 right-4 z-20 w-9 h-9 rounded-full bg-black/60 backdrop-blur flex items-center justify-center"
         >
           <X size={18} className="text-white" />

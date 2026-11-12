@@ -68,7 +68,8 @@ export default async function ProgressPage({
   for (const p of progress) {
     progressByChallenge.set(p.challenge_id, (progressByChallenge.get(p.challenge_id) ?? 0) + 1)
   }
-  const activeChallengeId = progress[0]?.challenge_id
+  // Aula do "Tu cuidado" (challenge_id 'cuidado:…', lib/cuidado.ts) conta na sequência, mas não é desafio ativo
+  const activeChallengeId = progress.find((p) => !p.challenge_id.startsWith('cuidado:'))?.challenge_id
   const activeChallenge = activeChallengeId
     ? mockChallenges.find((c) => c.id === activeChallengeId)
     : undefined

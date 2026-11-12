@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { getProgressForChallenge } from '@/lib/progress-server'
 import { getUserAccess, canAccessChallenge } from '@/lib/user-access-server'
+import { estadoCuidado } from '@/lib/cuidado-server'
 import { ChallengeDetailClient } from './ChallengeDetailClient'
 
 export default async function ChallengeDetailPage({
@@ -44,5 +45,7 @@ export default async function ChallengeDetailPage({
     current_day: completedCount > 0 ? completedCount : undefined,
   }
 
-  return <ChallengeDetailClient challenge={challenge} days={days} locale={locale} />
+  const cuidado = unlocked ? await estadoCuidado(access, locale) : undefined
+
+  return <ChallengeDetailClient challenge={challenge} days={days} locale={locale} cuidado={cuidado} />
 }

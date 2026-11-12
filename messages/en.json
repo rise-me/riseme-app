@@ -679,5 +679,54 @@
     "then": "Done: come back to the app and press play.",
     "note": "Works with AirPlay-compatible TVs (Apple TV, Samsung, LG) or Chromecast / Google TV.",
     "gotIt": "Got it"
+  },
+  "cuidado": {
+    "tabName": "Your care",
+    "back": "Back",
+    "doneCount": "You did {done} of {total}",
+    "lessonLabel": "Class {n}",
+    "rodillas": {
+      "name": "Knees",
+      "topLine": "Extra classes to care for your knees. Do them whenever you like, on top of your challenge.",
+      "cardLine": "{n, plural, one {# gentle class} other {# gentle classes}} for your knees"
+    },
+    "espalda": {
+      "name": "Back",
+      "topLine": "Extra classes to care for your back. Do them whenever you like, on top of your challenge.",
+      "cardLine": "{n, plural, one {# gentle class} other {# gentle classes}} for your back"
+    },
+    "card": {
+      "title": "Your care: {name}",
+      "progress": "You did {done} of {total} classes"
+    },
+    "place": {
+      "silla": "🪑 You need a chair",
+      "sofa": "🛋️ Done on the sofa",
+      "cama": "🛏️ Done in bed"
+    },
+    "equipment": {
+      "rodillo": "No foam roller? Use a large towel, tightly rolled.",
+      "tobillera": "No ankle weight? Do it without weight: it still works."
+    },
+    "towelTip": "If kneeling bothers you, put a folded towel under your knees.",
+    "question": {
+      "title": "Does any part of your body hurt when you exercise?",
+      "why": "Tell us and we'll give you gentle classes to care for it.",
+      "knees": "Knees",
+      "back": "Back",
+      "both": "Both",
+      "no": "No"
+    },
+    "gift": {
+      "title": "A gift for you",
+      "body": {
+        "rodillas": "You told us your knees hurt. So we prepared {n, plural, one {# gentle class} other {# gentle classes}} to care for them.",
+        "espalda": "You told us your back hurts. So we prepared {n, plural, one {# gentle class} other {# gentle classes}} to care for it.",
+        "both": "You told us your knees and back hurt. So we prepared {n, plural, one {# gentle class} other {# gentle classes}} to care for them."
+      },
+      "same": "Your challenge stays the same: this is an extra.",
+      "cta": "See my classes",
+      "later": "Not now"
+    }
   }
 }

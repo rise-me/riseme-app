@@ -105,6 +105,11 @@ Completo** (7 dias, todos os desafios).
 - Ideia: uma metodologia ou trilha que encadeie os desafios (ex.: Calistenia → Pilates en la Pared → Cuerpo Sexy) para que se complementem e gerem mais resultado; o bot passaria a sugerir o próximo desafio no dia certo (liga com o fluxo 5, n1).
 - Nada construído; registrado para quando o fluxo de venda entrar.
 
+## Vender os equipamentos que aparecem nas aulas (ideia do Bruno 11/11/2026, não iniciado)
+- Origem: as aulas de "Tu cuidado" (Joelhos/Costas) usam halteres, bola suíça e elástico em 8 de 19 aulas lidas; a aula ganha uma linha de alternativa para quem não tem ("¿Sin pesas? Usa 2 botellas de agua"). Bruno: "pode ser que a pessoa tenha. Isso abre imagem no futuro para nós podermos vender os equipamentos também."
+- Ponto de partida natural: a própria linha de alternativa vira o lugar de oferta ("¿Quieres la banda que usa la instructora?"). Nada decidido sobre como vender (afiliado/físico/kit).
+- Ver `docs/plano-personalizado.md`.
+
 ## Outros pendentes já conhecidos
 - Tela de assinatura mostra "Starter" para quem cancelou mas ainda está no período pago
   (consulta só `status='active'` em `more/subscription`).

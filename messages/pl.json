@@ -716,5 +716,54 @@
     "then": "Gotowe: wróć do aplikacji i naciśnij play.",
     "note": "Działa z telewizorami obsługującymi AirPlay (Apple TV, Samsung, LG) albo Chromecast / Google TV.",
     "gotIt": "Rozumiem"
+  },
+  "cuidado": {
+    "tabName": "Troska o siebie",
+    "back": "Wróć",
+    "doneCount": "Zrobiłaś {done} z {total}",
+    "lessonLabel": "Lekcja {n}",
+    "rodillas": {
+      "name": "Kolana",
+      "topLine": "Dodatkowe lekcje, dzięki którym zadbasz o swoje kolana. Rób je, kiedy chcesz – to dodatek do Twojego wyzwania.",
+      "cardLine": "{n, plural, one {# łagodna lekcja} few {# łagodne lekcje} many {# łagodnych lekcji} other {# łagodnej lekcji}} dla Twoich kolan"
+    },
+    "espalda": {
+      "name": "Plecy",
+      "topLine": "Dodatkowe lekcje, dzięki którym zadbasz o swoje plecy. Rób je, kiedy chcesz – to dodatek do Twojego wyzwania.",
+      "cardLine": "{n, plural, one {# łagodna lekcja} few {# łagodne lekcje} many {# łagodnych lekcji} other {# łagodnej lekcji}} dla Twoich pleców"
+    },
+    "card": {
+      "title": "Troska o siebie: {name}",
+      "progress": "Zrobiłaś {done} z {total} lekcji"
+    },
+    "place": {
+      "silla": "🪑 Potrzebujesz krzesła",
+      "sofa": "🛋️ Ćwiczysz na kanapie",
+      "cama": "🛏️ Ćwiczysz w łóżku"
+    },
+    "equipment": {
+      "rodillo": "Nie masz wałka do masażu? Użyj dużego, ciasno zwiniętego ręcznika.",
+      "tobillera": "Nie masz obciążnika na kostkę? Ćwicz bez niego – tak też jest dobrze."
+    },
+    "towelTip": "Jeśli klęczenie jest dla Ciebie niewygodne, podłóż pod kolana złożony ręcznik.",
+    "question": {
+      "title": "Czy coś Cię boli podczas ćwiczeń?",
+      "why": "Jeśli nam powiesz, podarujemy Ci łagodne lekcje dla tej części ciała.",
+      "knees": "Kolana",
+      "back": "Plecy",
+      "both": "Kolana i plecy",
+      "no": "Nie"
+    },
+    "gift": {
+      "title": "Prezent dla Ciebie",
+      "body": {
+        "rodillas": "Powiedziałaś nam, że bolą Cię kolana. Dlatego przygotowaliśmy {n, plural, one {# łagodną lekcję} few {# łagodne lekcje} many {# łagodnych lekcji} other {# łagodnej lekcji}}, żeby o nie zadbać.",
+        "espalda": "Powiedziałaś nam, że bolą Cię plecy. Dlatego przygotowaliśmy {n, plural, one {# łagodną lekcję} few {# łagodne lekcje} many {# łagodnych lekcji} other {# łagodnej lekcji}}, żeby o nie zadbać.",
+        "both": "Powiedziałaś nam, że bolą Cię kolana i plecy. Dlatego przygotowaliśmy {n, plural, one {# łagodną lekcję} few {# łagodne lekcje} many {# łagodnych lekcji} other {# łagodnej lekcji}}, żeby o nie zadbać."
+      },
+      "same": "Twoje wyzwanie się nie zmienia: to dodatek.",
+      "cta": "Zobacz moje lekcje",
+      "later": "Nie teraz"
+    }
   }
 }
