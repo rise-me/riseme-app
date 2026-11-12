@@ -4,6 +4,7 @@
 // As compras ficam em auth user_metadata.compras (gravadas pelos webhooks; backfill do dash em 05/11); o resto é lido na hora.
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
+import { cuidadoDaAluna, CUIDADO_IDIOMAS } from '@/lib/cuidado'
 
 export interface CompraGuardada {
   plataforma: 'hotmart' | 'perfectpay' | 'stripe'
@@ -19,6 +20,27 @@ export interface CompraGuardada {
 const NOME: Record<string, string> = {
   ...Object.fromEntries(mockChallenges.map((c) => [c.id, challengeNameEs(c.id) ?? c.id])),
   'protocolo-metabolico': 'Protocolo Metabólico',
+  // Aulas do "Tu cuidado" (presente p/ dor de joelho/costas, 12/11/2026): progresso gravado como cuidado:<n>
+  'cuidado:11': 'Tu cuidado · Espalda', 'cuidado:12': 'Tu cuidado · Alivio', 'cuidado:13': 'Tu cuidado · Menisco',
+  'cuidado:14': 'Tu cuidado · Osteoartritis', 'cuidado:15': 'Tu cuidado · Sofá', 'cuidado:16': 'Tu cuidado · Cama',
+  'cuidado:4': 'Tu cuidado · Yoga', 'cuidado:17': 'Tu cuidado · Yoga',
+}
+
+/**
+ * "Tu cuidado" no cartão (Bruno 12/11/2026: o bot conhece a aba e aponta o cartão quando ela fala de dor no joelho/costas
+ * ou de "es muy fuerte"). Só com a aba LIGADA (CUIDADO_ATIVO=1, a mesma chave do app) e idioma com aulas (es/pl).
+ */
+function linhaCuidado(meta: Record<string, unknown>, comprou: boolean): string | null {
+  if (process.env.CUIDADO_ATIVO !== '1' || !comprou) return null
+  const locale = String(meta.locale ?? meta.idioma ?? 'es').split('-')[0]
+  if (!CUIDADO_IDIOMAS.includes(locale)) return null
+  const nome = locale === 'pl' ? '"Troska o siebie"' : '"Tu cuidado"'
+  const c = cuidadoDaAluna(meta)
+  const como = `Se ela falar de dor no joelho ou nas costas, ou que o treino "es muy fuerte", além de responder a dúvida aponte o cartão 🎁 ${nome} no app: abre o desafio dela, logo abaixo do botão "Continuar"; aulas suaves (cadeira, sofá, cama), na ordem que quiser, contam na sequência; quem não tem rolo usa toalha enrolada, sem peso de tornozelo faz sem peso. Ali mesmo, "Cambiar dónde me duele" acrescenta ou tira joelho/costas.`
+  if (!c) return `TU CUIDADO (presente para dor, aba ${nome}): ela AINDA NÃO respondeu se tem dor. ${como} Se ela tem dor, diga para responder a pergunta "¿Te duele alguna parte del cuerpo al hacer ejercicio?" dentro do desafio no app, que a aba aparece.`
+  const tem = [c.rodillas && 'rodillas (12 aulas)', c.espalda && 'espalda (6 aulas)'].filter(Boolean).join(' e ')
+  if (!tem) return `TU CUIDADO: ela respondeu que NÃO tem dor (${c.origem}). Se agora disser que tem: pode mudar em "Cambiar dónde me duele", dentro do desafio, e a aba ${nome} aparece. ${como}`
+  return `TU CUIDADO: ela TEM a aba ${nome} liberada para ${tem} (marcou no ${c.origem}). ${como}`
 }
 
 /** Acrescenta uma compra ao metadata (sem duplicar pela transação; guarda as 12 mais recentes). */
@@ -40,6 +62,8 @@ const data = (iso?: string | null) => (iso ? iso.slice(0, 10) : '?')
 export async function cartaoDaAluna(db: SupabaseClient, p: { userId: string; user?: User | null; variantes: string[] }): Promise<string> {
   const linhas: string[] = []
   const meta = (p.user?.user_metadata ?? {}) as Record<string, unknown>
+  const cuidado = linhaCuidado(meta, Array.isArray(meta.compras) && meta.compras.length > 0)
+  if (cuidado) linhas.push(cuidado)
   if (meta.manter_acesso) linhas.push('ACESSO MANTIDO por decisão da equipe, mesmo com reembolso (gentileza, 08/11/2026): o acesso dela NÃO será retirado. Se ela perguntar, confirme que fica; nunca diga que será revisado.')
   const compras = (meta.compras as CompraGuardada[] | undefined) ?? []
   if (compras.length) {
