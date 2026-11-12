@@ -46,6 +46,30 @@ const TEXTO: Record<string, Texto> = {
     extratoTitulo: 'Jak zakup wygląda na wyciągu',
     extrato: 'Na wyciągu bankowym zakup widnieje jako RISEME.',
   },
+  // CL-NL (Stripe, 19 €): iDEAL (quando ligado), Bancontact e cartão/Apple Pay/Google Pay.
+  nl: {
+    titulo: 'Terugbetaling',
+    intro: 'Wil je om welke reden dan ook je geld terug? Dan regelen we dat snel en zonder lastige vragen.',
+    comoTitulo: 'Zo vraag je je geld terug',
+    comoWhats: 'Stuur ons een WhatsApp-bericht dat je je geld terug wilt. Meer hoeft niet.',
+    botaoWhats: 'Stuur een WhatsApp-bericht',
+    msgWhats: 'Hoi! Ik wil graag mijn geld terug.',
+    comoApp: 'Of in de app: Meer → Terugbetaling.',
+    botaoApp: 'Openen in de app',
+    depoisTitulo: 'Wat er daarna gebeurt',
+    depois: [
+      'We zetten de terugbetaling meteen in gang zodra je erom vraagt.',
+      'Zodra de terugbetaling is afgerond, sturen we je een bevestiging via WhatsApp.',
+      'Je hoeft niets met je bank te regelen — wij doen alles aan onze kant.',
+    ],
+    quandoTitulo: 'Wanneer je het geld terugkrijgt',
+    quando: [
+      'iDEAL of Bancontact: het geld gaat terug naar de bankrekening waarmee je hebt betaald. Meestal duurt dat een paar werkdagen, afhankelijk van je bank.',
+      'Kaart (ook Apple Pay en Google Pay): het geld gaat terug naar je kaart, meestal binnen 5–10 werkdagen, afhankelijk van je bank.',
+    ],
+    extratoTitulo: 'Zo staat de aankoop op je afschrift',
+    extrato: 'Op je bankafschrift (in België: rekeninguittreksel) staat de betaling als RISEME.',
+  },
   en: {
     titulo: 'Refunds',
     intro: 'If for any reason you want your money back, we will do it quickly and with no unnecessary questions.',

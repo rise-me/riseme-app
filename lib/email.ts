@@ -83,6 +83,18 @@ const COPY: Record<AppLocale, Copy> = {
     changeNote: "Più avanti, se vuoi, potrai cambiarla con una tua password direttamente nell'app.",
     footer: 'Se non sei stata tu a fare questo acquisto, ignora questo messaggio.',
   },
+  nl: {
+    subject: 'Welkom bij RiseMe! Hier zijn je inloggegevens 💛',
+    preview: 'Hierin vind je je e-mailadres en wachtwoord om in te loggen.',
+    greeting: 'Welkom bij RiseMe! 💛',
+    intro: 'Je account staat klaar. Dit zijn je inloggegevens:',
+    emailLabel: 'E-mail',
+    passwordLabel: 'Wachtwoord',
+    keepNote: 'Bewaar dit wachtwoord goed: je hebt het elke keer nodig als je inlogt.',
+    cta: 'Naar de app',
+    changeNote: 'Wil je later een eigen wachtwoord? Dat stel je in de app zelf in.',
+    footer: 'Heb jij deze aankoop niet gedaan? Dan kun je dit bericht negeren.',
+  },
   'pt-BR': {
     subject: 'Você está dentro! Seu acesso ao RiseMe 💛',
     preview: 'Seu email e sua senha de acesso estão aqui.',

@@ -290,7 +290,9 @@
     "csLabel": "Čeština",
     "csRegion": "Çekya",
     "itLabel": "Italiano",
-    "itRegion": "İtalya"
+    "itRegion": "İtalya",
+    "nlLabel": "Nederlands",
+    "nlRegion": "Hollanda ve Belçika"
   },
   "help": {
     "title": "Yardım",

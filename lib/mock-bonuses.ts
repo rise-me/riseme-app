@@ -24,17 +24,20 @@ export interface MockBonus {
   access?: 'bonus' | 'purchase' // default: 'bonus'
 }
 
+// nl (CL-NL, 11/11/2026): contagens PROVISÓRIAS = pl (os PDFs nl saem do pl, VSL-fonte da oferta). O bloco de bônus
+// fecha o número real com scripts/publish-material.py, que tem de rodar ANTES do deploy: sem as páginas no bucket, a
+// aba Extras em /nl abre o material com imagens quebradas. Protocolo (upsell) fica sem nl: a CL-NL vende só o front.
 export const mockBonuses: MockBonus[] = [
   // ES de propósito NÃO tem linha-suporte: a Central de Ajuda já leva ao WhatsApp
   // (decisão Bruno 2026-07-14). rastreador-progresso ES entra quando o PDF chegar.
-  { id: 'linha-suporte', emoji: '💬', pages: { tr: 3, pl: 3, cs: 3, it: 3 } },
-  { id: 'falsos-saudaveis', emoji: '🎭', pages: { tr: 7, es: 7, pl: 7, cs: 7, it: 7 } },
-  { id: 'anti-inchaco', emoji: '💧', pages: { tr: 11, es: 11, pl: 11, cs: 11, it: 11 } },
-  { id: 'vinagre-maca', emoji: '🍎', pages: { tr: 7, es: 9, pl: 7, cs: 7, it: 7 } },
-  { id: 'tres-botoes', emoji: '🔑', pages: { tr: 8, es: 8, pl: 8, cs: 8, it: 8 } },
-  { id: 'frutas-inocentes', emoji: '🍇', pages: { tr: 6, es: 6, pl: 6, cs: 6, it: 6 } },
-  { id: 'depois-28-dias', emoji: '🎯', pages: { tr: 7, es: 7, pl: 7, cs: 7, it: 7 } },
-  { id: 'rastreador-progresso', emoji: '📊', pages: { tr: 7, pl: 7, cs: 7, it: 7 } },
+  { id: 'linha-suporte', emoji: '💬', pages: { tr: 3, pl: 3, cs: 3, it: 3, nl: 3 } },
+  { id: 'falsos-saudaveis', emoji: '🎭', pages: { tr: 7, es: 7, pl: 7, cs: 7, it: 7, nl: 7 } },
+  { id: 'anti-inchaco', emoji: '💧', pages: { tr: 11, es: 11, pl: 11, cs: 11, it: 11, nl: 11 } },
+  { id: 'vinagre-maca', emoji: '🍎', pages: { tr: 7, es: 9, pl: 7, cs: 7, it: 7, nl: 7 } },
+  { id: 'tres-botoes', emoji: '🔑', pages: { tr: 8, es: 8, pl: 8, cs: 8, it: 8, nl: 8 } },
+  { id: 'frutas-inocentes', emoji: '🍇', pages: { tr: 6, es: 6, pl: 6, cs: 6, it: 6, nl: 6 } },
+  { id: 'depois-28-dias', emoji: '🎯', pages: { tr: 7, es: 7, pl: 7, cs: 7, it: 7, nl: 7 } },
+  { id: 'rastreador-progresso', emoji: '📊', pages: { tr: 7, pl: 7, cs: 7, it: 7, nl: 7 } },
   // Upsell vendido na Perfect Pay (ebook do sistema de chás de 28 dias)
   { id: 'protocolo-metabolico', emoji: '🍵', access: 'purchase', pages: { tr: 31, es: 31, pl: 31, cs: 31, it: 31 } },
 ]

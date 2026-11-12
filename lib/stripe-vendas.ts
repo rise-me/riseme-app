@@ -74,6 +74,7 @@ export const urlPaginaReembolso = (locale: string) => `${APP_URL()}${locale === 
 // Linha no fim do e-mail de acesso: como pedir reembolso (Bruno 09/11: tem que ficar claro para ela, caso deseje).
 const NOTA_EMAIL: Record<string, (url: string) => string> = {
   pl: (url) => `Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, napisz do nas na WhatsAppie albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
+  nl: (url) => `IJzersterke garantie: wil je om welke reden dan ook je geld terug? Stuur ons een WhatsApp-bericht of ga naar ${url}. We zetten de terugbetaling meteen in gang, zonder lastige vragen.`,
   en: (url) => `Guarantee: if for any reason you want your money back, message us on WhatsApp or go to ${url}. We start the refund right away, no questions asked.`,
 }
 
@@ -84,6 +85,12 @@ const CONFIRMA_REEMBOLSO: Record<string, (p: { nome: string | null; valor: strin
     `Gotowe${nome ? `, ${nome.split(' ')[0]}` : ''}. Zwrot ${valor} został zrealizowany. Nie musisz nic więcej robić.`,
     'Pieniądze wracają tą samą drogą, którą płaciłaś: jeśli BLIK-iem, na Twoje konto bankowe, a jeśli kartą, na kartę. Dokładny termin zależy od banku.',
     textoPresente('pl'),
+  ].join('\n\n'),
+  // O fecho (presente do acesso) vem do bot: sem PRESENTE.nl em lib/whatsapp-agent/reembolsos.ts, sai o inglês (pedir ao dono do bot).
+  nl: ({ nome, valor }) => [
+    `Klaar${nome ? `, ${nome.split(' ')[0]}` : ''}. Je terugbetaling van ${valor} is afgerond. Je hoeft verder niets te doen.`,
+    'Het geld gaat terug via dezelfde betaalmethode die je hebt gebruikt: bij iDEAL of Bancontact naar je bankrekening, bij een kaart naar je kaart. Hoe snel dat precies gaat, hangt af van je bank.',
+    textoPresente('nl'),
   ].join('\n\n'),
   en: ({ nome, valor }) => [
     `Done${nome ? `, ${nome.split(' ')[0]}` : ''}. Your refund of ${valor} has been completed. Nothing else to do on your side.`,

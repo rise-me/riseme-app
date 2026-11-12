@@ -290,7 +290,9 @@
     "csLabel": "Čeština",
     "csRegion": "Česko",
     "itLabel": "Italiano",
-    "itRegion": "Itálie"
+    "itRegion": "Itálie",
+    "nlLabel": "Nederlands",
+    "nlRegion": "Nizozemsko a Belgie"
   },
   "help": {
     "title": "Nápověda",

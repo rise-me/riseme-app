@@ -290,7 +290,9 @@
     "csLabel": "Čeština",
     "csRegion": "Tchéquia",
     "itLabel": "Italiano",
-    "itRegion": "Itália"
+    "itRegion": "Itália",
+    "nlLabel": "Nederlands",
+    "nlRegion": "Países Baixos e Bélgica"
   },
   "help": {
     "title": "Ajuda",

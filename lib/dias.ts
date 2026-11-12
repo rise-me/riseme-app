@@ -12,6 +12,7 @@ const FUSO_DO_IDIOMA: Record<string, string> = {
   pl: 'Europe/Warsaw',
   cs: 'Europe/Prague',
   it: 'Europe/Rome',
+  nl: 'Europe/Amsterdam',
   tr: 'Europe/Istanbul',
   'pt-BR': 'America/Sao_Paulo',
   en: 'America/New_York',

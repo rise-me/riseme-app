@@ -20,6 +20,9 @@ const COUNTRY_TO_DDI: Record<string, string> = {
   CZ: '420', SK: '421', DE: '49', AT: '43', GB: '44', IE: '353',
   // CL-IT (Hotmart, euro): Italia + Svizzera e San Marino (italofone vicine).
   IT: '39', CH: '41', SM: '378',
+  // CL-NL (Stripe, euro): Nederland + België (Vlaanderen) + Suriname, Curaçao/Bonaire e Aruba. A diáspora da tela 4
+  // (DE/ES/GB/US) já está acima. Com Apple/Google Pay o telefone pode vir sem +DDI: sem isto o WhatsApp não sai.
+  NL: '31', BE: '32', SR: '597', CW: '599', BQ: '599', AW: '297',
 }
 
 // Locales de país ÚNICO → DDI (fallback quando o payload não traz `country`).
@@ -29,6 +32,7 @@ const LOCALE_TO_DDI: Record<string, string> = {
   pl: '48',
   cs: '420',
   it: '39',
+  nl: '31', // CL-NL: a maioria das compradoras é da Holanda (BE/SR/CW/AW chegam com o país no payload)
   'pt-BR': '55',
 }
 

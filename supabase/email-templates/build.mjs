@@ -38,6 +38,10 @@ const COMMON = {
     fallback: "Se il pulsante non funziona, copia questo link e incollalo nel browser:",
     signoff: 'Con affetto,<br />Il team RiseMe',
   },
+  nl: {
+    fallback: 'Werkt de knop niet? Kopieer deze link en plak hem in je browser:',
+    signoff: 'Liefs,<br />Het RiseMe-team',
+  },
 }
 
 const NEW_EMAIL = '<strong style="color:#171717;">{{ .NewEmail }}</strong>'
@@ -81,6 +85,13 @@ const TEXT = {
       button: 'Imposta la mia password',
       note: 'Hai dubbi? Rispondi a questa e-mail e ti aiutiamo.',
     },
+    nl: {
+      title: 'Welkom bij RiseMe',
+      h1: 'Welkom bij RiseMe!',
+      body: 'Je aankoop is bevestigd en je account staat klaar. Nog één stap: stel je wachtwoord in om de app te openen.',
+      button: 'Mijn wachtwoord instellen',
+      note: 'Heb je vragen? Beantwoord deze e-mail, dan helpen we je.',
+    },
   },
   recovery: {
     type: 'recovery',
@@ -118,6 +129,13 @@ const TEXT = {
       body: 'Abbiamo ricevuto una richiesta per reimpostare la tua password. Clicca sul pulsante qui sotto per crearne una nuova.',
       button: 'Reimposta la password',
       note: 'Se non sei stata tu a fare questa richiesta, puoi ignorare questa e-mail. La tua password attuale continuerà a funzionare.',
+    },
+    nl: {
+      title: 'Herstel je wachtwoord',
+      h1: 'Herstel je wachtwoord',
+      body: 'We hebben een verzoek ontvangen om je wachtwoord opnieuw in te stellen. Klik op de knop hieronder om een nieuw wachtwoord te maken.',
+      button: 'Wachtwoord opnieuw instellen',
+      note: 'Heb jij dit niet aangevraagd? Dan kun je deze e-mail negeren. Je huidige wachtwoord blijft gewoon werken.',
     },
   },
   confirmation: {
@@ -157,6 +175,13 @@ const TEXT = {
       button: 'Conferma il mio account',
       note: 'Se non hai creato tu questo account, puoi ignorare questa e-mail.',
     },
+    nl: {
+      title: 'Bevestig je account',
+      h1: 'Bevestig je account',
+      body: 'Welkom bij RiseMe! Bevestig je e-mailadres met de knop hieronder en begin aan je eerste challenge.',
+      button: 'Mijn account bevestigen',
+      note: 'Heb je dit account niet aangemaakt? Dan kun je deze e-mail negeren.',
+    },
   },
   'email-change': {
     type: 'email_change',
@@ -195,6 +220,13 @@ const TEXT = {
       body: `Hai chiesto di cambiare l'e-mail del tuo account in ${NEW_EMAIL}. Conferma la modifica cliccando sul pulsante qui sotto.`,
       button: 'Conferma il nuovo indirizzo',
       note: 'Se non sei stata tu a chiedere questa modifica, ignora questa e-mail e valuta di cambiare la password.',
+    },
+    nl: {
+      title: 'Bevestig je nieuwe e-mailadres',
+      h1: 'Bevestig je nieuwe e-mailadres',
+      body: `Je hebt gevraagd om het e-mailadres van je account te wijzigen in ${NEW_EMAIL}. Bevestig deze wijziging met de knop hieronder.`,
+      button: 'Nieuw e-mailadres bevestigen',
+      note: 'Heb jij dit niet aangevraagd? Negeer dan deze e-mail en overweeg je wachtwoord te wijzigen.',
     },
   },
 }
@@ -292,6 +324,9 @@ ${body}
 const EMOJI_ASSUNTO = { invite: ' 💛', recovery: ' 🙌', confirmation: ' 🖤', 'email-change': ' ✨' }
 
 const dir = dirname(fileURLToPath(import.meta.url))
+// Gera os 4 corpos SEMPRE e lista TODOS os assuntos que estouram no fim (antes parava no 1º): com o nl (6º idioma,
+// 11/11/2026) recovery, confirmation e email-change passam de 255 — a saída para isso é decisão do Bruno.
+const estouros = []
 for (const [name, spec] of Object.entries(TEXT)) {
   for (const l of Object.keys(COMMON)) {
     if (!spec[l]) throw new Error(`${name}: falta o texto em '${l}'`)
@@ -302,6 +337,11 @@ for (const [name, spec] of Object.entries(TEXT)) {
   // por idioma quando precisar, e as tags sem espaço interno ({{if …}} vale igual a {{ if … }}).
   const subject = byLocale((l) => spec[l].subject ?? spec[l].title).replace(/\n/g, '').replace(/\{\{ /g, '{{').replace(/ \}\}/g, '}}')
   const assunto = `{{$l := or .Data.locale "${DEFAULT_LOCALE}"}}${subject}${EMOJI_ASSUNTO[name] ?? ''}`
-  if ([...assunto].length > 255) throw new Error(`${name}: assunto com ${[...assunto].length} caracteres (> 255 do Supabase)`)
-  console.log(`ok ${name}.html\n   assunto: ${assunto}`)
+  const tamanho = [...assunto].length
+  if (tamanho > 255) estouros.push(`${name}: assunto com ${tamanho} caracteres (> 255 do Supabase)`)
+  console.log(`${tamanho > 255 ? 'ESTOURA' : 'ok'} ${name}.html (${tamanho}/255)\n   assunto: ${assunto}`)
+}
+if (estouros.length) {
+  console.error(`\n${estouros.length} assunto(s) passam do limite do Supabase — NÃO colar esses assuntos:\n  ${estouros.join('\n  ')}`)
+  process.exitCode = 1
 }
