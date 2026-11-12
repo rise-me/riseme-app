@@ -122,7 +122,8 @@ export function cuidadoDaAluna(meta: Record<string, unknown> | null | undefined)
  * admin (prévia em produção). Presente de quem COMPROU: Pase ou qualquer desafio (canAccessBonuses).
  */
 export function cuidadoLigado(opts: { admin: boolean; comprou: boolean; locale: string }): boolean {
-  if (!opts.comprou) return false
+  // Admin vê mesmo sem compra (contas de teste da equipe não têm desafio comprado)
+  if (!opts.comprou && !opts.admin) return false
   if (!CUIDADO_IDIOMAS.includes(opts.locale.split('-')[0])) return false
   return process.env.CUIDADO_ATIVO === '1' || opts.admin
 }
