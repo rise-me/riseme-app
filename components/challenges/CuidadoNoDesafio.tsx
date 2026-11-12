@@ -16,6 +16,8 @@ export function CuidadoNoDesafio({ estado, locale }: { estado: EstadoCuidado; lo
   const router = useRouter()
   const t = useTranslations('cuidado')
   const [respondida, setRespondida] = useState(false)
+  // Mudar a resposta depois (Bruno 12/11: marcou Rodillas e não tinha como acrescentar a Espalda)
+  const [editando, setEditando] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [avisoAberto, setAvisoAberto] = useState(
     Boolean(estado.cuidado && !estado.cuidado.avisado && estado.tipos.length > 0)
@@ -35,6 +37,7 @@ export function CuidadoNoDesafio({ estado, locale }: { estado: EstadoCuidado; lo
     // Respondeu agora e marcou algo: o aviso do presente abre já, então nasce "avisado" (não repete).
     await gravar({ rodillas, espalda, origem: 'pergunta', avisado: rodillas || espalda })
     setRespondida(true)
+    setEditando(false)
     router.refresh()
     setSalvando(false)
     if (rodillas || espalda) setAvisoAberto(true)
@@ -49,8 +52,8 @@ export function CuidadoNoDesafio({ estado, locale }: { estado: EstadoCuidado; lo
     if (ir) router.push(`/${locale}/cuidado/${ir}`)
   }
 
-  // Pergunta (sem resposta no app nem no quiz)
-  if (!estado.cuidado && !respondida) {
+  // Pergunta (sem resposta no app nem no quiz, ou ela pediu para mudar)
+  if ((!estado.cuidado && !respondida) || editando) {
     const opcoes: { rotulo: string; rodillas: boolean; espalda: boolean }[] = [
       { rotulo: t('question.knees'), rodillas: true, espalda: false },
       { rotulo: t('question.back'), rodillas: false, espalda: true },
@@ -73,6 +76,11 @@ export function CuidadoNoDesafio({ estado, locale }: { estado: EstadoCuidado; lo
             </button>
           ))}
         </div>
+        {editando && (
+          <button onClick={() => setEditando(false)} className="w-full py-1 text-muted-foreground text-sm font-semibold">
+            {t('question.cancel')}
+          </button>
+        )}
       </div>
     )
   }
@@ -100,6 +108,13 @@ export function CuidadoNoDesafio({ estado, locale }: { estado: EstadoCuidado; lo
           <ChevronRight size={20} className="text-muted-foreground flex-shrink-0" />
         </button>
       ))}
+
+      <button
+        onClick={() => setEditando(true)}
+        className="mx-4 mt-2 w-[calc(100%-2rem)] py-1 text-left text-xs text-muted-foreground font-semibold underline underline-offset-2"
+      >
+        {tipos.length > 0 ? t('question.change') : t('question.changeNo')}
+      </button>
 
       {avisoAberto && tipos.length > 0 && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-6">

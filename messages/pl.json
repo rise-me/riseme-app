@@ -752,7 +752,10 @@
       "knees": "Kolana",
       "back": "Plecy",
       "both": "Kolana i plecy",
-      "no": "Nie"
+      "no": "Nie",
+      "change": "Zmień, co Cię boli",
+      "changeNo": "Coś Cię boli podczas ćwiczeń? Powiedz nam",
+      "cancel": "Anuluj"
     },
     "gift": {
       "title": "Prezent dla Ciebie",

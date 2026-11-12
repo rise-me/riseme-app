@@ -744,7 +744,10 @@
       "knees": "Rodillas",
       "back": "Espalda",
       "both": "Las dos",
-      "no": "No"
+      "no": "No",
+      "change": "Cambiar dónde me duele",
+      "changeNo": "¿Te duele algo al hacer ejercicio? Cuéntanos",
+      "cancel": "Cancelar"
     },
     "gift": {
       "title": "Un regalo para ti",

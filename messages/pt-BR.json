@@ -715,7 +715,10 @@
       "knees": "Joelhos",
       "back": "Costas",
       "both": "Os dois",
-      "no": "Não"
+      "no": "Não",
+      "change": "Mudar onde dói",
+      "changeNo": "Algo dói quando você se exercita? Conte pra gente",
+      "cancel": "Cancelar"
     },
     "gift": {
       "title": "Um presente para você",

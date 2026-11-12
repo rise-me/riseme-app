@@ -752,7 +752,10 @@
       "knees": "Knees",
       "back": "Back",
       "both": "Both",
-      "no": "No"
+      "no": "No",
+      "change": "Change where it hurts",
+      "changeNo": "Does something hurt when you exercise? Tell us",
+      "cancel": "Cancel"
     },
     "gift": {
       "title": "A gift for you",
