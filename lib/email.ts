@@ -238,3 +238,77 @@ export async function estadoEmail(id: string): Promise<'entregue' | 'falhou' | '
   if (ev === 'bounced' || ev === 'complained' || ev === 'failed' || ev === 'canceled') return 'falhou'
   return 'aguardando'
 }
+
+// ── Aviso de produto extra (upsell/downsell, ex.: Protokół) para quem já tem conta. Texto do dono do bot, aprovado pelo
+// Bruno 13/11/2026; mesmo conteúdo do aviso no WhatsApp. Mesmo visual do e-mail de acesso. Sem texto no idioma = não envia.
+type CopyExtra = { assunto: (nome?: string | null) => string; preview: string; ola: (nome?: string | null) => string; corpo: (valor?: string | null) => string; passos: (home: string) => string[]; cta: string; ajuda: (wa: string) => string; assinatura: string }
+const COPY_EXTRA: Record<string, Record<string, CopyExtra>> = {
+  'protocolo-metabolico': {
+    pl: {
+      // Assunto nas palavras do Bruno (13/11): nome só se for nome de verdade (ver primeiroNome em stripe-vendas).
+      assunto: (nome) => (nome ? `${nome}, dostęp do Protokołu jest już w Twojej aplikacji RiseMe 🖤🎉` : 'Dostęp do Protokołu jest już w Twojej aplikacji RiseMe 🖤🎉'),
+      preview: 'Wchodzisz tak samo jak zawsze, tym samym e-mailem i hasłem.',
+      ola: (nome) => (nome ? `Gotowe, ${nome}! 💛` : 'Gotowe! 💛'),
+      corpo: (valor) => `Twój Protokół Metaboliczny 28 Dni${valor ? ` (${valor})` : ''} jest już w aplikacji.`,
+      passos: (home) => [`Otwórz aplikację: ${home}`, 'Na dole ekranu kliknij „Dodatki”', 'Tam znajdziesz „Protokół metaboliczny”'],
+      cta: 'Otwórz aplikację',
+      ajuda: (wa) => `Masz pytanie? Odpisz na tę wiadomość albo napisz do nas na WhatsAppie: ${wa}`,
+      assinatura: 'Zespół RiseMe 💛',
+    },
+  },
+}
+
+export function emailProdutoExtra(p: { produto: string; locale: string; nome?: string | null; valor?: string | null; home: string; whatsapp: string }): { assunto: string; html: string; text: string } | null {
+  const c = COPY_EXTRA[p.produto]?.[p.locale]
+  if (!c) return null
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const link = (s: string) => esc(s).replace(/(https:\/\/[^\s<]+)/g, '<a href="$1" style="color:#1a1a1a;">$1</a>')
+  const passos = c.passos(p.home)
+  const html = `<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f1ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a;">
+  <span style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(c.preview)}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.06);">
+        <tr><td style="background:#1a1a1a;padding:28px 32px;">
+          <div style="color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">RiseMe</div>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <h1 style="margin:0 0 8px;font-size:22px;font-weight:800;line-height:1.25;">${esc(c.ola(p.nome))}</h1>
+          <p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#555;">${esc(c.corpo(p.valor))}</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;border-radius:16px;">
+            ${passos.map((s, i) => `<tr><td style="padding:${i ? '0' : '16px'} 18px 12px;font-size:15px;line-height:1.5;"><b>${i + 1}.</b> ${link(s)}</td></tr>`).join('')}
+          </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;">
+            <tr><td align="center">
+              <a href="${p.home}" style="display:block;background:#1a1a1a;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px;border-radius:16px;text-align:center;">${esc(c.cta)}</a>
+            </td></tr>
+          </table>
+          <p style="margin:24px 0 0;font-size:13px;line-height:1.5;color:#777;">${link(c.ajuda(p.whatsapp))}</p>
+          <p style="margin:16px 0 0;font-size:14px;font-weight:600;">${esc(c.assinatura)}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+  const text = [c.ola(p.nome), '', c.corpo(p.valor), '', ...passos.map((s, i) => `${i + 1}. ${s}`), '', `${c.cta}: ${p.home}`, '', c.ajuda(p.whatsapp), '', c.assinatura].join('\n')
+  return { assunto: c.assunto(p.nome), html, text }
+}
+
+/** Envia o aviso de produto extra por e-mail (Resend). null = sem texto no idioma ou sem chave. */
+export async function sendEmailProdutoExtra(p: { email: string; produto: string; locale: string; nome?: string | null; valor?: string | null; home: string; whatsapp: string }): Promise<ResultadoEmail | null> {
+  const msg = emailProdutoExtra(p)
+  const apiKey = process.env.RESEND_API_KEY
+  if (!msg || !apiKey) return null
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ from: process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>', to: [p.email], subject: msg.assunto, html: msg.html, text: msg.text }),
+  }).catch(() => null)
+  if (!res?.ok) return { ok: false, erro: `Resend ${res?.status ?? 'sem resposta'}` }
+  const json = (await res.json().catch(() => ({}))) as { id?: string }
+  return { ok: true, id: json.id ?? null }
+}

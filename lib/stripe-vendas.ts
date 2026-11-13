@@ -15,7 +15,7 @@ import { createServiceClient } from '@/lib/admin-server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { sendWhatsAppAccess, mensagensDeAcesso, avisarProdutoExtra } from '@/lib/whatsapp-access'
 import { enfileirar } from '@/lib/whatsapp-outbox'
-import { sendAccessEmail, estadoEmail } from '@/lib/email'
+import { sendAccessEmail, estadoEmail, sendEmailProdutoExtra } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
 import { registrarMensagem } from '@/lib/whatsapp-agent/conversa'
@@ -113,6 +113,24 @@ export function desafioDaSessao(s: Pick<Stripe.Checkout.Session, 'payment_link' 
   return null
 }
 
+// ── Nome pra saudação: só nome de verdade (Bruno 13/11: "{imię}", "undefined" ou o e-mail nunca podem sair) ─────────
+/** 1º nome com a 1ª maiúscula, ou null se não parecer nome (vazio, inicial, número, e-mail). */
+export function primeiroNome(bruto: string | null | undefined): string | null {
+  const p = String(bruto ?? '').trim().split(/\s+/)[0] ?? ''
+  if (p.length < 2 || !/^[\p{L}'-]+$/u.test(p) || /^(undefined|null|imi[eę])$/i.test(p)) return null
+  return p.split('-').map((x) => x.charAt(0).toLocaleUpperCase('pl') + x.slice(1).toLocaleLowerCase('pl')).join('-')
+}
+
+/** Nome digitado no quiz (tela 33, ligado à conta) ou o da Stripe, já validado. */
+async function nomeDaAluna(db: Db, userId: string | null, daStripe: string | null): Promise<string | null> {
+  if (userId) {
+    const meta = ((await db.auth.admin.getUserById(userId)).data.user?.user_metadata ?? {}) as { quiz?: { respostas?: Record<string, string> }; name?: string }
+    const doQuiz = primeiroNome(meta.quiz?.respostas?.['33']) ?? primeiroNome(meta.name)
+    if (doQuiz) return doQuiz
+  }
+  return primeiroNome(daStripe)
+}
+
 // ── Aviso ao responsável (WhatsApp) ─────────────────────────────────────────────────────────────────────────────
 export async function avisarResponsavel(texto: string): Promise<boolean> {
   const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
@@ -207,10 +225,12 @@ async function entregar(db: Db, v: Venda): Promise<void> {
       await db.from('stripe_vendas').update({ user_id: userId, conta_nova: false, wa_ok: true, email_ok: true, wa_erro: nota, email_erro: nota, updated_at: agora() }).eq('session_id', v.session_id)
       // Aviso curto "o Protocolo já está na aba Dodatki" (texto, horário, trava de 1 por venda e opt-out = dono do bot;
       // texto aprovado pelo Bruno 13/11). Valor sem centavos, como ela viu na página.
-      if (v.phone) {
-        const valor = v.valor_centavos == null ? null : `${Math.round(v.valor_centavos / 100)} ${(v.moeda ?? '').toLowerCase() === 'pln' ? 'zł' : (v.moeda ?? '').toUpperCase()}`
-        await avisarProdutoExtra({ phone: v.phone, produto: v.challenge_id, locale: v.locale, venda: v.session_id, nome: v.nome, valor }).catch(() => null)
-      }
+      const valor = v.valor_centavos == null ? null : `${Math.round(v.valor_centavos / 100)} ${(v.moeda ?? '').toLowerCase() === 'pln' ? 'zł' : (v.moeda ?? '').toUpperCase()}`
+      const nome = await nomeDaAluna(db, userId, v.nome)
+      if (v.phone) await avisarProdutoExtra({ phone: v.phone, produto: v.challenge_id, locale: v.locale, venda: v.session_id, nome, valor }).catch(() => null)
+      // Mesmo aviso por e-mail (Bruno 13/11), 1 por venda (este ramo só roda na 1ª entrega da sessão).
+      // Bruno 13/11: o e-mail sai SEM nome em lugar nenhum (assunto e saudação).
+      await sendEmailProdutoExtra({ email: v.email, produto: v.challenge_id, locale: v.locale, nome: null, valor, home: `${APP_URL()}/${v.locale}`, whatsapp: 'https://wa.me/riseme' }).catch(() => null)
     } else if (existente?.length) {
       // Já tinha conta (ex.: comprou antes por outra plataforma): senha nova, para ela receber um acesso que funciona.
       // Se outra venda Stripe dela ainda está em entrega (compra repetida), reaproveita a MESMA senha: senão o 1º

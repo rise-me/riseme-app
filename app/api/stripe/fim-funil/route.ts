@@ -38,12 +38,14 @@ export async function POST(request: NextRequest) {
     if (i) await new Promise((r) => setTimeout(r, 2000))
     venda = (await db.from('stripe_vendas').select('wa_outbox_id').eq('session_id', sessao).maybeSingle()).data
   }
+  let resultado = venda?.wa_outbox_id ? 'ja-tinha-saido' : 'nao-achou'
   if (venda?.wa_outbox_id) {
     // Idempotente: só puxa pra AGORA o que ainda não saiu e estava marcado pra depois. Nunca cria mensagem.
     const agora = new Date()
     const depois = new Date(agora.getTime() + 45_000) // 'apoio' 45 s depois do acesso, como na sequência normal
-    await db.from('whatsapp_outbox').update({ send_after: agora.toISOString() })
-      .eq('id', venda.wa_outbox_id).eq('kind', 'acesso').is('sent_at', null).gt('send_after', agora.toISOString())
+    const { data: puxou } = await db.from('whatsapp_outbox').update({ send_after: agora.toISOString() })
+      .eq('id', venda.wa_outbox_id).eq('kind', 'acesso').is('sent_at', null).gt('send_after', agora.toISOString()).select('id')
+    if (puxou?.length) resultado = 'puxou'
     await db.from('whatsapp_outbox').update({ send_after: depois.toISOString() })
       .eq('depends_on', venda.wa_outbox_id).eq('kind', 'apoio').is('sent_at', null).gt('send_after', depois.toISOString())
     // Aviso do produto extra (Protokół; kind 'aviso-extra:<sessão do upsell>', do dono do bot) nasceu preso ao horário
@@ -52,6 +54,8 @@ export async function POST(request: NextRequest) {
     await db.from('whatsapp_outbox').update({ send_after: aviso.toISOString() })
       .eq('depends_on', venda.wa_outbox_id).like('kind', 'aviso-extra:%').is('sent_at', null).gt('send_after', aviso.toISOString())
   }
+  // Rastro por chamada nos logs da Vercel (pedido do chat do funil 13/11): separa "não chegou ao obrigado" de "beacon falhou".
+  console.log(`[fim-funil] ${sessao} → ${resultado}`)
   // Não devolve dado nenhum (o beacon nem lê a resposta).
   return new NextResponse(null, { status: 204, headers: cabecalhos })
 }
