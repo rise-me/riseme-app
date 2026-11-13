@@ -594,7 +594,18 @@ export async function avisarProdutoExtra(p: {
   const kind = `aviso-extra:${p.venda}`.slice(0, 120)
   if ((await jaEnfileirou(phone, kind)) || (await pediuParaParar(phone))) return null
   const n = p.nome?.trim().split(/\s+/)[0] || undefined
-  return enfileirar({ phone, kind, body: texto(n, p.valor ?? undefined, `https://riseme.app/${p.locale}`), sendAfter: new Date(Date.now() + 5 * 60_000) })
+  // O acesso do desafio (com a senha) sai 15 min depois da compra do front, por causa da VSL do upsell ([Alunas Stripe]).
+  // Se ele ainda está na fila, o aviso espera por ele: "mesmo e-mail e senha" nunca pode chegar antes da senha.
+  let sendAfter = new Date(Date.now() + 5 * 60_000)
+  let dependsOn: number | undefined
+  const { admin } = await import('@/lib/whatsapp-agent/conversa')
+  const { data: acesso } = await admin().from('whatsapp_outbox').select('id, send_after').eq('phone', phone).eq('kind', 'acesso').is('sent_at', null).order('send_after', { ascending: false }).limit(1)
+  if (acesso?.[0]) {
+    dependsOn = acesso[0].id as number
+    const depois = new Date(new Date(acesso[0].send_after as string).getTime() + 3 * 60_000)
+    if (depois > sendAfter) sendAfter = depois
+  }
+  return enfileirar({ phone, kind, body: texto(n, p.valor ?? undefined, `https://riseme.app/${p.locale}`), sendAfter, dependsOn })
 }
 
 /** Texto do aviso (prévia ao Bruno, testes). */
