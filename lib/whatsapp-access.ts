@@ -593,9 +593,7 @@ export async function avisarProdutoExtra(p: {
   const { jaEnfileirou, pediuParaParar } = await import('@/lib/whatsapp-outbox')
   const kind = `aviso-extra:${p.venda}`.slice(0, 120)
   if ((await jaEnfileirou(phone, kind)) || (await pediuParaParar(phone))) return null
-  // Nome só se for nome de verdade (Bruno 13/11: tag quebrada fica esquisita): 1ª palavra, só letras, 2+ letras, sem @.
-  const bruto = p.nome?.trim().split(/\s+/)[0] ?? ''
-  const n = /^[\p{L}][\p{L}'-]+$/u.test(bruto) ? bruto[0].toLocaleUpperCase('pl') + bruto.slice(1).toLocaleLowerCase('pl') : undefined
+  // Sem nome (Bruno 13/11: 'para não ter problema e minimizar erros').
   // O acesso do desafio (com a senha) sai 15 min depois da compra do front, por causa da VSL do upsell ([Alunas Stripe]).
   // Se ele ainda está na fila, o aviso espera por ele: "mesmo e-mail e senha" nunca pode chegar antes da senha.
   let sendAfter = new Date(Date.now() + 5 * 60_000)
@@ -607,7 +605,7 @@ export async function avisarProdutoExtra(p: {
     const depois = new Date(new Date(acesso[0].send_after as string).getTime() + 3 * 60_000)
     if (depois > sendAfter) sendAfter = depois
   }
-  return enfileirar({ phone, kind, body: texto(n, p.valor ?? undefined, `https://riseme.app/${p.locale}`), sendAfter, dependsOn })
+  return enfileirar({ phone, kind, body: texto(undefined, p.valor ?? undefined, `https://riseme.app/${p.locale}`), sendAfter, dependsOn })
 }
 
 /** Texto do aviso (prévia ao Bruno, testes). */
