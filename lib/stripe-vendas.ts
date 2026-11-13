@@ -13,7 +13,7 @@ import 'server-only'
 import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/admin-server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
-import { sendWhatsAppAccess, mensagensDeAcesso } from '@/lib/whatsapp-access'
+import { sendWhatsAppAccess, mensagensDeAcesso, avisarProdutoExtra } from '@/lib/whatsapp-access'
 import { enfileirar } from '@/lib/whatsapp-outbox'
 import { sendAccessEmail, estadoEmail } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
@@ -205,6 +205,12 @@ async function entregar(db: Db, v: Venda): Promise<void> {
       codigo = null
       const nota = 'compra adicional: acesso já entregue na compra principal'
       await db.from('stripe_vendas').update({ user_id: userId, conta_nova: false, wa_ok: true, email_ok: true, wa_erro: nota, email_erro: nota, updated_at: agora() }).eq('session_id', v.session_id)
+      // Aviso curto "o Protocolo já está na aba Dodatki" (texto, horário, trava de 1 por venda e opt-out = dono do bot;
+      // texto aprovado pelo Bruno 13/11). Valor sem centavos, como ela viu na página.
+      if (v.phone) {
+        const valor = v.valor_centavos == null ? null : `${Math.round(v.valor_centavos / 100)} ${(v.moeda ?? '').toLowerCase() === 'pln' ? 'zł' : (v.moeda ?? '').toUpperCase()}`
+        await avisarProdutoExtra({ phone: v.phone, produto: v.challenge_id, locale: v.locale, venda: v.session_id, nome: v.nome, valor }).catch(() => null)
+      }
     } else if (existente?.length) {
       // Já tinha conta (ex.: comprou antes por outra plataforma): senha nova, para ela receber um acesso que funciona.
       // Se outra venda Stripe dela ainda está em entrega (compra repetida), reaproveita a MESMA senha: senão o 1º
