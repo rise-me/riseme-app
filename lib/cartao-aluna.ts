@@ -59,6 +59,13 @@ const data = (iso?: string | null) => (iso ? iso.slice(0, 10) : '?')
  * Texto do cartão para o perfil do agente. Variantes do telefone (com/sem 9, LID) vêm de quem chama.
  * Nunca lança: o que falhar fica de fora.
  */
+// Ofertas da Stripe (metadata.oferta do link) com nome legível para o bot: upsell PL de 13/11/2026 ([Alunas Stripe]).
+const NOME_STRIPE: Record<string, string> = {
+  'CL-PL': 'Kalistenika (desafio)',
+  'CL-PL-UP1': 'Protokół Metaboliczny 28 Dni (upsell, 97 zł)',
+  'CL-PL-DS1': 'Protokół Metaboliczny 28 Dni (downsell, 47 zł)',
+}
+
 export async function cartaoDaAluna(db: SupabaseClient, p: { userId: string; user?: User | null; variantes: string[] }): Promise<string> {
   const linhas: string[] = []
   const meta = (p.user?.user_metadata ?? {}) as Record<string, unknown>
@@ -69,7 +76,7 @@ export async function cartaoDaAluna(db: SupabaseClient, p: { userId: string; use
   if (compras.length) {
     linhas.push('Compras (o que ela pagou, de onde):')
     for (const c of compras.slice(0, 6)) {
-      linhas.push(`- ${data(c.em)} (há ${dias(c.em)} dias) · ${c.produto}${c.oferta ? ` [oferta ${c.oferta}]` : ''} · ${c.valor != null ? `${c.valor} ${c.moeda ?? ''}` : 'valor ?'} · ${c.plataforma === 'hotmart' ? 'Hotmart' : c.plataforma === 'stripe' ? 'Stripe' : 'Perfect Pay'}${c.pais ? ` · país ${c.pais}` : ''} · ${c.transacao}`)
+      linhas.push(`- ${data(c.em)} (há ${dias(c.em)} dias) · ${NOME_STRIPE[c.produto] ?? c.produto}${c.oferta ? ` [oferta ${c.oferta}]` : ''} · ${c.valor != null ? `${c.valor} ${c.moeda ?? ''}` : 'valor ?'} · ${c.plataforma === 'hotmart' ? 'Hotmart' : c.plataforma === 'stripe' ? 'Stripe' : 'Perfect Pay'}${c.pais ? ` · país ${c.pais}` : ''} · ${c.transacao}`)
     }
   }
   try {

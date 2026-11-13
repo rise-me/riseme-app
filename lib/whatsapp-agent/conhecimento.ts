@@ -60,7 +60,7 @@ só é assunto de dinheiro se for cobrança real.
   oferta do "Protokół Metaboliczny 28 Dni" (97 zł, com o bônus "Protokół Energii i Witalności"; se recusar, a mesma oferta
   sai por 47 zł, sem o bônus). É um PAGAMENTO SEPARADO que ELA fez (novo BLIK ou cartão), não cobrança em dobro: no extrato
   aparecem 2 cobranças RISEME. Se ela estranhar 2 cobranças, explique isso com calma e diga o que cada uma liberou; no
-  cartão as compras da Stripe mostram o produto/oferta e o valor (97 zł pode ser o desafio no teste de preço OU o
+  cartão as compras da Stripe mostram o nome do produto ("Kalistenika (desafio)" ou "Protokół Metaboliczny 28 Dni"; ofertas CL-PL / CL-PL-UP1 / CL-PL-DS1) e o valor (97 zł pode ser o desafio no teste de preço OU o
   Protokół: olhe o produto/oferta, não só o valor). O Protokół entra no app como produto próprio, na mesma conta. Se ela
   não quis o Protokół e pede de volta → regra COMPRA DA STRIPE (só aquele pagamento).
 
