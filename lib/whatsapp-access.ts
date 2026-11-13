@@ -559,3 +559,45 @@ const ABERTURA_REENVIO: Record<string, string> = {
 export function aberturaReenvio(locale: string): string {
   return ABERTURA_REENVIO[locale] ?? ABERTURA_REENVIO.es
 }
+
+// ── Aviso de produto extra (upsell/downsell de quem JÁ tem conta) ─────────────────────────────────────────────────
+// Bruno 13/11/2026: quem compra o Protokół no upsell do CL-PL não recebia nada (o produto só aparece na aba "Dodatki").
+// Uma mensagem só, ~5 min depois do pagamento (ela já saiu do funil), dizendo o que comprou, que o login é o mesmo e o
+// caminho exato no app. Quem chama: a rota da Stripe ([Alunas Stripe]) quando entra a compra extra. 1 vez por venda.
+const AVISO_EXTRA: Partial<Record<string, Record<string, (n: string | undefined, valor: string | undefined, homeUrl: string) => string>>> = {
+  'protocolo-metabolico': {
+    pl: (n, valor, home) => `Gotowe${n ? `, ${n}` : ''}! 💛 Twój *Protokół Metaboliczny 28 Dni*${valor ? ` (${valor})` : ''} jest już w aplikacji.
+
+📲 Wchodzisz tak samo jak zawsze, *tym samym e-mailem i hasłem*. Nie ma nowego hasła.
+
+👉 Otwórz aplikację: ${home}
+👉 Na dole ekranu kliknij *„Dodatki"*
+👉 Tam znajdziesz *„Protokół metaboliczny"*
+
+Masz pytanie? Napisz tutaj 💛`,
+  },
+}
+
+export async function avisarProdutoExtra(p: {
+  phone: string
+  produto: string // id do produto no app, ex.: 'protocolo-metabolico'
+  locale: string
+  venda: string // id da venda (ex.: sessão da Stripe) — trava de 1 aviso por compra
+  nome?: string | null
+  valor?: string | null // como ela vê no extrato, ex.: '97 zł'
+}): Promise<number | null> {
+  const texto = AVISO_EXTRA[p.produto]?.[p.locale]
+  if (!texto || !isZapiConfigured()) return null
+  const phone = toZapiPhone(p.phone)
+  if (!phone) return null
+  const { jaEnfileirou, pediuParaParar } = await import('@/lib/whatsapp-outbox')
+  const kind = `aviso-extra:${p.venda}`.slice(0, 120)
+  if ((await jaEnfileirou(phone, kind)) || (await pediuParaParar(phone))) return null
+  const n = p.nome?.trim().split(/\s+/)[0] || undefined
+  return enfileirar({ phone, kind, body: texto(n, p.valor ?? undefined, `https://riseme.app/${p.locale}`), sendAfter: new Date(Date.now() + 5 * 60_000) })
+}
+
+/** Texto do aviso (prévia ao Bruno, testes). */
+export function textoAvisoProdutoExtra(produto: string, locale: string, nome?: string, valor?: string): string | null {
+  return AVISO_EXTRA[produto]?.[locale]?.(nome, valor, `https://riseme.app/${locale}`) ?? null
+}
