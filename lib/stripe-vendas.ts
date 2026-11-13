@@ -24,6 +24,10 @@ import { registrarCompraNaConta } from '@/lib/cartao-aluna'
 import { textoPresente } from '@/lib/whatsapp-agent/reembolsos'
 import { stripe, stripeConfigurada, reembolsarStripe } from '@/lib/stripe-api'
 import { buscarRespostasQuiz, guardarQuizNaConta } from '@/lib/quiz-contexto'
+import { mockBonuses } from '@/lib/mock-bonuses'
+
+// Produto vendido à parte (upsell/downsell, ex.: Protocolo Metabólico): libera na aba Extras de quem já tem conta.
+const COMPRA_ADICIONAL = new Set(mockBonuses.filter((b) => b.access === 'purchase').map((b) => b.id))
 
 const APP_URL = () => (process.env.NEXT_PUBLIC_APP_URL ?? 'https://riseme.app').replace(/\/$/, '')
 const MAX_WA = 2 // envios de WhatsApp por venda (o 1º + 1 reenvio); cada envio tem 5 tentativas na fila
@@ -194,7 +198,14 @@ async function entregar(db: Db, v: Venda): Promise<void> {
     codigo = generateAccessCode()
     const { data: existente } = await db.from('users').select('id, phone').eq('email', v.email).limit(1)
     let contaNova = false
-    if (existente?.length) {
+    if (existente?.length && COMPRA_ADICIONAL.has(v.challenge_id)) {
+      // Upsell/downsell de quem já tem conta (acabou de comprar o front): só libera o produto. Sem senha nova e sem
+      // mensagem de boas-vindas de novo: o acesso dela já foi entregue (ou está saindo) pela compra principal.
+      userId = existente[0].id as string
+      codigo = null
+      const nota = 'compra adicional: acesso já entregue na compra principal'
+      await db.from('stripe_vendas').update({ user_id: userId, conta_nova: false, wa_ok: true, email_ok: true, wa_erro: nota, email_erro: nota, updated_at: agora() }).eq('session_id', v.session_id)
+    } else if (existente?.length) {
       // Já tinha conta (ex.: comprou antes por outra plataforma): senha nova, para ela receber um acesso que funciona.
       // Se outra venda Stripe dela ainda está em entrega (compra repetida), reaproveita a MESMA senha: senão o 1º
       // WhatsApp, ainda na fila, chegaria com uma senha que já não vale.

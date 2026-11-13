@@ -16,6 +16,8 @@ type Texto = TextosBotao & {
   whats: string
   msgWhats: string
   saibaMais: string
+  /** Nome do que foi comprado (quando há mais de uma compra, ela escolhe qual devolver). Chave = id do desafio/produto. */
+  produto: Record<string, string>
 }
 
 const TEXTO: Record<string, Texto> = {
@@ -40,6 +42,7 @@ const TEXTO: Record<string, Texto> = {
     whats: 'Napisz na WhatsAppie',
     msgWhats: 'Cześć! Chcę zwrot pieniędzy.',
     saibaMais: 'Jak działa zwrot',
+    produto: { 'protocolo-metabolico': 'Protokół Metaboliczny 28 Dni', padrao: 'Wyzwanie Kalisteniki' },
   },
   en: {
     titulo: 'Refund',
@@ -62,6 +65,7 @@ const TEXTO: Record<string, Texto> = {
     whats: 'Message us on WhatsApp',
     msgWhats: 'Hi! I would like a refund.',
     saibaMais: 'How refunds work',
+    produto: { 'protocolo-metabolico': '28-Day Metabolic Protocol', padrao: 'Calisthenics Challenge' },
   },
 }
 
@@ -99,6 +103,7 @@ export default async function RefundInAppPage({ params }: { params: Promise<{ lo
           const data = new Date(v.criadaEm).toLocaleDateString(locale)
           return (
             <div key={v.sessionId} className="space-y-3 rounded-2xl border border-border bg-card p-4">
+              <p className="text-[15px] font-semibold">{t.produto[v.challengeId] ?? t.produto.padrao}</p>
               <p className="text-sm text-muted-foreground">{t.compra.replace('{data}', data)} · {valor}</p>
               {v.reembolsoStatus ? (
                 <p className="text-[15px] font-medium">{t.status[v.reembolsoStatus] ?? t.status.pending}</p>

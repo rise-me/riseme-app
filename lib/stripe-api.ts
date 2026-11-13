@@ -96,10 +96,11 @@ export async function vendasStripeDaConta(userId: string): Promise<{
   moeda: string | null
   criadaEm: string
   reembolsoStatus: string | null
+  challengeId: string
 }[]> {
   const { data } = await createServiceClient()
     .from('stripe_vendas')
-    .select('session_id, payment_intent, valor_centavos, moeda, created_at, reembolso_status')
+    .select('session_id, payment_intent, valor_centavos, moeda, created_at, reembolso_status, challenge_id')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
   return (data ?? []).map((v) => ({
@@ -109,5 +110,6 @@ export async function vendasStripeDaConta(userId: string): Promise<{
     moeda: (v.moeda as string | null) ?? null,
     criadaEm: v.created_at as string,
     reembolsoStatus: (v.reembolso_status as string | null) ?? null,
+    challengeId: v.challenge_id as string,
   }))
 }
