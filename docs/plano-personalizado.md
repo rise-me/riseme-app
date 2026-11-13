@@ -92,12 +92,18 @@ Só aulas que servem INTEIRAS (sem corte), em ordem de progressão. **APROVADA p
 3. Uma aula pode ter mais de uma versão no mesmo dia (ex.: `1/5` normal e `1/5-rodillas`)? Qual formato você sugere no `hls-lessons.json`?
 4. O que trava a cadência de 1–2 desafios por semana no Pase hoje?
 
-## ESTADO 12/11 noite: aba NO AR desligada para alunas (só admin vê); Bruno aprovou as telas ('pode seguir assim, depois se precisar de ajuste a gente faz')
+## LIGADO PARA AS ALUNAS 12/11 ~21h48 BRT
+- 18 aulas no R2 (Subidor, commits 4bf6e88 + 6d228ea), conferidas tocando: es (12 R2 + 4 ioga YouTube) e pl (18 R2), todas respondendo. `CUIDADO_ATIVO=1` gravado na Vercel Production + redeploy (riseme.app). O bot liga junto (d0d7eb4).
+- **Base do teste (medida 12/11):** contas criadas 01–28/10 com quiz guardado, dia 7 em até 14 dias: COM dor 9,8% (16/164; joelho 10,5%, costas 16,7%, as duas 4,4%) × SEM dor 7,3% (12/164). Fez o dia 1: 40% × 39%. Meta do teste: 1,5× = ≥ 14,7% nas contas novas com dor, a partir de 13/11; n pequeno, ler em 26/11 (14 dias) com as contas de 13/11 em diante que já tiverem 14 dias.
+- Trechos que os revisores pediram pra ouvir no vídeo (Subidor 12/11): sofá 15·5 "Revolved head of the knee" (fala diz "alarga el costado izquierdo"); osteo 14·2 "Rotations" (ambíguo como o original); cama 16·12 "Side-lying thoracic rotation" (ela está de costas). Corrigir só se alguém reclamar.
+
+## ESTADO 12/11 noite (antes de ligar): aba NO AR desligada para alunas (só admin vê); Bruno aprovou as telas ('pode seguir assim, depois se precisar de ajuste a gente faz')
 - **Código:** `lib/cuidado.ts` (listas 6+12, quem recebe, idiomas es+pl), `lib/cuidado-server.ts`, `components/challenges/CuidadoNoDesafio.tsx` (pergunta · cartão · aviso 🎁), rotas `app/[locale]/(app)/cuidado/[tipo]` (lista) e `/player/[n]` (o mesmo VideoPlayer, sem trava de ordem e sem oferta do Pase), textos `cuidado` nos messages (es/pl/en/pt-BR; tr/cs/it = en, aba desligada lá). Progresso em `user_progress` com challenge_id `cuidado:<desafio>` e dia = aula do módulo (conta na sequência, não vira "desafio ativo").
 - **Liga como:** só para quem comprou (Pase ou desafio) e marcou joelho/costas (quiz `problemas_fisicos` ou pergunta no desafio); aparece só com `CUIDADO_ATIVO=1` na Vercel OU para admin (prévia do Bruno em produção). Aula aparece só se existe no idioma dela.
 - **Hoje em ES:** 4 aulas (Y01, Y02, Y04, Y17 do YouTube do desafio 4). O resto aparece sozinho quando o Subidor publicar no R2 com os ids 11 Costas · 12 Alívio · 13 Menisco · 14 Osteo · 15 Sofá · 16 Cama (en+es+pl) e 17 = ioga na cadeira SÓ PL (dias 1, 2, 4, 17), CONFIRMADOS pelo Subidor 12/11. O PL da ioga não vai no desafio 4 para não trocar o espanhol do YouTube por inglês em quem comprou o "Yoga en la Silla".
 - **Prévia local:** `npm run dev` → `/dev-cuidado?tela=pergunta|aviso|cartao|lista&tipo=rodillas|espalda&simula=1` (404 em produção). Prints mandados ao Bruno 12/11.
 - **Feito 12/11:** telas aprovadas; PL revisado por nativa (aba "Troska o siebie"); títulos finais do Subidor; dono do bot avisado de `user_metadata.cuidado`; commit + push com a aba desligada.
+- **LIGAR SEM NOVO OK (Bruno 12/11: "quando estiverem prontas não precisa do meu aval para publicar. Pode subir e publicar"):** quando o Subidor avisar que as 18 estão no R2, o riseme-c2 confere cada aula tocando (es e pl), mede a base do dia 7 e liga para as alunas com **CUIDADO_ATIVO=1 na Vercel (Production) + redeploy** (NÃO por constante no código: o bot usa a mesma chave, d0d7eb4 do Arquiteto), e avisa o Bruno e o Arquiteto dos Fluxos depois (ele confere numa conversa real).
 - **Falta:** as 18 aulas no R2 (Subidor publica uma a uma) → Bruno grava `CUIDADO_ATIVO=1` na Vercel (Production) + redeploy para ligar para as alunas; na véspera, medir a base do dia 7 (MAPA-TESTES).
 
 ## (histórico) RETOMAR DAQUI: implementação no app (riseme-c2, 12/11; Bruno "pode executar")
