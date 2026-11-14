@@ -141,8 +141,10 @@ async function avisarEquipe(assunto: string, linhas: string[]): Promise<void> {
 interface Recebido { id: string; de: string; nome: string | null; para: string[]; assunto: string; texto: string; messageId: string | null; headers: Record<string, string>; anexos: number }
 
 async function buscarRecebido(id: string): Promise<Recebido | { erro: string }> {
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) return { erro: 'RESEND_API_KEY ausente' }
+  // A chave de ENVIO (RESEND_API_KEY) é restrita a enviar: ler o e-mail recebido pede uma chave de acesso total, à parte
+  // (RESEND_INBOUND_KEY), para não mexer na que entrega os acessos.
+  const apiKey = process.env.RESEND_INBOUND_KEY ?? process.env.RESEND_API_KEY
+  if (!apiKey) return { erro: 'RESEND_INBOUND_KEY ausente' }
   const res = await fetch(`https://api.resend.com/emails/receiving/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${apiKey}` } })
   const txt = await res.text()
   if (!res.ok) return { erro: `Resend ${res.status}: ${txt.slice(0, 200)}` }
@@ -208,7 +210,7 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
   const r = await buscarRecebido(emailId)
   if ('erro' in r) {
     // Não deu para ler o e-mail (chave sem permissão de leitura, id falso): nada é respondido; a equipe fica sabendo.
-    await avisarEquipe('não consegui ler um e-mail recebido', [`id ${emailId}`, r.erro, 'Se for "restricted_api_key": a chave do Resend na Vercel é só de envio; trocar por uma com acesso total.'])
+    await avisarEquipe('não consegui ler um e-mail recebido', [`id ${emailId}`, r.erro, 'Se for "restricted_api_key": falta gravar na Vercel a RESEND_INBOUND_KEY (chave do Resend com acesso total).'])
     return `erro ao ler ${emailId}: ${r.erro}`
   }
   if (!r.de.includes('@')) return `sem remetente (${emailId})`
