@@ -439,7 +439,9 @@ Regras do canal (valem acima das regras que citam o WhatsApp):
 4. E-mail não é bate-papo: responda TUDO de uma vez (os passos completos, o link completo com https://), porque cada ida e volta demora. No máximo 1 pergunta, só se sem ela não dá para resolver.
 5. Reembolso de compra da Stripe: mesma regra de sempre (1º pedido → "reembolso_transacoes" com o pi_…). Ela também pode pedir sozinha em https://riseme.app/pl/refund ou pelo botão no app.
 6. Não ofereça convite de depoimento, brinde, indicação nem Pase por este canal. "pedir_depoimento" e "liberar_brinde" = false.
-7. Sem conta no perfil: o endereço de onde ela escreve não é o da compra. Peça o e-mail usado na compra (ou o telefone do pagamento), em 1 frase.`
+7. Sem conta no perfil: o endereço de onde ela escreve não é o da compra. Peça o e-mail usado na compra, em 1 frase, e NÃO transfira: quando ela mandar, o sistema acha a conta sozinho.
+8. NUNCA prometa nada pelo WhatsApp: nada de "o acesso chega no WhatsApp", "te escrevo no WhatsApp" ou "confirmo no WhatsApp". Tudo chega por e-mail. A regra "POLONÊS / compra da Stripe sem conta" vale aqui sem a parte do WhatsApp: diga que o pagamento está certo e que o acesso está (ou vai) no e-mail da compra.
+9. Conta achada pelo e-mail que ela CITOU (escreveu de outro endereço): o e-mail novo de acesso vai para o e-mail da conta, não para o endereço de onde ela escreve. Diga isso com o endereço da conta.`
 
 export async function decidirResposta(params: {
   phone?: string // só para o registro de uso (tokens/custo) por conversa

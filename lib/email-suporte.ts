@@ -149,15 +149,17 @@ async function buscarRecebido(id: string): Promise<Recebido | { erro: string }> 
   const txt = await res.text()
   if (!res.ok) return { erro: `Resend ${res.status}: ${txt.slice(0, 200)}` }
   const j = JSON.parse(txt) as { from?: string; to?: string[] | string; subject?: string; text?: string | null; html?: string | null; message_id?: string; headers?: Record<string, string> | { name: string; value: string }[]; attachments?: unknown[] }
-  const m = (j.from ?? '').match(/^\s*(?:"?([^"<]*)"?\s*)?<?([^<>\s]+@[^<>\s]+)>?\s*$/)
+  const bruto = j.from ?? ''
+  const endereco = bruto.match(/<([^<>\s]+@[^<>\s]+)>/)?.[1] ?? bruto.match(/[^\s<>"]+@[^\s<>"]+/)?.[0] ?? ''
+  const nomeRemetente = bruto.includes('<') ? bruto.slice(0, bruto.indexOf('<')).replace(/"/g, '').trim() : ''
   const headers: Record<string, string> = {}
   if (Array.isArray(j.headers)) for (const h of j.headers) headers[String(h.name).toLowerCase()] = String(h.value)
   else for (const [k, v] of Object.entries(j.headers ?? {})) headers[k.toLowerCase()] = String(v)
   const texto = (j.text && j.text.trim()) || (j.html ?? '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<br\s*\/?>|<\/p>|<\/div>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   return {
     id,
-    de: (m?.[2] ?? j.from ?? '').toLowerCase().trim(),
-    nome: m?.[1]?.trim() || null,
+    de: endereco.toLowerCase().trim(),
+    nome: nomeRemetente || null,
     para: (Array.isArray(j.to) ? j.to : [j.to ?? '']).map((t) => String(t).toLowerCase().replace(/^.*<|>.*$/g, '').trim()).filter(Boolean),
     assunto: (j.subject ?? '').trim(),
     texto,
@@ -232,8 +234,18 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
   }
 
   // Quem é: conta com este e-mail. Escrever do e-mail da conta confirma a identidade (o acesso só vai para esse endereço).
-  const { data: conta } = await db.from('users').select('id').eq('email', r.de).limit(1)
-  const userId = (conta?.[0]?.id as string | undefined) ?? null
+  const { data: conta } = await db.from('users').select('id, email').eq('email', r.de).limit(1)
+  let userId = (conta?.[0]?.id as string | undefined) ?? null
+  let emailConta = r.de
+  if (!userId) {
+    // Escreveu de outro endereço e citou o e-mail da compra: vale para achar a conta. O acesso novo vai SEMPRE para o e-mail
+    // da conta (nunca para quem escreveu), então quem não é a dona não ganha nada com isso.
+    const citados = [...new Set((await conversaDoEndereco(r.de)).filter((m) => m.autor === 'student').flatMap((m) => m.texto.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) ?? []).map((e) => e.toLowerCase()))].filter((e) => !/@riseme\.app$/.test(e))
+    if (citados.length) {
+      const { data: porCitado } = await db.from('users').select('id, email').in('email', citados).limit(1)
+      if (porCitado?.[0]) { userId = porCitado[0].id as string; emailConta = (porCitado[0].email as string).toLowerCase() }
+    }
+  }
   const perfil = userId ? await perfilDaAluna(userId, true, null).catch(() => null) : null
   const idiomaDoEndereco = r.para.some((t) => t.startsWith('pomoc@')) || /\.pl$/i.test(r.de) ? 'pl' : r.para.some((t) => t.startsWith('ayuda@')) ? 'es' : undefined
   const idioma = perfil?.idioma ?? idiomaDoEndereco ?? 'es'
@@ -273,8 +285,8 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
     if (decisao.reenviarAcesso && userId && !perfil?.reenvioRecente) {
       const code = generateAccessCode()
       const { error } = await db.auth.admin.updateUserById(userId, { password: code })
-      const envio = error ? { ok: false as const, erro: error.message } : await sendAccessEmail({ email: r.de, code, link: buildAccessLink(APP_URL(), idioma, r.de, code), locale: idioma })
-      notas.push(envio.ok ? 'acesso reenviado por e-mail' : `REENVIO DO ACESSO FALHOU: ${envio.erro}`)
+      const envio = error ? { ok: false as const, erro: error.message } : await sendAccessEmail({ email: emailConta, code, link: buildAccessLink(APP_URL(), idioma, emailConta, code), locale: idioma })
+      notas.push(envio.ok ? `acesso reenviado para ${emailConta}` : `REENVIO DO ACESSO FALHOU: ${envio.erro}`)
       if (envio.ok) await gravar(r.de, KIND_REENVIO, { email: r.de })
       else await avisarEquipe(`o bot prometeu acesso novo a ${r.de} e o envio falhou`, [envio.erro])
     }
