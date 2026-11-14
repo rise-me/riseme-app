@@ -27,15 +27,21 @@ function podeAbrir(id: string, access: UserAccess): boolean {
 /**
  * Qual aula o botão abre: continua o desafio em que ela treinou por último; se nunca treinou, o desafio que ela
  * comprou (o de menor número primeiro). Desafio terminado não entra. null = nada para oferecer.
- * A aula é sempre a seguinte à última concluída: é a única que a trava de ordem do player deixa abrir.
+ * A aula é a seguinte à MAIS ADIANTADA que ela concluiu (a trava de ordem do player só exige a anterior feita).
+ * Contar aulas não serve: 51 de 6.741 contas têm dias pulados (de antes da trava) e a conta cairia num dia já feito
+ * ou trancado (conferido no banco em 14/11). Se a mais adiantada já é a última, volta ao primeiro dia pulado.
  */
 export function proximaAula(progress: DayProgress[], access: UserAccess): ProximaAula | null {
   const reais = progress.filter((p) => !p.challenge_id.startsWith(PREFIXO_PROGRESSO_CUIDADO) && mockChallenges.some((c) => c.id === p.challenge_id))
-  const feitasPor = new Map<string, number>()
-  for (const p of reais) feitasPor.set(p.challenge_id, (feitasPor.get(p.challenge_id) ?? 0) + 1)
+  const diasPor = new Map<string, Set<number>>()
+  for (const p of reais) {
+    if (!diasPor.has(p.challenge_id)) diasPor.set(p.challenge_id, new Set())
+    diasPor.get(p.challenge_id)!.add(p.day_number)
+  }
+  const feitasDe = (id: string) => diasPor.get(id)?.size ?? 0
 
   const total = (id: string) => mockChallenges.find((c) => c.id === id)?.days_count ?? 0
-  const aberto = (id: string) => podeAbrir(id, access) && (feitasPor.get(id) ?? 0) < total(id)
+  const aberto = (id: string) => podeAbrir(id, access) && feitasDe(id) < total(id)
 
   // progress vem do mais recente para o mais antigo
   const recentes = [...new Set(reais.map((p) => p.challenge_id))]
@@ -44,6 +50,11 @@ export function proximaAula(progress: DayProgress[], access: UserAccess): Proxim
   const id = [...recentes, ...comprados, ...doPase].find(aberto)
   if (!id) return null
 
-  const feitas = feitasPor.get(id) ?? 0
-  return { challengeId: id, day: feitas + 1, feitas, total: total(id), primeira: reais.length === 0 }
+  const dias = diasPor.get(id) ?? new Set<number>()
+  let day = (dias.size ? Math.max(...dias) : 0) + 1
+  if (day > total(id)) {
+    day = 1
+    while (dias.has(day)) day++
+  }
+  return { challengeId: id, day, feitas: dias.size, total: total(id), primeira: reais.length === 0 }
 }
