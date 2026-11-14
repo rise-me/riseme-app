@@ -8,7 +8,8 @@ import { createClient } from '@/lib/supabase/client'
 // Aparece só na 1ª entrada (flag onboarded no metadata). Fecha o ciclo mental:
 // a aluna entende que TEM uma senha (está no WhatsApp) e decide manter ou trocar.
 // Card centralizado (não bottom-sheet) pra não colidir com a BottomNav.
-export function FirstAccessNotice({ locale }: { locale: string }) {
+// inline = cartão discreto no meio da página (quando a tela abre com "Tu clase de hoy": a 1ª coisa é a aula, não a senha).
+export function FirstAccessNotice({ locale, inline = false }: { locale: string; inline?: boolean }) {
   const t = useTranslations('firstAccess')
   const [open, setOpen] = useState(true)
 
@@ -22,6 +23,27 @@ export function FirstAccessNotice({ locale }: { locale: string }) {
   }
 
   if (!open) return null
+
+  if (inline) {
+    return (
+      <div className="bg-card border border-border rounded-2xl p-4 flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
+          <KeyRound size={18} className="text-foreground" />
+        </div>
+        <div className="flex-1 min-w-0 space-y-2">
+          <p className="text-sm text-muted-foreground leading-relaxed">{t('body')}</p>
+          <div className="flex items-center gap-4">
+            <a href={`/${locale}/more/profile#contrasena`} className="text-sm font-bold underline underline-offset-2">
+              {t('changeCta')}
+            </a>
+            <button onClick={dismiss} className="text-sm font-semibold text-muted-foreground">
+              {t('keepCta')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-6">

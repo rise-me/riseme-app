@@ -760,5 +760,17 @@
       "cta": "Ver mis clases",
       "later": "Ahora no"
     }
+  },
+  "claseHoy": {
+    "firstLabel": "Tu primera clase",
+    "firstCta": "Empezar mi primera clase",
+    "firstHint": "Toca el botón y sigue el video. Nada más.",
+    "todayLabel": "Tu clase de hoy",
+    "todayCta": "Empezar la clase de hoy",
+    "doneLabel": "¡Hoy ya entrenaste!",
+    "doneNext": "Tu próxima clase:",
+    "doneCta": "Hacer otra clase hoy",
+    "dayTitle": "Día {day} · {title}",
+    "meta": "{challenge} · {min} min"
   }
 }

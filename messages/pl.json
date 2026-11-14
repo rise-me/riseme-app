@@ -768,5 +768,17 @@
       "cta": "Zobacz moje lekcje",
       "later": "Nie teraz"
     }
+  },
+  "claseHoy": {
+    "firstLabel": "Twoja pierwsza lekcja",
+    "firstCta": "Zacznij pierwszą lekcję",
+    "firstHint": "Naciśnij przycisk i ćwicz razem z filmem. To wszystko.",
+    "todayLabel": "Twoja lekcja na dziś",
+    "todayCta": "Zacznij dzisiejszą lekcję",
+    "doneLabel": "Dziś już ćwiczyłaś!",
+    "doneNext": "Twoja następna lekcja:",
+    "doneCta": "Zrób jeszcze jedną lekcję",
+    "dayTitle": "Dzień {day} · {title}",
+    "meta": "{challenge} · {min} min"
   }
 }

@@ -9,6 +9,11 @@ import { WaterTracker } from '@/components/home/WaterTracker'
 import { FirstAccessNotice } from '@/components/home/FirstAccessNotice'
 import { IndicaAmiga } from '@/components/home/IndicaAmiga'
 import { diaNoFuso, fusoDaAluna, numeroDoDia, sequenciaDeDias } from '@/lib/dias'
+import { getUserAccess } from '@/lib/user-access-server'
+import { getMockDays } from '@/lib/mock-challenge-days'
+import { CLASE_HOY_IDIOMAS, proximaAula } from '@/lib/proxima-aula'
+import { recursoLigado } from '@/lib/previa'
+import { ClaseDeHoy, type ClaseDeHoyProps } from '@/components/home/ClaseDeHoy'
 
 const MINUTES_PER_DAY_AVG = 20
 
@@ -29,10 +34,11 @@ export default async function ProgressPage({
   const { locale } = await params
   const t = await getTranslations('progress')
   const tData = await getTranslations('challengeData')
-  const [progress, user, tz] = await Promise.all([
+  const [progress, user, tz, access] = await Promise.all([
     getAllProgressForUser(),
     getCurrentUser(),
     fusoDaAluna(locale),
+    getUserAccess(),
   ])
 
   const greetName = firstNameForGreeting(user?.realName ?? null, locale)
@@ -86,6 +92,30 @@ export default async function ProgressPage({
     if (ch && done >= ch.days_count) completedChallenges++
   }
 
+  // "Tu clase de hoy": a tela abre com o botão da próxima aula (lib/proxima-aula.ts)
+  let clase: ClaseDeHoyProps | null = null
+  if (CLASE_HOY_IDIOMAS.includes(locale.split('-')[0]) && recursoLigado('CLASE_HOY_ATIVO', user?.admin === true)) {
+    const prox = proximaAula(progress, access)
+    if (prox) {
+      const tDays = await getTranslations('challengeDays')
+      const titulos = (tDays.raw(prox.challengeId) as string[] | undefined) ?? []
+      const dia = getMockDays(prox.challengeId, titulos, locale)[prox.day - 1]
+      const emoji = mockChallenges.find((c) => c.id === prox.challengeId)?.thumbnail_emoji ?? '💪'
+      if (dia) {
+        clase = {
+          estado: prox.primeira ? 'primera' : weekCompleted.has(todayIndex) ? 'hecha' : 'hoy',
+          href: `/${locale}/challenges/${prox.challengeId}/player/${prox.day}`,
+          challengeId: prox.challengeId,
+          desafio: tData(`${prox.challengeId}.title`),
+          emoji,
+          dia: prox.day,
+          titulo: dia.title,
+          minutos: dia.duration_minutes,
+        }
+      }
+    }
+  }
+
   const STATS = [
     { label: t('statTrainingsThisWeek'), value: String(weekCompleted.size), icon: <Zap size={16} className="text-yellow-500" /> },
     { label: t('statTotalMinutes'), value: String(totalCompleted * MINUTES_PER_DAY_AVG), icon: <Clock size={16} className="text-blue-500" /> },
@@ -95,7 +125,8 @@ export default async function ProgressPage({
 
   return (
     <div className="px-4 pt-12 pb-6 space-y-4">
-      {user && !user.onboarded && <FirstAccessNotice locale={locale} />}
+      {/* Com "Tu clase de hoy" a 1ª coisa é a aula: o aviso da senha vira cartão logo abaixo, não janela por cima */}
+      {user && !user.onboarded && !clase && <FirstAccessNotice locale={locale} />}
 
       {/* Header — saudação pelo nome quando temos o nome REAL da compra */}
       <div className="flex items-center justify-between">
@@ -106,6 +137,9 @@ export default async function ProgressPage({
           {user?.initial ?? '?'}
         </div>
       </div>
+
+      {clase && <ClaseDeHoy {...clase} />}
+      {clase && user && !user.onboarded && <FirstAccessNotice locale={locale} inline />}
 
       {/* Streak */}
       <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4">
@@ -227,7 +261,7 @@ export default async function ProgressPage({
         </div>
       )}
 
-      {!activeChallenge && (
+      {!activeChallenge && !clase && (
         <div className="bg-card border border-border rounded-2xl p-6 text-center">
           <p className="text-3xl mb-2">🎯</p>
           <p className="text-sm font-semibold">{t('noActiveChallenge')}</p>

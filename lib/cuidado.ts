@@ -7,6 +7,7 @@
 // Aula só aparece se existir no idioma da aluna (sem cair em outro idioma). Idiomas ligados: CUIDADO_IDIOMAS.
 import { videoNoIdioma, type LessonVideo, type MockDay } from './mock-challenge-days'
 import { respostaDoQuiz, type QuizGuardado } from './quiz-contexto'
+import { recursoLigado } from './previa'
 
 export type TipoCuidado = 'rodillas' | 'espalda'
 export const TIPOS_CUIDADO: TipoCuidado[] = ['rodillas', 'espalda']
@@ -125,7 +126,7 @@ export function cuidadoLigado(opts: { admin: boolean; comprou: boolean; locale: 
   // Admin vê mesmo sem compra (contas de teste da equipe não têm desafio comprado)
   if (!opts.comprou && !opts.admin) return false
   if (!CUIDADO_IDIOMAS.includes(opts.locale.split('-')[0])) return false
-  return process.env.CUIDADO_ATIVO === '1' || opts.admin
+  return recursoLigado('CUIDADO_ATIVO', opts.admin)
 }
 
 export interface AulaNaTela {
