@@ -131,3 +131,50 @@ export async function registrarVerificacao(phone: string, antes: string, v: Veri
   const agora = new Date().toISOString()
   await admin().from('whatsapp_outbox').insert({ phone: phone.replace(/\D/g, '') || 'sem-telefone', kind: 'verificador', body: JSON.stringify({ corrigida: v.corrigida, problemas: v.problemas, antes, depois: v.corrigida ? v.texto : null }), send_after: agora, sent_at: agora }).then(({ error }) => { if (error) console.error('[verificador] registro falhou:', error.message) })
 }
+
+// ── Trava de idioma (14/11/2026) ──────────────────────────────────────────────────────────────────────────────────
+// Casos reais 14/11 (CL-PL): "Super! 😊 Clique no link da mensagem de cima…" (português) e "Aplicación RiseMe funciona en el
+// navegador…" (espanhol) saíram para alunas polonesas; 13/11 a bateria já tinha mostrado 1 em 3 em português. A editora não
+// pega isso (ela "mantém o idioma da resposta"). Aqui é conta fixa: se a resposta está claramente em espanhol/português e a
+// aluna é de outro idioma, traduz antes de enviar. Na dúvida, não mexe.
+const PALAVRAS: Record<'es' | 'pt' | 'pl', RegExp> = {
+  es: /\b(el|los|las|que|con|para|una|est[aá]s?|puedes|aplicaci[oó]n|contraseña|mensaje|navegador|hola|gracias|funciona|basta|entrar|pudiste|tienes|aqu[ií]|ahora|ya|muy|tambi[eé]n|cuando|d[ií]a)\b/gi,
+  pt: /\b(voc[eê]|n[aã]o|clique|mensagem|cima|abre|sozinho|obrigad[ao]|tamb[eé]m|ent[aã]o|aqui|agora|j[aá]|muito|quando|seu|sua|dia)\b/gi,
+  pl: /\b(jest|nie|si[eę]|na|że|to|tw[oó]j|twoja|tutaj|mo[zż]esz|dzie[nń]|aplikacj[iaę]|has[lł]o|wiadomo[sś]ci?|kliknij|wejd[zź]|dost[eę]p)\b/gi,
+}
+const NOME_IDIOMA: Record<string, string> = { pl: 'polonês', cs: 'tcheco', it: 'italiano', tr: 'turco', ro: 'romeno', en: 'inglês', nl: 'holandês', es: 'espanhol', 'pt-BR': 'português do Brasil' }
+
+/** Idioma em que o texto claramente está (só es/pt/pl), ou null se não dá pra dizer. */
+export function idiomaClaro(texto: string): 'es' | 'pt' | 'pl' | null {
+  const limpo = texto.replace(/https?:\/\/\S+|\S+@\S+/g, ' ')
+  const c = { es: (limpo.match(PALAVRAS.es) ?? []).length, pt: (limpo.match(PALAVRAS.pt) ?? []).length, pl: (limpo.match(PALAVRAS.pl) ?? []).length + (limpo.match(/[ąćęłńśźż]/gi) ?? []).length }
+  const [top, segundo] = (Object.entries(c) as ['es' | 'pt' | 'pl', number][]).sort((a, b) => b[1] - a[1])
+  return top[1] >= 3 && top[1] >= 2 * Math.max(1, segundo[1]) ? top[0] : null
+}
+
+/** Devolve o texto no idioma da aluna: se está claramente em espanhol/português e ela é de outro idioma, traduz. */
+export async function garantirIdioma(texto: string, idioma: string | undefined): Promise<{ texto: string; traduziu: boolean }> {
+  const alvo = idioma === 'pt' ? 'pt-BR' : idioma
+  if (!alvo || !NOME_IDIOMA[alvo] || !texto.trim()) return { texto, traduziu: false }
+  const visto = idiomaClaro(texto)
+  // Italiano parece espanhol nas palavras curtas: não traduz por suspeita de espanhol numa aluna italiana.
+  const errado = visto && !(alvo === 'it' && visto === 'es') && ((visto === 'es' && alvo !== 'es') || (visto === 'pt' && alvo !== 'pt-BR') || (visto === 'pl' && alvo !== 'pl'))
+  if (!errado) return { texto, traduziu: false }
+  try {
+    const res = await cliente().messages.create({
+      model: MODELO_EDITOR,
+      max_tokens: 1500,
+      system: `Traduza a mensagem de WhatsApp para ${NOME_IDIOMA[alvo]}, natural e no mesmo tom. Mantenha EXATAMENTE links, e-mails, números, códigos, emojis, quebras de linha e *negritos*. Responda só com a mensagem traduzida, sem comentário.`,
+      messages: [{ role: 'user', content: texto }],
+    })
+    const b = res.content.find((x) => x.type === 'text')
+    const novo = b && b.type === 'text' ? limparTexto(b.text) : ''
+    const links = (t: string) => (t.match(/https?:\/\/\S+/g) ?? []).sort().join(' ')
+    if (!novo || links(novo) !== links(texto)) return { texto, traduziu: false }
+    console.log(`[idioma] resposta em ${visto} traduzida para ${alvo}`)
+    return { texto: novo, traduziu: true }
+  } catch (err) {
+    console.error('[idioma] tradução falhou, mandando original:', err)
+    return { texto, traduziu: false }
+  }
+}

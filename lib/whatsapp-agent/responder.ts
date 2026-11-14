@@ -1,7 +1,7 @@
 // Agente de WhatsApp: recebe o perfil da aluna + a conversa até agora e devolve
 // a próxima resposta OU o pedido de passar pra humano. Não tem ferramentas nem
 // acesso a nada além do que vem aqui — o texto da aluna é dado, não instrução.
-import { verificarResposta, registrarVerificacao } from './verificador'
+import { verificarResposta, registrarVerificacao, garantirIdioma } from './verificador'
 import { prazoDaLista } from './lista-20h'
 import { ASSUNTOS, TODOS, classificarAssuntos, montarSystem, porAssuntoLigado, type Assunto } from './assuntos'
 import { buscarAcervo, blocoAcervo, trechosPorIds } from './acervo'
@@ -246,7 +246,8 @@ BRINDE DO DEPOIMENTO ("liberar_brinde" = true): ela mandou IMAGEM nova com um co
 (ou qualquer imagem nova depois do convite com 🎁). Não exija prova perfeita, elogio, nem o convite na conversa;
 conta achada pelo email que ela digitou vale (é presente, não dado sensível). NUNCA confira de quem é o comentário nem
 questione o print (Bruno 11/11/2026: "se ela se deu o trabalho de mandar o print, dificilmente está mentindo"; caso Beata PL:
-o comentário era dela, com outro sobrenome, e o bot disse que era de outra pessoa): print de post nosso = "liberar_brinde" true,
+o comentário era dela, com outro sobrenome, e o bot disse que era de outra pessoa; 14/11 PL final 3415: o bot disse "não vejo
+seu comentário, o campo está vazio" e pediu outro print). Mesmo sem enxergar o comentário no print: print de post nosso = "liberar_brinde" true,
 agradeça, dê os parabéns e diga que o cardápio extra está liberado. Sem conta no perfil → peça o email da compra (false; true quando a conta
 aparecer). Brinde já entregue → agradeça e diga que já está na app (false). O brinde é o direito de gerar MAIS 1
 cardápio (não há cardápio pronto). Resposta curta, no espírito de: "¡Muchas gracias por tu comentario! 💛 Ya puedes
@@ -608,6 +609,10 @@ export async function decidirResposta(params: {
   const verificacao = await verificarResposta({ texto: out.resposta, conversa: params.conversa, agora: params.agora, permiteLongo, regras: (extra || base).slice(0, 28000), contexto: [params.hotmart, params.perfil?.cartao, params.consultaPendente ? `CONSULTA PENDENTE: ${params.consultaPendente.resumo}` : '', acervo, aulas].filter(Boolean).join('\n\n') })
   if (verificacao.corrigida || verificacao.problemas.length) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, verificacao).catch(() => undefined)
   out.resposta = verificacao.texto
+  // Trava de idioma (14/11/2026): resposta em espanhol/português para aluna de outro idioma é traduzida antes de sair.
+  const idiomaDela = params.perfil?.idioma ?? idiomaPeloTelefone(params.phone)
+  const trava = await garantirIdioma(out.resposta, idiomaDela)
+  if (trava.traduziu) { registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, { texto: trava.texto, corrigida: true, problemas: ['idioma_errado'] }).catch(() => undefined); out.resposta = trava.texto }
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
   if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
