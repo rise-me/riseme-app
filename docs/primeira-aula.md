@@ -22,7 +22,17 @@ senha por cima de tudo, sequência 0, semana vazia e "Sin desafíos en curso". A
 existem no PostHog (`player_error`, `player_muted`, `challenge_started`, `workout_completed`, pageviews), mas o chat não
 tem acesso de leitura: o Chrome do Bruno não está logado no PostHog (us.posthog.com). Com ele logado, dá para ler.
 
-## O que foi construído (14/11, desligado para as alunas)
+## LIGADO PARA AS ALUNAS 14/11/2026 ~15h00 BRT
+Bruno viu a prévia da tela inteira (antes × depois) e aprovou: "pode fazer essas implementações… não acho que vai
+melhorar muita coisa, não, mas piorar não vai". Inclui o aviso da senha como cartão. `CLASE_HOY_ATIVO=1` na Vercel
+(Production) + deploy c9d3e8f; registros do servidor sem erro em /progress (es e pl) no primeiro minuto.
+Antes de ligar, a regra do botão foi rodada contra as 6.741 contas reais: 4.298 "primeira aula", 2.371 "continua",
+72 sem botão (desafio terminado); 51 contas têm dias pulados e por isso o botão abre a aula seguinte à mais adiantada
+(contar aulas caía em dia já feito ou trancado).
+Atenção para a leitura do "Tu cuidado" (26/11): as contas novas com dor também recebem este botão desde 14/11; ler o
+efeito do cuidado como a DIFERENÇA entre com dor e sem dor no mesmo período (base 9,8% × 7,3%), não só o número bruto.
+
+## O que foi construído (14/11)
 - `lib/proxima-aula.ts`: qual aula o botão abre (continua o desafio do último treino; compradora nova = desafio comprado, dia 1).
 - `components/home/ClaseDeHoy.tsx`: cartão no topo do Progreso, 3 estados:
   - **primera** (nunca treinou): "Tu primera clase · Día 1 · … · 14 min · [Empezar mi primera clase] · Toca el botón y sigue el video. Nada más."
@@ -31,14 +41,15 @@ tem acesso de leitura: o Chrome do Bruno não está logado no PostHog (us.postho
 - Com o cartão na tela, o aviso da senha (`FirstAccessNotice`) deixa de ser janela e vira cartão logo abaixo.
 - Idiomas: es + pl (`CLASE_HOY_IDIOMAS`). Liga com `CLASE_HOY_ATIVO=1` na Vercel (Production) + redeploy; admin sempre vê
   (`lib/previa.ts`, a mesma regra do "Tu cuidado").
-- Prévia local: `npm run dev` → `/dev-clase?estado=primera|hoy|hecha` (404 em produção).
+- Prévia local: `npm run dev` → `/dev-clase?estado=primera|hoy|hecha` (+ `&antes=1` = a tela de antes); mostra a tela inicial INTEIRA
+  (`ProgressView`), não só o cartão. 404 em produção.
 
 ## Teste (linha no `~/.claude/MAPA-TESTES.md`)
-Critério proposto (falta ok do Bruno): contas ES criadas depois de ligar, "1 aula em até 72 h entre as que entraram"
-≥ 46% (1,2× a base de 38%); fracasso ≤ 38%. Leitura 10 dias depois de ligar (7 dias de contas + 72 h).
+Critério (proposto 14/11; Bruno: "pode fazer"): contas ES criadas depois de ligar, "1 aula em até 72 h entre as que entraram"
+≥ 46% (1,2× a base de 38%); fracasso ≤ 38%. Leitura 24/11 (contas de 14/11 15h a 21/11 + 72 h).
 
 ## Próximos (ordem combinada 14/11)
-1. Bruno vê na conta admin e aprova → ligar.
+1. FEITO 14/11: Bruno viu e aprovou; ligado. Ler em 24/11.
 2. Tela de conquista no dia 3 e no dia 7 (app) + parabéns por WhatsApp (pedido ao Arquiteto dos Fluxos).
 3. "Empezando de cero": transcrição dos módulos 40, 61 e 17. O chat do Subidor estava fechado em 14/11: pedido em
    `docs/HANDOFF-EMPEZANDO-DE-CERO.md`, ainda não entregue → ler aula por aula → lista ao Bruno.
