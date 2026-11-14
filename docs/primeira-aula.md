@@ -40,7 +40,8 @@ Critério proposto (falta ok do Bruno): contas ES criadas depois de ligar, "1 au
 ## Próximos (ordem combinada 14/11)
 1. Bruno vê na conta admin e aprova → ligar.
 2. Tela de conquista no dia 3 e no dia 7 (app) + parabéns por WhatsApp (pedido ao Arquiteto dos Fluxos).
-3. "Empezando de cero": transcrição pedida ao Subidor 14/11 (módulos 40, 61, 17) → ler aula por aula → lista ao Bruno.
+3. "Empezando de cero": transcrição dos módulos 40, 61 e 17. O chat do Subidor estava fechado em 14/11: pedido em
+   `docs/HANDOFF-EMPEZANDO-DE-CERO.md`, ainda não entregue → ler aula por aula → lista ao Bruno.
 4. Aviso nos dias pesados da Calistenia (fase 2 do Tu cuidado): ler as 28 aulas uma a uma.
    Já se sabe (chat da CL-KR, 14/11): as aulas 11, 16, 17, 22 e 23 têm salto.
 5. Consertos: títulos dos dias 3–4; dia 1 do Pilates em inglês; dia 20 da Calistenia ES = vídeo do dia 6 (Subidor).
