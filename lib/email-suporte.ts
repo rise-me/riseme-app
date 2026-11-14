@@ -24,8 +24,8 @@ const MAX_RESPOSTAS_DIA = 8 // contra laço com resposta automática do outro la
 const APP_URL = () => process.env.NEXT_PUBLIC_APP_URL ?? 'https://riseme.app'
 
 /** Endereço do suporte por idioma. Todos caem na mesma caixa (qualquer nome @riseme.app chega). */
-export const ENDERECO_SUPORTE: Record<string, string> = { pl: 'pomoc@riseme.app', es: 'ayuda@riseme.app' }
-export const enderecoSuporte = (idioma?: string | null) => ENDERECO_SUPORTE[idioma ?? ''] ?? 'ayuda@riseme.app'
+import { EMAIL_SUPORTE as ENDERECO_SUPORTE, emailSuporte as enderecoSuporte } from '@/lib/suporte' // fonte única dos endereços
+export { ENDERECO_SUPORTE, enderecoSuporte }
 const ASSINATURA: Record<string, string> = { pl: 'Zespół RiseMe', es: 'Equipo RiseMe', 'pt-BR': 'Equipe RiseMe', en: 'RiseMe Team', it: 'Il team RiseMe', cs: 'Tým RiseMe', tr: 'RiseMe Ekibi', ro: 'Echipa RiseMe', nl: 'Team RiseMe' }
 const ASSUNTO_PADRAO: Record<string, string> = { pl: 'Twoja wiadomość do RiseMe', es: 'Tu mensaje a RiseMe', en: 'Your message to RiseMe' }
 

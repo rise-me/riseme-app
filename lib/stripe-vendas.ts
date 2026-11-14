@@ -22,6 +22,7 @@ import { registrarMensagem } from '@/lib/whatsapp-agent/conversa'
 import { deveRevogar, registrarCompra } from '@/lib/compras'
 import { registrarCompraNaConta } from '@/lib/cartao-aluna'
 import { textoPresente } from '@/lib/whatsapp-agent/reembolsos'
+import { WHATSAPP_FORA_DO_AR, emailSuporte } from '@/lib/suporte'
 import { stripe, stripeConfigurada, reembolsarStripe } from '@/lib/stripe-api'
 import { buscarRespostasQuiz, guardarQuizNaConta } from '@/lib/quiz-contexto'
 import { mockBonuses } from '@/lib/mock-bonuses'
@@ -76,6 +77,11 @@ export interface Venda {
 export const urlPaginaReembolso = (locale: string) => `${APP_URL()}${locale === 'es' ? '' : `/${locale}`}/refund` // es sem prefixo (as-needed)
 
 // Linha no fim do e-mail de acesso: como pedir reembolso (Bruno 09/11: tem que ficar claro para ela, caso deseje).
+// WhatsApp fora do ar (lib/suporte.ts WHATSAPP_FORA_DO_AR): a nota avisa e manda responder o próprio e-mail.
+const NOTA_EMAIL_SEM_WHATS: Record<string, (url: string) => string> = {
+  pl: (url) => `Ważne: nasz WhatsApp chwilowo nie działa, dlatego dostęp wysyłamy teraz tylko e-mailem. Masz pytanie? Odpowiedz na tę wiadomość albo napisz na ${emailSuporte('pl')}. Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, odpowiedz na tę wiadomość albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
+  en: (url) => `Important: our WhatsApp is temporarily unavailable, so we send access by e-mail only. Questions? Reply to this message. Guarantee: if for any reason you want your money back, reply to this message or go to ${url}. We start the refund right away, no questions asked.`,
+}
 const NOTA_EMAIL: Record<string, (url: string) => string> = {
   pl: (url) => `Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, napisz do nas na WhatsAppie albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
   en: (url) => `Guarantee: if for any reason you want your money back, message us on WhatsApp or go to ${url}. We start the refund right away, no questions asked.`,
@@ -353,7 +359,8 @@ async function enviarWhatsApp(db: Db, v: Venda, primeiro: boolean): Promise<void
 
 async function enviarEmail(db: Db, v: Venda): Promise<void> {
   const link = buildAccessLink(APP_URL(), v.locale, v.email, v.codigo!)
-  const nota = (NOTA_EMAIL[v.locale] ?? NOTA_EMAIL.en)(urlPaginaReembolso(v.locale))
+  const notas = WHATSAPP_FORA_DO_AR ? NOTA_EMAIL_SEM_WHATS : NOTA_EMAIL
+  const nota = (notas[v.locale] ?? notas.en)(urlPaginaReembolso(v.locale))
   const url = urlPaginaReembolso(v.locale)
   const r = await sendAccessEmail({
     email: v.email,
@@ -563,6 +570,7 @@ async function avisarAluna(v: Venda, texto: string): Promise<boolean> {
     body: JSON.stringify({
       from: process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>',
       to: [v.email],
+      reply_to: emailSuporte(v.locale),
       subject: assunto,
       text: texto,
       html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;line-height:1.55;color:#1a1a1a;max-width:440px">${texto.split('\n\n').map((p) => `<p>${escapeHtml(p)}</p>`).join('')}</div>`,

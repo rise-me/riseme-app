@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { linkWhatsAppSuporte } from '@/lib/suporte'
+import { linkWhatsAppSuporte, linkEmailSuporte, emailSuporte, WHATSAPP_FORA_DO_AR } from '@/lib/suporte'
 
 // Página pública de reembolso (sem login) — vendas pela Stripe, 1º caso CL-PL (Bruno 09/11/2026: zero chargeback;
 // "tem que ficar claro para ela como pedir o reembolso caso ela deseje"). Linkada no e-mail de acesso, na página de
@@ -20,6 +20,8 @@ type Texto = {
   quando: string[]
   extratoTitulo: string
   extrato: string
+  /** WhatsApp fora do ar (lib/suporte.ts): o caminho principal vira a tela do app (lista cada compra) e o e-mail. */
+  semWhats: { aviso: string; comoApp: string; comoEmail: (email: string) => string; botaoEmail: string; assunto: string; confirmacao: string }
 }
 
 const TEXTO: Record<string, Texto> = {
@@ -45,6 +47,14 @@ const TEXTO: Record<string, Texto> = {
     ],
     extratoTitulo: 'Jak zakup wygląda na wyciągu',
     extrato: 'Na wyciągu bankowym zakup widnieje jako RISEME.',
+    semWhats: {
+      aviso: 'Nasz WhatsApp chwilowo nie działa. Na wszystkie wiadomości odpowiadamy e-mailem.',
+      comoApp: 'Najprościej w aplikacji: Więcej → Zwrot pieniędzy. Zobaczysz tam każdy swój zakup osobno i sama wybierzesz, za który chcesz zwrot.',
+      comoEmail: (email) => `Albo napisz do nas e-mailem na ${email}, że chcesz zwrot. To wystarczy.`,
+      botaoEmail: 'Napisz e-mailem',
+      assunto: 'Chcę zwrot pieniędzy',
+      confirmacao: 'Gdy zwrot zostanie zrealizowany, wyślemy Ci potwierdzenie e-mailem.',
+    },
   },
   en: {
     titulo: 'Refunds',
@@ -68,6 +78,14 @@ const TEXTO: Record<string, Texto> = {
     ],
     extratoTitulo: 'How the purchase shows on your statement',
     extrato: 'On your bank statement the purchase shows as RISEME.',
+    semWhats: {
+      aviso: 'Our WhatsApp is temporarily unavailable. We answer every message by e-mail.',
+      comoApp: 'The easiest way is in the app: More → Refund. You will see each purchase separately and choose which one to refund.',
+      comoEmail: (email) => `Or e-mail us at ${email} saying you want a refund. That is all.`,
+      botaoEmail: 'Send an e-mail',
+      assunto: 'I would like a refund',
+      confirmacao: 'When the refund is completed, we send you a confirmation by e-mail.',
+    },
   },
 }
 
@@ -82,6 +100,7 @@ export default async function RefundPage({ params }: { params: Promise<{ locale:
   const { locale } = await params
   const t = textoDe(locale)
   const prefixo = locale === 'es' ? '' : `/${locale}`
+  const semWhats = WHATSAPP_FORA_DO_AR
 
   return (
     <main className="min-h-dvh bg-background text-foreground">
@@ -94,25 +113,47 @@ export default async function RefundPage({ params }: { params: Promise<{ locale:
 
         <section className="space-y-3">
           <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t.comoTitulo}</h2>
-          <p className="text-[15px] leading-relaxed">{t.comoWhats}</p>
-          <a
-            href={linkWhatsAppSuporte(t.msgWhats)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full rounded-2xl bg-foreground py-4 text-center text-[15px] font-semibold text-background active:opacity-80"
-          >
-            {t.botaoWhats}
-          </a>
-          <p className="pt-2 text-[15px] leading-relaxed">{t.comoApp}</p>
-          <a
-            href={`${prefixo}/more/refund`}
-            className="block w-full rounded-2xl border border-border py-4 text-center text-[15px] font-semibold active:bg-secondary/50"
-          >
-            {t.botaoApp}
-          </a>
+          {semWhats ? (
+            <>
+              <p className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-[15px] leading-relaxed text-amber-900">{t.semWhats.aviso}</p>
+              <p className="text-[15px] leading-relaxed">{t.semWhats.comoApp}</p>
+              <a
+                href={`${prefixo}/more/refund`}
+                className="block w-full rounded-2xl bg-foreground py-4 text-center text-[15px] font-semibold text-background active:opacity-80"
+              >
+                {t.botaoApp}
+              </a>
+              <p className="pt-2 text-[15px] leading-relaxed">{t.semWhats.comoEmail(emailSuporte(locale))}</p>
+              <a
+                href={linkEmailSuporte(locale, t.semWhats.assunto)}
+                className="block w-full rounded-2xl border border-border py-4 text-center text-[15px] font-semibold active:bg-secondary/50"
+              >
+                {t.semWhats.botaoEmail}
+              </a>
+            </>
+          ) : (
+            <>
+              <p className="text-[15px] leading-relaxed">{t.comoWhats}</p>
+              <a
+                href={linkWhatsAppSuporte(t.msgWhats)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full rounded-2xl bg-foreground py-4 text-center text-[15px] font-semibold text-background active:opacity-80"
+              >
+                {t.botaoWhats}
+              </a>
+              <p className="pt-2 text-[15px] leading-relaxed">{t.comoApp}</p>
+              <a
+                href={`${prefixo}/more/refund`}
+                className="block w-full rounded-2xl border border-border py-4 text-center text-[15px] font-semibold active:bg-secondary/50"
+              >
+                {t.botaoApp}
+              </a>
+            </>
+          )}
         </section>
 
-        <Bloco titulo={t.depoisTitulo} itens={t.depois} />
+        <Bloco titulo={t.depoisTitulo} itens={semWhats ? [t.depois[0], t.semWhats.confirmacao, ...t.depois.slice(2)] : t.depois} />
         <Bloco titulo={t.quandoTitulo} itens={t.quando} />
         <Bloco titulo={t.extratoTitulo} itens={[t.extrato]} />
       </div>

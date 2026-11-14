@@ -8,6 +8,7 @@
 // depende disso. Domínio riseme.app já verificado no Resend (mesmo do SMTP).
 
 import type { AppLocale } from '@/i18n/routing'
+import { WHATSAPP_FORA_DO_AR, emailSuporte } from '@/lib/suporte'
 
 interface Copy {
   subject: string
@@ -205,6 +206,7 @@ export async function sendAccessEmail(params: {
       body: JSON.stringify({
         from,
         to: [params.email],
+        reply_to: emailSuporte(params.locale), // resposta dela cai no suporte por e-mail (o bot responde): lib/email-suporte.ts
         subject: c.subject,
         html: renderHtml(c, params),
         text: renderText(c, params),
@@ -252,7 +254,7 @@ const COPY_EXTRA: Record<string, Record<string, CopyExtra>> = {
       corpo: (valor) => `Twój Protokół Metaboliczny 28 Dni${valor ? ` (${valor})` : ''} jest już w aplikacji.`,
       passos: (home) => [`Otwórz aplikację: ${home}`, 'Na dole ekranu kliknij „Dodatki”', 'Tam znajdziesz „Protokół metaboliczny”'],
       cta: 'Otwórz aplikację',
-      ajuda: (wa) => `Masz pytanie? Odpisz na tę wiadomość albo napisz do nas na WhatsAppie: ${wa}`,
+      ajuda: (wa) => (WHATSAPP_FORA_DO_AR ? `Masz pytanie? Odpowiedz na tę wiadomość albo napisz na ${emailSuporte('pl')}. Nasz WhatsApp chwilowo nie działa, więc odpowiadamy e-mailem.` : `Masz pytanie? Odpisz na tę wiadomość albo napisz do nas na WhatsAppie: ${wa}`),
       assinatura: 'Zespół RiseMe 💛',
     },
   },
@@ -306,7 +308,7 @@ export async function sendEmailProdutoExtra(p: { email: string; produto: string;
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ from: process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>', to: [p.email], subject: msg.assunto, html: msg.html, text: msg.text }),
+    body: JSON.stringify({ from: process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>', to: [p.email], reply_to: emailSuporte(p.locale), subject: msg.assunto, html: msg.html, text: msg.text }),
   }).catch(() => null)
   if (!res?.ok) return { ok: false, erro: `Resend ${res?.status ?? 'sem resposta'}` }
   const json = (await res.json().catch(() => ({}))) as { id?: string }

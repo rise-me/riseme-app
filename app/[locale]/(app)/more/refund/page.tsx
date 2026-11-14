@@ -2,7 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { getCurrentUser } from '@/lib/current-user-server'
 import { vendasStripeDaConta } from '@/lib/stripe-api'
-import { linkWhatsAppSuporte } from '@/lib/suporte'
+import { linkWhatsAppSuporte, linkEmailSuporte, emailSuporte, WHATSAPP_FORA_DO_AR } from '@/lib/suporte'
 import { PedirReembolso, type TextosBotao } from './PedirReembolso'
 
 // Más → Reembolso (só aparece no menu para quem comprou pela Stripe). Regras em lib/stripe-vendas.ts.
@@ -18,6 +18,8 @@ type Texto = TextosBotao & {
   saibaMais: string
   /** Nome do que foi comprado (quando há mais de uma compra, ela escolhe qual devolver). Chave = id do desafio/produto. */
   produto: Record<string, string>
+  /** WhatsApp fora do ar (lib/suporte.ts): estes textos entram no lugar dos que falam de WhatsApp. {email} = e-mail do suporte. */
+  semWhats: { pedido: string; erro: string; semCompra: string; whats: string; msgWhats: string }
 }
 
 const TEXTO: Record<string, Texto> = {
@@ -43,6 +45,13 @@ const TEXTO: Record<string, Texto> = {
     msgWhats: 'Cześć! Chcę zwrot pieniędzy.',
     saibaMais: 'Jak działa zwrot',
     produto: { 'protocolo-metabolico': 'Protokół Metaboliczny 28 Dni', padrao: 'Wyzwanie Kalisteniki' },
+    semWhats: {
+      pedido: 'Gotowe. Zwrot jest w trakcie realizacji. Gdy zostanie zrealizowany, wyślemy Ci potwierdzenie e-mailem.',
+      erro: 'Coś poszło nie tak. Spróbuj jeszcze raz albo napisz do nas na {email} — zajmiemy się tym od razu.',
+      semCompra: 'Nie widzimy tu Twojego zakupu. Nasz WhatsApp chwilowo nie działa, więc napisz do nas na {email}, że chcesz zwrot, a zajmiemy się tym od razu.',
+      whats: 'Napisz e-mailem',
+      msgWhats: 'Chcę zwrot pieniędzy',
+    },
   },
   en: {
     titulo: 'Refund',
@@ -66,6 +75,13 @@ const TEXTO: Record<string, Texto> = {
     msgWhats: 'Hi! I would like a refund.',
     saibaMais: 'How refunds work',
     produto: { 'protocolo-metabolico': '28-Day Metabolic Protocol', padrao: 'Calisthenics Challenge' },
+    semWhats: {
+      pedido: 'Done. Your refund is being processed. When it is completed, we will send you a confirmation by e-mail.',
+      erro: 'Something went wrong. Try again or e-mail us at {email} — we will handle it right away.',
+      semCompra: 'We cannot see your purchase here. Our WhatsApp is temporarily unavailable, so e-mail us at {email} saying you want a refund and we will handle it right away.',
+      whats: 'Send an e-mail',
+      msgWhats: 'I would like a refund',
+    },
   },
 }
 
@@ -74,7 +90,12 @@ const valorBonito = (centavos: number | null, moeda: string | null) =>
 
 export default async function RefundInAppPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  const t = TEXTO[locale] ?? TEXTO.en
+  const base = TEXTO[locale] ?? TEXTO.en
+  const comEmail = (s: string) => s.replace('{email}', emailSuporte(locale))
+  const t: Texto = WHATSAPP_FORA_DO_AR
+    ? { ...base, pedido: base.semWhats.pedido, erro: comEmail(base.semWhats.erro), semCompra: comEmail(base.semWhats.semCompra), whats: base.semWhats.whats, msgWhats: base.semWhats.msgWhats }
+    : base
+  const linkSuporte = WHATSAPP_FORA_DO_AR ? linkEmailSuporte(locale, t.msgWhats) : linkWhatsAppSuporte(t.msgWhats)
   const user = await getCurrentUser()
   const vendas = user ? await vendasStripeDaConta(user.id) : []
   const prefixo = locale === 'es' ? '' : `/${locale}`
@@ -93,7 +114,7 @@ export default async function RefundInAppPage({ params }: { params: Promise<{ lo
       {vendas.length === 0 ? (
         <div className="space-y-3">
           <p className="text-[15px] leading-relaxed">{t.semCompra}</p>
-          <a href={linkWhatsAppSuporte(t.msgWhats)} target="_blank" rel="noopener noreferrer" className="block w-full rounded-2xl bg-foreground py-4 text-center text-[15px] font-semibold text-background">
+          <a href={linkSuporte} target="_blank" rel="noopener noreferrer" className="block w-full rounded-2xl bg-foreground py-4 text-center text-[15px] font-semibold text-background">
             {t.whats}
           </a>
         </div>
