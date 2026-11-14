@@ -301,7 +301,8 @@
     "technicalProblems": "Technical issues",
     "manageSubscription": "Manage subscription",
     "otherQuestions": "Other questions",
-    "whatsappIntro": "Hi, I'm a RiseMe member 💛 I need help with: {topic}"
+    "whatsappIntro": "Hi, I'm a RiseMe member 💛 I need help with: {topic}",
+    "emailBanner": "Our WhatsApp is temporarily unavailable. E-mail us at {email}: we answer everything there. Tap a topic and the e-mail opens ready to send."
   },
   "fasting": {
     "title": "Fasting",

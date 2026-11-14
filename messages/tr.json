@@ -301,7 +301,8 @@
     "technicalProblems": "Teknik sorunlar",
     "manageSubscription": "Aboneliği yönet",
     "otherQuestions": "Diğer sorular",
-    "whatsappIntro": "Merhaba, RiseMe üyesiyim 💛 Şu konuda yardıma ihtiyacım var: {topic}"
+    "whatsappIntro": "Merhaba, RiseMe üyesiyim 💛 Şu konuda yardıma ihtiyacım var: {topic}",
+    "emailBanner": "Our WhatsApp is temporarily unavailable. E-mail us at {email}: we answer everything there. Tap a topic and the e-mail opens ready to send."
   },
   "fasting": {
     "title": "Oruç",

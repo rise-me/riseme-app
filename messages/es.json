@@ -301,7 +301,8 @@
     "technicalProblems": "Problemas técnicos",
     "manageSubscription": "Gestionar suscripción",
     "otherQuestions": "Otras preguntas",
-    "whatsappIntro": "Hola, soy alumna de RiseMe 💛 Necesito ayuda con: {topic}"
+    "whatsappIntro": "Hola, soy alumna de RiseMe 💛 Necesito ayuda con: {topic}",
+    "emailBanner": "Nuestro WhatsApp está temporalmente fuera de servicio. Escríbenos por correo a {email}: ahí respondemos todo. Toca un tema y se abrirá el correo listo."
   },
   "fasting": {
     "title": "Ayuno",

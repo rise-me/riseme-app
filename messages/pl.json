@@ -301,7 +301,8 @@
     "technicalProblems": "Problemy techniczne",
     "manageSubscription": "Zarządzanie subskrypcją",
     "otherQuestions": "Inne pytania",
-    "whatsappIntro": "Cześć, jestem uczestniczką RiseMe 💛 Potrzebuję pomocy w sprawie: {topic}"
+    "whatsappIntro": "Cześć, jestem uczestniczką RiseMe 💛 Potrzebuję pomocy w sprawie: {topic}",
+    "emailBanner": "Nasz WhatsApp chwilowo nie działa. Napisz do nas e-mailem na {email}: tam odpowiadamy na wszystko. Wybierz temat, a otworzy się gotowa wiadomość."
   },
   "fasting": {
     "title": "Post przerywany",

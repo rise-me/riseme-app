@@ -301,7 +301,8 @@
     "technicalProblems": "Technické problémy",
     "manageSubscription": "Správa předplatného",
     "otherQuestions": "Jiné dotazy",
-    "whatsappIntro": "Ahoj, jsem účastnice RiseMe 💛 Potřebuju pomoct s tématem: {topic}"
+    "whatsappIntro": "Ahoj, jsem účastnice RiseMe 💛 Potřebuju pomoct s tématem: {topic}",
+    "emailBanner": "Our WhatsApp is temporarily unavailable. E-mail us at {email}: we answer everything there. Tap a topic and the e-mail opens ready to send."
   },
   "fasting": {
     "title": "Přerušovaný půst",

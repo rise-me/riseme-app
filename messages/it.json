@@ -301,7 +301,8 @@
     "technicalProblems": "Problemi tecnici",
     "manageSubscription": "Gestisci abbonamento",
     "otherQuestions": "Altre domande",
-    "whatsappIntro": "Ciao, sono un'allieva di RiseMe 💛 Ho bisogno di aiuto con: {topic}"
+    "whatsappIntro": "Ciao, sono un'allieva di RiseMe 💛 Ho bisogno di aiuto con: {topic}",
+    "emailBanner": "Our WhatsApp is temporarily unavailable. E-mail us at {email}: we answer everything there. Tap a topic and the e-mail opens ready to send."
   },
   "fasting": {
     "title": "Digiuno",
