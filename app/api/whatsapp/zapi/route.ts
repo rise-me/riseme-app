@@ -41,18 +41,7 @@ import { blocoHotmart } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsosPendentes, aprovarReembolsos, criarPedidosDaDecisao } from '@/lib/whatsapp-agent/reembolsos'
 import { emailNaConversa } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsarStripe } from '@/lib/stripe-api'
-
-/** Resposta imediata ao pedido de reembolso da Stripe (texto do [Alunas Stripe], 09/11). Sem "devolvido". */
-function textoReembolsoStripe(idioma: string, nome: string | undefined, ok: boolean): string {
-  const n = nome?.trim().split(/\s+/)[0]
-  const pl = idioma === 'pl'
-  if (!ok) return pl
-    ? `${n ? `${n}, t` : 'T'}woja prośba o zwrot jest zapisana. Nasz zespół sprawdza to teraz i napiszemy do Ciebie tutaj. 💛`
-    : `${n ? `${n}, y` : 'Y'}our refund request is registered. Our team is checking it now and we'll write to you here. 💛`
-  return pl
-    ? `Jasne${n ? `, ${n}` : ''}. Twój zwrot jest już w trakcie realizacji — nie musisz nic więcej robić. Wszystkie informacje znajdziesz tutaj:\nhttps://riseme.app/pl/refund\nGdy zwrot zostanie zrealizowany, wyślę Ci tutaj potwierdzenie. 💛`
-    : `Of course${n ? `, ${n}` : ''}. Your refund is already being processed — you don't need to do anything else. All the details are here:\nhttps://riseme.app/en/refund\nOnce the refund is completed, I'll send you a confirmation here. 💛`
-}
+import { textoReembolsoStripe } from '@/lib/whatsapp-agent/reembolsos'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.

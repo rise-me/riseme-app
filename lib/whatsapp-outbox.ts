@@ -17,7 +17,7 @@ const PAUSADOS = new Set(['depoimento', 'pase', 'convite-comunidade', 'convite-g
   'acesso', 'apoio', 'acesso-retro'])
 const pausado = (kind: string) => PAUSADOS.has(kind) || kind.startsWith('aviso-extra:')
 // Com a instância DESCONECTADA só roda o que não entrega nada ao WhatsApp (a Z-API guardaria numa fila e soltaria tudo junto).
-const SEM_WHATSAPP = ['teste-agente', 'hotmart', 'zapi']
+const SEM_WHATSAPP = ['teste-agente', 'hotmart', 'zapi', 'email-suporte']
 
 export async function enfileirar(m: {
   phone: string
@@ -278,6 +278,26 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
         saida = `erro: ${String(err).slice(0, 300)}`
       }
       await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
+    // 'email-suporte' (14/11/2026): e-mail do suporte mandado pelo chat (a chave do Resend só existe no servidor).
+    // body = JSON {para, assunto, texto, idioma?, de?, titulo?, botao?: {rotulo, link}, rodape?}. Aviso às alunas e resposta manual.
+    if (item.kind === 'email-suporte') {
+      let erro: string | null = null
+      try {
+        const { enviarEmailSuporte } = await import('@/lib/email-suporte')
+        const e = JSON.parse(item.body) as Parameters<typeof enviarEmailSuporte>[0]
+        // para = 'responsavel' → ALERTA_EMAIL (prévia para o Bruno sem o chat conhecer o endereço)
+        const para = e.para === 'responsavel' || item.phone === 'responsavel' ? (process.env.ALERTA_EMAIL ?? '').split(',')[0]?.trim() : (e.para ?? item.phone)
+        if (!para) throw new Error('sem destinatário (ALERTA_EMAIL ausente?)')
+        const r = await enviarEmailSuporte({ ...e, para, registrar: e.para !== 'responsavel' && item.phone !== 'responsavel' })
+        if (!r.ok) erro = r.erro
+      } catch (err) {
+        erro = String(err).slice(0, 300)
+      }
+      if (erro) { falhas++; await db.from('whatsapp_outbox').update({ attempts: item.attempts + 1, last_error: erro, claimed_at: null, send_after: new Date(Date.now() + REPROGRAMAR_MS).toISOString() }).eq('id', item.id) }
+      else { enviados++; await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, last_error: null }).eq('id', item.id) }
       continue
     }
 

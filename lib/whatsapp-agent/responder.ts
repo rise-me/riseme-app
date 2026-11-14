@@ -429,6 +429,18 @@ function descreverPerfil(p: PerfilAluna): string {
   ].filter(Boolean).join('\n')
 }
 
+// Atendimento por E-MAIL (14/11/2026: a Meta restringiu o WhatsApp do suporte por 24 h; Bruno: "um e-mail que envia e recebe,
+// ligado a você, similar ao WhatsApp"). O cérebro e as regras são os mesmos; este bloco só ajusta o que muda no canal.
+const CANAL_EMAIL = `CANAL DESTA CONVERSA: E-MAIL (não é WhatsApp). O WhatsApp do suporte está temporariamente indisponível; o atendimento segue por este e-mail e a sua resposta sai por e-mail.
+Regras do canal (valem acima das regras que citam o WhatsApp):
+1. Nunca escreva "aqui no WhatsApp", "na mensagem acima", "nesta conversa do WhatsApp" nem peça print pelo WhatsApp. O acesso dela chegou POR E-MAIL (um e-mail da RiseMe com e-mail, senha e botão para entrar; pode estar em Spam/Promoções/Ofertas).
+2. Ela escreve do e-mail da conta: a identidade está confirmada. Não acha o e-mail de acesso, a senha não funciona ou não consegue entrar → "reenviar_acesso" = true: o sistema manda AGORA outro e-mail, separado, com senha nova e botão para entrar. Diga isso ("te mandei agora um novo e-mail de acesso; use a senha desse e-mail novo").
+3. Se ela perguntar do WhatsApp ou disser que escreveu lá e ninguém respondeu: peça desculpas em 1 frase, diga que o WhatsApp está temporariamente indisponível e que o atendimento segue por este e-mail, sem perder nada. Não prometa dia nem hora de volta.
+4. E-mail não é bate-papo: responda TUDO de uma vez (os passos completos, o link completo com https://), porque cada ida e volta demora. No máximo 1 pergunta, só se sem ela não dá para resolver.
+5. Reembolso de compra da Stripe: mesma regra de sempre (1º pedido → "reembolso_transacoes" com o pi_…). Ela também pode pedir sozinha em https://riseme.app/pl/refund ou pelo botão no app.
+6. Não ofereça convite de depoimento, brinde, indicação nem Pase por este canal. "pedir_depoimento" e "liberar_brinde" = false.
+7. Sem conta no perfil: o endereço de onde ela escreve não é o da compra. Peça o e-mail usado na compra (ou o telefone do pagamento), em 1 frase.`
+
 export async function decidirResposta(params: {
   phone?: string // só para o registro de uso (tokens/custo) por conversa
   perfil: PerfilAluna | null // null = número que não bate com nenhuma conta
@@ -445,6 +457,8 @@ export async function decidirResposta(params: {
   diaAula?: number // interno (2ª rodada): dia e trechos já escolhidos na 1ª
   acervoIds?: string[]
   recusouTransferencia?: boolean // interno (2ª rodada): a 1ª quis transferir sem ação humana; o sistema exige a resposta
+  canal?: 'email' // atendimento por e-mail (lib/email-suporte.ts, 14/11/2026): mesmas regras, com o bloco CANAL abaixo
+  idiomaPadrao?: string // sem perfil e sem telefone (e-mail): idioma pelo endereço para onde ela escreveu
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -546,10 +560,11 @@ export async function decidirResposta(params: {
             text:
               (params.recusouTransferencia ? 'TRANSFERÊNCIA RECUSADA PELO SISTEMA: na rodada anterior você quis transferir sem apontar nenhuma ação que só uma pessoa possa fazer. Logo a resposta existe (política pública do meio de pagamento, regra do produto, acervo, fato do sistema, conhecimento geral). RESPONDA a pergunta dela agora, direto, na primeira frase. Só transfira se houver uma ação humana concreta, escrita em "acao_humana".\n\n' : '') +
               (params.consultaPendente ? `CONSULTA PENDENTE #${params.consultaPendente.id} (aberta em ${params.consultaPendente.desde.slice(0, 10)}, ainda sem resposta): ${params.consultaPendente.resumo}\nA aluna espera ESSA resposta, não um "de nada". Responda a isso agora com o que você sabe hoje (Hotmart, acervo, catálogo, acesso); se não souber resolver, passar_para_humano = true e diga que a equipe já está vendo, sem repetir "vou ver".\n\n` : '') +
+              (params.canal === 'email' ? `${CANAL_EMAIL}\n\n` : '') +
               (aulas ? `${aulas}\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
               (params.hotmart ? `${params.hotmart}\n\n` : '') +
-              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília; NUNCA prometa outro horário): use esta frase no idioma dela: "${frasePrazo(params.perfil?.idioma ?? idiomaPeloTelefone(params.phone), prazoDaLista(params.agora))}"\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
+              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília; NUNCA prometa outro horário): use esta frase no idioma dela: "${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora))}"\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
               (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
               'Escreva a próxima mensagem para a aluna (respondendo o que ela mandou por último).',
@@ -610,14 +625,14 @@ export async function decidirResposta(params: {
   if (verificacao.corrigida || verificacao.problemas.length) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, verificacao).catch(() => undefined)
   out.resposta = verificacao.texto
   // Trava de idioma (14/11/2026): resposta em espanhol/português para aluna de outro idioma é traduzida antes de sair.
-  const idiomaDela = params.perfil?.idioma ?? idiomaPeloTelefone(params.phone)
+  const idiomaDela = params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone))
   const trava = await garantirIdioma(out.resposta, idiomaDela)
   if (trava.traduziu || trava.erro) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, { texto: trava.texto, corrigida: trava.traduziu, problemas: ['idioma_errado', ...(trava.erro ? [`nao_traduzido: ${trava.erro}`] : [])] }).catch(() => undefined)
   out.resposta = trava.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
   if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
-    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? idiomaPeloTelefone(params.phone), prazoDaLista(params.agora))}`
+    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora))}`
   }
 
   const assuntos = `${[...cls.assuntos].join(',')} (${cls.fonte})`
