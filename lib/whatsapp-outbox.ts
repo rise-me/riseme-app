@@ -11,6 +11,7 @@ const REPROGRAMAR_MS = 2 * 60_000
 const POR_RODADA = 15 // ~3 s por envio (delayTyping) — cabe nos 60 s do cron; pico real é bem menor
 const TRAVA_EXPIRA_MS = 5 * 60_000 // função morta no meio do envio não prende o item pra sempre
 const MASCARA = '••••••'
+const PAUSADOS = new Set(['depoimento', 'pase', 'convite-comunidade', 'convite-grupo', 'lembrete-24h', 'recuperacao', 'recuperacao-2', 'video-convite', 'depo-hotmart'])
 
 export async function enfileirar(m: {
   phone: string
@@ -181,6 +182,13 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       .or(`claimed_at.is.null,claimed_at.lt.${travaVencida()}`)
       .select('id')
     if (!trava?.length) continue
+
+    // PAUSA (14/11/2026, WhatsApp do suporte RESTRITO pela Meta): nada que a aluna não pediu sai até o Bruno liberar.
+    // Só passam acesso, apoio, respostas e o que ele manda. Liberar = esvaziar PAUSADOS e republicar.
+    if (PAUSADOS.has(item.kind)) {
+      await db.from('whatsapp_outbox').update({ claimed_at: null, send_after: new Date(Date.now() + 7 * 24 * 3_600_000).toISOString() }).eq('id', item.id)
+      continue
+    }
 
     // Ordem garantida: a msg de apoio só sai depois da de acesso.
     if (item.depends_on && (await dependenciaPendente(item.depends_on))) {
