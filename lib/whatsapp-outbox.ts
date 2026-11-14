@@ -38,17 +38,34 @@ export async function jaEscreveu(phone: string): Promise<boolean> {
  */
 export async function liberarEspera(phone: string, outboxId?: number): Promise<boolean> {
   const db = admin()
-  const base = db.from('whatsapp_outbox').select('id, kind').is('sent_at', null).lt('attempts', MAX_TENTATIVAS).gte('send_after', LIMITE_ESPERA)
+  const base = db.from('whatsapp_outbox').select('id, kind, body, created_at').is('sent_at', null).lt('attempts', MAX_TENTATIVAS).gte('send_after', LIMITE_ESPERA)
   const { data } = outboxId ? await base.or(`id.eq.${outboxId},depends_on.eq.${outboxId}`) : await base.in('phone', formasDoNumero(phone))
+  const linhas = (data ?? []) as { id: number; kind: string; body: string; created_at: string }[]
+  const destino = toZapiPhone(phone) ?? phone
   const agora = Date.now()
-  let acesso = false
-  for (const r of (data ?? []) as { id: number; kind: string }[]) {
-    if (r.kind === 'acesso') acesso = true
-    const atraso = r.kind === 'acesso' ? 0 : r.kind.startsWith('aviso-extra:') ? 3 * 60_000 : r.kind === 'depoimento' ? 30 * 60_000 : 60_000
-    await db.from('whatsapp_outbox').update({ send_after: new Date(agora + atraso).toISOString(), ...(outboxId ? { phone: toZapiPhone(phone) ?? phone } : {}) }).eq('id', r.id)
+  const marcar = (id: number, nota: string) => db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), body: nota, claimed_at: null }).eq('id', id)
+  // Mais de uma compra em espera: só o acesso MAIS NOVO sai (a senha das linhas antigas já não vale). As antigas ficam
+  // como atendidas, sem apagar: linha de venda da Stripe que some faz a conferência re-enfileirar ([Alunas Stripe], 14/11).
+  const acessos = linhas.filter((r) => r.kind === 'acesso').sort((x, y) => y.id - x.id)
+  for (const velho of acessos.slice(1)) await marcar(velho.id, '(substituída: saiu o acesso mais novo desta aluna)')
+  const principal = acessos[0]
+  let reenviado = false
+  if (principal && agora - new Date(principal.created_at).getTime() > PEDIDO_TARDIO_MS) {
+    // Pediu dias depois da compra: a senha guardada pode ter mudado → acesso novo, com senha nova (mesmo caminho do reenvio).
+    const email = principal.body.match(/[^\s:<>*]+@[^\s<>*]+\.[a-z]{2,}/i)?.[0]
+    if (email && (await enfileirar({ phone: destino, kind: 'reenviar-acesso', body: JSON.stringify({ email }), sendAfter: new Date() }))) {
+      await marcar(principal.id, '(pedido tardio: acesso reenviado com senha nova)')
+      reenviado = true
+    }
   }
-  return acesso
+  for (const r of linhas) {
+    if (r.kind === 'acesso' && (r.id !== principal?.id || reenviado)) continue
+    const atraso = r.kind === 'acesso' ? 0 : r.kind.startsWith('aviso-extra:') ? 3 * 60_000 : r.kind === 'depoimento' ? 30 * 60_000 : 60_000
+    await db.from('whatsapp_outbox').update({ send_after: new Date(agora + atraso).toISOString(), ...(outboxId ? { phone: destino } : {}) }).eq('id', r.id)
+  }
+  return Boolean(principal)
 }
+const PEDIDO_TARDIO_MS = 48 * 3_600_000
 
 // Mensagem pronta do botão "abrir conversa" (página de obrigado, e-mail): código da venda da Stripe entre parênteses,
 // ou a frase fixa (Hotmart, sem código). Quem só apertou o botão recebe o acesso e nada mais (sem resposta do agente).
