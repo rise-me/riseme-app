@@ -153,7 +153,7 @@ export function idiomaClaro(texto: string): 'es' | 'pt' | 'pl' | null {
 }
 
 /** Devolve o texto no idioma da aluna: se está claramente em espanhol/português e ela é de outro idioma, traduz. */
-export async function garantirIdioma(texto: string, idioma: string | undefined): Promise<{ texto: string; traduziu: boolean }> {
+export async function garantirIdioma(texto: string, idioma: string | undefined): Promise<{ texto: string; traduziu: boolean; erro?: string }> {
   const alvo = idioma === 'pt' ? 'pt-BR' : idioma
   if (!alvo || !NOME_IDIOMA[alvo] || !texto.trim()) return { texto, traduziu: false }
   const visto = idiomaClaro(texto)
@@ -173,13 +173,14 @@ export async function garantirIdioma(texto: string, idioma: string | undefined):
     // Link igual (sem pontuação colada no fim, que a tradução pode mudar) e mesma quantidade.
     const links = (t: string) => (t.match(/https?:\/\/[^\s*)\]]+/g) ?? []).map((l) => l.replace(/[.,;:!?…]+$/, '')).sort().join(' ')
     if (!novo || links(novo) !== links(texto)) {
-      console.error(`[idioma] tradução recusada (${!novo ? 'vazia' : 'links mudaram'}): ${links(texto)} × ${links(novo)}`)
-      return { texto, traduziu: false }
+      const erro = `tradução recusada (${!novo ? 'vazia' : 'links mudaram'}): ${links(texto)} × ${links(novo)}`
+      console.error(`[idioma] ${erro}`)
+      return { texto, traduziu: false, erro }
     }
     console.log(`[idioma] resposta em ${visto} traduzida para ${alvo}`)
     return { texto: novo, traduziu: true }
   } catch (err) {
     console.error('[idioma] tradução falhou, mandando original:', err)
-    return { texto, traduziu: false }
+    return { texto, traduziu: false, erro: String(err).slice(0, 200) }
   }
 }

@@ -612,7 +612,8 @@ export async function decidirResposta(params: {
   // Trava de idioma (14/11/2026): resposta em espanhol/português para aluna de outro idioma é traduzida antes de sair.
   const idiomaDela = params.perfil?.idioma ?? idiomaPeloTelefone(params.phone)
   const trava = await garantirIdioma(out.resposta, idiomaDela)
-  if (trava.traduziu) { registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, { texto: trava.texto, corrigida: true, problemas: ['idioma_errado'] }).catch(() => undefined); out.resposta = trava.texto }
+  if (trava.traduziu || trava.erro) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, { texto: trava.texto, corrigida: trava.traduziu, problemas: ['idioma_errado', ...(trava.erro ? [`nao_traduzido: ${trava.erro}`] : [])] }).catch(() => undefined)
+  out.resposta = trava.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
   if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
