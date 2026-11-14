@@ -1,11 +1,10 @@
 import { notFound } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
-import { ClaseDeHoy } from '@/components/home/ClaseDeHoy'
-import { FirstAccessNotice } from '@/components/home/FirstAccessNotice'
-import { getMockDays } from '@/lib/mock-challenge-days'
+import { ProgressView } from '../progress/ProgressView'
+import { montarClaseDeHoy } from '@/lib/clase-hoy-server'
+import type { DayProgress } from '@/lib/progress-server'
 
-// SÓ NO COMPUTADOR (npm run dev): prévia do "Tu clase de hoy" com dados de mentira. 404 em produção.
-// ?estado=primera|hoy|hecha
+// SÓ NO COMPUTADOR (npm run dev): a tela inicial INTEIRA com dados de mentira, para ver o "Tu clase de hoy". 404 em produção.
+// ?estado=primera|hoy|hecha  ·  &antes=1 mostra a tela como é HOJE (sem o cartão), para comparar.
 export default async function DevClase({
   params,
   searchParams,
@@ -15,36 +14,31 @@ export default async function DevClase({
 }) {
   if (process.env.NODE_ENV !== 'development') notFound()
   const { locale } = await params
-  const estado = ((await searchParams).estado ?? 'primera') as 'primera' | 'hoy' | 'hecha'
-  const t = await getTranslations('progress')
-  const tData = await getTranslations('challengeData')
-  const tDays = await getTranslations('challengeDays')
-  const n = estado === 'primera' ? 1 : 4
-  const dia = getMockDays('1', (tDays.raw('1') as string[]) ?? [], locale)[n - 1]
+  const sp = await searchParams
+  const estado = (sp.estado ?? 'primera') as 'primera' | 'hoy' | 'hecha'
+  const antes = Boolean(sp.antes)
+  const tz = 'America/Bogota'
+
+  // Aluna de mentira: nova (nenhuma aula) · 3 aulas até ontem · 3 aulas, a última hoje
+  const dia = 864e5
+  const feitas = estado === 'primera' ? [] : estado === 'hoy' ? [3, 2, 1] : [2, 1, 0]
+  const progress: DayProgress[] = feitas.map((atras, i) => ({
+    challenge_id: '1',
+    day_number: feitas.length - i,
+    watched_pct: 90,
+    // eslint-disable-next-line react-hooks/purity -- prévia de desenvolvimento: as datas de mentira partem de "agora"
+    completed_at: new Date(Date.now() - atras * dia - 3600_000).toISOString(),
+  }))
+  const prox = { challengeId: '1', day: feitas.length + 1, feitas: feitas.length, total: 28, primeira: estado === 'primera' }
+  const clase = antes ? null : await montarClaseDeHoy(prox, estado === 'hecha', locale)
+
   return (
-    <div className="px-4 pt-12 pb-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{t('greeting', { name: 'María' })}</h1>
-        <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">M</div>
-      </div>
-      <ClaseDeHoy
-        estado={estado}
-        href="#"
-        challengeId="1"
-        desafio={tData('1.title')}
-        emoji="💪"
-        dia={n}
-        titulo={dia.title}
-        minutos={dia.duration_minutes}
-      />
-      {estado === 'primera' && <FirstAccessNotice locale={locale} inline />}
-      <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0 text-2xl">🔥</div>
-        <div>
-          <p className="text-4xl font-black leading-none">{estado === 'primera' ? 0 : 3}</p>
-          <p className="text-sm text-muted-foreground mt-0.5">{t('daysSequence')}</p>
-        </div>
-      </div>
-    </div>
+    <ProgressView
+      locale={locale}
+      progress={progress}
+      user={{ id: 'previa', realName: 'María', initial: 'M', onboarded: estado !== 'primera' }}
+      tz={tz}
+      clase={clase}
+    />
   )
 }
