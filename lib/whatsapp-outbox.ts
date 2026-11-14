@@ -2,7 +2,7 @@
 // o cron /api/whatsapp/outbox (a cada minuto) chama processarFila(), que envia o que
 // venceu, registra no histórico como 'system' e apaga a senha do body depois do envio.
 
-import { sendZapiText, temWhatsApp, toZapiPhone } from '@/lib/zapi'
+import { conexaoZapi, filaZapi, sendZapiText, temWhatsApp, toZapiPhone } from '@/lib/zapi'
 import { admin, registrarMensagem, variantesTelefone } from '@/lib/whatsapp-agent/conversa'
 import { decidirResposta } from '@/lib/whatsapp-agent/responder'
 
@@ -11,7 +11,13 @@ const REPROGRAMAR_MS = 2 * 60_000
 const POR_RODADA = 15 // ~3 s por envio (delayTyping) — cabe nos 60 s do cron; pico real é bem menor
 const TRAVA_EXPIRA_MS = 5 * 60_000 // função morta no meio do envio não prende o item pra sempre
 const MASCARA = '••••••'
-const PAUSADOS = new Set(['depoimento', 'pase', 'convite-comunidade', 'convite-grupo', 'lembrete-24h', 'recuperacao', 'recuperacao-2', 'video-convite', 'depo-hotmart'])
+const PAUSADOS = new Set(['depoimento', 'pase', 'convite-comunidade', 'convite-grupo', 'lembrete-24h', 'recuperacao', 'recuperacao-2', 'video-convite', 'depo-hotmart',
+  // Entrega (acesso, apoio, aviso do Protokół): em espera desde a restrição de 14/11. Na volta NÃO pode sair tudo de uma vez
+  // (centenas de mensagens a quem nunca escreveu = nova restrição): a retomada é combinada com o Bruno e em ritmo lento.
+  'acesso', 'apoio', 'acesso-retro'])
+const pausado = (kind: string) => PAUSADOS.has(kind) || kind.startsWith('aviso-extra:')
+// Com a instância DESCONECTADA só roda o que não entrega nada ao WhatsApp (a Z-API guardaria numa fila e soltaria tudo junto).
+const SEM_WHATSAPP = ['teste-agente', 'hotmart', 'zapi']
 
 export async function enfileirar(m: {
   phone: string
@@ -160,15 +166,16 @@ const travaVencida = () => new Date(Date.now() - TRAVA_EXPIRA_MS).toISOString()
 export async function processarFila(): Promise<{ enviados: number; falhas: number }> {
   const db = admin()
   const agora = new Date().toISOString()
-  const { data } = await db
+  const desconectada = (await conexaoZapi()).estado === 'desconectado'
+  let consulta = db
     .from('whatsapp_outbox')
     .select('id, phone, kind, body, mask, depends_on, attempts')
     .is('sent_at', null)
     .or(`claimed_at.is.null,claimed_at.lt.${travaVencida()}`)
     .lt('attempts', MAX_TENTATIVAS)
     .lte('send_after', agora)
-    .order('send_after', { ascending: true })
-    .limit(POR_RODADA)
+  if (desconectada) consulta = consulta.in('kind', SEM_WHATSAPP) // o resto fica na fila, intacto, até reconectar
+  const { data } = await consulta.order('send_after', { ascending: true }).limit(POR_RODADA)
 
   let enviados = 0
   let falhas = 0
@@ -185,7 +192,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
 
     // PAUSA (14/11/2026, WhatsApp do suporte RESTRITO pela Meta): nada que a aluna não pediu sai até o Bruno liberar.
     // Só passam acesso, apoio, respostas e o que ele manda. Liberar = esvaziar PAUSADOS e republicar.
-    if (PAUSADOS.has(item.kind)) {
+    if (pausado(item.kind)) {
       await db.from('whatsapp_outbox').update({ claimed_at: null, send_after: new Date(Date.now() + 7 * 24 * 3_600_000).toISOString() }).eq('id', item.id)
       continue
     }
@@ -259,6 +266,21 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     // {acao:'renomear', groupId, nome} ou {acao:'enquete', groupId, nome, opcoes} ou {acao:'texto', groupId, nome = a mensagem}) e grava o resultado no body. A chave da Z-API só existe no servidor (02/11/2026).
     // 'hotmart' não manda texto: consulta a Hotmart pelo e-mail (body = JSON {email}) e grava o bloco no body. Serve para
     // testar a credencial e para conferir consultas pendentes sem a chave sair da Vercel (04/11/2026).
+    // 'zapi' (14/11/2026): body = JSON {acao: 'status' | 'fila' | 'limpar-fila'}; olha/limpa a fila PRÓPRIA da Z-API (o chat não
+    // tem a chave localmente). Limpar antes de reconectar, senão tudo que ficou preso sai de uma vez.
+    if (item.kind === 'zapi') {
+      let saida: string
+      try {
+        const { acao } = JSON.parse(item.body) as { acao: 'status' | 'fila' | 'limpar-fila' }
+        const conexao = await conexaoZapi()
+        saida = JSON.stringify({ acao, conexao, ...(acao === 'fila' ? { fila: await filaZapi('contar') } : acao === 'limpar-fila' ? { limpeza: await filaZapi('limpar'), depois: await filaZapi('contar') } : {}) })
+      } catch (err) {
+        saida = `erro: ${String(err).slice(0, 300)}`
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
     if (item.kind === 'hotmart') {
       let saida: string
       try {
