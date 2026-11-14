@@ -161,16 +161,21 @@ export async function garantirIdioma(texto: string, idioma: string | undefined):
   const errado = visto && !(alvo === 'it' && visto === 'es') && ((visto === 'es' && alvo !== 'es') || (visto === 'pt' && alvo !== 'pt-BR') || (visto === 'pl' && alvo !== 'pl'))
   if (!errado) return { texto, traduziu: false }
   try {
-    const res = await cliente().messages.create({
+    const res = await cliente().beta.messages.create({
       model: MODELO_EDITOR,
       max_tokens: 1500,
+      output_config: { effort: 'low' },
       system: `Traduza a mensagem de WhatsApp para ${NOME_IDIOMA[alvo]}, natural e no mesmo tom. Mantenha EXATAMENTE links, e-mails, números, códigos, emojis, quebras de linha e *negritos*. Responda só com a mensagem traduzida, sem comentário.`,
       messages: [{ role: 'user', content: texto }],
     })
     const b = res.content.find((x) => x.type === 'text')
     const novo = b && b.type === 'text' ? limparTexto(b.text) : ''
-    const links = (t: string) => (t.match(/https?:\/\/\S+/g) ?? []).sort().join(' ')
-    if (!novo || links(novo) !== links(texto)) return { texto, traduziu: false }
+    // Link igual (sem pontuação colada no fim, que a tradução pode mudar) e mesma quantidade.
+    const links = (t: string) => (t.match(/https?:\/\/[^\s*)\]]+/g) ?? []).map((l) => l.replace(/[.,;:!?…]+$/, '')).sort().join(' ')
+    if (!novo || links(novo) !== links(texto)) {
+      console.error(`[idioma] tradução recusada (${!novo ? 'vazia' : 'links mudaram'}): ${links(texto)} × ${links(novo)}`)
+      return { texto, traduziu: false }
+    }
     console.log(`[idioma] resposta em ${visto} traduzida para ${alvo}`)
     return { texto: novo, traduziu: true }
   } catch (err) {
