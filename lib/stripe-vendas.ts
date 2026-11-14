@@ -140,13 +140,25 @@ async function nomeDaAluna(db: Db, userId: string | null, daStripe: string | nul
 // ── Aviso ao responsável (WhatsApp) ─────────────────────────────────────────────────────────────────────────────
 export async function avisarResponsavel(texto: string): Promise<boolean> {
   const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
-  if (!destino) {
-    console.error('[stripe] sem WHATSAPP_HANDOFF_PHONE; aviso não saiu:', texto)
+  if (destino) {
+    const r = await sendZapiText({ phone: destino, message: texto, delayTyping: 1 })
+    if (r.ok) return true
+    console.error('[stripe] aviso ao responsável pelo WhatsApp falhou:', r.error)
+  } else console.error('[stripe] sem WHATSAPP_HANDOFF_PHONE')
+  // WhatsApp fora (14/11: instância desconectada/restrita) → e-mail ao ALERTA_EMAIL, pra o alerta não esperar a volta.
+  const apiKey = process.env.RESEND_API_KEY
+  const para = (process.env.ALERTA_EMAIL ?? '').split(',').map((e) => e.trim()).filter(Boolean)
+  if (!apiKey || !para.length) {
+    console.error('[stripe] aviso ao responsável não saiu (sem WhatsApp e sem ALERTA_EMAIL):', texto)
     return false
   }
-  const r = await sendZapiText({ phone: destino, message: texto, delayTyping: 1 })
-  if (!r.ok) console.error('[stripe] aviso ao responsável falhou:', r.error, texto)
-  return r.ok
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ from: process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>', to: para, subject: texto.split('\n')[0].slice(0, 180), text: texto }),
+  }).catch(() => null)
+  if (!res?.ok) console.error('[stripe] aviso ao responsável por e-mail falhou:', res?.status, texto)
+  return Boolean(res?.ok)
 }
 
 const quem = (v: Pick<Venda, 'nome' | 'email' | 'phone'>) => `${v.nome || 'sem nome'} · ${v.email}${v.phone ? ` · ${v.phone}` : ''}`
@@ -393,11 +405,15 @@ export async function conferirVendas(): Promise<{ recuperadas: number; conferida
   if (stripeConfigurada()) {
     try {
       const desde = Math.floor(Date.now() / 1000) - 2 * 86_400
-      const sessoes = await stripe().checkout.sessions.list({ created: { gte: desde }, status: 'complete', limit: 100 })
-      const pagas = sessoes.data.filter((s) => s.payment_status === 'paid' && desafioDaSessao(s))
+      // Todas as páginas: com ~500 vendas/dia (14/11), 1 página de 100 cobria só ~4 h dos 2 dias.
+      const sessoes = await stripe().checkout.sessions.list({ created: { gte: desde }, status: 'complete', limit: 100 }).autoPagingToArray({ limit: 5000 })
+      const pagas = sessoes.filter((s) => s.payment_status === 'paid' && desafioDaSessao(s))
       if (pagas.length) {
-        const { data: ja } = await db.from('stripe_vendas').select('session_id').in('session_id', pagas.map((s) => s.id))
-        const tem = new Set((ja ?? []).map((r) => r.session_id as string))
+        const tem = new Set<string>()
+        for (let i = 0; i < pagas.length; i += 100) {
+          const { data: ja } = await db.from('stripe_vendas').select('session_id').in('session_id', pagas.slice(i, i + 100).map((s) => s.id))
+          for (const r of ja ?? []) tem.add(r.session_id as string)
+        }
         for (const s of pagas.filter((x) => !tem.has(x.id))) {
           console.warn(`[stripe] sessão paga sem webhook: ${s.id} → entregando pela conferência`)
           await processarSessaoPaga(s).catch((err) => console.error('[stripe] recuperação falhou:', s.id, err))
@@ -411,7 +427,17 @@ export async function conferirVendas(): Promise<{ recuperadas: number; conferida
 
   const desde = new Date(Date.now() - DIAS_CONFERE * 86_400_000).toISOString()
   const { data } = await db.from('stripe_vendas').select('*').gte('created_at', desde).or('email_ok.is.null,wa_ok.is.null,email_ok.eq.false,wa_ok.eq.false')
-  const lista = (data ?? []) as Venda[]
+  const todas = (data ?? []) as Venda[]
+  // Regime 'a pedido' do WhatsApp (14/11): quase toda venda fica com wa_ok null e a linha 'acesso' parada na fila. Com o
+  // e-mail confirmado e a linha só esperando (sem envio, < 5 tentativas), não há o que fazer: tira da volta numa leitura
+  // só, senão a conferência passa dos 120 s com ~3.500 vendas em 7 dias.
+  const parada = new Set<number>()
+  const ids = todas.filter((v) => v.email_ok === true && v.wa_ok == null && v.wa_outbox_id).map((v) => v.wa_outbox_id as number)
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data: f } = await db.from('whatsapp_outbox').select('id, sent_at, attempts').in('id', ids.slice(i, i + 200))
+    for (const r of f ?? []) if (!r.sent_at && (r.attempts as number) < 5) parada.add(r.id as number)
+  }
+  const lista = todas.filter((v) => !(v.email_ok === true && v.wa_ok == null && v.wa_outbox_id && parada.has(v.wa_outbox_id as number)))
   for (const venda of lista) {
     try {
       avisos += await conferirUma(db, venda)
@@ -435,6 +461,9 @@ async function conferirUma(db: Db, v0: Venda): Promise<number> {
   }
 
   const muda: Partial<Venda> = {}
+  // Regime 'a pedido' do bot (Bruno 14/11, restrição da Meta): a linha 'acesso' nasce em espera (send_after 2099) e só sai
+  // se a aluna escrever. Não é falha nem gera reenvio, mas NÃO é acesso garantido: com o e-mail falhando, ela fica sem nada.
+  let aPedido = false
 
   // WhatsApp
   if (v.wa_ok == null) {
@@ -442,7 +471,8 @@ async function conferirUma(db: Db, v0: Venda): Promise<number> {
       muda.wa_ok = false
       muda.wa_erro = 'sem telefone'
     } else if (v.wa_outbox_id) {
-      const { data: fila } = await db.from('whatsapp_outbox').select('sent_at, attempts, last_error').eq('id', v.wa_outbox_id).maybeSingle()
+      const { data: fila } = await db.from('whatsapp_outbox').select('sent_at, attempts, last_error, send_after').eq('id', v.wa_outbox_id).maybeSingle()
+      aPedido = Boolean(fila && !fila.sent_at && new Date(fila.send_after as string).getUTCFullYear() >= 2090)
       if (fila?.sent_at) muda.wa_ok = true
       else if (!fila || (fila.attempts as number) >= 5) {
         const erro = (fila?.last_error as string | null) ?? 'linha da fila sumiu'
@@ -493,16 +523,18 @@ async function conferirUma(db: Db, v0: Venda): Promise<number> {
   // Avisa 1x, com o quadro fechado: espera o outro canal se resolver (senão um "saiu só por um canal" chegaria antes de o
   // outro também falhar, e o alerta de "SEM ACESSO" nunca sairia). Teto: 2 h esperando o outro canal.
   const algumFalhou = waOk === false || emailOk === false
-  const quadroFechado = (waOk != null && emailOk != null) || Date.now() - new Date(v.created_at).getTime() > 2 * 3_600_000
+  // Sem acesso nenhum: e-mail falhou e o WhatsApp falhou ou só sai se ela escrever. Avisa na hora (não há canal a esperar).
+  const semAcesso = emailOk === false && (waOk === false || aPedido)
+  const quadroFechado = semAcesso || (waOk != null && emailOk != null) || Date.now() - new Date(v.created_at).getTime() > 2 * 3_600_000
   let avisou = 0
   if (algumFalhou && quadroFechado && !v.alerta_em) {
     const linhas = [
-      waOk === false && emailOk === false ? '🚨 Stripe: compradora SEM ACESSO (WhatsApp e e-mail falharam)' : '⚠️ Stripe: acesso saiu só por um canal',
+      semAcesso ? `🚨 Stripe: compradora SEM ACESSO (${aPedido ? 'e-mail falhou; o WhatsApp só sai se ela escrever' : 'WhatsApp e e-mail falharam'})` : '⚠️ Stripe: acesso saiu só por um canal',
       quem(v),
-      waOk === false ? `WhatsApp: ❌ ${muda.wa_erro ?? v.wa_erro ?? '?'}` : `WhatsApp: ${waOk ? '✅' : '⏳'}`,
+      waOk === false ? `WhatsApp: ❌ ${muda.wa_erro ?? v.wa_erro ?? '?'}` : aPedido ? 'WhatsApp: ⏸ a pedido (só sai se ela escrever)' : `WhatsApp: ${waOk ? '✅' : '⏳'}`,
       emailOk === false ? `E-mail: ❌ ${muda.email_erro ?? v.email_erro ?? '?'}` : `E-mail: ${emailOk ? '✅' : '⏳'}`,
       `Compra ${valorBonito(v.valor_centavos, v.moeda)} · sessão ${v.session_id}`,
-      waOk === false && emailOk === false ? 'Falar com ela por outro meio (o telefone/e-mail do checkout está acima).' : 'Ela tem o acesso pelo outro canal; conferir se o dado do canal que falhou está certo.',
+      semAcesso ? 'Falar com ela por outro meio (o telefone/e-mail do checkout está acima).' : 'Ela tem o acesso pelo outro canal; conferir se o dado do canal que falhou está certo.',
     ]
     if (await avisarResponsavel(linhas.join('\n'))) {
       muda.alerta_em = new Date().toISOString()
