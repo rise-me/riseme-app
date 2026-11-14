@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
-import { acessoPendente, enfileirar, jaEnfileirou, marcarNaFila, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
+import { acessoPendente, atenderPedido, enfileirar, jaEnfileirou, marcarNaFila, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
@@ -250,6 +250,16 @@ async function avisarHumano(phone: string, nome: string | undefined, motivo: str
 // waMessageId null = reprocessar (sem esperar agrupamento): conversa que ficou sem resposta.
 // silencioso = pendente antigo: se o agente for transferir, NÃO manda de novo "vou transferir" pra aluna
 // (ela já ouviu isso) — só abre a consulta pro responsável. Se ele souber responder, responde.
+// Muitas conversas ao mesmo tempo (ex.: volta de uma queda, com mensagens acumuladas): as respostas saem espaçadas em vez
+// de dezenas no mesmo minuto (restrição da Meta em 14/11/2026). Melhor esforço, no máximo ~12 s de espera por resposta.
+async function espacarRespostas() {
+  for (let i = 0; i < 3; i++) {
+    const { count } = await admin().from('whatsapp_messages').select('created_at', { count: 'exact', head: true }).eq('direction', 'out').gte('created_at', new Date(Date.now() - 15_000).toISOString())
+    if ((count ?? 0) < 2) return
+    await esperar(3000 + Math.random() * 2000)
+  }
+}
+
 async function processarEntrada(phone: string, waMessageId: string | null, silencioso = false) {
   if (waMessageId) {
     await esperar(ESPERA_AGRUPAR_MS)
@@ -519,6 +529,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     return
   }
   if (decisao.texto) {
+    await espacarRespostas()
     const envio = await sendZapiText({ phone, message: decisao.texto, delayTyping: 2 })
     if (envio.ok) {
       await registrarMensagem({ phone, direction: 'out', author: 'agent', body: decisao.texto, waMessageId: envio.messageId })
@@ -722,6 +733,11 @@ export async function POST(request: NextRequest) {
 
   if (lid && !ehLid) await salvarLid(phone, lid)
   const nova = await registrarMensagem({ phone, direction: 'in', author: 'student', body: texto, waMessageId })
-  if (nova) after(() => processarEntrada(phone, waMessageId))
+  // Regime "a pedido" (14/11/2026): a mensagem dela libera o acesso que estava em espera; se era só o botão da página de
+  // obrigado (ou uma fala curta sobre acesso), o acesso que sai É a resposta e o agente não escreve por cima.
+  if (nova) after(async () => {
+    const atendida = await atenderPedido(phone, texto).catch((err) => { console.error('[a-pedido] falhou:', err); return false })
+    if (!atendida) await processarEntrada(phone, waMessageId)
+  })
   return NextResponse.json({ ok: true })
 }

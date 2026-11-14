@@ -17,7 +17,7 @@
 import type { AppLocale } from '@/i18n/routing'
 import { sendVoxuyAccess } from '@/lib/voxuy'
 import { isZapiConfigured, toZapiPhone } from '@/lib/zapi'
-import { enfileirar } from '@/lib/whatsapp-outbox'
+import { enfileirar, jaEscreveu, ESPERA_PEDIDO } from '@/lib/whatsapp-outbox'
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 
 type AccessCopy = (p: { email: string; code: string; link: string; homeUrl: string }) => string
@@ -25,7 +25,6 @@ type SupportCopy = (p: { playlist?: string }) => string
 
 // Atraso do acesso: tempo da VSL do upsell (~15 min). Ajustável sem deploy de código.
 const ATRASO_ACESSO_MIN = Number(process.env.WHATSAPP_ACCESS_DELAY_MIN ?? 15)
-const ESPERA_MSG2_MS = 45_000
 const ESPERA_DEPOIMENTO_MS = 30 * 60_000 // "aproveitar que a pessoa está quente" (Bruno, 14/10)
 const CONVITE_PARA_TODAS = true
 
@@ -458,17 +457,14 @@ export async function sendWhatsAppAccess(params: {
   // NÃO envia na hora: a compradora está na VSL do upsell logo após pagar, e a
   // notificação do WhatsApp tira ela da página de venda. Enfileira com atraso; o cron
   // /api/whatsapp/outbox envia. O email (contingência) continua saindo na hora.
-  const [acesso, apoio] = mensagensDeAcesso(params)
-  const sendAt = new Date(Date.now() + ATRASO_ACESSO_MIN * 60_000)
-  const idAcesso = await enfileirar({ phone, kind: 'acesso', body: acesso, mask: params.code, sendAfter: sendAt })
+  // REGIME "A PEDIDO" (Bruno 14/11/2026, lib/whatsapp-outbox.ts): UMA mensagem (acesso + apoio + como pedir reembolso no
+  // fim), e ela só sai depois que a aluna nos escreve (botão da página de obrigado). Quem já nos escreveu antes por este
+  // número recebe no atraso normal. Até lá a linha fica em espera; o e-mail de acesso sai na hora, como sempre.
+  const unica = mensagensDeAcesso(params).join('\n\n')
+  const emEspera = !(await jaEscreveu(phone))
+  const sendAt = emEspera ? new Date(ESPERA_PEDIDO) : new Date(Date.now() + ATRASO_ACESSO_MIN * 60_000)
+  const idAcesso = await enfileirar({ phone, kind: 'acesso', body: unica, mask: params.code, sendAfter: sendAt })
   if (!idAcesso) return
-  await enfileirar({
-    phone,
-    kind: 'apoio',
-    body: apoio,
-    sendAfter: new Date(sendAt.getTime() + ESPERA_MSG2_MS),
-    dependsOn: idAcesso,
-  })
 
   // 3ª mensagem: convite de depoimento para TODA compradora, ~30 min depois do acesso (decisão do Bruno,
   // 14/10/2026: 85% nunca escreve, então o convite só pela conversa quase não saía). Na hora de enviar,
@@ -483,7 +479,7 @@ export async function sendWhatsAppAccess(params: {
       phone: chave,
       kind: 'depoimento',
       body: convite,
-      sendAfter: new Date(sendAt.getTime() + ESPERA_DEPOIMENTO_MS),
+      sendAfter: emEspera ? sendAt : new Date(sendAt.getTime() + ESPERA_DEPOIMENTO_MS), // em espera: liberarEspera põe 30 min depois do acesso
       dependsOn: idAcesso,
     })
   }
@@ -603,7 +599,9 @@ export async function avisarProdutoExtra(p: {
   if (acesso?.[0]) {
     dependsOn = acesso[0].id as number
     const depois = new Date(new Date(acesso[0].send_after as string).getTime() + 3 * 60_000)
-    if (depois > sendAfter) sendAfter = depois
+    if (depois > sendAfter) sendAfter = depois // acesso em espera (regime a pedido) → o aviso espera junto e sai 3 min depois dele
+  } else if (!(await jaEscreveu(phone))) {
+    sendAfter = new Date(ESPERA_PEDIDO) // nunca nos escreveu: só sai quando ela escrever (o e-mail do produto já avisou)
   }
   return enfileirar({ phone, kind, body: texto(undefined, p.valor ?? undefined, `https://riseme.app/${p.locale}`), sendAfter, dependsOn })
 }

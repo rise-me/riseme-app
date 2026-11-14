@@ -10,6 +10,10 @@ import { createServiceClient } from '@/lib/admin-server'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 20
 
+// Regime "a pedido" (dono do bot, 14/11/2026): linha com send_after ≥ 2090 está EM ESPERA até a aluna escrever no WhatsApp
+// (lib/whatsapp-outbox.ts). O fim do funil não a antecipa: só puxa o que tinha horário normal.
+const EM_ESPERA = '2090-01-01T00:00:00.000Z'
+
 const cabecalhos = {
   'Access-Control-Allow-Origin': 'https://kalistenika.riseme.fitness',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -44,15 +48,15 @@ export async function POST(request: NextRequest) {
     const agora = new Date()
     const depois = new Date(agora.getTime() + 45_000) // 'apoio' 45 s depois do acesso, como na sequência normal
     const { data: puxou } = await db.from('whatsapp_outbox').update({ send_after: agora.toISOString() })
-      .eq('id', venda.wa_outbox_id).eq('kind', 'acesso').is('sent_at', null).gt('send_after', agora.toISOString()).select('id')
+      .eq('id', venda.wa_outbox_id).eq('kind', 'acesso').is('sent_at', null).gt('send_after', agora.toISOString()).lt('send_after', EM_ESPERA).select('id')
     if (puxou?.length) resultado = 'puxou'
     await db.from('whatsapp_outbox').update({ send_after: depois.toISOString() })
-      .eq('depends_on', venda.wa_outbox_id).eq('kind', 'apoio').is('sent_at', null).gt('send_after', depois.toISOString())
+      .eq('depends_on', venda.wa_outbox_id).eq('kind', 'apoio').is('sent_at', null).gt('send_after', depois.toISOString()).lt('send_after', EM_ESPERA)
     // Aviso do produto extra (Protokół; kind 'aviso-extra:<sessão do upsell>', do dono do bot) nasceu preso ao horário
     // antigo do acesso + 3 min: acompanha a antecipação e sai 3 min depois do acesso.
     const aviso = new Date(agora.getTime() + 3 * 60_000)
     await db.from('whatsapp_outbox').update({ send_after: aviso.toISOString() })
-      .eq('depends_on', venda.wa_outbox_id).like('kind', 'aviso-extra:%').is('sent_at', null).gt('send_after', aviso.toISOString())
+      .eq('depends_on', venda.wa_outbox_id).like('kind', 'aviso-extra:%').is('sent_at', null).gt('send_after', aviso.toISOString()).lt('send_after', EM_ESPERA)
   }
   // Rastro por chamada nos logs da Vercel (pedido do chat do funil 13/11): separa "não chegou ao obrigado" de "beacon falhou".
   console.log(`[fim-funil] ${sessao} → ${resultado}`)

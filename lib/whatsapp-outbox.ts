@@ -11,11 +11,70 @@ const REPROGRAMAR_MS = 2 * 60_000
 const POR_RODADA = 15 // ~3 s por envio (delayTyping) — cabe nos 60 s do cron; pico real é bem menor
 const TRAVA_EXPIRA_MS = 5 * 60_000 // função morta no meio do envio não prende o item pra sempre
 const MASCARA = '••••••'
-const PAUSADOS = new Set(['depoimento', 'pase', 'convite-comunidade', 'convite-grupo', 'lembrete-24h', 'recuperacao', 'recuperacao-2', 'video-convite', 'depo-hotmart',
-  // Entrega (acesso, apoio, aviso do Protokół): em espera desde a restrição de 14/11. Na volta NÃO pode sair tudo de uma vez
-  // (centenas de mensagens a quem nunca escreveu = nova restrição): a retomada é combinada com o Bruno e em ritmo lento.
-  'acesso', 'apoio', 'acesso-retro'])
-const pausado = (kind: string) => PAUSADOS.has(kind) || kind.startsWith('aviso-extra:')
+// PAUSADOS = envios a quem não nos escreveu que seguem desligados até o Bruno decidir (restrição da Meta em 14/11).
+// Acesso, convite de depoimento e aviso do Protokół saíram daqui: valem pelo REGIME "A PEDIDO" logo abaixo.
+const PAUSADOS = new Set(['pase', 'convite-comunidade', 'convite-grupo', 'lembrete-24h', 'recuperacao', 'recuperacao-2', 'video-convite', 'depo-hotmart', 'acesso-retro'])
+const pausado = (kind: string) => PAUSADOS.has(kind)
+
+// ── REGIME "A PEDIDO" (Bruno 14/11/2026: "ela clica, cai no WhatsApp com a mensagem pronta, envia, o bot responde, e
+// ninguém recebe mensagem sem ter escrito antes"; vale para todos os idiomas). Causa: ~3 mensagens com link por compradora
+// a ~280 polonesas/dia que nunca respondiam = WhatsApp restrito pela Meta. Como funciona: a mensagem de acesso (uma só) e
+// o que vem depois dela NASCEM EM ESPERA (send_after = ESPERA_PEDIDO, nunca vencem sozinhas). Quando a aluna escreve
+// (botão da página de obrigado ou qualquer mensagem), liberarEspera() põe o acesso para sair agora e o resto em seguida.
+export const ESPERA_PEDIDO = '2099-01-01T00:00:00.000Z'
+export const LIMITE_ESPERA = '2090-01-01T00:00:00.000Z' // send_after acima disto = em espera
+const formasDoNumero = (phone: string) => variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
+
+/** A aluna já nos escreveu alguma vez por este número? (quem já escreveu pode receber sem pedir de novo) */
+export async function jaEscreveu(phone: string): Promise<boolean> {
+  const { data } = await admin().from('whatsapp_messages').select('created_at').in('phone', variantesTelefone(phone)).eq('direction', 'in').limit(1)
+  return Boolean(data?.length)
+}
+
+/**
+ * Libera o que está em espera para este número (ou, com outboxId, para a venda cujo acesso é essa linha: caso de quem
+ * escreve de um número diferente do checkout; aí as linhas passam a apontar para o número de onde ela escreveu).
+ * Acesso sai agora; aviso do Protokół 3 min depois; convite de depoimento 30 min depois. Devolve true se liberou um acesso.
+ */
+export async function liberarEspera(phone: string, outboxId?: number): Promise<boolean> {
+  const db = admin()
+  const base = db.from('whatsapp_outbox').select('id, kind').is('sent_at', null).lt('attempts', MAX_TENTATIVAS).gte('send_after', LIMITE_ESPERA)
+  const { data } = outboxId ? await base.or(`id.eq.${outboxId},depends_on.eq.${outboxId}`) : await base.in('phone', formasDoNumero(phone))
+  const agora = Date.now()
+  let acesso = false
+  for (const r of (data ?? []) as { id: number; kind: string }[]) {
+    if (r.kind === 'acesso') acesso = true
+    const atraso = r.kind === 'acesso' ? 0 : r.kind.startsWith('aviso-extra:') ? 3 * 60_000 : r.kind === 'depoimento' ? 30 * 60_000 : 60_000
+    await db.from('whatsapp_outbox').update({ send_after: new Date(agora + atraso).toISOString(), ...(outboxId ? { phone: toZapiPhone(phone) ?? phone } : {}) }).eq('id', r.id)
+  }
+  return acesso
+}
+
+// Mensagem pronta do botão "abrir conversa" (página de obrigado, e-mail): código da venda da Stripe entre parênteses,
+// ou a frase fixa (Hotmart, sem código). Quem só apertou o botão recebe o acesso e nada mais (sem resposta do agente).
+const CODIGO_BOTAO = /\((?:kod|c[oó]digo|code):\s*([A-Za-z0-9]{6,12})\)/i
+const FRASE_BOTAO = /acabo de unirme al reto riseme|w[łl]a[śs]nie do[łl][ąa]czy[łl]am do wyzwania riseme/i
+const FALA_DE_ACESSO = /acces|dost[eę]p|contrase|has[łl]|password|entrar|ingres|login|zalog|wej[śs][ćc]/i
+
+/**
+ * Chamado a cada mensagem recebida de aluna, antes do agente. Libera o que estava em espera para ela. Devolve true quando
+ * a mensagem já está atendida pelo acesso que vai sair (botão, ou fala curta sobre acesso) e o agente NÃO deve responder:
+ * evita duas mensagens de acesso (a da fila e um reenvio do agente com senha nova).
+ */
+export async function atenderPedido(phone: string, texto: string): Promise<boolean> {
+  const codigo = texto.match(CODIGO_BOTAO)?.[1]
+  const botao = Boolean(codigo) || FRASE_BOTAO.test(texto)
+  for (let tentativa = 0; tentativa < (botao ? 4 : 1); tentativa++) {
+    if (tentativa) await new Promise((r) => setTimeout(r, 5000)) // o botão pode chegar antes de o webhook da venda gravar
+    if (await liberarEspera(phone)) return botao || (texto.length <= 200 && FALA_DE_ACESSO.test(texto))
+    if (codigo) {
+      // Escreveu de um número diferente do checkout: acha a venda pelo fim do id da sessão da Stripe.
+      const { data: v } = await admin().from('stripe_vendas').select('wa_outbox_id').like('session_id', `%${codigo}`).limit(2)
+      if (v?.length === 1 && v[0].wa_outbox_id && (await liberarEspera(phone, v[0].wa_outbox_id as number))) return true
+    }
+  }
+  return false
+}
 // Com a instância DESCONECTADA só roda o que não entrega nada ao WhatsApp (a Z-API guardaria numa fila e soltaria tudo junto).
 const SEM_WHATSAPP = ['teste-agente', 'hotmart', 'zapi', 'email-suporte']
 
@@ -96,6 +155,7 @@ export async function acessoPendente(phone: string): Promise<string | null> {
     .in('kind', ['acesso', 'acesso-retro'])
     .is('sent_at', null)
     .lt('attempts', MAX_TENTATIVAS)
+    .lt('send_after', LIMITE_ESPERA) // em espera (regime a pedido) não tem hora marcada
     .order('send_after', { ascending: true })
     .limit(1)
   return data?.[0]?.send_after ?? null
