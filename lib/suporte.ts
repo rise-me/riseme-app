@@ -6,7 +6,8 @@ export const linkWhatsAppSuporte = (texto: string) => `https://wa.me/${SUPPORT_W
 // 14/11/2026 — WhatsApp do suporte restrito pela Meta (Bruno: "deixar claro que o WhatsApp não está funcionando e que a
 // gente responde tudo por e-mail"). Enquanto true, páginas e e-mails mandam a aluna para o E-MAIL do suporte (o bot
 // responde lá: lib/email-suporte.ts). WhatsApp voltou → false (quem muda é o dono do bot, com o ok do Bruno).
-export const WHATSAPP_FORA_DO_AR = true
+// 15/11/2026 ~16h35 BRT: restrição caiu, Z-API reconectada, 1º clique real no botão conferido → false.
+export const WHATSAPP_FORA_DO_AR = false
 export const EMAIL_SUPORTE: Record<string, string> = { pl: 'pomoc@riseme.app', es: 'ayuda@riseme.app' }
 export const emailSuporte = (idioma?: string | null) => EMAIL_SUPORTE[idioma ?? ''] ?? 'ayuda@riseme.app'
 export const linkEmailSuporte = (idioma: string | null | undefined, assunto: string) => `mailto:${emailSuporte(idioma)}?subject=${encodeURIComponent(assunto)}`

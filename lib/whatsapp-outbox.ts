@@ -252,6 +252,9 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     .lt('attempts', MAX_TENTATIVAS)
     .lte('send_after', agora)
   if (desconectada) consulta = consulta.in('kind', SEM_WHATSAPP) // o resto fica na fila, intacto, até reconectar
+  // Pausados nem entram na rodada: na reconexão de 15/11 havia ~100 lembretes vencidos na frente e o acesso de quem
+  // escrevesse esperaria ~7 rodadas atrás deles (15 por minuto).
+  else consulta = consulta.not('kind', 'in', `(${[...PAUSADOS].map((k) => `"${k}"`).join(',')})`)
   const { data } = await consulta.order('send_after', { ascending: true }).limit(POR_RODADA)
 
   let enviados = 0
