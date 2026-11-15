@@ -53,7 +53,7 @@ Há alunas que reclamam que a Calistenia é FÁCIL demais, então a trilha leve 
 quando a aluna mostra dificuldade:
 1. **"¿Cómo te fue hoy?"** no fim da aula (quando o dia é concluído): [Fácil] [Bien] [Muy difícil]. Construído 15/11
    (`components/challenges/ComoTeFue.tsx`), desligado até `COMO_TE_FUE_ATIVO=1` (admin vê). Guarda em
-   `user_metadata.como_te_fue`. Enquanto a trilha não existe, "Muy difícil" responde "Ve a tu ritmo: pausa el video…".
+   `user_metadata.como_te_fue`. LIGADO 15/11 13h01 BRT (Bruno: "ficou boa… bem minimalistas, gostei"). Enquanto a trilha não existe, "Muy difícil" responde "Ve a tu ritmo: pausa el video…".
    Quando existir, "Muy difícil" oferece a versão suave ("¿Quieres probarla?").
 2. Saiu antes da metade da aula → a oferta aparece 1 vez na próxima abertura (a fazer, quando houver trilha).
 3. Bot: "es muy fuerte" / "no puedo" → aponta a versão suave (pedido ao Arquiteto, quando houver trilha).
