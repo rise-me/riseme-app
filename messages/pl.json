@@ -783,32 +783,32 @@
     "meta": "{challenge} · {min} min"
   },
   "comoTeFue": {
-    "question": "Jak Ci poszło?",
+    "question": "Jak Ci dziś poszło?",
     "facil": "Łatwo",
     "bien": "Dobrze",
     "dificil": "Bardzo trudno",
     "thanks": "Dziękujemy! 💪",
-    "thanksHard": "Dziękujemy, że nam mówisz 💛",
-    "hardTip": "Ćwicz we własnym tempie: zatrzymaj film, kiedy potrzebujesz, i odpocznij między ćwiczeniami."
+    "thanksHard": "Dziękujemy, że dałaś nam znać 💛",
+    "hardTip": "Ćwicz w swoim tempie: zatrzymaj film, kiedy tylko potrzebujesz, i odpoczywaj między ćwiczeniami."
   },
   "conquista": {
     "cta": "Dalej",
     "share": "Zaproś przyjaciółkę 💛",
     "d3": {
       "title": "3 dni za Tobą!",
-      "body": "Najtrudniejszy jest początek, a Ty masz go już za sobą."
+      "body": "Najtrudniej jest zacząć, a Ty już to zrobiłaś."
     },
     "d7": {
       "title": "Cały tydzień!",
-      "body": "Tylko 1 na 10 osób dochodzi do 7. dnia. Twoje ciało już zaczęło się zmieniać: tak trzymaj."
+      "body": "Tylko 1 na 10 osób dochodzi do 7. dnia. Twoje ciało już zaczyna się zmieniać. Tak trzymaj!"
     },
     "d14": {
       "title": "Połowa wyzwania!",
-      "body": "14 dni treningów. To już nawyk i widać to."
+      "body": "14 dni treningów. To już nawyk i to widać."
     },
     "d21": {
       "title": "Został Ci tylko tydzień!",
-      "body": "21 dni bez poddawania się. Ostatnia prosta należy do Ciebie."
+      "body": "21 dni i ani razu się nie poddałaś. Ostatnia prosta jest Twoja!"
     }
   }
 }
