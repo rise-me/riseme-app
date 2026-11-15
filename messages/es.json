@@ -782,5 +782,25 @@
     "thanks": "¡Gracias! 💪",
     "thanksHard": "Gracias por contarnos 💛",
     "hardTip": "Ve a tu ritmo: pausa el video cuando lo necesites y descansa entre ejercicios."
+  },
+  "conquista": {
+    "cta": "Seguir",
+    "share": "Invitar a una amiga 💛",
+    "d3": {
+      "title": "¡3 días completados!",
+      "body": "Lo más difícil es empezar, y tú ya lo hiciste. Menos de 1 de cada 5 llega hasta aquí en su primera semana."
+    },
+    "d7": {
+      "title": "¡Una semana completa!",
+      "body": "Solo 1 de cada 10 llega al día 7. Tu cuerpo ya empezó a cambiar: sigue así."
+    },
+    "d14": {
+      "title": "¡Mitad del desafío!",
+      "body": "14 días entrenando. Ya es un hábito, y se nota."
+    },
+    "d21": {
+      "title": "¡Solo te falta una semana!",
+      "body": "21 días sin rendirte. La recta final es tuya."
+    }
   }
 }

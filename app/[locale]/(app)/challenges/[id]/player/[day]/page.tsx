@@ -46,7 +46,10 @@ export default async function PlayerPage({
 
   // "¿Cómo te fue hoy?" no fim da aula: es + pl, desligado para as alunas até COMO_TE_FUE_ATIVO=1 (admin vê)
   const user = await getCurrentUser()
-  const perguntar = ['es', 'pl'].includes(locale.split('-')[0]) && recursoLigado('COMO_TE_FUE_ATIVO', user?.admin === true)
+  const esPl = ['es', 'pl'].includes(locale.split('-')[0])
+  const perguntar = esPl && recursoLigado('COMO_TE_FUE_ATIVO', user?.admin === true)
+  // Conquista nos dias 3/7/14/21: desligada até CONQUISTA_ATIVO=1 (admin vê)
+  const conquistas = esPl && recursoLigado('CONQUISTA_ATIVO', user?.admin === true)
 
   return (
     <VideoPlayer
@@ -57,6 +60,8 @@ export default async function PlayerPage({
       hasPase={access.hasActiveSubscription}
       hlsPath={hlsPath}
       perguntar={perguntar}
+      conquistas={conquistas}
+      userId={user?.id ?? null}
     />
   )
 }

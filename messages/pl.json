@@ -790,5 +790,25 @@
     "thanks": "Dziękujemy! 💪",
     "thanksHard": "Dziękujemy, że nam mówisz 💛",
     "hardTip": "Ćwicz we własnym tempie: zatrzymaj film, kiedy potrzebujesz, i odpocznij między ćwiczeniami."
+  },
+  "conquista": {
+    "cta": "Dalej",
+    "share": "Zaproś przyjaciółkę 💛",
+    "d3": {
+      "title": "3 dni za Tobą!",
+      "body": "Najtrudniejszy jest początek, a Ty masz go już za sobą."
+    },
+    "d7": {
+      "title": "Cały tydzień!",
+      "body": "Tylko 1 na 10 osób dochodzi do 7. dnia. Twoje ciało już zaczęło się zmieniać: tak trzymaj."
+    },
+    "d14": {
+      "title": "Połowa wyzwania!",
+      "body": "14 dni treningów. To już nawyk i widać to."
+    },
+    "d21": {
+      "title": "Został Ci tylko tydzień!",
+      "body": "21 dni bez poddawania się. Ostatnia prosta należy do Ciebie."
+    }
   }
 }

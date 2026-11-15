@@ -790,5 +790,25 @@
     "thanks": "Thank you! 💪",
     "thanksHard": "Thanks for telling us 💛",
     "hardTip": "Go at your own pace: pause the video when you need to and rest between exercises."
+  },
+  "conquista": {
+    "cta": "Continue",
+    "share": "Invite a friend 💛",
+    "d3": {
+      "title": "3 days done!",
+      "body": "Starting is the hardest part, and you already did it."
+    },
+    "d7": {
+      "title": "A whole week!",
+      "body": "Only 1 in 10 make it to day 7. Your body has already started to change: keep going."
+    },
+    "d14": {
+      "title": "Halfway there!",
+      "body": "14 days of training. It's a habit now, and it shows."
+    },
+    "d21": {
+      "title": "Just one week left!",
+      "body": "21 days without giving up. The final stretch is yours."
+    }
   }
 }
