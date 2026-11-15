@@ -138,7 +138,7 @@ async function avisarEquipe(assunto: string, linhas: string[]): Promise<void> {
 }
 
 // ── E-mail recebido ─────────────────────────────────────────────────────────────────────────────────────────────
-interface Recebido { id: string; de: string; nome: string | null; para: string[]; assunto: string; texto: string; messageId: string | null; headers: Record<string, string>; anexos: number }
+interface Recebido { id: string; de: string; nome: string | null; para: string[]; assunto: string; texto: string; html: string | null; messageId: string | null; headers: Record<string, string>; anexos: number }
 
 async function buscarRecebido(id: string): Promise<Recebido | { erro: string }> {
   // A chave de ENVIO (RESEND_API_KEY) é restrita a enviar: ler o e-mail recebido pede uma chave de acesso total, à parte
@@ -155,7 +155,7 @@ async function buscarRecebido(id: string): Promise<Recebido | { erro: string }> 
   const headers: Record<string, string> = {}
   if (Array.isArray(j.headers)) for (const h of j.headers) headers[String(h.name).toLowerCase()] = String(h.value)
   else for (const [k, v] of Object.entries(j.headers ?? {})) headers[k.toLowerCase()] = String(v)
-  const texto = (j.text && j.text.trim()) || (j.html ?? '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<br\s*\/?>|<\/p>|<\/div>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  const texto = (j.text && j.text.trim()) || textoDoHtml(j.html ?? '')
   return {
     id,
     de: endereco.toLowerCase().trim(),
@@ -163,10 +163,34 @@ async function buscarRecebido(id: string): Promise<Recebido | { erro: string }> 
     para: (Array.isArray(j.to) ? j.to : [j.to ?? '']).map((t) => String(t).toLowerCase().replace(/^.*<|>.*$/g, '').trim()).filter(Boolean),
     assunto: (j.subject ?? '').trim(),
     texto,
+    html: j.html ?? null,
     messageId: j.message_id ?? headers['message-id'] ?? null,
     headers,
     anexos: j.attachments?.length ?? 0,
   }
+}
+
+const textoDoHtml = (html: string, semBlocoCitado = false) =>
+  (semBlocoCitado ? html.replace(/<blockquote[\s\S]*<\/blockquote>/gi, '\n').replace(/<div[^>]+class="[^"]*(gmail_quote|moz-cite-prefix|yahoo_quoted)[^"]*"[\s\S]*$/i, '') : html)
+    .replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<br\s*\/?>|<\/p>|<\/div>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+
+/**
+ * O que ela escreveu agora, sem a citação. Caso de origem (15/11/2026): 2 respostas ao aviso chegaram "vazias" e ficaram sem
+ * resposta. Webmails poloneses (onet, op) deixam a resposta ABAIXO da citação ou só no HTML; cortar no 1º sinal de citação
+ * jogava tudo fora. Ordem: resposta no topo → HTML sem o bloco citado → linhas fora da citação, abaixo dela.
+ */
+export function textoDela(texto: string, html?: string | null): string {
+  const topo = semCitacao(texto)
+  if (topo) return topo
+  if (html) {
+    const semBloco = semCitacao(textoDoHtml(html, true))
+    if (semBloco) return semBloco
+  }
+  const CABECALHO = /^(On .{5,120} wrote:|W dniu .{5,160}(pisze|napisa[łl]\w*(\(a\))?):?|Dnia .{5,160}(pisze|napisa[łl]\w*(\(a\))?):?|El .{5,160} escribi[oó]:|Em .{5,160} escreveu:|(Od|From|De|Do|To|Para|Temat|Subject|Asunto|Data|Date|Fecha):\s.*)$/i
+  const linhas = texto.replace(/\r/g, '').split('\n').map((l) => l.trim())
+  const temCitacaoMarcada = linhas.some((l) => l.startsWith('>'))
+  if (!temCitacaoMarcada) return '' // sem ">" não dá para separar o que é dela do que é nosso
+  return linhas.filter((l) => l && !l.startsWith('>') && !CABECALHO.test(l) && !/^-{2,}|^_{8,}$/.test(l)).join('\n').trim()
 }
 
 /** Tira a citação da resposta ("W dniu … pisze:", "> …") e deixa só o que ela escreveu agora. */
@@ -217,14 +241,25 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
   }
   if (!r.de.includes('@')) return `sem remetente (${emailId})`
   const db = admin()
-  const texto = semCitacao(r.texto).slice(0, 4000) + (r.anexos ? `\n[A aluna anexou ${r.anexos} arquivo(s); por e-mail o sistema ainda não abre anexos.]` : '')
+  const texto = textoDela(r.texto, r.html).slice(0, 4000) + (r.anexos ? `\n[A aluna anexou ${r.anexos} arquivo(s); por e-mail o sistema ainda não abre anexos.]` : '')
   const auto = ehAutomatico(r)
   // Grava primeiro (o Resend reenvia o aviso se demorarmos): quem gravou a 1ª linha deste id é quem responde.
   const meu = await gravar(r.de, KIND_IN, { id: r.id, para: r.para, assunto: r.assunto, texto, messageId: r.messageId, ...(auto ? { ignorado: auto } : {}) })
   const { data: iguais } = await db.from('whatsapp_outbox').select('id').eq('phone', r.de).eq('kind', KIND_IN).like('body', `%"id":"${r.id}"%`).order('id').limit(1)
   if (meu && iguais?.[0] && iguais[0].id !== meu) return `repetido (${emailId})`
   if (auto) return `ignorado: ${auto} (${r.de})`
-  if (!texto.trim()) return `vazio (${r.de})`
+  if (!texto.trim()) {
+    // Chegou sem texto nenhum (só a citação, ou enviado em branco): em vez de silêncio, pede a dúvida. 1 vez por dia por endereço.
+    const lingua = r.para.some((t) => t.startsWith('pomoc@')) || /\.pl$/i.test(r.de) ? 'pl' : 'es'
+    const { count: jaPediu } = await db.from('whatsapp_outbox').select('id', { count: 'exact', head: true }).eq('phone', r.de).eq('kind', KIND_OUT).gte('created_at', new Date(Date.now() - 24 * 3_600_000).toISOString()).like('body', '%"vazio":true%')
+    if ((jaPediu ?? 0) > 0) return `vazio de novo (${r.de})`
+    const pedido = lingua === 'pl'
+      ? 'Cześć! Dostaliśmy Twoją wiadomość, ale dotarła do nas bez treści. Napisz proszę jeszcze raz, w czym możemy pomóc (dostęp, logowanie, aplikacja, zwrot), a od razu się tym zajmiemy. 💚'
+      : '¡Hola! Recibimos tu mensaje, pero nos llegó sin texto. Escríbenos de nuevo contándonos en qué te ayudamos (acceso, inicio de sesión, la app, reembolso) y lo vemos enseguida. 💛'
+    const env = await enviarEmailSuporte({ para: r.de, assunto: /^re:/i.test(r.assunto) ? r.assunto : `Re: ${r.assunto || ASSUNTO_PADRAO[lingua]}`, texto: pedido, idioma: lingua, emRespostaA: r.messageId, auto: true, registrar: false })
+    if (env.ok) await gravar(r.de, KIND_OUT, { assunto: r.assunto, texto: pedido, resendId: env.id, auto: true, vazio: true })
+    return `vazio: pedi a dúvida (${r.de})`
+  }
 
   const desde = new Date(Date.now() - 24 * 3_600_000).toISOString()
   const { count: respostas } = await db.from('whatsapp_outbox').select('id', { count: 'exact', head: true }).eq('phone', r.de).eq('kind', KIND_OUT).gte('created_at', desde).like('body', '%"auto":true%')
