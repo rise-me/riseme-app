@@ -92,6 +92,11 @@ Só aulas que servem INTEIRAS (sem corte), em ordem de progressão. **APROVADA p
 3. Uma aula pode ter mais de uma versão no mesmo dia (ex.: `1/5` normal e `1/5-rodillas`)? Qual formato você sugere no `hls-lessons.json`?
 4. O que trava a cadência de 1–2 desafios por semana no Pase hoje?
 
+## CORREÇÃO 15/11: a ioga na cadeira em ES era INGLÊS
+O YouTube do desafio 4 ("Yoga en la Silla") fala inglês (conferido ouvindo trechos, Whisper). Y01, Y02, Y04, Y17 nunca
+existiram em espanhol; desde 12/11 as alunas ES viam essas 4 aulas em inglês. Corrigido 15/11 (12bf606): em ES o
+Rodillas mostra 8 aulas (PL segue com 12). Pedido ao Subidor: dublar as 4 em ES no desafio 17 (crédito com o Bruno).
+
 ## LIGADO PARA AS ALUNAS 12/11 ~21h48 BRT
 - 18 aulas no R2 (Subidor, commits 4bf6e88 + 6d228ea), conferidas tocando: es (12 R2 + 4 ioga YouTube) e pl (18 R2), todas respondendo. `CUIDADO_ATIVO=1` gravado na Vercel Production + redeploy (riseme.app). O bot liga junto (d0d7eb4).
 - **Base do teste (medida 12/11):** contas criadas 01–28/10 com quiz guardado, dia 7 em até 14 dias: COM dor 9,8% (16/164; joelho 10,5%, costas 16,7%, as duas 4,4%) × SEM dor 7,3% (12/164). Fez o dia 1: 40% × 39%. Meta do teste: 1,5× = ≥ 14,7% nas contas novas com dor, a partir de 13/11; n pequeno, ler em 26/11 (14 dias) com as contas de 13/11 em diante que já tiverem 14 dias.
