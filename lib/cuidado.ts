@@ -88,28 +88,28 @@ const AULAS: Record<TipoLista, AulaCuidado[]> = {
   ],
   // Versión suave: lista aprovada pelo Bruno 15/11 (leitura aula a aula do RESUMO-EMPEZANDO.md do Subidor). Inteiras, sem
   // equipamento além de cadeira/parede, sem ajoelhar nem salto. 18 = Caminhada Interior (módulo 40), 19 = Treinos Rápidos
-  // (módulo 17), dia = nº da aula no módulo (proposta ao Subidor 15/11). Títulos provisórios até os nomes.*.tsv dele.
+  // (módulo 17), dia = nº da aula no módulo (confirmados pelo Subidor 15/11). Títulos = nomes.{en,es,pl}.tsv dele (revisão nativa).
   suave: [
     { codigo: 'C07', desafio: '18', dia: 7, lugar: 'silla',
-      titulo: { es: 'Ejercicio suave sentada', pl: 'Łagodne ćwiczenia na siedząco', en: 'Gentle Seated Workout' } },
+      titulo: { es: 'En la silla, a ritmo suave', pl: 'Spokojny trening na krześle', en: 'Gentle Chair Workout' } },
     { codigo: 'C01', desafio: '18', dia: 1,
-      titulo: { es: 'Marcha suave en casa', pl: 'Łagodny marsz w domu', en: 'Gentle Home Walk' } },
+      titulo: { es: 'Marcha suave y pasos', pl: 'Spokojny marsz i kroki', en: 'Easy March and Steps' } },
     { codigo: 'R15', desafio: '19', dia: 15, lugar: 'pared',
       titulo: { es: 'Estiramientos en la pared', pl: 'Rozciąganie przy ścianie', en: 'Wall Stretches' } },
     { codigo: 'C05', desafio: '18', dia: 5,
-      titulo: { es: 'Marcha con brazos', pl: 'Marsz z pracą rąk', en: 'Walk with Arm Moves' } },
+      titulo: { es: 'Marcha con movimientos de brazos', pl: 'Marsz z ruchami rąk', en: 'Marching with Arm Moves' } },
     { codigo: 'R02', desafio: '19', dia: 2, lugar: 'pared',
-      titulo: { es: 'Piernas en la pared', pl: 'Nogi na ścianie', en: 'Legs on the Wall' } },
+      titulo: { es: 'Piernas en la pared', pl: 'Nogi na ścianie', en: 'Legs Up the Wall' } },
     { codigo: 'C14', desafio: '18', dia: 14, lugar: 'silla',
-      titulo: { es: 'Más ritmo, sentada', pl: 'Więcej rytmu na siedząco', en: 'Seated Cardio' } },
+      titulo: { es: 'En la silla, a buen ritmo', pl: 'Trening na krześle w równym tempie', en: 'Chair Workout, Steady Pace' } },
     { codigo: 'R21', desafio: '19', dia: 21, lugar: 'pared',
-      titulo: { es: 'Espalda en la pared', pl: 'Plecy przy ścianie', en: 'Wall Back Series' } },
+      titulo: { es: 'Movilidad con apoyo en la pared', pl: 'Mobilność na stojąco przy ścianie', en: 'Standing Wall Mobility' } },
     { codigo: 'C09', desafio: '18', dia: 9,
-      titulo: { es: 'Caminata con brazos activos', pl: 'Marsz z aktywnymi ramionami', en: 'Active Arms Walk' } },
+      titulo: { es: 'Marcha con giros y trabajo de hombros', pl: 'Marsz ze skrętami i pracą barków', en: 'Marching with Twists and Shoulders' } },
     { codigo: 'C08', desafio: '18', dia: 8, lugar: 'silla',
-      titulo: { es: 'En forma, sentada', pl: 'Forma na siedząco', en: 'Seated & Fit' } },
+      titulo: { es: 'En la silla: toques y golpes', pl: 'Trening na krześle: kroki i ciosy', en: 'Chair Workout: Taps and Punches' } },
     { codigo: 'C15', desafio: '18', dia: 15,
-      titulo: { es: 'Caminata para los brazos', pl: 'Marsz dla ramion', en: 'Arm-Toning Walk' } },
+      titulo: { es: 'Pasos laterales y trabajo de brazos', pl: 'Kroki w bok z ruchami rąk', en: 'Side Steps and Arms' } },
   ],
 }
 
