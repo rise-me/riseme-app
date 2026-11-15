@@ -77,6 +77,12 @@ export interface Venda {
 export const urlPaginaReembolso = (locale: string) => `${APP_URL()}${locale === 'es' ? '' : `/${locale}`}/refund` // es sem prefixo (as-needed)
 
 // Linha no fim do e-mail de acesso: como pedir reembolso (Bruno 09/11: tem que ficar claro para ela, caso deseje).
+// Destaque no topo do e-mail de acesso (Bruno 15/11/2026, mesma frase da página de obrigado): metade dos reembolsos sai em ~1 h
+// da compra, por susto na chegada ("vai cobrar todo mês?"). NÃO dizer "nada mais será cobrado": há upsells.
+const SELO_EMAIL: Record<string, string> = {
+  pl: 'Płatność jednorazowa · bez subskrypcji · dożywotni dostęp',
+  en: 'One-time payment · no subscription · lifetime access',
+}
 // WhatsApp fora do ar (lib/suporte.ts WHATSAPP_FORA_DO_AR): a nota avisa e manda responder o próprio e-mail.
 const NOTA_EMAIL_SEM_WHATS: Record<string, (url: string) => string> = {
   pl: (url) => `Ważne: nasz WhatsApp chwilowo nie działa, dlatego dostęp wysyłamy teraz tylko e-mailem. Masz pytanie? Odpowiedz na tę wiadomość albo napisz na ${emailSuporte('pl')}. Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, odpowiedz na tę wiadomość albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
@@ -379,6 +385,7 @@ async function enviarEmail(db: Db, v: Venda): Promise<void> {
     code: v.codigo!,
     link,
     locale: v.locale,
+    destaque: SELO_EMAIL[v.locale],
     notaTexto: nota,
     notaHtml: escapeHtml(nota).replace(escapeHtml(url), `<a href="${url}" style="color:#1a1a1a;">${escapeHtml(url)}</a>`),
   })

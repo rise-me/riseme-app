@@ -110,8 +110,8 @@ const COPY: Record<AppLocale, Copy> = {
   },
 }
 
-function renderHtml(c: Copy, params: { email: string; code: string; link: string; notaHtml?: string }): string {
-  const { email, code, link, notaHtml: nota } = params
+function renderHtml(c: Copy, params: { email: string; code: string; link: string; notaHtml?: string; destaque?: string }): string {
+  const { email, code, link, notaHtml: nota, destaque } = params
   return `<!doctype html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -126,6 +126,7 @@ function renderHtml(c: Copy, params: { email: string; code: string; link: string
         <tr><td style="padding:32px;">
           <h1 style="margin:0 0 8px;font-size:22px;font-weight:800;line-height:1.25;">${c.greeting}</h1>
           <p style="margin:0 0 24px;font-size:15px;line-height:1.5;color:#555;">${c.intro}</p>
+          ${destaque ? `<p style="margin:0 0 24px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;font-size:14px;line-height:1.45;font-weight:700;color:#14532d;text-align:center;">${destaque}</p>` : ''}
 
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;border-radius:16px;padding:4px;">
             <tr><td style="padding:16px 18px;">
@@ -159,11 +160,12 @@ function renderHtml(c: Copy, params: { email: string; code: string; link: string
 </html>`
 }
 
-function renderText(c: Copy, params: { email: string; code: string; link: string; notaTexto?: string }): string {
+function renderText(c: Copy, params: { email: string; code: string; link: string; notaTexto?: string; destaque?: string }): string {
   return [
     c.greeting,
     '',
     c.intro,
+    ...(params.destaque ? ['', params.destaque, ''] : []),
     `${c.emailLabel}: ${params.email}`,
     `${c.passwordLabel}: ${params.code}`,
     '',
@@ -187,6 +189,8 @@ export async function sendAccessEmail(params: {
   /** Parágrafo extra no fim (HTML já pronto, e a versão em texto). Ex.: como pedir reembolso nas vendas da Stripe. */
   notaHtml?: string
   notaTexto?: string
+  /** Frase curta em destaque logo abaixo da abertura (texto puro). Ex.: "pagamento único · sem assinatura · acesso vitalício". */
+  destaque?: string
 }): Promise<ResultadoEmail> {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
