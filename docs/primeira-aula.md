@@ -62,7 +62,7 @@ Bônus: a pergunta mede fácil × difícil aula por aula (quais dias pesam; se m
 Aulas: Subidor transcrevendo os módulos 17, 40 e 61 desde 14/11 → `fabrica-dublagem/trabalho/empezando/RESUMO-EMPEZANDO.md`.
 Prévia local: `npm run dev` → `/dev-aula/player/1`.
 
-## Tela de conquista (dias 3, 7, 14, 21) — construída 15/11, desligada até CONQUISTA_ATIVO=1
+## Tela de conquista (dias 3, 7, 14, 21) — LIGADA 15/11 (textos do dia 7 e 14 escritos pelo Bruno: "grupo selecto"; es e pl aprovados por ele)
 Aparece ao sair da aula concluída (ou no fim do vídeo), uma vez por desafio e dia (`components/challenges/Conquista.tsx`).
 O 28 fica de fora porque lá já existe a oferta do Pase. Textos com número só onde o dado sustenta (14/11, contas
 10/10–06/11): "menos de 1 de cada 5" fazem 3 aulas na 1ª semana (17%, ES) e "1 de cada 10" chegam ao dia 7 (9,7%; PL 9%).
@@ -71,7 +71,7 @@ Arquiteto quando o WhatsApp voltar. Prévia: `/dev-aula/player/7?conquista=1`.
 
 ## Próximos (ordem combinada 14/11)
 1. FEITO 14/11: Bruno viu e aprovou; ligado. Ler em 24/11.
-2. Tela de conquista: construída 15/11 (ver acima), aguarda ok do Bruno; WhatsApp depois.
+2. Tela de conquista: LIGADA 15/11; parabéns por WhatsApp quando ele voltar (Arquiteto).
 3. "Versión suave" (ver acima): Subidor transcrevendo os módulos 17, 40 e 61 (confirmou 15/11) → ler aula por aula → lista ao Bruno.
 4. Aviso nos dias pesados da Calistenia (fase 2 do Tu cuidado): ler as 28 aulas uma a uma.
    Já se sabe (chat da CL-KR, 14/11): as aulas 11, 16, 17, 22 e 23 têm salto.
