@@ -6,6 +6,8 @@ import { VideoPlayer } from './VideoPlayer'
 import { canAccessChallenge, getUserAccess } from '@/lib/user-access-server'
 import { getProgressForChallenge } from '@/lib/progress-server'
 import { signLessonPath } from '@/lib/hls-token'
+import { getCurrentUser } from '@/lib/current-user-server'
+import { recursoLigado } from '@/lib/previa'
 
 export default async function PlayerPage({
   params,
@@ -42,6 +44,10 @@ export default async function PlayerPage({
   // Aula no R2: passe assinado só depois das travas de acesso acima
   const hlsPath = currentDay.video?.provider === 'hls' ? signLessonPath(currentDay.video.id) : null
 
+  // "¿Cómo te fue hoy?" no fim da aula: es + pl, desligado para as alunas até COMO_TE_FUE_ATIVO=1 (admin vê)
+  const user = await getCurrentUser()
+  const perguntar = ['es', 'pl'].includes(locale.split('-')[0]) && recursoLigado('COMO_TE_FUE_ATIVO', user?.admin === true)
+
   return (
     <VideoPlayer
       challenge={challenge}
@@ -50,6 +56,7 @@ export default async function PlayerPage({
       locale={locale}
       hasPase={access.hasActiveSubscription}
       hlsPath={hlsPath}
+      perguntar={perguntar}
     />
   )
 }

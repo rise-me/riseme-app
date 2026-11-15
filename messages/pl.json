@@ -781,5 +781,14 @@
     "doneCta": "Zrób jeszcze jedną lekcję",
     "dayTitle": "Dzień {day} · {title}",
     "meta": "{challenge} · {min} min"
+  },
+  "comoTeFue": {
+    "question": "Jak Ci poszło?",
+    "facil": "Łatwo",
+    "bien": "Dobrze",
+    "dificil": "Bardzo trudno",
+    "thanks": "Dziękujemy! 💪",
+    "thanksHard": "Dziękujemy, że nam mówisz 💛",
+    "hardTip": "Ćwicz we własnym tempie: zatrzymaj film, kiedy potrzebujesz, i odpocznij między ćwiczeniami."
   }
 }

@@ -744,5 +744,14 @@
     "doneCta": "Fazer outra aula hoje",
     "dayTitle": "Dia {day} · {title}",
     "meta": "{challenge} · {min} min"
+  },
+  "comoTeFue": {
+    "question": "Como foi hoje?",
+    "facil": "Fácil",
+    "bien": "Bem",
+    "dificil": "Muito difícil",
+    "thanks": "Obrigada! 💪",
+    "thanksHard": "Obrigada por contar 💛",
+    "hardTip": "Vá no seu ritmo: pause o vídeo quando precisar e descanse entre os exercícios."
   }
 }

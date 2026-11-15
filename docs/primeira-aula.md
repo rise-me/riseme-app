@@ -48,11 +48,24 @@ efeito do cuidado como a DIFERENÇA entre com dor e sem dor no mesmo período (b
 Critério (proposto 14/11; Bruno: "pode fazer"): contas ES criadas depois de ligar, "1 aula em até 72 h entre as que entraram"
 ≥ 46% (1,2× a base de 38%); fracasso ≤ 38%. Leitura 24/11 (contas de 14/11 15h a 21/11 + 72 h).
 
+## "Versión suave" (Bruno 15/11: opcional, só para quem acha difícil)
+Há alunas que reclamam que a Calistenia é FÁCIL demais, então a trilha leve nunca aparece para todas. Ela é oferecida só
+quando a aluna mostra dificuldade:
+1. **"¿Cómo te fue hoy?"** no fim da aula (quando o dia é concluído): [Fácil] [Bien] [Muy difícil]. Construído 15/11
+   (`components/challenges/ComoTeFue.tsx`), desligado até `COMO_TE_FUE_ATIVO=1` (admin vê). Guarda em
+   `user_metadata.como_te_fue`. Enquanto a trilha não existe, "Muy difícil" responde "Ve a tu ritmo: pausa el video…".
+   Quando existir, "Muy difícil" oferece a versão suave ("¿Quieres probarla?").
+2. Saiu antes da metade da aula → a oferta aparece 1 vez na próxima abertura (a fazer, quando houver trilha).
+3. Bot: "es muy fuerte" / "no puedo" → aponta a versão suave (pedido ao Arquiteto, quando houver trilha).
+Nome na tela: "versión suave", nunca "para principiantes"; conta como o dia; o desafio dela não muda.
+Bônus: a pergunta mede fácil × difícil aula por aula (quais dias pesam; se muitas marcam "Fácil", abre uma versão mais puxada).
+Aulas: Subidor transcrevendo os módulos 17, 40 e 61 desde 14/11 → `fabrica-dublagem/trabalho/empezando/RESUMO-EMPEZANDO.md`.
+Prévia local: `npm run dev` → `/dev-aula/player/1`.
+
 ## Próximos (ordem combinada 14/11)
 1. FEITO 14/11: Bruno viu e aprovou; ligado. Ler em 24/11.
 2. Tela de conquista no dia 3 e no dia 7 (app) + parabéns por WhatsApp (pedido ao Arquiteto dos Fluxos).
-3. "Empezando de cero": transcrição dos módulos 40, 61 e 17. O chat do Subidor estava fechado em 14/11: pedido em
-   `docs/HANDOFF-EMPEZANDO-DE-CERO.md`, ainda não entregue → ler aula por aula → lista ao Bruno.
+3. "Versión suave" (ver acima): Subidor transcrevendo os módulos 17, 40 e 61 (confirmou 15/11) → ler aula por aula → lista ao Bruno.
 4. Aviso nos dias pesados da Calistenia (fase 2 do Tu cuidado): ler as 28 aulas uma a uma.
    Já se sabe (chat da CL-KR, 14/11): as aulas 11, 16, 17, 22 e 23 têm salto.
 5. Consertos: títulos dos dias 3–4; dia 1 do Pilates em inglês; dia 20 da Calistenia ES = vídeo do dia 6 (Subidor).

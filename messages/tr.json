@@ -781,5 +781,14 @@
     "doneCta": "Do another class today",
     "dayTitle": "Day {day} · {title}",
     "meta": "{challenge} · {min} min"
+  },
+  "comoTeFue": {
+    "question": "How did it go today?",
+    "facil": "Easy",
+    "bien": "Good",
+    "dificil": "Very hard",
+    "thanks": "Thank you! 💪",
+    "thanksHard": "Thanks for telling us 💛",
+    "hardTip": "Go at your own pace: pause the video when you need to and rest between exercises."
   }
 }

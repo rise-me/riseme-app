@@ -10,6 +10,7 @@ import { track } from '@/lib/posthog/track'
 import { mockChallenges, type MockChallenge } from '@/lib/mock-challenges'
 import { HLS_BASE_URL, STREAM_CUSTOMER_HOST, type LessonVideo, type MockDay } from '@/lib/mock-challenge-days'
 import { CastTvHelp } from '@/components/challenges/CastTvHelp'
+import { ComoTeFue } from '@/components/challenges/ComoTeFue'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 import { marcaOfertaDaAula, ofertaDaAulaJaMostrada, ofertaMostradaHoje } from '@/lib/pase-oferta'
 
@@ -23,6 +24,10 @@ interface Props {
   // Aulas fora de um desafio ("Tu cuidado", lib/cuidado.ts): rota própria e nenhuma oferta do Pase no meio.
   basePath?: string
   semOferta?: boolean
+  // "¿Cómo te fue hoy?" quando a aula é concluída (components/challenges/ComoTeFue.tsx)
+  perguntar?: boolean
+  // Só a prévia de desenvolvimento (/dev-aula): abre a tela como se a aula já tivesse sido concluída
+  previaConcluida?: boolean
 }
 
 // O que o poll de progresso precisa, igual pros dois provedores
@@ -234,7 +239,7 @@ function loadYouTubeAPI(): Promise<void> {
   return apiLoadingPromise
 }
 
-export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase: temPase, hlsPath, basePath, semOferta }: Props) {
+export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase: temPase, hlsPath, basePath, semOferta, perguntar, previaConcluida }: Props) {
   // Sem oferta = como quem já tem o Pase: nenhuma das 3 ofertas abre.
   const hasPase = temPase || semOferta === true
   const base = basePath ?? `/${locale}/challenges/${challenge.id}`
@@ -274,7 +279,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   // ou o vídeo chegar ao fim. Uma vez por aula, só pra quem não tem o Pase.
   const isFinalDay = currentDayNumber >= days.length
   const offerDay = !hasPase && (currentDayNumber === 1 || isFinalDay)
-  const [dayDone, setDayDone] = useState(false)
+  const [dayDone, setDayDone] = useState(previaConcluida === true)
   const [offerOpen, setOfferOpen] = useState(false)
   const pendingNavRef = useRef<(() => void) | null>(null)
 
@@ -313,7 +318,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   useEffect(() => {
     savedRef.current = false
     heardRef.current = false
-    setDayDone(false)
+    setDayDone(previaConcluida === true)
     setElapsed(0)
     setFailCode(null)
     setMuted(false)
@@ -547,7 +552,9 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
           </button>
         </div>
 
-        {nextDay && (
+        {perguntar && dayDone && <ComoTeFue challengeId={challenge.id} dayNumber={currentDayNumber} />}
+
+        {nextDay && !(perguntar && dayDone) && (
           <div className="flex items-center gap-3 bg-white/5 rounded-2xl p-3">
             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
               <span className="text-lg">{challenge.thumbnail_emoji}</span>
