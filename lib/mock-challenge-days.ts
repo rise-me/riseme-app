@@ -92,7 +92,13 @@ const VIDEOS_BY_CHALLENGE: Record<string, string[]> = {
   ],
 }
 
-// Vídeos dublados por idioma. Dia sem vídeo no idioma cai no default (espanhol) acima.
+// Idioma da FALA nos vídeos do YouTube acima. Conferido 15/11/2026 ouvindo trechos de cada desafio (Whisper): só a
+// Calistenia (1) fala espanhol; Pilates (2, os 28), Yoga en la Silla (4) e Cuerpo Sexy (5) falam INGLÊS; Yoga Facial (3)
+// só tem música. Antes disso o app tratava todo YouTube como espanhol: aluna ES não via aviso nenhum e aluna PL via
+// "Audio en español" num vídeo em inglês (feedback de 08–09/11). null = sem fala (serve a qualquer idioma).
+const IDIOMA_YOUTUBE: Record<string, string | null> = { '1': 'es', '2': 'en', '3': null, '4': 'en', '5': 'en' }
+
+// Vídeos dublados por idioma. Dia sem vídeo no idioma cai no vídeo padrão (YouTube) acima.
 const VIDEO_OVERRIDES_BY_LOCALE: Record<string, Record<string, (string | undefined)[]>> = {
   tr: {
     '1': [
@@ -109,8 +115,9 @@ const VIDEO_OVERRIDES_BY_LOCALE: Record<string, Record<string, (string | undefin
 // true quando as aulas do desafio tocam no idioma da usuária (es é o áudio original dos
 // desafios do YouTube; os demais dependem de dublagem no R2, no Stream ou em VIDEO_OVERRIDES_BY_LOCALE)
 export function hasLocalizedVideos(challengeId: string, locale: string): boolean {
+  const yt = VIDEOS_BY_CHALLENGE[challengeId] ? IDIOMA_YOUTUBE[challengeId] : undefined
   return (
-    (locale === 'es' && Boolean(VIDEOS_BY_CHALLENGE[challengeId])) ||
+    (yt === null || (yt !== undefined && yt === audioLang(locale))) ||
     Object.values(HLS_LESSONS[challengeId] ?? {}).some((e) => e.languages.includes(audioLang(locale))) ||
     Boolean(STREAM_LESSONS[locale]?.[challengeId]) ||
     Boolean(VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId])
@@ -122,7 +129,7 @@ export function hasLocalizedVideos(challengeId: string, locale: string): boolean
 export function fallbackAudio(challengeId: string, locale: string): string | null {
   if (hasLocalizedVideos(challengeId, locale)) return null
   const temPadrao = Object.values(HLS_LESSONS[challengeId] ?? {}).some((e) => e.languages.includes(AUDIO_PADRAO))
-  return temPadrao ? AUDIO_PADRAO : 'es'
+  return temPadrao ? AUDIO_PADRAO : (IDIOMA_YOUTUBE[challengeId] ?? 'es')
 }
 
 // Aula de um desafio SÓ no idioma pedido, sem cair em outro (o "Tu cuidado" mostra a aula apenas quando ela existe na
@@ -137,7 +144,8 @@ export function videoNoIdioma(
   if (hls) return { video: { provider: 'hls', id: `${hls.path}/master_${lang}.m3u8` }, seconds: hls.seconds }
   const stream = STREAM_LESSONS[locale]?.[challengeId]?.[String(day)]
   if (stream) return { video: { provider: 'stream', id: stream.uid }, seconds: stream.seconds ?? undefined }
-  const youtubeId = VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId]?.[day - 1] ?? (lang === 'es' ? VIDEOS_BY_CHALLENGE[challengeId]?.[day - 1] : undefined)
+  const ytFala = IDIOMA_YOUTUBE[challengeId]
+  const youtubeId = VIDEO_OVERRIDES_BY_LOCALE[locale]?.[challengeId]?.[day - 1] ?? (ytFala === null || ytFala === lang ? VIDEOS_BY_CHALLENGE[challengeId]?.[day - 1] : undefined)
   if (youtubeId) return { video: { provider: 'youtube', id: youtubeId }, seconds: VIDEO_DURATIONS_SECONDS[youtubeId] }
   return null
 }
