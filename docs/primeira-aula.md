@@ -59,7 +59,11 @@ quando a aluna mostra dificuldade:
 3. Bot: "es muy fuerte" / "no puedo" → aponta a versão suave (pedido ao Arquiteto, quando houver trilha).
 Nome na tela: "versión suave", nunca "para principiantes"; conta como o dia; o desafio dela não muda.
 Bônus: a pergunta mede fácil × difícil aula por aula (quais dias pesam; se muitas marcam "Fácil", abre uma versão mais puxada).
-Aulas: Subidor transcrevendo os módulos 17, 40 e 61 desde 14/11 → `fabrica-dublagem/trabalho/empezando/RESUMO-EMPEZANDO.md`.
+LISTA APROVADA pelo Bruno 15/11 (10 aulas inteiras, sem equipamento além de cadeira/parede, sem ajoelhar nem salto; o
+Pilates Básico saiu porque as 10 pedem equipamento): C07, C01, R15, C05, R02, C14, R21, C09, C08, C15 (C = Caminhada
+Interior, id 18 no R2; R = Treinos Rápidos, id 19; dia = nº da aula no módulo). Subidor: tradução es+pl rodando 15/11;
+dublagem depois do crédito com o Bruno. APP PRONTO 15/11, desligado até SUAVE_ATIVO=1 (e só mostra aula que existe no
+idioma): `lib/cuidado.ts` tipo 'suave', página `/cuidado/suave`, "Muy difícil" oferece "¿Quieres probarla?" quando há aula.
 Prévia local: `npm run dev` → `/dev-aula/player/1`.
 
 ## Tela de conquista (dias 3, 7, 14, 21) — LIGADA 15/11 (textos do dia 7 e 14 escritos pelo Bruno: "grupo selecto"; es e pl aprovados por ele)

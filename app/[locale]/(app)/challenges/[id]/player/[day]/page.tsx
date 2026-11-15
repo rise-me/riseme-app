@@ -8,6 +8,7 @@ import { getProgressForChallenge } from '@/lib/progress-server'
 import { signLessonPath } from '@/lib/hls-token'
 import { getCurrentUser } from '@/lib/current-user-server'
 import { recursoLigado } from '@/lib/previa'
+import { aulasSuaveDisponiveis } from '@/lib/cuidado-server'
 
 export default async function PlayerPage({
   params,
@@ -50,6 +51,7 @@ export default async function PlayerPage({
   const perguntar = esPl && recursoLigado('COMO_TE_FUE_ATIVO', user?.admin === true)
   // Conquista nos dias 3/7/14/21: desligada até CONQUISTA_ATIVO=1 (admin vê)
   const conquistas = esPl && recursoLigado('CONQUISTA_ATIVO', user?.admin === true)
+  const suaveHref = perguntar && (await aulasSuaveDisponiveis(access, locale)) > 0 ? `/${locale}/cuidado/suave` : null
 
   return (
     <VideoPlayer
@@ -62,6 +64,7 @@ export default async function PlayerPage({
       perguntar={perguntar}
       conquistas={conquistas}
       userId={user?.id ?? null}
+      suaveHref={suaveHref}
     />
   )
 }

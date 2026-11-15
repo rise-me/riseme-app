@@ -24,7 +24,7 @@ export default async function DevAula({
   const challenge = mockChallenges.find((c) => c.id === '1')!
   return (
     <>
-      <VideoPlayer challenge={challenge} days={days} currentDayNumber={dia} locale={locale} hasPase hlsPath={null} perguntar previaConcluida />
+      <VideoPlayer challenge={challenge} days={days} currentDayNumber={dia} locale={locale} hasPase hlsPath={null} perguntar previaConcluida suaveHref={`/${locale}/dev-cuidado?tela=lista&tipo=suave&simula=1`} />
       {conquista && <ConquistaPrevia dia={dia} locale={locale} />}
     </>
   )

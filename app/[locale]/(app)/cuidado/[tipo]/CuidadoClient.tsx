@@ -4,10 +4,10 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { ArrowLeft, CheckCircle2, Play, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { AulaNaTela, TipoCuidado } from '@/lib/cuidado'
+import type { AulaNaTela, TipoLista } from '@/lib/cuidado'
 
 interface Props {
-  tipo: TipoCuidado
+  tipo: TipoLista
   aulas: (AulaNaTela & { feita: boolean })[]
   locale: string
 }
@@ -29,8 +29,8 @@ export function CuidadoClient({ tipo, aulas, locale }: Props) {
           <ArrowLeft size={18} className="text-background" />
         </button>
 
-        <div className="text-6xl mb-4">🎁</div>
-        <p className="text-background/60 text-xs font-bold uppercase tracking-wide">{t('tabName')}</p>
+        <div className="text-6xl mb-4">{tipo === 'suave' ? '🌱' : '🎁'}</div>
+        <p className="text-background/60 text-xs font-bold uppercase tracking-wide">{tipo === 'suave' ? t('suave.label') : t('tabName')}</p>
         <h1 className="text-2xl font-black leading-tight mb-2">{t(`${tipo}.name`)}</h1>
         <p className="text-background/80 text-sm leading-relaxed">{t(`${tipo}.topLine`)}</p>
 

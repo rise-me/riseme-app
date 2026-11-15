@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import { VideoPlayer } from '../../../../challenges/[id]/player/[day]/VideoPlayer'
 import { getUserAccess } from '@/lib/user-access-server'
 import { signLessonPath } from '@/lib/hls-token'
-import { aulasComoDias, aulasDoCuidado, ehTipoCuidado } from '@/lib/cuidado'
+import { aulasComoDias, aulasDoCuidado, ehTipoLista } from '@/lib/cuidado'
 import { podeVerCuidado, progressoDoCuidado } from '@/lib/cuidado-server'
 import type { MockChallenge } from '@/lib/mock-challenges'
 
@@ -13,7 +13,7 @@ export default async function CuidadoPlayerPage({
   params: Promise<{ locale: string; tipo: string; n: string }>
 }) {
   const { locale, tipo, n } = await params
-  if (!ehTipoCuidado(tipo)) notFound()
+  if (!ehTipoLista(tipo)) notFound()
   const base = `/${locale}/cuidado/${tipo}`
   const access = await getUserAccess()
   if (!(await podeVerCuidado(access, locale, tipo))) redirect(`/${locale}/challenges`)
@@ -28,7 +28,7 @@ export default async function CuidadoPlayerPage({
   const pseudo: MockChallenge = {
     id: `cuidado-${tipo}`,
     days_count: days.length,
-    thumbnail_emoji: tipo === 'rodillas' ? '🦵' : '🌿',
+    thumbnail_emoji: tipo === 'rodillas' ? '🦵' : tipo === 'suave' ? '🌱' : '🌿',
     is_free: false,
     status: 'active',
   }

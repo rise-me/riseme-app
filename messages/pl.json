@@ -740,7 +740,8 @@
     "place": {
       "silla": "🪑 Potrzebujesz krzesła",
       "sofa": "🛋️ Ćwiczysz na kanapie",
-      "cama": "🛏️ Ćwiczysz w łóżku"
+      "cama": "🛏️ Ćwiczysz w łóżku",
+      "pared": "🧱 Potrzebujesz ściany"
     },
     "equipment": {
       "rodillo": "Nie masz wałka do masażu? Użyj dużego, ciasno zwiniętego ręcznika.",
@@ -768,6 +769,12 @@
       "same": "Twoje wyzwanie się nie zmienia: to dodatek.",
       "cta": "Zobacz moje lekcje",
       "later": "Nie teraz"
+    },
+    "suave": {
+      "label": "Wersja łagodna",
+      "name": "Łagodne lekcje",
+      "topLine": "Łagodniejsze lekcje, żeby ćwiczyć w swoim tempie. Rób je, kiedy chcesz: liczą się do Twojej serii dni, a wyzwanie się nie zmienia.",
+      "cardLine": "{n, plural, one {# łagodna lekcja} few {# łagodne lekcje} many {# łagodnych lekcji} other {# łagodnej lekcji}}"
     }
   },
   "claseHoy": {
@@ -789,7 +796,10 @@
     "dificil": "Bardzo trudno",
     "thanks": "Dziękujemy! 💪",
     "thanksHard": "Dziękujemy, że dałaś nam znać 💛",
-    "hardTip": "Ćwicz w swoim tempie: zatrzymaj film, kiedy tylko potrzebujesz, i odpoczywaj między ćwiczeniami."
+    "hardTip": "Ćwicz w swoim tempie: zatrzymaj film, kiedy tylko potrzebujesz, i odpoczywaj między ćwiczeniami.",
+    "suaveOffer": "Mamy łagodniejszą wersję na początek. Chcesz spróbować?",
+    "suaveYes": "Tak, pokaż",
+    "suaveNo": "Nie, zostaję"
   },
   "conquista": {
     "cta": "Dalej",

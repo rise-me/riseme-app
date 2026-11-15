@@ -9,7 +9,10 @@ import {
   TIPOS_CUIDADO,
   type CuidadoDaAluna,
   type TipoCuidado,
+  type TipoLista,
+  CUIDADO_IDIOMAS,
 } from '@/lib/cuidado'
+import { recursoLigado } from '@/lib/previa'
 
 export interface EstadoCuidado {
   ligado: boolean
@@ -56,7 +59,21 @@ export async function progressoDoCuidado(): Promise<Set<string>> {
 }
 
 /** Pode abrir a página/aula deste tipo? (ligado, marcou o tipo e há aula no idioma) */
-export async function podeVerCuidado(access: UserAccess, locale: string, tipo: TipoCuidado): Promise<boolean> {
+export async function podeVerCuidado(access: UserAccess, locale: string, tipo: TipoLista): Promise<boolean> {
+  if (tipo === 'suave') return (await aulasSuaveDisponiveis(access, locale)) > 0
   const e = await estadoCuidado(access, locale)
   return e.tipos.some((t) => t.tipo === tipo)
+}
+
+/**
+ * Quantas aulas da "versión suave" ela pode abrir (0 = não oferecer). Presente de quem comprou, es/pl, desligada até
+ * SUAVE_ATIVO=1 (admin vê). Só aparece a aula que existe no idioma dela, como no cuidado.
+ */
+export async function aulasSuaveDisponiveis(access: UserAccess, locale: string): Promise<number> {
+  if (!access.userId || !CUIDADO_IDIOMAS.includes(locale.split('-')[0])) return 0
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const admin = user?.app_metadata?.role === 'admin'
+  if (!(canAccessBonuses(access) || admin) || !recursoLigado('SUAVE_ATIVO', admin)) return 0
+  return aulasDoCuidado('suave', locale).length
 }

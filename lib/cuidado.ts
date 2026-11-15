@@ -11,6 +11,9 @@ import { recursoLigado } from './previa'
 
 export type TipoCuidado = 'rodillas' | 'espalda'
 export const TIPOS_CUIDADO: TipoCuidado[] = ['rodillas', 'espalda']
+// "Versión suave" (Bruno 15/11): trilha OPCIONAL de aulas leves, oferecida só a quem marca "Muy difícil" no fim da aula
+// (há alunas que acham a Calistenia fácil demais). Usa a mesma lista/página/player do cuidado, sem depender de dor marcada.
+export type TipoLista = TipoCuidado | 'suave'
 
 // ES e PL primeiro (Bruno 11/11). Outro idioma entra quando as aulas e os textos dele existirem.
 export const CUIDADO_IDIOMAS = ['es', 'pl']
@@ -18,7 +21,7 @@ export const CUIDADO_IDIOMAS = ['es', 'pl']
 type Idioma = 'es' | 'pl' | 'en'
 // Onde a aula acontece (vira 1 linha simples na tela) e o que ela pede que nem toda casa tem (vira a linha de
 // alternativa, Bruno 11/11: "pode ser que a pessoa tenha"). Cadeira, sofá, cama e parede toda casa tem.
-type Lugar = 'silla' | 'sofa' | 'cama'
+type Lugar = 'silla' | 'sofa' | 'cama' | 'pared'
 type Equipo = 'rodillo' | 'tobillera'
 
 interface AulaCuidado {
@@ -40,7 +43,7 @@ interface AulaCuidado {
 // não mudar o áudio de quem comprou o "Yoga en la Silla" (o 4 com R2 em inglês tiraria o espanhol do YouTube).
 // Títulos = nomes.{en,es,pl}.tsv do Subidor (revisão nativa, 12/11; sem promessa médica). ES da ioga é nosso.
 // ORDEM = ordem aprovada pelo Bruno (12/11). A posição na lista é só a ordem na tela: o progresso usa desafio+dia.
-const AULAS: Record<TipoCuidado, AulaCuidado[]> = {
+const AULAS: Record<TipoLista, AulaCuidado[]> = {
   espalda: [
     { codigo: 'A01', desafio: '12', dia: 1, equipo: ['rodillo'],
       titulo: { es: 'Libera la flexibilidad de tu columna', pl: 'Uwolnij elastyczność kręgosłupa', en: "Unlock Your Spine's Flexibility" } },
@@ -83,10 +86,38 @@ const AULAS: Record<TipoCuidado, AulaCuidado[]> = {
     { codigo: 'K12', desafio: '16', dia: 12, lugar: 'cama',
       titulo: { es: 'Columna en movimiento, piernas firmes', pl: 'Kręgosłup w ruchu, mocne nogi', en: 'Mobile Spine, Strong Legs' } },
   ],
+  // Versión suave: lista aprovada pelo Bruno 15/11 (leitura aula a aula do RESUMO-EMPEZANDO.md do Subidor). Inteiras, sem
+  // equipamento além de cadeira/parede, sem ajoelhar nem salto. 18 = Caminhada Interior (módulo 40), 19 = Treinos Rápidos
+  // (módulo 17), dia = nº da aula no módulo (proposta ao Subidor 15/11). Títulos provisórios até os nomes.*.tsv dele.
+  suave: [
+    { codigo: 'C07', desafio: '18', dia: 7, lugar: 'silla',
+      titulo: { es: 'Ejercicio suave sentada', pl: 'Łagodne ćwiczenia na siedząco', en: 'Gentle Seated Workout' } },
+    { codigo: 'C01', desafio: '18', dia: 1,
+      titulo: { es: 'Marcha suave en casa', pl: 'Łagodny marsz w domu', en: 'Gentle Home Walk' } },
+    { codigo: 'R15', desafio: '19', dia: 15, lugar: 'pared',
+      titulo: { es: 'Estiramientos en la pared', pl: 'Rozciąganie przy ścianie', en: 'Wall Stretches' } },
+    { codigo: 'C05', desafio: '18', dia: 5,
+      titulo: { es: 'Marcha con brazos', pl: 'Marsz z pracą rąk', en: 'Walk with Arm Moves' } },
+    { codigo: 'R02', desafio: '19', dia: 2, lugar: 'pared',
+      titulo: { es: 'Piernas en la pared', pl: 'Nogi na ścianie', en: 'Legs on the Wall' } },
+    { codigo: 'C14', desafio: '18', dia: 14, lugar: 'silla',
+      titulo: { es: 'Más ritmo, sentada', pl: 'Więcej rytmu na siedząco', en: 'Seated Cardio' } },
+    { codigo: 'R21', desafio: '19', dia: 21, lugar: 'pared',
+      titulo: { es: 'Espalda en la pared', pl: 'Plecy przy ścianie', en: 'Wall Back Series' } },
+    { codigo: 'C09', desafio: '18', dia: 9,
+      titulo: { es: 'Caminata con brazos activos', pl: 'Marsz z aktywnymi ramionami', en: 'Active Arms Walk' } },
+    { codigo: 'C08', desafio: '18', dia: 8, lugar: 'silla',
+      titulo: { es: 'En forma, sentada', pl: 'Forma na siedząco', en: 'Seated & Fit' } },
+    { codigo: 'C15', desafio: '18', dia: 15,
+      titulo: { es: 'Caminata para los brazos', pl: 'Marsz dla ramion', en: 'Arm-Toning Walk' } },
+  ],
 }
 
 export function ehTipoCuidado(s: string): s is TipoCuidado {
   return (TIPOS_CUIDADO as string[]).includes(s)
+}
+export function ehTipoLista(s: string): s is TipoLista {
+  return s === 'suave' || ehTipoCuidado(s)
 }
 
 /** O que a aluna tem marcado. */
@@ -151,7 +182,7 @@ export function chaveProgresso(a: { desafio: string; dia: number }) {
  * Aulas do tipo que existem no idioma dela, na ordem aprovada. `simular` (só a prévia de desenvolvimento) inclui as
  * que ainda não subiram, com um vídeo vazio, para ver a tela cheia.
  */
-export function aulasDoCuidado(tipo: TipoCuidado, locale: string, simular = false): AulaNaTela[] {
+export function aulasDoCuidado(tipo: TipoLista, locale: string, simular = false): AulaNaTela[] {
   const lang = locale.split('-')[0]
   const idioma: Idioma = lang === 'es' || lang === 'pl' ? lang : 'en'
   const lista: AulaNaTela[] = []

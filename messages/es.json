@@ -732,7 +732,8 @@
     "place": {
       "silla": "🪑 Necesitas una silla",
       "sofa": "🛋️ Se hace en el sofá",
-      "cama": "🛏️ Se hace en la cama"
+      "cama": "🛏️ Se hace en la cama",
+      "pared": "🧱 Necesitas una pared"
     },
     "equipment": {
       "rodillo": "¿No tienes rodillo de espuma? Usa una toalla grande bien enrollada.",
@@ -760,6 +761,12 @@
       "same": "Tu desafío sigue igual: esto es un extra.",
       "cta": "Ver mis clases",
       "later": "Ahora no"
+    },
+    "suave": {
+      "label": "Versión suave",
+      "name": "Clases suaves",
+      "topLine": "Clases más suaves para ir a tu ritmo. Hazlas cuando quieras: cuentan en tus días seguidos y tu desafío sigue igual.",
+      "cardLine": "{n, plural, one {# clase suave} other {# clases suaves}}"
     }
   },
   "claseHoy": {
@@ -781,7 +788,10 @@
     "dificil": "Muy difícil",
     "thanks": "¡Gracias! 💪",
     "thanksHard": "Gracias por contarnos 💛",
-    "hardTip": "Ve a tu ritmo: pausa el video cuando lo necesites y descansa entre ejercicios."
+    "hardTip": "Ve a tu ritmo: pausa el video cuando lo necesites y descansa entre ejercicios.",
+    "suaveOffer": "Tenemos una versión más suave para empezar. ¿Quieres probarla?",
+    "suaveYes": "Sí, mostrarme",
+    "suaveNo": "No, sigo así"
   },
   "conquista": {
     "cta": "Seguir",

@@ -29,6 +29,8 @@ interface Props {
   perguntar?: boolean
   // Tela de conquista nos dias 3/7/14/21 (components/challenges/Conquista.tsx); userId = link de indicação dela
   conquistas?: boolean
+  // "Muy difícil" oferece a versión suave quando há aulas dela no idioma (lib/cuidado.ts, tipo 'suave')
+  suaveHref?: string | null
   userId?: string | null
   // Só a prévia de desenvolvimento (/dev-aula): abre a tela como se a aula já tivesse sido concluída
   previaConcluida?: boolean
@@ -243,7 +245,7 @@ function loadYouTubeAPI(): Promise<void> {
   return apiLoadingPromise
 }
 
-export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase: temPase, hlsPath, basePath, semOferta, perguntar, previaConcluida, conquistas, userId }: Props) {
+export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase: temPase, hlsPath, basePath, semOferta, perguntar, previaConcluida, conquistas, userId, suaveHref }: Props) {
   // Sem oferta = como quem já tem o Pase: nenhuma das 3 ofertas abre.
   const hasPase = temPase || semOferta === true
   const base = basePath ?? `/${locale}/challenges/${challenge.id}`
@@ -574,7 +576,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
           </button>
         </div>
 
-        {perguntar && dayDone && <ComoTeFue challengeId={challenge.id} dayNumber={currentDayNumber} />}
+        {perguntar && dayDone && <ComoTeFue challengeId={challenge.id} dayNumber={currentDayNumber} suaveHref={suaveHref} />}
 
         {nextDay && !(perguntar && dayDone) && (
           <div className="flex items-center gap-3 bg-white/5 rounded-2xl p-3">

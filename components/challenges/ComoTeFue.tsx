@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { track } from '@/lib/posthog/track'
@@ -10,7 +11,7 @@ export type RespostaAula = 'facil' | 'bien' | 'dificil'
 // "¿Cómo te fue hoy?" no fim da aula (Bruno 15/11): mede, aula por aula, quem acha fácil e quem acha difícil, e é a
 // porta da "versión suave" — oferecida SÓ a quem marca "Muy difícil" (há alunas que reclamam que é fácil demais).
 // Guarda em user_metadata.como_te_fue (sem tabela nova): [{ c: desafio, d: dia, r: resposta, em }]. Plano: docs/primeira-aula.md.
-export function ComoTeFue({ challengeId, dayNumber }: { challengeId: string; dayNumber: number }) {
+export function ComoTeFue({ challengeId, dayNumber, suaveHref }: { challengeId: string; dayNumber: number; suaveHref?: string | null }) {
   const t = useTranslations('comoTeFue')
   const [resposta, setResposta] = useState<RespostaAula | null>(null)
 
@@ -24,6 +25,31 @@ export function ComoTeFue({ challengeId, dayNumber }: { challengeId: string; day
       const novo = { c: challengeId, d: dayNumber, r, em: new Date().toISOString() }
       await supabase.auth.updateUser({ data: { como_te_fue: [...antes, novo].slice(-200) } })
     } catch {}
+  }
+
+  // "Muy difícil" + há versión suave no idioma dela: oferece (ela escolhe; nada muda se disser não)
+  if (resposta === 'dificil' && suaveHref) {
+    return (
+      <div className="bg-white/5 rounded-2xl p-4 space-y-3 text-center">
+        <p className="text-white text-sm font-bold">{t('thanksHard')}</p>
+        <p className="text-white/80 text-sm leading-relaxed">{t('suaveOffer')}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <Link
+            href={suaveHref}
+            onClick={() => track('suave_oferta', { acao: 'sim', challenge_id: challengeId, day_number: dayNumber })}
+            className="py-3 rounded-xl bg-white text-black text-sm font-bold"
+          >
+            {t('suaveYes')}
+          </Link>
+          <button
+            onClick={() => { track('suave_oferta', { acao: 'nao', challenge_id: challengeId, day_number: dayNumber }); setResposta('bien') }}
+            className="py-3 rounded-xl bg-white/10 text-white text-sm font-bold"
+          >
+            {t('suaveNo')}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (resposta) {
