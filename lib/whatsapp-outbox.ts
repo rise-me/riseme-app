@@ -191,7 +191,15 @@ export async function estaComProblema(phone: string): Promise<boolean> {
     .order('created_at', { ascending: false })
     .limit(40)
   const ms = (data ?? []).filter((m) => m.author !== 'system')
-  if (ms[0]?.author === 'student') return true
+  if (ms[0]?.author === 'student') {
+    // Regime "a pedido": a mensagem pronta do botão é respondida pela linha 'acesso' (author 'system'), não pelo agente.
+    // Sem esta exceção ela contava como "fala sem resposta" e o convite de depoimento era pulado para quem só apertou
+    // o botão (15/11/2026: 11 de 12 pulados no primeiro dia; Bruno: "é importante esse comentário").
+    const corpo = String(ms[0].body ?? '')
+    const doBotao = CODIGO_BOTAO.test(corpo) || FRASE_BOTAO.test(corpo)
+    const acessoSaiu = (data ?? []).some((m) => m.author === 'system' && m.created_at > ms[0].created_at)
+    if (!(doBotao && acessoSaiu)) return true
+  }
   // O que o CLASSIFICADOR entendeu nas últimas respostas (kind 'uso-llm' guarda os assuntos): dinheiro, técnico ou feedback = problema.
   // A lista de palavras fica só como atalho (Bruno 05/11: palavra exata não decide nada).
   const { data: usos } = await admin().from('whatsapp_outbox').select('body').eq('kind', 'uso-llm').in('phone', formas).gte('created_at', new Date(Date.now() - 3 * 86_400_000).toISOString()).order('created_at', { ascending: false }).limit(5)
