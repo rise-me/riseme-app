@@ -65,8 +65,9 @@ Interior, id 18 no R2; R = Treinos Rápidos, id 19; dia = nº da aula no módulo
 dublagem depois do crédito com o Bruno. LIGAR SEM NOVO OK (Bruno 15/11: "sim"): quando o Subidor avisar que as 10 estão no R2, o riseme-c2 toca cada aula (es e pl) e liga SUAVE_ATIVO=1 + redeploy, e avisa o Bruno e o Arquiteto (bot passa a apontar a versión suave em 'es muy fuerte'). APP PRONTO 15/11, desligado até SUAVE_ATIVO=1 (e só mostra aula que existe no
 idioma): `lib/cuidado.ts` tipo 'suave', página `/cuidado/suave`, "Muy difícil" oferece "¿Quieres probarla?" quando há aula.
 LIGADA 16/11 18h14 BRT: 10 aulas no R2 (a001bde, voz do Google), conferidas em es e pl (playlists inteiras, volume −21 a −26 dB,
-trecho de 30 s de cada uma transcrito no idioma certo); SUAVE_ATIVO=1 + redeploy. Arquiteto avisado; regra do bot espera o ok
-do Bruno. Ler junto com o 'Tu clase de hoy' (24/11): quantas marcam "Muy difícil", quantas abrem a suave, quantas concluem.
+trecho de 30 s de cada uma transcrito no idioma certo); SUAVE_ATIVO=1 + redeploy. Bot já sabe (Arquiteto e24aabd, ok do Bruno):
+oferece a suave só a quem acha pesado; títulos ES, saltos 25/27 e áudio EN de 2/4/5 no conhecimento.
+REGRA: mudou título de dia da Calistenia → rodar `npx tsx scripts/gerar-aulas.mts` e avisar o Arquiteto (o JSON é do bot). Ler junto com o 'Tu clase de hoy' (24/11): quantas marcam "Muy difícil", quantas abrem a suave, quantas concluem.
 Prévia local: `npm run dev` → `/dev-aula/player/1`.
 
 ## Tela de conquista (dias 3, 7, 14, 21) — LIGADA 15/11 (textos do dia 7 e 14 escritos pelo Bruno: "grupo selecto"; es e pl aprovados por ele)
