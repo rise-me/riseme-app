@@ -367,7 +367,16 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     if (item.kind === 'zapi') {
       let saida: string
       try {
-        const { acao } = JSON.parse(item.body) as { acao: 'status' | 'fila' | 'limpar-fila' }
+        const { acao, path } = JSON.parse(item.body) as { acao: 'status' | 'fila' | 'limpar-fila' | 'get'; path?: string }
+        if (acao === 'get') {
+          // Leitura qualquer da Z-API (só GET), para diagnóstico pelo chat: 'me' (webhooks), 'chats?page=1&pageSize=50'…
+          const { zapiGet } = await import('@/lib/zapi')
+          const r = await zapiGet(String(path ?? 'me').replace(/^\/+/, ''))
+          // Nunca guardar segredo no banco: chaves com token/secret saem mascaradas.
+          const limpo = JSON.stringify({ acao, path, r }, (k, v) => (/token|secret|password|senha/i.test(k) ? '•••' : v))
+          await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: limpo.slice(0, 60_000) }).eq('id', item.id)
+          continue
+        }
         const conexao = await conexaoZapi()
         saida = JSON.stringify({ acao, conexao, ...(acao === 'fila' ? { fila: await filaZapi('contar') } : acao === 'limpar-fila' ? { limpeza: await filaZapi('limpar'), depois: await filaZapi('contar') } : {}) })
       } catch (err) {
