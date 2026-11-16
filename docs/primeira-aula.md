@@ -83,6 +83,7 @@ Arquiteto quando o WhatsApp voltar. Prévia: `/dev-aula/player/7?conquista=1`.
    - FEITO: idioma real da fala no YouTube (12bf606). Só a Calistenia (1) é espanhol; Pilates (2, os 28), Yoga en la Silla (4)
      e Cuerpo Sexy (5) são INGLÊS; Yoga Facial (3) é só música. Selo agora diz "audio en inglés". DECISÃO DO BRUNO: dublar
      2/4/5 (es+pl) ou trazer o Pilates ES da Hotmart.
-   - Títulos da Calistenia ES: as aulas ES (YouTube) são vídeos diferentes das EN; 12 de 28 já transcritas, as outras 16
-     transcrevem esta noite (`~/Movies/Claude/aulas-es/job.sh`, 23h) → títulos novos pelo conteúdo, aula por aula.
+   - FEITO 16/11: 23 títulos de dia da Calistenia ES trocados pelo conteúdo real (0655177; Bruno "ok"); detalhe em
+     `docs/titulos-calistenia-es.md`. Saltos nos vídeos ES: só dias 25 e 27. Dias 6 e 20 = mesmo vídeo. PL/outros idiomas
+     tocam os vídeos EN (outros conteúdos): mesma leitura a fazer com as transcrições EN.
    - Antes: títulos dos dias 3–4; dia 1 do Pilates em inglês; dia 20 da Calistenia ES = vídeo do dia 6 (Subidor).
