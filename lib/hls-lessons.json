@@ -1154,6 +1154,100 @@
           "pl"
         ]
       }
+    },
+    "18": {
+      "1": {
+        "path": "c18/d01-202611161537",
+        "seconds": 630,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "5": {
+        "path": "c18/d05-202611161543",
+        "seconds": 630,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "7": {
+        "path": "c18/d07-202611161550",
+        "seconds": 665,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "8": {
+        "path": "c18/d08-202611161557",
+        "seconds": 665,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "9": {
+        "path": "c18/d09-202611161604",
+        "seconds": 665,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "14": {
+        "path": "c18/d14-202611161611",
+        "seconds": 665,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "15": {
+        "path": "c18/d15-202611161618",
+        "seconds": 630,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      }
+    },
+    "19": {
+      "2": {
+        "path": "c19/d02-202611161622",
+        "seconds": 470,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "15": {
+        "path": "c19/d15-202611161625",
+        "seconds": 395,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "21": {
+        "path": "c19/d21-202611161629",
+        "seconds": 385,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      }
     }
   }
 }
