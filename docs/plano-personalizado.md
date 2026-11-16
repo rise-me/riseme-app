@@ -96,6 +96,8 @@ Só aulas que servem INTEIRAS (sem corte), em ordem de progressão. **APROVADA p
 O YouTube do desafio 4 ("Yoga en la Silla") fala inglês (conferido ouvindo trechos, Whisper). Y01, Y02, Y04, Y17 nunca
 existiram em espanhol; desde 12/11 as alunas ES viam essas 4 aulas em inglês. Corrigido 15/11 (12bf606): em ES o
 Rodillas mostra 8 aulas (PL segue com 12). Pedido ao Subidor: dublar as 4 em ES no desafio 17 (crédito com o Bruno).
+RESOLVIDO 16/11: Subidor publicou as 4 em en/es/pl no desafio 17 (f2c6b98); o app passou a buscar a ioga no 17 em todos os
+idiomas e o Rodillas ES voltou a 12 (conferido tocando, 16/11).
 
 ## LIGADO PARA AS ALUNAS 12/11 ~21h48 BRT
 - 18 aulas no R2 (Subidor, commits 4bf6e88 + 6d228ea), conferidas tocando: es (12 R2 + 4 ioga YouTube) e pl (18 R2), todas respondendo. `CUIDADO_ATIVO=1` gravado na Vercel Production + redeploy (riseme.app). O bot liga junto (d0d7eb4).
