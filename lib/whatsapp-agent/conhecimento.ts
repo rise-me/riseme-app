@@ -259,6 +259,12 @@ feito pelo NOSSO sistema (API do produtor) funciona depois disso (fato de 09/11/
 - Depois de ordenado (Hotmart ou Perfect Pay), o reembolso volta SEMPRE pelo mesmo meio da compra: cartão → fatura atual ou
   seguinte (prazo do banco, em geral até 10 dias úteis); PayPal → conta PayPal; BLIK/Przelewy24/transferência → conta de
   origem. Nunca pedimos número de cartão nem dados bancários por e-mail ou WhatsApp.
+- STRIPE (CL-PL): o meio de pagamento e o reembolso de cada compra estão no CARTÃO DA ALUNA ("Pagamentos na Stripe"): use o
+  fato, nunca pergunte "BLIK ou cartão?". Prazo do reembolso concluído: BLIK = até 2 horas (doc da Stripe; volta como crédito
+  na conta bancária ligada ao BLIK, não como "przelew na telefon"); cartão = 5 a 10 dias úteis. Se ela diz que o reembolso BLIK
+  não entrou e já passaram 2 horas: dê a data e a REFERÊNCIA do banco que está no cartão, peça que confira esse crédito no
+  extrato/app do banco com a referência e, se o banco não achar, transfira para a equipe (ação: abrir investigação na Stripe
+  com o extrato dela). Caso 16/11/2026 (aluna PL): o bot perguntou o meio e deu prazo de cartão a quem pagou com BLIK.
 - Cartão trocado, perdido ou cancelado NÃO atrapalha, em qualquer meio: o estorno vai ao banco emissor, que credita na
   conta dela (regra das bandeiras; artigo oficial da Hotmart). Se ela oferece mandar o número do cartão novo: não é preciso
   e não deve mandar. Responda isso; não transfira.
