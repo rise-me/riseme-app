@@ -20,6 +20,7 @@
 import prePart from './06-pre-parto.json'
 import posPart from './07-pos-parto.json'
 import d9 from './09-kegel-10.json'
+import d8 from './08-menopausa.json'
 
 export interface FichaDesafio {
   id: string
@@ -32,7 +33,7 @@ export interface FichaDesafio {
   dias: Record<string, string[]>
 }
 
-export const FICHAS: FichaDesafio[] = [prePart, posPart, d9]
+export const FICHAS: FichaDesafio[] = [prePart, posPart, d9, d8]
 
 // Quem usa o app num idioma que a ficha não tem vê o desafio nele
 export const IDIOMA_PADRAO = 'en'

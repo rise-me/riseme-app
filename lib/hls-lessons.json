@@ -865,30 +865,292 @@
     },
     "17": {
       "1": {
-        "path": "c17/d01-202611122037",
+        "path": "c17/d01-202611161019",
         "seconds": 630,
         "languages": [
+          "en",
+          "es",
           "pl"
         ]
       },
       "2": {
-        "path": "c17/d02-202611122042",
+        "path": "c17/d02-202611161025",
         "seconds": 630,
         "languages": [
+          "en",
+          "es",
           "pl"
         ]
       },
       "4": {
-        "path": "c17/d04-202611122046",
+        "path": "c17/d04-202611161030",
         "seconds": 520,
         "languages": [
+          "en",
+          "es",
           "pl"
         ]
       },
       "17": {
-        "path": "c17/d17-202611122100",
+        "path": "c17/d17-202611161046",
         "seconds": 1190,
         "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      }
+    },
+    "8": {
+      "1": {
+        "path": "c8/d01-202611160140",
+        "seconds": 1066,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "2": {
+        "path": "c8/d02-202611160154",
+        "seconds": 1097,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "3": {
+        "path": "c8/d03-202611160208",
+        "seconds": 1132,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "4": {
+        "path": "c8/d04-202611160221",
+        "seconds": 1006,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "5": {
+        "path": "c8/d05-202611160241",
+        "seconds": 1652,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "6": {
+        "path": "c8/d06-202611160305",
+        "seconds": 1898,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "7": {
+        "path": "c8/d07-202611160322",
+        "seconds": 1117,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "8": {
+        "path": "c8/d08-202611160343",
+        "seconds": 1692,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "9": {
+        "path": "c8/d09-202611160400",
+        "seconds": 1046,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "10": {
+        "path": "c8/d10-202611160418",
+        "seconds": 1522,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "11": {
+        "path": "c8/d11-202611160434",
+        "seconds": 1172,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "12": {
+        "path": "c8/d12-202611160454",
+        "seconds": 1627,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "13": {
+        "path": "c8/d13-202611160517",
+        "seconds": 1772,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "14": {
+        "path": "c8/d14-202611160539",
+        "seconds": 1537,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "15": {
+        "path": "c8/d15-202611160554",
+        "seconds": 1136,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "16": {
+        "path": "c8/d16-202611160608",
+        "seconds": 1112,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "17": {
+        "path": "c8/d17-202611160630",
+        "seconds": 1743,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "18": {
+        "path": "c8/d18-202611160650",
+        "seconds": 1482,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "19": {
+        "path": "c8/d19-202611160705",
+        "seconds": 1077,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "20": {
+        "path": "c8/d20-202611160719",
+        "seconds": 1132,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "21": {
+        "path": "c8/d21-202611160741",
+        "seconds": 1582,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "22": {
+        "path": "c8/d22-202611160802",
+        "seconds": 1472,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "23": {
+        "path": "c8/d23-202611160829",
+        "seconds": 2058,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "24": {
+        "path": "c8/d24-202611160855",
+        "seconds": 1843,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "25": {
+        "path": "c8/d25-202611160911",
+        "seconds": 1162,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "26": {
+        "path": "c8/d26-202611160929",
+        "seconds": 1427,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "27": {
+        "path": "c8/d27-202611160947",
+        "seconds": 1317,
+        "languages": [
+          "en",
+          "es",
+          "pl"
+        ]
+      },
+      "28": {
+        "path": "c8/d28-202611161010",
+        "seconds": 1767,
+        "languages": [
+          "en",
+          "es",
           "pl"
         ]
       }
