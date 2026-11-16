@@ -73,6 +73,15 @@ O 28 fica de fora porque lá já existe a oferta do Pase. Textos com número só
 Botão "Invitar a una amiga" (só ES; link de indicação da aluna = momento de alegria, n2). Parabéns por WhatsApp: pedir ao
 Arquiteto quando o WhatsApp voltar. Prévia: `/dev-aula/player/7?conquista=1`.
 
+## "Versión intensa" (Bruno 16/11: "pode começar pelo passo 1") — RETOMAR DAQUI
+Espelho da versión suave: oferecida só a quem marca "Fácil" no fim da aula ("¿Quieres algo más intenso? Tenemos clases
+rápidas tipo tabata"). Origem: Monika (PL) pediu reembolso 16/11 dizendo "muito lento; intervalos ou tabata seria ótimo";
+2 alunas em 11/11 acharam fácil demais. Passos: (1) FEITO o pedido ao Subidor 16/11: inventário de HIIT/tabata nos 80
+módulos do Drive (só pelos nomes); EM ANDAMENTO: eu ler as aulas fortes do rapidos17 (R16–R28) no RESUMO-EMPEZANDO.md
+(R24 HIIT Rápido 11 min, R27 HIIT Silencioso 7,5, R26 Explosão 6,6, R25 Núcleo Forte 10, R28 Prancha 10; R16/R22 são prancha
+o tempo todo); (2) ~23/11: ler quantas marcam "Fácil" em `user_metadata.como_te_fue` → Bruno decide se dubla;
+(3) lista → dublagem es+pl (crédito com o Bruno) → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
+
 ## Próximos (ordem combinada 14/11)
 1. FEITO 14/11: Bruno viu e aprovou; ligado. Ler em 24/11.
 2. Tela de conquista: LIGADA 15/11; parabéns por WhatsApp quando ele voltar (Arquiteto).
