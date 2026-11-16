@@ -39,7 +39,7 @@ interface AulaCuidado {
 
 // Ids dos módulos no registro do R2 (combinado com o Subidor de aulas): 11 Costas · 12 Alívio das Costas ·
 // 13 Menisco · 14 Osteoartrite · 15 Ioga no Sofá · 16 Ioga na Cama · 17 Ioga na Cadeira só PL (confirmados 12/11).
-// A ioga na cadeira é o desafio 4 do app (mesmas aulas): ES vem do YouTube do 4; o PL fica no 17, e não no 4, para
+// A ioga na cadeira é o desafio 4 do app (mesmas aulas), mas o YouTube do 4 fala INGLÊS (conferido 15/11): es/pl/en vêm do 17 (R2, 16/11); fica no 17, e não no 4, para
 // não mudar o áudio de quem comprou o "Yoga en la Silla" (o 4 com R2 em inglês tiraria o espanhol do YouTube).
 // Títulos = nomes.{en,es,pl}.tsv do Subidor (revisão nativa, 12/11; sem promessa médica). ES da ioga é nosso.
 // ORDEM = ordem aprovada pelo Bruno (12/11). A posição na lista é só a ordem na tela: o progresso usa desafio+dia.
@@ -60,11 +60,11 @@ const AULAS: Record<TipoLista, AulaCuidado[]> = {
   ],
   rodillas: [
     // Parte 1 · alívio (sentada ou deitada, iniciante)
-    { codigo: 'Y01', desafio: '4', dia: 1, porIdioma: { pl: { desafio: '17', dia: 1 } }, lugar: 'silla',
+    { codigo: 'Y01', desafio: '4', dia: 1, porIdioma: { es: { desafio: '17', dia: 1 }, pl: { desafio: '17', dia: 1 }, en: { desafio: '17', dia: 1 } }, lugar: 'silla',
       titulo: { es: 'Yoga relajante en la silla', pl: 'Regenerująca joga na krześle', en: 'Restorative Chair Yoga' } },
-    { codigo: 'Y02', desafio: '4', dia: 2, porIdioma: { pl: { desafio: '17', dia: 2 } }, lugar: 'silla',
+    { codigo: 'Y02', desafio: '4', dia: 2, porIdioma: { es: { desafio: '17', dia: 2 }, pl: { desafio: '17', dia: 2 }, en: { desafio: '17', dia: 2 } }, lugar: 'silla',
       titulo: { es: 'Yoga en la silla para tus articulaciones', pl: 'Joga na krześle dla stawów', en: 'Chair Yoga for Joints' } },
-    { codigo: 'Y04', desafio: '4', dia: 4, porIdioma: { pl: { desafio: '17', dia: 4 } }, lugar: 'silla',
+    { codigo: 'Y04', desafio: '4', dia: 4, porIdioma: { es: { desafio: '17', dia: 4 }, pl: { desafio: '17', dia: 4 }, en: { desafio: '17', dia: 4 } }, lugar: 'silla',
       titulo: { es: 'Piernas en movimiento suave en la silla', pl: 'Łagodny trening nóg na krześle', en: 'Gentle Chair Leg Flow' } },
     { codigo: 'M01', desafio: '13', dia: 1, lugar: 'silla', equipo: ['rodillo', 'tobillera'],
       titulo: { es: 'Comienza a cuidar tu rodilla', pl: 'Zacznij dbać o kolano', en: 'Start Caring for Your Knee' } },
@@ -72,7 +72,7 @@ const AULAS: Record<TipoLista, AulaCuidado[]> = {
       titulo: { es: 'Libera el movimiento de tus rodillas', pl: 'Uwolnij ruch w kolanach', en: 'Unlock Knee Movement' } },
     { codigo: 'O01', desafio: '14', dia: 1, lugar: 'silla', equipo: ['rodillo', 'tobillera'],
       titulo: { es: 'Serie suave para tus rodillas', pl: 'Łagodna seria dla kolan', en: 'Gentle Knee Series' } },
-    { codigo: 'Y17', desafio: '4', dia: 17, porIdioma: { pl: { desafio: '17', dia: 17 } }, lugar: 'silla',
+    { codigo: 'Y17', desafio: '4', dia: 17, porIdioma: { es: { desafio: '17', dia: 17 }, pl: { desafio: '17', dia: 17 }, en: { desafio: '17', dia: 17 } }, lugar: 'silla',
       titulo: { es: 'Tronco y caderas en movimiento en la silla', pl: 'Tułów i biodra w ruchu na krześle', en: 'Chair Flow for Torso and Hips' } },
     // Parte 2 · movimento suave (no sofá ou na cama, sem descer ao chão)
     { codigo: 'S03', desafio: '15', dia: 3, lugar: 'sofa',
