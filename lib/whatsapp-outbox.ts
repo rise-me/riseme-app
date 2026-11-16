@@ -346,6 +346,9 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       try {
         const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: (string | { a: 'student' | 'agent' | 'human'; t: string; em?: string })[]; conviteHotmart?: { presente: string | null }; conviteVideo?: boolean; hotmart?: string; hotmartEmail?: string; emailSemConta?: string }
         const agora = new Date().toISOString()
+        // cartaoDe = user_id real: monta o cartão da aluna como em produção (teste do cartão sem falar com ela; 16/11/2026)
+        const cartaoDe = (caso as { cartaoDe?: string }).cartaoDe
+        if (cartaoDe && caso.perfil) { const { cartaoDaAluna } = await import('@/lib/cartao-aluna'); caso.perfil = { ...caso.perfil, cartao: await cartaoDaAluna(admin(), { userId: cartaoDe, variantes: [] }) } }
         // hotmartEmail = consulta real à Hotmart no teste; hotmart = bloco pronto (teste sem credencial)
         // hotmartEmail = a Hotmart é consultada só se o CLASSIFICADOR disser dinheiro (como em produção); hotmart = bloco pronto
         const { resumoHotmart } = await import('@/lib/hotmart-api')
