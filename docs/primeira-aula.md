@@ -112,8 +112,8 @@ mês. ElevenLabs deixou de ser trava pra aula (fica pra criativo/VSL). Vale tamb
    Já se sabe (chat da CL-KR, 14/11): as aulas 11, 16, 17, 22 e 23 têm salto.
 5. Consertos (15/11):
    - FEITO: idioma real da fala no YouTube (12bf606). Só a Calistenia (1) é espanhol; Pilates (2, os 28), Yoga en la Silla (4)
-     e Cuerpo Sexy (5) são INGLÊS; Yoga Facial (3) é só música. Selo agora diz "audio en inglés". DECISÃO DO BRUNO: dublar
-     2/4/5 (es+pl) ou trazer o Pilates ES da Hotmart.
+     e Cuerpo Sexy (5) são INGLÊS; Yoga Facial (3) é só música. Selo agora diz "audio en inglés". DECIDIDO 16/11 (Bruno): dublar
+     2/4/5 (es+pl). Pedido ao Subidor (2 → 4 → 5; mesma aula do YouTube dia a dia; acima da cota grátis = Bruno decide gasto).
    - FEITO 16/11: 23 títulos de dia da Calistenia ES trocados pelo conteúdo real (0655177; Bruno "ok"); detalhe em
      `docs/titulos-calistenia-es.md`. Saltos nos vídeos ES: só dias 25 e 27. Dias 6 e 20 = mesmo vídeo. PL/outros idiomas
      tocam os vídeos EN (outros conteúdos): mesma leitura a fazer com as transcrições EN.
