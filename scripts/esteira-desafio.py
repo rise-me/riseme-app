@@ -207,6 +207,10 @@ def pontos_por_transicao(est, so):
 def produzir(a):
     est = ler_estado(a.slug)
     extra = (["--aulas", a.aulas] if a.aulas else []) + ["--descanso", str(a.descanso)]
+    # Trilha por módulo (16/11, Bruno: músicas novas): esteira.json "musica" = pasta em entrada/musica/
+    # ("calmas" p/ cuidado, suave, menopausa, alongamento). Sem o campo: a pasta padrão (energéticas da Calistenia).
+    if est.get("musica"):
+        extra += ["--musica", str(FABRICA / "entrada" / "musica" / est["musica"])]
     lote = FABRICA / "pipeline" / "05_produzir_lote.py"
     if a.descanso > 0:
         pontos_por_transicao(est, so_aulas(a.aulas))
