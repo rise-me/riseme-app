@@ -92,6 +92,9 @@ INVENTÁRIO PRONTO 16/11 (`fabrica-dublagem/trabalho/empezando/INVENTARIO-INTENS
 Pastas VAZIAS no Drive: "33 - HIIT pelo Yaroslav", Corrida, Passadeira → perguntar ao Bruno onde está.
 PEDIDO 16/11 ao Subidor: transcrever no Air as 18 (duração, 20/10 de verdade?, salto, equipamento, nível × Calistenia) e
 conferir se as 5 coincidentes são os mesmos arquivos. Sem dublar até a decisão do Bruno (~23/11).
+16/11 (Bruno confirmou ao Subidor): MD5 confirma 53 aulas 8/9/20/21/23 = Calistenia dias 8/9/20/21/24; o 43 está todo dentro
+do 53. As 18 restantes do 53 (1–7, 10–19, 22) indo pro Air; transcrição depois da dublagem da suave →
+`fabrica-dublagem/trabalho/intensa/RESUMO-INTENSA.md`.
 (2) ~23/11: ler quantas marcam "Fácil" em `user_metadata.como_te_fue` → Bruno decide;
 (3) lista → dublagem es+pl → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
 CUSTO (Subidor 16/11): a voz das aulas agora é do Google (aprovada pelo Bruno); 28 aulas es+pl cabem na cota grátis do
