@@ -86,6 +86,12 @@ FEITO 16/11, leitura das fortes do rapidos17 (RESUMO-EMPEZANDO.md):
   R20 (marcha alta, polichinelo sem pulo, salto lateral). É uma trilha de FORÇA/CORE curta, não de intervalo.
 - Leitura: dá pra montar uma "versión intensa" de ~8 aulas curtas só com o rapidos17 (atende "muito lento"), mas "tabata"
   de verdade depende do inventário do Subidor.
+INVENTÁRIO PRONTO 16/11 (`fabrica-dublagem/trabalho/empezando/INVENTARIO-INTENSA.md`, só por nome): 43 Tabata (15, 5 por nível;
+5 são arquivos da própria Calistenia: dias 8, 9, 20, 21, 24) + 53 Cardio (23 = as 15 do Tabata + 8 próprias) = 23 distintas,
+18 fora da Calistenia; depois 31 Boxe (4 com HIIT/cardio no nome), 03 Fitness em Casa (~15 de 86), 24/64/58 menores.
+Pastas VAZIAS no Drive: "33 - HIIT pelo Yaroslav", Corrida, Passadeira → perguntar ao Bruno onde está.
+PEDIDO 16/11 ao Subidor: transcrever no Air as 18 (duração, 20/10 de verdade?, salto, equipamento, nível × Calistenia) e
+conferir se as 5 coincidentes são os mesmos arquivos. Sem dublar até a decisão do Bruno (~23/11).
 (2) ~23/11: ler quantas marcam "Fácil" em `user_metadata.como_te_fue` → Bruno decide;
 (3) lista → dublagem es+pl → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
 CUSTO (Subidor 16/11): a voz das aulas agora é do Google (aprovada pelo Bruno); 28 aulas es+pl cabem na cota grátis do
