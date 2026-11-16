@@ -44,7 +44,8 @@ export const TEXTOS: Record<string, Texto> = {
 export interface Candidata { userId: string; email: string; nome: string; idioma: string; compra: string; phone: string }
 
 /** Quem receberia agora (sem a regra da hora local). Usado pelo cron e pelo modo seco. */
-export async function candidatasLembreteEmail(): Promise<Candidata[]> {
+export async function candidatasLembreteEmail(limite = Infinity, prazoMs = Infinity): Promise<Candidata[]> {
+  const inicio = Date.now()
   const db = admin()
   const ate = new Date(Date.now() - JANELA_H[0] * 3600_000).toISOString()
   const desde = new Date(Date.now() - JANELA_H[1] * 3600_000).toISOString()
@@ -59,6 +60,7 @@ export async function candidatasLembreteEmail(): Promise<Candidata[]> {
   const vistas = new Set<string>()
   const out: Candidata[] = []
   for (const v of vendas ?? []) {
+    if (out.length >= limite || Date.now() - inicio > prazoMs) break // não segurar a fila do WhatsApp (mesmo cron)
     if (!v.user_id || vistas.has(v.user_id) || v.reembolso_id || !TEXTOS[v.locale]) continue
     vistas.add(v.user_id)
     // reembolso em qualquer compra dela = fora
@@ -80,7 +82,7 @@ export async function lembrarPorEmail(): Promise<number> {
   if (process.env.LEMBRETE_EMAIL_ATIVO !== '1' || new Date().getMinutes() !== MINUTO) return 0
   const db = admin()
   let n = 0
-  for (const c of await candidatasLembreteEmail()) {
+  for (const c of await candidatasLembreteEmail(POR_HORA, 60_000)) {
     if (n >= POR_HORA) break
     const tel = c.phone.replace(/\D/g, '')
     const hora = tel ? horaLocal(tel) : 12
