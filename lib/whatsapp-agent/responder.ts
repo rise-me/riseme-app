@@ -359,7 +359,7 @@ function blocoMateriais(idioma: string, temProtocolo: boolean): string {
 // conhecer as aulas. lib/whatsapp-agent/aulas-calistenia.json (scripts/gerar-aulas.mts) guarda a transcrição POR VERSÃO: 'en' =
 // as aulas em inglês, que são as mesmas dubladas para pl, cs, it, ro e tr; 'es' = as aulas em espanhol, que são OUTROS vídeos
 // (Bruno 05/11) e ainda não têm transcrição. Entra a aula do dia citado (ou o dia atual pelo cartão) + um índice curto.
-type Aula = { texto: string; exercicios: string[]; duracaoMin: number }
+type Aula = { texto: string; exercicios: string[]; duracaoMin: number; titulo?: string; salto?: boolean; obs?: string }
 const AULAS_POR_VERSAO = AULAS as Record<string, Record<string, Aula>>
 const versaoDasAulas = (idioma: string) => (idioma === 'es' ? 'es' : 'en')
 export function diasCitados(conversa: MensagemConversa[], cartao?: string | null): number[] {
@@ -377,8 +377,8 @@ export function blocoAulas(idioma: string, dias: number[]): string {
   if (!aulas || !Object.keys(aulas).length) {
     return 'AULAS DA CALISTENIA: a transcrição das aulas em espanhol ainda não está disponível (são vídeos diferentes dos outros idiomas). Para dúvida sobre um exercício, responda com o acervo e a anatomia básica consolidada (o que o exercício trabalha, como executar com segurança), nunca "não tenho nos materiais"; se precisar do detalhe exato do vídeo, peça que ela descreva o exercício em uma frase.'
   }
-  const indice = Object.entries(aulas).map(([d, a]) => `${d}: ${a.exercicios.slice(0, 5).join(', ')} (${a.duracaoMin} min)`).join(' · ')
-  const detalhe = dias.filter((d) => aulas[String(d)]).map((d) => { const a = aulas[String(d)]; return `AULA DO DIA ${d} (${a.duracaoMin} min; exercícios na ordem: ${a.exercicios.join(' → ')}). Narração do vídeo (inglês; a aluna ouve dublado no idioma dela):\n${a.texto}` })
+  const indice = Object.entries(aulas).map(([d, a]) => `${d}${a.titulo ? ` "${a.titulo}"` : ''}${a.salto ? ' [TEM SALTO]' : ''}: ${a.exercicios.slice(0, 5).join(', ')} (${a.duracaoMin} min)`).join(' · ')
+  const detalhe = dias.filter((d) => aulas[String(d)]).map((d) => { const a = aulas[String(d)]; return `AULA DO DIA ${d}${a.titulo ? ` "${a.titulo}" (título que ela vê no app)` : ''} (${a.duracaoMin} min${a.salto ? '; TEM SALTO' : ''}${a.obs ? `; ${a.obs}` : ''}; exercícios na ordem: ${a.exercicios.join(' → ')}). ${versaoDasAulas(idioma) === 'es' ? 'Narração do vídeo em espanhol (transcrição automática: nomes de exercício podem vir com erro de grafia; ignore palavras sem sentido)' : 'Narração do vídeo (inglês; a aluna ouve dublado no idioma dela)'}:\n${a.texto}` })
   return `AULAS DA CALISTENIA EN CASA (índice dos 28 dias, 5 primeiros exercícios de cada): ${indice}\n${detalhe.length ? '\n' + detalhe.join('\n\n') : '\n(Ela não citou o dia e o cartão não diz: para detalhar um exercício, pergunte em qual dia está.)'}`
 }
 

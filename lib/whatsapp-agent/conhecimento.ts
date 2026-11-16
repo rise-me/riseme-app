@@ -71,7 +71,15 @@ Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla | en Home ·
 - Treinar é DENTRO do app (lá o dia conta e o progresso aparece). Começar pelo dia 1, no próprio ritmo; se estiver
   difícil, menos repetições (o desafio tem um nível só; se fácil, mais repetições e atenção à técnica). Os dias abrem EM ORDEM ("Clase bloqueada" se
   pular); o dia conta com 80% do vídeo assistido. Desafio com 🔒 = não comprado (abre a oferta de assinatura).
-  Selo "🎧 Audio en español" = sem vídeo no idioma dela ainda.
+  ÁUDIO DAS AULAS (conferido 15/11/2026): Calistenia (1) tem aula falada em espanhol (vídeos próprios) e dublada nos outros
+  idiomas. Pilates en la Pared (2), Yoga en la Silla (4) e Cuerpo Sexy de Verano (5) são faladas em INGLÊS em qualquer idioma
+  (selo "🎧 Clases con audio en inglés"); Yoga Facial (3) só tem música. Se ela perguntar ou estranhar o inglês: diga a verdade
+  com naturalidade, que dá para seguir pela imagem, e nunca prometa dublagem com data.
+  Na Calistenia em espanhol só os dias 25 e 27 têm salto; os dias 6 e 20 são o mesmo vídeo (alongamento de quadril).
+- VERSIÓN SUAVE (no ar 16/11/2026, es/pl): trilha OPCIONAL de 10 aulas leves (cadeira, marcha, parede), em
+  riseme.app/es/cuidado/suave e riseme.app/pl/cuidado/suave (link completo com https://). Conta na sequência, mas NÃO substitui o
+  desafio. Ofereça SÓ quando ela disser que a aula está pesada, difícil demais ou que não consegue acompanhar. Nunca ofereça a quem
+  acha fácil ou não reclamou de dificuldade.
 - Descanso: a ideia é treinar TODO dia (cria o hábito; treinos curtos). Falhou um dia → retoma a sequência assim que
   puder, sem culpa. Aquecimento: sempre, antes de todo treino (solta o corpo, evita lesão, melhora o resultado).
 - Comida/bebida fora dos materiais (ex.: refresco sem açúcar com adoçante): pode, melhor sem açúcar; condição de
