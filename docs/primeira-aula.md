@@ -62,7 +62,7 @@ Bônus: a pergunta mede fácil × difícil aula por aula (quais dias pesam; se m
 LISTA APROVADA pelo Bruno 15/11 (10 aulas inteiras, sem equipamento além de cadeira/parede, sem ajoelhar nem salto; o
 Pilates Básico saiu porque as 10 pedem equipamento): C07, C01, R15, C05, R02, C14, R21, C09, C08, C15 (C = Caminhada
 Interior, id 18 no R2; R = Treinos Rápidos, id 19; dia = nº da aula no módulo). Subidor: tradução es+pl rodando 15/11;
-dublagem depois do crédito com o Bruno. APP PRONTO 15/11, desligado até SUAVE_ATIVO=1 (e só mostra aula que existe no
+dublagem depois do crédito com o Bruno. LIGAR SEM NOVO OK (Bruno 15/11: "sim"): quando o Subidor avisar que as 10 estão no R2, o riseme-c2 toca cada aula (es e pl) e liga SUAVE_ATIVO=1 + redeploy, e avisa o Bruno e o Arquiteto (bot passa a apontar a versión suave em 'es muy fuerte'). APP PRONTO 15/11, desligado até SUAVE_ATIVO=1 (e só mostra aula que existe no
 idioma): `lib/cuidado.ts` tipo 'suave', página `/cuidado/suave`, "Muy difícil" oferece "¿Quieres probarla?" quando há aula.
 Prévia local: `npm run dev` → `/dev-aula/player/1`.
 
