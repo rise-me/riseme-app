@@ -77,10 +77,19 @@ Arquiteto quando o WhatsApp voltar. Prévia: `/dev-aula/player/7?conquista=1`.
 Espelho da versión suave: oferecida só a quem marca "Fácil" no fim da aula ("¿Quieres algo más intenso? Tenemos clases
 rápidas tipo tabata"). Origem: Monika (PL) pediu reembolso 16/11 dizendo "muito lento; intervalos ou tabata seria ótimo";
 2 alunas em 11/11 acharam fácil demais. Passos: (1) FEITO o pedido ao Subidor 16/11: inventário de HIIT/tabata nos 80
-módulos do Drive (só pelos nomes); EM ANDAMENTO: eu ler as aulas fortes do rapidos17 (R16–R28) no RESUMO-EMPEZANDO.md
-(R24 HIIT Rápido 11 min, R27 HIIT Silencioso 7,5, R26 Explosão 6,6, R25 Núcleo Forte 10, R28 Prancha 10; R16/R22 são prancha
-o tempo todo); (2) ~23/11: ler quantas marcam "Fácil" em `user_metadata.como_te_fue` → Bruno decide se dubla;
-(3) lista → dublagem es+pl (crédito com o Bruno) → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
+módulos do Drive (só pelos nomes); Subidor confirmou 16/11 que está rodando → `fabrica-dublagem/trabalho/empezando/INVENTARIO-INTENSA.md`.
+FEITO 16/11, leitura das fortes do rapidos17 (RESUMO-EMPEZANDO.md):
+- Sem equipamento, 5–11 min: R16 Prancha 5,2 · R18 Costas/braço 6,9 · R20 Cabeça aos pés 7,7 · R22 Aquecimento 5,7 ·
+  R24 HIIT Rápido 11,1 · R25 Núcleo Forte 10,1 · R27 HIIT Silencioso 7,5 · R28 Prancha 10,0 (+ R13 Burpee walk 3,9, iniciante).
+- Com equipamento (fora ou com aviso): R17 faixa+halter · R19 halteres · R23 halteres · R26 banco + 2 min sem fala.
+- O que NÃO são: tabata. Blocos de 30–60 s, sem 20/10; o "HIIT" de R24/R27 é caminhado, sem pulo. Cardio de verdade só
+  R20 (marcha alta, polichinelo sem pulo, salto lateral). É uma trilha de FORÇA/CORE curta, não de intervalo.
+- Leitura: dá pra montar uma "versión intensa" de ~8 aulas curtas só com o rapidos17 (atende "muito lento"), mas "tabata"
+  de verdade depende do inventário do Subidor.
+(2) ~23/11: ler quantas marcam "Fácil" em `user_metadata.como_te_fue` → Bruno decide;
+(3) lista → dublagem es+pl → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
+CUSTO (Subidor 16/11): a voz das aulas agora é do Google (aprovada pelo Bruno); 28 aulas es+pl cabem na cota grátis do
+mês. ElevenLabs deixou de ser trava pra aula (fica pra criativo/VSL). Vale também pra dublar Pilates/Yoga/Cuerpo Sexy (2/4/5).
 
 ## Próximos (ordem combinada 14/11)
 1. FEITO 14/11: Bruno viu e aprovou; ligado. Ler em 24/11.
