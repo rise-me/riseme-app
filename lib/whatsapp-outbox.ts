@@ -209,6 +209,7 @@ export async function estaComProblema(phone: string): Promise<boolean> {
   return ms.some((m) => m.author === 'student' && SINAL_DE_PROBLEMA.test(m.body))
 }
 
+const TETO_CONVITES_HORA = 10
 async function motivoParaPular(phone: string, kind: string, id: number): Promise<string | null> {
   if (await pediuParaParar(phone)) return 'pediu para não receber mensagens'
   if ((kind === 'depoimento' || kind === 'convite-comunidade' || kind === 'convite-grupo') && (await estaComProblema(phone))) return 'aluna com problema/pergunta aberta'
@@ -222,6 +223,13 @@ async function motivoParaPular(phone: string, kind: string, id: number): Promise
   if (jaFoi) return 'já recebeu'
   if ((chats ?? []).some((c) => c.mode === 'human' && (!c.human_until || new Date(c.human_until) > new Date()))) return 'pessoa atendendo'
   if (consultas) return 'consulta aberta'
+  // Teto por hora do convite de depoimento (Bruno 15/11/2026, depois da restrição da Meta: "tem que ficar com bastante
+  // cuidado… se amanhã a gente coloca uma escala, vai ter um montão de mensagem de novo"). O convite dobra o volume por
+  // conversa; com escala ele não pode acompanhar o número de cliques. O que passa do teto NÃO sai (não fica para depois).
+  if (kind === 'depoimento') {
+    const { count: naHora } = await db.from('whatsapp_outbox').select('id', { count: 'exact', head: true }).eq('kind', 'depoimento').gte('sent_at', new Date(Date.now() - 3_600_000).toISOString())
+    if ((naHora ?? 0) >= TETO_CONVITES_HORA) return `teto de ${TETO_CONVITES_HORA} convites por hora`
+  }
   return null
 }
 
