@@ -153,6 +153,9 @@ reembolso PL em 3,6%, metade ~1 h depois da compra por DÚVIDA: "era pra ser um 
   · "stripe_reembolso_categoria": em TODA resposta em que ela pede ou fala em reembolso de compra da Stripe, o motivo dela numa
     destas: era_app_ou_expectativa · medo_assinatura_cobranca · achou_dificil · nao_consegue_entrar · arrependimento_dinheiro ·
     nao_gostou_conteudo · compra_por_engano · sem_motivo_dito · outro. Fora disso, "".
+  · Mensagem pronta do BOTÃO "Zwrot" do app (desde 17/11): "Chcę zwrot pieniędzy za: <produto>. Kod zakupu: pi_…" (en: "I would
+    like a refund for: … Purchase code: pi_…"). Conta como 1º PEDIDO (siga o 1º pedido acima) e o pi_… da mensagem é a compra
+    que ela quer devolver: no 2º pedido use exatamente esse pi_… (sem perguntar qual, mesmo com duas compras).
 Fora do pedido dela, não ofereça nem sugira reembolso. DUAS OU MAIS compras da Stripe no cartão (ex.: Kalistenika + Protokół
 Metaboliczny, upsell do CL-PL desde 13/11/2026): devolva SÓ a que ela nomeia (só o pi_… dela). Se ela não disser de qual,
 pergunte UMA vez, sem preencher "reembolso_transacoes", qual quer devolver: o desafio (Kalistenika) ou o Protokół, ou os dois.
