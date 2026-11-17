@@ -12,7 +12,7 @@
 
 import { admin, aprendizadosAtivos, perfilDaAluna } from '@/lib/whatsapp-agent/conversa'
 import { decidirResposta, type MensagemConversa } from '@/lib/whatsapp-agent/responder'
-import { textoReembolsoStripe } from '@/lib/whatsapp-agent/reembolsos'
+import { textoReembolsoStripe, registrarPedidoReembolso } from '@/lib/whatsapp-agent/reembolsos'
 import { reembolsarStripe } from '@/lib/stripe-api'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
 import { sendAccessEmail } from '@/lib/email'
@@ -306,6 +306,7 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
   if (decisao.tipo === 'responder') {
     // Reembolso da Stripe: automático, já no 1º pedido (Bruno 09/11 e 12/11; zero chargeback).
     const pis = (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_'))
+    if (decisao.reembolsoCategoria || pis.length) await registrarPedidoReembolso({ phone: r.de, canal: 'email', categoria: decisao.reembolsoCategoria, devolveu: pis, motivo: decisao.reembolsoMotivo }).catch((err) => console.error('[reembolso-pedido] falhou:', err))
     if (pis.length) {
       const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
       const falhas = res.map((x, i) => (x.ok ? null : `${pis[i]}: ${'erro' in x ? x.erro : '?'}`)).filter(Boolean)

@@ -41,7 +41,7 @@ import { blocoHotmart } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsosPendentes, aprovarReembolsos, criarPedidosDaDecisao } from '@/lib/whatsapp-agent/reembolsos'
 import { emailNaConversa } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsarStripe } from '@/lib/stripe-api'
-import { textoReembolsoStripe } from '@/lib/whatsapp-agent/reembolsos'
+import { textoReembolsoStripe, registrarPedidoReembolso } from '@/lib/whatsapp-agent/reembolsos'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.
@@ -452,6 +452,9 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   // responsável (lista das 20h, ou na hora se estiver perto do dia 15). Sem pedido criado → vira consulta (05/11/2026).
   // Compra da Stripe (Bruno 09/11/2026, teste CL-PL; zero chargeback): reembolso AUTOMÁTICO, sem lista nem aprovação.
   // O texto é fixo (nunca "devolvido"); a confirmação final, com o presente do acesso, sai pelo webhook da Stripe.
+  // Motivo de toda conversa de reembolso da Stripe (teste CL-PL T11, 17/11/2026), devolvendo ou não.
+  if (decisao.tipo === 'responder' && (decisao.reembolsoCategoria || decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))))
+    await registrarPedidoReembolso({ phone, canal: 'whatsapp', categoria: decisao.reembolsoCategoria, devolveu: (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_')), motivo: decisao.reembolsoMotivo }).catch((err) => console.error('[reembolso-pedido] falhou:', err))
   if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))) {
     const pis = decisao.reembolsoTransacoes.filter((t) => t.startsWith('pi_'))
     const idioma = perfil?.idioma ?? 'pl'

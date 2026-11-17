@@ -217,3 +217,22 @@ export function textoReembolsoStripe(idioma: string, nome: string | undefined, o
     ? `Jasne${n ? `, ${n}` : ''}. Twój zwrot jest już w trakcie realizacji — nie musisz nic więcej robić. Wszystkie informacje znajdziesz tutaj:\nhttps://riseme.app/pl/refund\nGdy zwrot zostanie zrealizowany, wyślę Ci tutaj potwierdzenie. 💛`
     : `Of course${n ? `, ${n}` : ''}. Your refund is already being processed — you don't need to do anything else. All the details are here:\nhttps://riseme.app/en/refund\nOnce the refund is completed, I'll send you a confirmation here. 💛`
 }
+
+/**
+ * Registro do MOTIVO de cada conversa de reembolso da Stripe (teste CL-PL T11, Bruno 17/11/2026): linha inerte em
+ * whatsapp_outbox, kind 'reembolso-pedido', body JSON {canal, categoria, devolveu, pis, motivo}. O monitor de testes lê
+ * daqui quantas pediram, por quê, e quantas ficaram depois de tirar a dúvida.
+ */
+export async function registrarPedidoReembolso(p: { phone: string; canal: 'whatsapp' | 'email'; categoria?: string; devolveu: string[]; motivo?: string }): Promise<void> {
+  if (!p.categoria && !p.devolveu.length) return
+  const { admin } = await import('./conversa')
+  const agora = new Date().toISOString()
+  await admin().from('whatsapp_outbox').insert({
+    phone: p.phone,
+    kind: 'reembolso-pedido',
+    body: JSON.stringify({ canal: p.canal, categoria: p.categoria ?? 'sem_motivo_dito', devolveu: p.devolveu.length > 0, pis: p.devolveu, motivo: (p.motivo ?? '').slice(0, 300) }),
+    send_after: agora,
+    sent_at: agora,
+    attempts: 5,
+  })
+}

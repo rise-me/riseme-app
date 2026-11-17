@@ -61,7 +61,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; feedbackResumo?: string; assuntos?: string; paseEmVezDeReembolso?: boolean }
+  | { tipo: 'responder'; reembolsoCategoria?: string; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; feedbackResumo?: string; assuntos?: string; paseEmVezDeReembolso?: boolean }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta; assuntos?: string }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -136,9 +136,20 @@ PARAR MENSAGENS ("parar_mensagens" = true): ela pede para não receber mais ("no
 "NIE"/"wypisz"; cs "NE"/"odhlásit"; it "NO"/"basta"/"annulla l'iscrizione"; tr "hayır"/"yazmayın"; en "stop"/"unsubscribe"):
 responda curto e educado que não vamos mais escrever, sem oferecer nada. Um "no" a uma pergunta sua NÃO é pedido para parar.
 
-COMPRA DA STRIPE (no cartão, compra com "· Stripe ·" e transação pi_…; Bruno 09/11/2026, fase de teste): se ela pede
-reembolso dessa compra, já no 1º pedido: "reembolso_transacoes" = o pi_… e NÃO transfira. Nada de perguntar o motivo,
-oferecer o Pase ou falar de Hotmart/7 dias. O sistema pede o reembolso na hora e escreve a resposta. Nunca diga "devolvido".
+COMPRA DA STRIPE (no cartão, compra com "· Stripe ·" e transação pi_…). REGRA NOVA (Bruno 17/11/2026, teste CL-PL T11:
+reembolso PL em 3,6%, metade ~1 h depois da compra por DÚVIDA: "era pra ser um app?", "vai cobrar todo mês?"):
+  · 1º PEDIDO, sem ela ter dito que quer o dinheiro de qualquer jeito: NÃO preencha "reembolso_transacoes". Pergunte o motivo
+    em 1 frase curta e, na MESMA resposta, já tire a dúvida mais provável com o fato: é pagamento ÚNICO, sem assinatura, nada
+    mensal; é um app no navegador (riseme.app) com e-mail e senha do e-mail de acesso; se achou pesado, existe a versión suave
+    opcional; se não consegue entrar, "reenviar_acesso". Ofereça ajuda UMA vez, sem pressão, e diga que se ela preferir mesmo o
+    dinheiro de volta, é só responder que devolvemos na hora. Nada de Pase, desconto ou Hotmart.
+  · 2º PEDIDO (ela insiste), OU já no 1º se ela diz claramente que quer o dinheiro mesmo assim / que já decidiu / "zwrot pieniędzy
+    teraz": "reembolso_transacoes" = o pi_… e NÃO transfira. Sem discutir. O sistema pede o reembolso na hora e escreve a resposta.
+    Nunca diga "devolvido".
+  · Nunca deixe sem resposta e nunca transfira pedido de reembolso da Stripe (chargeback vem de quem se sente enrolada).
+  · "stripe_reembolso_categoria": em TODA resposta em que ela pede ou fala em reembolso de compra da Stripe, o motivo dela numa
+    destas: era_app_ou_expectativa · medo_assinatura_cobranca · achou_dificil · nao_consegue_entrar · arrependimento_dinheiro ·
+    nao_gostou_conteudo · compra_por_engano · sem_motivo_dito · outro. Fora disso, "".
 Fora do pedido dela, não ofereça nem sugira reembolso. DUAS OU MAIS compras da Stripe no cartão (ex.: Kalistenika + Protokół
 Metaboliczny, upsell do CL-PL desde 13/11/2026): devolva SÓ a que ela nomeia (só o pi_… dela). Se ela não disser de qual,
 pergunte UMA vez, sem preencher "reembolso_transacoes", qual quer devolver: o desafio (Kalistenika) ou o Protokół, ou os dois.
@@ -301,8 +312,9 @@ const FORMATO = {
       precisa_materiais: { type: 'boolean' },
       acao_humana: { type: 'string' },
       pase_em_vez_de_reembolso: { type: 'boolean' },
+      stripe_reembolso_categoria: { type: 'string' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo', 'precisa_materiais', 'acao_humana', 'pase_em_vez_de_reembolso'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo', 'precisa_materiais', 'acao_humana', 'pase_em_vez_de_reembolso', 'stripe_reembolso_categoria'],
     additionalProperties: false,
   },
 }
@@ -437,7 +449,7 @@ Regras do canal (valem acima das regras que citam o WhatsApp):
 2. Ela escreve do e-mail da conta: a identidade está confirmada. Não acha o e-mail de acesso, a senha não funciona ou não consegue entrar → "reenviar_acesso" = true: o sistema manda AGORA outro e-mail, separado, com senha nova e botão para entrar. Diga isso ("te mandei agora um novo e-mail de acesso; use a senha desse e-mail novo").
 3. Se ela perguntar do WhatsApp ou disser que escreveu lá e ninguém respondeu: peça desculpas em 1 frase, diga que o WhatsApp está temporariamente indisponível e que o atendimento segue por este e-mail, sem perder nada. Não prometa dia nem hora de volta.
 4. E-mail não é bate-papo: responda TUDO de uma vez (os passos completos, o link completo com https://), porque cada ida e volta demora. No máximo 1 pergunta, só se sem ela não dá para resolver.
-5. Reembolso de compra da Stripe: mesma regra de sempre (1º pedido → "reembolso_transacoes" com o pi_…). Ela também pode pedir sozinha em https://riseme.app/pl/refund ou pelo botão no app.
+5. Reembolso de compra da Stripe: mesma regra COMPRA DA STRIPE (1º pedido: motivo + tirar a dúvida + 1 oferta; 2º pedido ou decisão clara: "reembolso_transacoes" com o pi_…). Por e-mail, diga que basta responder "quero o reembolso" que devolvemos na hora.
 6. Não ofereça convite de depoimento, brinde, indicação nem Pase por este canal. "pedir_depoimento" e "liberar_brinde" = false.
 7. Sem conta no perfil: o endereço de onde ela escreve não é o da compra. Peça o e-mail usado na compra, em 1 frase, e NÃO transfira: quando ela mandar, o sistema acha a conta sozinho.
 8. NUNCA prometa nada pelo WhatsApp: nada de "o acesso chega no WhatsApp", "te escrevo no WhatsApp" ou "confirmo no WhatsApp". Tudo chega por e-mail. A regra "POLONÊS / compra da Stripe sem conta" vale aqui sem a parte do WhatsApp: diga que o pagamento está certo e que o acesso está (ou vai) no e-mail da compra.
@@ -604,6 +616,7 @@ export async function decidirResposta(params: {
     precisa_materiais: boolean
     acao_humana: string
     pase_em_vez_de_reembolso: boolean
+    stripe_reembolso_categoria?: string
   }
   // A 1ª rodada não tinha os materiais e precisava deles: refaz uma vez com o assunto 'conteudo' (prompt por assunto, 05/11/2026).
   if (out.precisa_materiais && !comMateriais && !params.forcarAssuntos) {
@@ -650,7 +663,7 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim()).map((t) => (/^pi_/i.test(t) ? t : t.toUpperCase())).filter((t) => /^[A-Z]{2}\d{6,}/.test(t) || /^pi_[A-Za-z0-9]{6,}$/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined, paseEmVezDeReembolso: Boolean(out.pase_em_vez_de_reembolso) }
+    : { tipo: 'responder', assuntos, reembolsoCategoria: out.stripe_reembolso_categoria?.trim() || undefined, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim()).map((t) => (/^pi_/i.test(t) ? t : t.toUpperCase())).filter((t) => /^[A-Z]{2}\d{6,}/.test(t) || /^pi_[A-Za-z0-9]{6,}$/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined, paseEmVezDeReembolso: Boolean(out.pase_em_vez_de_reembolso) }
 }
 
 // Frase curta do prazo da lista das 20h, por idioma (lib/whatsapp-agent/lista-20h.ts decide hoje/amanhã).
