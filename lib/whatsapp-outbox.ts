@@ -352,7 +352,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
         // hotmartEmail = consulta real à Hotmart no teste; hotmart = bloco pronto (teste sem credencial)
         // hotmartEmail = a Hotmart é consultada só se o CLASSIFICADOR disser dinheiro (como em produção); hotmart = bloco pronto
         const { resumoHotmart } = await import('@/lib/hotmart-api')
-        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((m) => (typeof m === 'string' ? { autor: 'student' as const, texto: m, em: agora } : { autor: m.a, texto: m.t, em: m.em ?? agora })), agora, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo, hotmart: caso.hotmart ?? null, emailSemConta: caso.emailSemConta, buscarHotmart: caso.hotmartEmail ? () => resumoHotmart(caso.hotmartEmail!) : undefined })
+        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((m) => (typeof m === 'string' ? { autor: 'student' as const, texto: m, em: agora } : { autor: m.a, texto: m.t, em: m.em ?? agora })), agora, canal: (caso as { canal?: 'email' }).canal, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo, hotmart: caso.hotmart ?? null, emailSemConta: caso.emailSemConta, buscarHotmart: caso.hotmartEmail ? () => resumoHotmart(caso.hotmartEmail!) : undefined })
         saida = JSON.stringify({ ...caso, resultado: d })
       } catch (err) {
         saida = JSON.stringify({ erro: String(err), entrada: item.body.slice(0, 500) })
