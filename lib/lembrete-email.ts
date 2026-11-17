@@ -2,7 +2,7 @@
 // e-mail"). Substitui o lembrete de WhatsApp (lib/lembrete-24h.ts), desligado desde a restrição da Meta de 14/11: e-mail
 // não arrisca o número. Uma vez por compradora, sem senha no e-mail (aponta para o e-mail de acesso e para "esqueci a
 // senha"), só de dia no fuso dela. Hoje cobre as vendas da Stripe (CL-PL), de onde vem o volume; Hotmart (ES) fica de fora.
-// Liga com LEMBRETE_EMAIL_ATIVO=1 na Vercel. Modo seco: scripts/tmp-lembrete-email.mts.
+// LIGADO 17/11/2026 (Bruno: 'faz isso aí do lembrete'). Desligar: LEMBRETE_EMAIL_ATIVO=0 na Vercel. Modo seco: scripts/tmp-lembrete-email.mts.
 import { admin } from './whatsapp-agent/conversa'
 import { horaLocal } from './video-depoimento'
 
@@ -79,7 +79,7 @@ export async function candidatasLembreteEmail(limite = Infinity, prazoMs = Infin
 
 /** Cron (minuto 27 de cada hora, dentro de app/api/whatsapp/outbox). Enfileira e-mails; a fila manda 15/min. */
 export async function lembrarPorEmail(): Promise<number> {
-  if (process.env.LEMBRETE_EMAIL_ATIVO !== '1' || new Date().getMinutes() !== MINUTO) return 0
+  if (process.env.LEMBRETE_EMAIL_ATIVO === '0' || new Date().getMinutes() !== MINUTO) return 0
   const db = admin()
   let n = 0
   for (const c of await candidatasLembreteEmail(POR_HORA, 60_000)) {
