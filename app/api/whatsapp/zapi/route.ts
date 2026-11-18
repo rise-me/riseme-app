@@ -499,7 +499,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   }
   if (decisao.tipo === 'responder' && (decisao.novoEmail || decisao.reenviarAcesso)) {
     const idioma = perfil?.idioma ?? 'es'
-    const pedido = decisao.novoEmail ? `trocar o e-mail para ${decisao.novoEmail}` : 'renovar a senha'
+    const pedido = decisao.novoEmail ? `trocar o e-mail para ${decisao.novoEmail}` : 'reenviar o acesso'
     if (!userId || !perfil?.confirmadaPorTelefone) {
       // O prompt não deveria marcar sem conta confirmada; segurança em profundidade (qualquer um digita um e-mail).
       decisao = decisao.novoEmail
@@ -547,7 +547,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     } catch (err) {
       const detalhe = (err instanceof Error ? err.message : String(err)).slice(0, 200)
       console.error(`[acesso] reenvio pelo bot falhou (${phone}):`, err)
-      await consultarResponsavel(phone, perfil?.nome, perfil?.idioma ?? '?', ultimaDela, `ACESSO — o bot prometeu o acesso novo (${reenviarDepois}) e o envio falhou: ${detalhe}`, { resumo: `O bot disse à aluna que a senha foi renovada e o acesso chegaria aqui, mas o envio falhou (${detalhe}).`, opcaoA: 'Reenviar o acesso (comando "reenvia o acesso de <e-mail>").', opcaoB: 'Pedir que use "¿Olvidaste tu contraseña?" no login.' })
+      await consultarResponsavel(phone, perfil?.nome, perfil?.idioma ?? '?', ultimaDela, `ACESSO — o bot prometeu o acesso novo (${reenviarDepois}) e o envio falhou: ${detalhe}`, { resumo: `O bot disse à aluna que o acesso chegaria aqui, mas o envio falhou (${detalhe}).`, opcaoA: 'Reenviar o acesso (comando "reenvia o acesso de <e-mail>").', opcaoB: 'Pedir que use "¿Olvidaste tu contraseña?" no login.' })
     }
   }
 

@@ -43,11 +43,13 @@ só é assunto de dinheiro se for cobrança real.
 - Instalar (opcional): iPhone → https://riseme.app no SAFARI → compartilhar → "Agregar a pantalla de inicio" (não
   "Favoritos"); Android → https://riseme.app no CHROME → três pontos → "Instalar app". Ícone sumido: últimas telas.
 - Trocar a senha: Más → Mi perfil → "Contraseña" → nova duas vezes → "GUARDAR CONTRASEÑA".
-- Não consegue entrar / esqueceu ou perdeu a senha / não recebeu o acesso: VOCÊ renova a senha e o acesso chega aqui
-  (regra REENVIAR ACESSO). O "¿Olvidaste tu contraseña?" do login (pl "Nie pamiętasz hasła?", cs "Zapomněla jsi heslo?",
+- Não consegue entrar / esqueceu ou perdeu a senha / não recebeu o acesso: VOCÊ reenvia o acesso e ele chega aqui
+  (regra REENVIAR ACESSO). A senha de acesso de cada conta é UMA só e nunca muda por nossa parte: todo reenvio traz a
+  mesma. Se ela diz que "a senha não funciona", o mais comum é o telefone ter preenchido sozinho uma senha guardada ou
+  ela ter copiado com espaço: a certa é a da mensagem de acesso (ou o link dela, que entra direto). O "¿Olvidaste tu contraseña?" do login (pl "Nie pamiętasz hasła?", cs "Zapomněla jsi heslo?",
   it "Hai dimenticato la password?", ro "Ți-ai uitat parola?", tr "Şifreni mi unuttun?", en "Forgot your password?") →
   email da compra → "ENVIAR ENLACE" → cria a nova no email ("GUARDAR NUEVA CONTRASEÑA") é o caminho para conta NÃO
-  confirmada ou se ela preferir; e-mail não chegou: spam/promoções. Senha já renovada há pouco e segue sem entrar =
+  confirmada ou se ela preferir; e-mail não chegou: spam/promoções. Acesso já reenviado há pouco e segue sem entrar =
   problema técnico (uma pergunta: o que aparece na tela? print) → depois transfira.
 - E-mail da compra errado (digitou errado, não usa aquele): regra CORRIGIR E-MAIL (ela confirma o novo; você troca).
 - Sem conta no número e ela manda o e-mail da compra: o sistema cria a conta pela compra Hotmart sozinho (CONTA CRIADA

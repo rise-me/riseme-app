@@ -115,7 +115,7 @@ async function planejar(p: PedidoComando, a: Aluna): Promise<{ resumo: string; p
       return { resumo: `Vou liberar *${NOME_PRODUTO[p.produto]}* (vitalício) para ${quem}.`, params: { ...base, produto: p.produto } }
     case 'reenviar_acesso':
       return {
-        resumo: `Vou gerar uma *senha nova* para ${quem} e mandar o acesso completo no WhatsApp dela. A senha atual deixa de valer.`,
+        resumo: `Vou mandar o acesso completo de ${quem} no WhatsApp dela, com a *senha de sempre* da conta (não gero senha nova).`,
         params: base,
       }
     case 'trocar_email':
@@ -165,7 +165,7 @@ async function executar(acao: string, p: Params, idAtual?: number): Promise<stri
       if (!chat) throw new Error('não achei o WhatsApp dela (sem telefone na conta e sem conversa)')
       const perfil = await perfilDaAluna(p.userId)
       await reenviarAcesso({ userId: p.userId, phone: chat, email: p.email, idioma: perfil?.idioma ?? 'es' })
-      return `Acesso novo enviado para ${p.nome || p.email} (senha nova; a antiga não vale mais).`
+      return `Acesso reenviado para ${p.nome || p.email} (mesma senha de sempre).`
     }
     case 'reembolsar':
       return executarReembolso(idAtual!, p as unknown as PedidoReembolso)

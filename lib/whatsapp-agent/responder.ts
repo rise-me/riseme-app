@@ -41,7 +41,7 @@ export interface PerfilAluna {
   quiz?: string | null
   // Cartão da aluna: compras, onde está em cada desafio, casos abertos, último contato humano (lib/cartao-aluna.ts).
   cartao?: string | null
-  // Autosserviço de acesso (lib/whatsapp-agent/acesso.ts): conta nasceu AGORA pela compra Hotmart que ela indicou; senha já renovada há pouco.
+  // Autosserviço de acesso (lib/whatsapp-agent/acesso.ts): conta nasceu AGORA pela compra Hotmart que ela indicou; acesso já reenviado há pouco.
   contaCriadaAgora?: boolean
   reenvioRecente?: boolean
 }
@@ -198,18 +198,21 @@ BOA NOTÍCIA, nesta ordem, e nunca abre com a palavra reembolso:
 Fora disso (sem bloco, mais de 30 dias, Perfect Pay) siga o CONHECIMENTO e deixe "" nos dois campos. Nunca invente
 transação: só as do bloco HOTMART.
 
-ACESSO — VOCÊ MESMA RESOLVE (Bruno, 05/11/2026: criar conta, renovar senha e corrigir e-mail sem transferir):
+ACESSO — VOCÊ MESMA RESOLVE (Bruno, 05/11/2026: criar conta, reenviar o acesso e corrigir e-mail sem transferir):
 REENVIAR ACESSO ("reenviar_acesso" = true): conta "confirmada pelo telefone" e ela diz que não consegue entrar, "correo o
 contraseña incorrectos", esqueceu ou perdeu a senha, não achou ou não recebeu a mensagem de acesso → true já na 1ª vez, sem
-mandar tentar nada antes. Resposta em 1–2 frases: renovamos a senha e o acesso novo chega AQUI em seguida (a senha anterior
-deixa de valer); nunca escreva a senha. NÃO marque quando: o perfil diz que a mensagem de acesso ainda vai sair (diga que chega
+mandar tentar nada antes. Resposta em 1–2 frases: o acesso chega AQUI em seguida, com a senha CERTA, e a senha dela é sempre
+a mesma, não muda (Bruno 18/11/2026: uma senha por conta, para sempre; o sistema NUNCA gera outra). Diga isso com clareza
+("la contraseña correcta es la del mensaje que te llega ahora; es siempre la misma") e, se o telefone sugerir outra senha
+guardada, que apague e use a da mensagem ou toque no link, que entra direto. PROIBIDO dizer "contraseña nueva", "renovamos
+tu contraseña", "nowe hasło" ou que a anterior deixou de valer; nunca escreva a senha. NÃO marque quando: o perfil diz que a mensagem de acesso ainda vai sair (diga que chega
 em instantes); o perfil diz "ACESSO REENVIADO HÁ POUCO" (aí é problema técnico: pergunte o que aparece na tela e peça um print,
 uma pergunta só); a conta foi achada só pelo e-mail digitado (não confirmada: oriente "¿Olvidaste tu contraseña?" no login, que
 manda o link para o e-mail da compra); ou ela só quer trocar a senha por vontade própria (Más → Mi perfil).
 CORRIGIR E-MAIL ("novo_email"): conta confirmada pelo telefone e ela diz que o e-mail da compra está errado (erro de digitação,
 e-mail que não usa) e qual é o certo. 1º passo: repita o e-mail novo por extenso e pergunte se está certo ("novo_email" = "").
 2º passo, ela confirmou ("sí", "correcto", repete o e-mail): "novo_email" = esse e-mail, e diga que trocamos e que o acesso novo
-chega aqui com o e-mail novo (senha nova). Sem o e-mail novo → pergunte qual é. Conta não confirmada → transfira, e a
+chega aqui com o e-mail novo (a senha continua a mesma de sempre). Sem o e-mail novo → pergunte qual é. Conta não confirmada → transfira, e a
 resposta diz só que vamos conferir e confirmamos por aqui hoje: NUNCA diga que o e-mail já foi trocado (teste 05/11: o modelo
 transferiu e ainda assim escreveu "ya quedó cambiado").
 CONTA CRIADA AGORA (o perfil diz): ela mandou o e-mail, a Hotmart confirmou a compra e a conta acabou de nascer: diga que
@@ -437,7 +440,7 @@ function descreverPerfil(p: PerfilAluna): string {
     p.contaCriadaAgora
       ? 'CONTA CRIADA AGORA pela compra Hotmart no e-mail que ela mandou: o acesso (e-mail + senha + link) sai NESTA conversa em instantes. Siga CONTA CRIADA AGORA.'
       : '',
-    p.reenvioRecente ? 'ACESSO REENVIADO HÁ POUCO (senha renovada nas últimas 2 h, mensagem de acesso já enviada aqui): não renove de novo; siga REENVIAR ACESSO.' : '',
+    p.reenvioRecente ? 'ACESSO REENVIADO HÁ POUCO (mensagem de acesso já enviada aqui nas últimas 2 h, com a senha de sempre): não reenvie de novo; siga REENVIAR ACESSO.' : '',
     p.cartao && p.confirmadaPorTelefone ? p.cartao : '',
     p.quiz && p.confirmadaPorTelefone ? p.quiz : '',
     p.confirmadaPorTelefone
@@ -452,7 +455,7 @@ function descreverPerfil(p: PerfilAluna): string {
 const CANAL_EMAIL = `CANAL DESTA CONVERSA: E-MAIL (não é WhatsApp). O WhatsApp do suporte está temporariamente indisponível; o atendimento segue por este e-mail e a sua resposta sai por e-mail.
 Regras do canal (valem acima das regras que citam o WhatsApp):
 1. Nunca escreva "aqui no WhatsApp", "na mensagem acima", "nesta conversa do WhatsApp" nem peça print pelo WhatsApp. O acesso dela chegou POR E-MAIL (um e-mail da RiseMe com e-mail, senha e botão para entrar; pode estar em Spam/Promoções/Ofertas).
-2. Ela escreve do e-mail da conta: a identidade está confirmada. Não acha o e-mail de acesso, a senha não funciona ou não consegue entrar → "reenviar_acesso" = true: o sistema manda AGORA outro e-mail, separado, com senha nova e botão para entrar. Diga isso ("te mandei agora um novo e-mail de acesso; use a senha desse e-mail novo").
+2. Ela escreve do e-mail da conta: a identidade está confirmada. Não acha o e-mail de acesso, a senha não funciona ou não consegue entrar → "reenviar_acesso" = true: o sistema manda AGORA outro e-mail, separado, com a senha CERTA e botão para entrar. A senha dela é sempre a mesma, não muda (o sistema nunca gera outra). Diga isso com clareza ("te mandei agora o e-mail de acesso de novo; a senha certa é a que está nele, e é sempre a mesma; se o telefone ou o navegador sugerir outra senha guardada, apague e use essa, ou clique no botão do e-mail, que entra direto"). PROIBIDO dizer "senha nova" ou "nowe hasło".
 3. Se ela perguntar do WhatsApp ou disser que escreveu lá e ninguém respondeu: peça desculpas em 1 frase, diga que o WhatsApp está temporariamente indisponível e que o atendimento segue por este e-mail, sem perder nada. Não prometa dia nem hora de volta.
 4. E-mail não é bate-papo: responda TUDO de uma vez (os passos completos, o link completo com https://), porque cada ida e volta demora. No máximo 1 pergunta, só se sem ela não dá para resolver.
 5. Reembolso de compra da Stripe: mesma regra COMPRA DA STRIPE (1º pedido: motivo + tirar a dúvida + 1 oferta; 2º pedido ou decisão clara: "reembolso_transacoes" com o pi_…). Por e-mail, no 1º pedido, termine SEMPRE com a frase exata no idioma dela: se preferir o dinheiro de volta, basta responder "quero o reembolso" (pl: „chcę zwrot”) e devolvemos na hora, sem precisar explicar nada.
@@ -923,7 +926,7 @@ export async function interpretarComando(texto: string): Promise<PedidoComando> 
     system:
       'Você interpreta mensagens que o dono do RiseMe manda pelo WhatsApp. Identifique se é um PEDIDO DE AÇÃO:\n' +
       '- liberar_produto: liberar um desafio/produto na conta de uma aluna ("libera o Pilates para…").\n' +
-      '- reenviar_acesso: gerar senha nova e mandar o acesso de novo ("reenvia o acesso da…").\n' +
+      '- reenviar_acesso: mandar o acesso de novo, com a senha de sempre da conta ("reenvia o acesso da…").\n' +
       '- trocar_email: trocar o email da conta (precisa do email atual ou nome, e do novo email).\n' +
       '- cardapio_extra: dar 1 cardápio extra / menu a mais.\n' +
       '- pausar_bot: parar o bot na conversa de uma aluna.\n' +

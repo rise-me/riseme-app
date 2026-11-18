@@ -3,7 +3,8 @@
 // (levantamento das 152 consultas de outubro: acesso/senha/e-mail era a maior causa de transferência).
 // 1) CONTA PELA COMPRA: ela escreve de um número sem conta, manda o e-mail, a Hotmart tem compra PAGA de produto que o
 //    app entrega (HOTMART_CHALLENGE_MAP) → a conta nasce pelo mesmo caminho do webhook e o acesso sai NESTA conversa.
-// 2) SENHA: conta confirmada pelo telefone + "não consigo entrar" → senha nova + mensagem de acesso aqui, na hora.
+// 2) SENHA: conta confirmada pelo telefone + "não consigo entrar" → mensagem de acesso aqui, na hora, com a senha DE SEMPRE
+//    (18/11/2026: nunca geramos outra; lib/senha-conta.ts).
 // 3) E-MAIL: conta confirmada + ela confirmou o e-mail novo → troca + acesso novo com o e-mail novo.
 // Conta achada só pelo e-mail digitado (não confirmada) nunca ganha senha nem troca de e-mail por aqui (qualquer um
 // digita um e-mail): o caminho é o "¿Olvidaste tu contraseña?" do login, que prova a posse do e-mail.
@@ -12,7 +13,8 @@ import type { MensagemConversa } from './responder'
 import { contaDaConvidadaHotmart } from './prova-social'
 import { comprasPorEmail, hotmartConfigurada, resumoHotmart, type CompraHotmart } from '@/lib/hotmart-api'
 import { getMappingForProduct } from '@/lib/hotmart-map'
-import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
+import { buildAccessLink } from '@/lib/access-code'
+import { senhaDaConta } from '@/lib/senha-conta'
 import { aberturaReenvio, mensagensDeAcesso } from '@/lib/whatsapp-access'
 import { marcarNaFila } from '@/lib/whatsapp-outbox'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
@@ -171,21 +173,20 @@ export function quaseIgual(a: string, b: string): boolean {
   return true
 }
 
-/** Senha nova + mensagem de acesso nesta conversa (usado pelo bot e pelo comando "reenvia o acesso"). Lança em erro. */
+/** Mensagem de acesso nesta conversa com a senha DE SEMPRE da conta (usado pelo bot e pelo comando "reenvia o acesso").
+ *  Não gera senha nova (Bruno 18/11/2026: uma senha por conta, para sempre; ver lib/senha-conta.ts). Lança em erro. */
 export async function reenviarAcesso(p: { userId: string; phone: string; email: string; idioma: string; nova?: boolean; challengeId?: string }): Promise<void> {
-  const code = generateAccessCode()
-  const { error } = await admin().auth.admin.updateUserById(p.userId, { password: code })
-  if (error) throw new Error(error.message)
+  const { code } = await senhaDaConta({ userId: p.userId, email: p.email })
   const [acesso] = mensagensDeAcesso({ locale: p.idioma, email: p.email, code, link: buildAccessLink(APP_URL(), p.idioma, p.email, code), challengeId: p.challengeId })
   const msg = p.nova ? acesso : `${aberturaReenvio(p.idioma)}\n\n${acesso}`
   const destino = toZapiPhone(p.phone)
   const r = await sendZapiText({ phone: destino, message: msg, delayTyping: 2 })
-  if (!r.ok) throw new Error(`senha trocada, mas o envio falhou: ${r.error}`)
+  if (!r.ok) throw new Error(`o envio do acesso falhou (a senha da conta continua a mesma): ${r.error}`)
   await registrarMensagem({ phone: destino, direction: 'out', author: 'system', body: msg.replaceAll(code, '••••••'), waMessageId: r.messageId })
   await marcarNaFila(p.phone, KIND_REENVIO, p.email)
 }
 
-/** Senha já renovada nas últimas 2 h nesta conversa (trava: reenviar de novo não resolve problema técnico). */
+/** Acesso já reenviado nas últimas 2 h nesta conversa (trava: reenviar de novo não resolve problema técnico). */
 export async function reenvioRecente(phone: string): Promise<boolean> {
   const { count } = await admin()
     .from('whatsapp_outbox')

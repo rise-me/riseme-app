@@ -51,10 +51,13 @@ export async function liberarEspera(phone: string, outboxId?: number): Promise<b
   const principal = acessos[0]
   let reenviado = false
   if (principal && agora - new Date(principal.created_at).getTime() > PEDIDO_TARDIO_MS) {
-    // Pediu dias depois da compra: a senha guardada pode ter mudado → acesso novo, com senha nova (mesmo caminho do reenvio).
+    // Pediu dias depois da compra: a senha da conta pode ter sido mexida no meio → sai pelo caminho do reenvio, que manda
+    // a MESMA senha desta mensagem e a grava de novo na conta (18/11/2026: nunca senha nova; lib/senha-conta.ts). A senha
+    // é registrada aqui porque o texto da linha é trocado logo abaixo.
+    await (await import('@/lib/senha-conta')).guardarSenhaDaMensagem(principal.body)
     const email = principal.body.match(/[^\s:<>*]+@[^\s<>*]+\.[a-z]{2,}/i)?.[0]
     if (email && (await enfileirar({ phone: destino, kind: 'reenviar-acesso', body: JSON.stringify({ email }), sendAfter: new Date() }))) {
-      await marcar(principal.id, '(pedido tardio: acesso reenviado com senha nova)')
+      await marcar(principal.id, '(pedido tardio: acesso reenviado com a mesma senha)')
       reenviado = true
     }
   }
@@ -76,7 +79,7 @@ const FALA_DE_ACESSO = /acces|dost[eę]p|contrase|has[łl]|password|entrar|ingre
 /**
  * Chamado a cada mensagem recebida de aluna, antes do agente. Libera o que estava em espera para ela. Devolve true quando
  * a mensagem já está atendida pelo acesso que vai sair (botão, ou fala curta sobre acesso) e o agente NÃO deve responder:
- * evita duas mensagens de acesso (a da fila e um reenvio do agente com senha nova).
+ * evita duas mensagens de acesso (a da fila e um reenvio do agente).
  */
 export async function atenderPedido(phone: string, texto: string): Promise<boolean> {
   const codigo = texto.match(CODIGO_BOTAO)?.[1]
@@ -457,7 +460,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     }
 
     // 'reenviar-acesso' (08/11/2026): body = JSON {email}; liga a conversa (item.phone) à conta desse e-mail, corrige o telefone da
-    // conta e reenvia o acesso com senha nova NESTA conversa. Para o caso em que o acesso foi para outro número (checkout errado).
+    // conta e reenvia o acesso (senha de sempre) NESTA conversa. Para o caso em que o acesso foi para outro número (checkout errado).
     if (item.kind === 'reenviar-acesso') {
       let saida: string
       try {
@@ -616,6 +619,9 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     }
 
     enviados++
+    // A senha que acabou de ser entregue é a de sempre desta conta: fica no registro cifrado ANTES de sumir da linha
+    // (reenvio manda a mesma; Bruno 18/11/2026, lib/senha-conta.ts).
+    if (item.kind === 'acesso' && item.mask) await (await import('@/lib/senha-conta')).guardarSenhaDaMensagem(item.body)
     const corpoSeguro = item.mask ? item.body.replaceAll(item.mask, MASCARA) : item.body
     await db
       .from('whatsapp_outbox')

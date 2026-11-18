@@ -539,17 +539,19 @@ export function mensagensDeAcesso(p: {
   ]
 }
 
-// Abertura do REENVIO de acesso (senha nova) — usada pelo script de reenvio em lote e pelo comando
+// Abertura do REENVIO de acesso (mesma senha de sempre) — usada pelo script de reenvio em lote e pelo comando
 // "reenvia o acesso" do responsável. Sem a palavra "anterior": a msg de acesso diz "la contraseña
 // anterior" no sentido de "a de cima".
+// Bruno 18/11/2026: a senha da conta é UMA só, para sempre (lib/senha-conta.ts). O reenvio manda a mesma e diz isso com
+// todas as letras: "a senha certa é esta". O aviso do telefone existe porque o preenchimento automático guarda senha velha.
 const ABERTURA_REENVIO: Record<string, string> = {
-  es: '¡Hola! 💛 Te reenviamos por aquí tu acceso a RiseMe. Tu contraseña fue renovada: usa la que aparece en este mensaje.',
-  pl: 'Cześć! 💛 Przesyłamy Ci tutaj dostęp do RiseMe. Twoje hasło zostało odnowione: użyj tego z tej wiadomości.',
-  it: "Ciao! 💛 Ti rimandiamo qui il tuo accesso a RiseMe. La tua password è stata rinnovata: usa quella che trovi in questo messaggio.",
-  cs: 'Ahoj! 💛 Posíláme ti sem znovu přístup do RiseMe. Tvoje heslo bylo obnoveno: použij to, které je v této zprávě.',
-  tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. Şifren yenilendi: bu mesajdaki şifreyi kullan.',
-  en: 'Hi! 💛 We are resending your RiseMe access here. Your password was renewed: use the one in this message.',
-  'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. Sua senha foi renovada: use a que está nesta mensagem.',
+  es: '¡Hola! 💛 Te reenviamos por aquí tu acceso a RiseMe. *La contraseña correcta es la de este mensaje*, y es siempre la misma: no cambia. Si tu teléfono te sugiere otra contraseña guardada, bórrala y escribe esta, o simplemente toca el enlace de abajo y entras directo.',
+  pl: 'Cześć! 💛 Przesyłamy Ci tutaj jeszcze raz dostęp do RiseMe. *Prawidłowe hasło to to z tej wiadomości* i zawsze jest to samo: nie zmienia się. Jeśli telefon podpowiada inne, zapisane hasło, usuń je i wpisz to poniżej albo po prostu kliknij link na dole, a wejdziesz od razu.',
+  it: "Ciao! 💛 Ti rimandiamo qui il tuo accesso a RiseMe. *La password giusta è quella di questo messaggio* ed è sempre la stessa: non cambia. Se il telefono ti suggerisce un'altra password salvata, cancellala e scrivi questa, oppure tocca semplicemente il link qui sotto ed entri subito.",
+  cs: 'Ahoj! 💛 Posíláme ti sem znovu přístup do RiseMe. *Správné heslo je to v této zprávě* a je pořád stejné: nemění se. Pokud ti telefon nabízí jiné uložené heslo, smaž ho a napiš tohle, nebo prostě klikni na odkaz níže a jsi hned uvnitř.',
+  tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. *Doğru şifre bu mesajdaki şifredir* ve hep aynıdır: değişmez. Telefonun kayıtlı başka bir şifre önerirse onu sil ve bunu yaz ya da aşağıdaki bağlantıya dokun, doğrudan girersin.',
+  en: 'Hi! 💛 We are resending your RiseMe access here. *The correct password is the one in this message*, and it is always the same: it does not change. If your phone suggests another saved password, delete it and type this one, or just tap the link below and you are in.',
+  'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. *A senha certa é a desta mensagem*, e é sempre a mesma: não muda. Se o celular sugerir outra senha salva, apague e digite esta, ou simplesmente toque no link abaixo e você entra direto.',
 }
 
 export function aberturaReenvio(locale: string): string {

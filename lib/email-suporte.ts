@@ -4,7 +4,7 @@
 // Como funciona: o Resend recebe o que chega em qualquer endereço @riseme.app (pomoc@ = polonês, ayuda@ = espanhol) e avisa
 // POST /api/email-suporte (evento email.received, só metadados). Aqui o e-mail é buscado de volta no Resend (é isso que
 // prova que o aviso é verdadeiro), a aluna é achada pelo endereço, o MESMO cérebro do WhatsApp decide (decidirResposta,
-// canal 'email') e a resposta sai por e-mail na mesma conversa. Ações: reenviar acesso (e-mail novo com senha nova) e
+// canal 'email') e a resposta sai por e-mail na mesma conversa. Ações: reenviar acesso (e-mail novo com a senha de sempre) e
 // reembolso automático da Stripe (regra do Bruno de 09/11, mantida). O que precisa de pessoa vai por e-mail ao ALERTA_EMAIL.
 //
 // Histórico: linhas inertes em whatsapp_outbox (kind 'email-in' / 'email-out', phone = endereço da aluna, body = JSON).
@@ -14,7 +14,8 @@ import { admin, aprendizadosAtivos, perfilDaAluna } from '@/lib/whatsapp-agent/c
 import { decidirResposta, type MensagemConversa } from '@/lib/whatsapp-agent/responder'
 import { textoReembolsoStripe, registrarPedidoReembolso } from '@/lib/whatsapp-agent/reembolsos'
 import { reembolsarStripe } from '@/lib/stripe-api'
-import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
+import { buildAccessLink } from '@/lib/access-code'
+import { senhaDaConta } from '@/lib/senha-conta'
 import { sendAccessEmail } from '@/lib/email'
 
 export const KIND_IN = 'email-in'
@@ -317,11 +318,11 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
     const outros = (decisao.reembolsoTransacoes ?? []).filter((t) => !t.startsWith('pi_'))
     if (outros.length) await avisarEquipe(`reembolso para aprovar (${r.de})`, [`Transações: ${outros.join(', ')}`, `Motivo: ${decisao.reembolsoMotivo ?? '-'}`, '', 'O bot já respondeu a ela. Aprovar no chat do bot.', '', 'Mensagem dela:', texto.slice(0, 1500)])
     if (decisao.novoEmail) await avisarEquipe(`troca de e-mail pedida (${r.de})`, [`Novo e-mail: ${decisao.novoEmail}`, 'Por e-mail a troca não é automática: fazer pelo chat do bot.'])
-    // Acesso de novo: senha nova + e-mail de acesso separado, sempre para o e-mail da conta.
+    // Acesso de novo: e-mail de acesso separado, sempre para o e-mail da conta, com a senha DE SEMPRE (18/11/2026:
+    // nunca geramos outra; lib/senha-conta.ts).
     if (decisao.reenviarAcesso && userId && !perfil?.reenvioRecente) {
-      const code = generateAccessCode()
-      const { error } = await db.auth.admin.updateUserById(userId, { password: code })
-      const envio = error ? { ok: false as const, erro: error.message } : await sendAccessEmail({ email: emailConta, code, link: buildAccessLink(APP_URL(), idioma, emailConta, code), locale: idioma })
+      const senha = await senhaDaConta({ userId, email: emailConta }).catch((err) => ({ erro: String(err instanceof Error ? err.message : err) }))
+      const envio = 'erro' in senha ? { ok: false as const, erro: senha.erro } : await sendAccessEmail({ email: emailConta, code: senha.code, link: buildAccessLink(APP_URL(), idioma, emailConta, senha.code), locale: idioma })
       notas.push(envio.ok ? `acesso reenviado para ${emailConta}` : `REENVIO DO ACESSO FALHOU: ${envio.erro}`)
       if (envio.ok) await gravar(r.de, KIND_REENVIO, { email: r.de })
       else await avisarEquipe(`o bot prometeu acesso novo a ${r.de} e o envio falhou`, [envio.erro])

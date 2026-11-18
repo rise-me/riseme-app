@@ -2,6 +2,7 @@ import { registrarCompraNaConta } from '@/lib/cartao-aluna'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
+import { guardarSenhaDaConta } from '@/lib/senha-conta'
 import { sendWhatsAppAccess } from '@/lib/whatsapp-access'
 import { sendAccessEmail } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
@@ -139,6 +140,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
       }
       userId = created.user.id
+      // A senha com que a conta nasce é a de sempre: reenvio de acesso manda esta mesma (lib/senha-conta.ts).
+      await guardarSenhaDaConta(userId, code).catch(() => null)
       if (phone) await supabase.from('users').update({ phone }).eq('id', userId)
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
