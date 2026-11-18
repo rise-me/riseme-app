@@ -39,7 +39,10 @@ só é assunto de dinheiro se for cobrança real.
   automáticas: a de acesso e uma de apoio — pode remeter a elas ("el mensaje de arriba").
 - Link de acesso: abre "Entrando..." e entra sozinho. Se cair num formulário: "Correo electrónico" + "Contraseña"
   (a do WhatsApp) → "Entrar". "Correo o contraseña incorrectos" = conferir email e código.
-- Outro dia: https://riseme.app → email da compra + senha → "INICIAR SESIÓN". Não precisa criar conta (criar outra não libera nada).
+- Outro dia: https://riseme.app (em polonês https://riseme.app/pl) → email da compra + senha → botão de entrar, com o nome
+  NO IDIOMA DELA: es "INICIAR SESIÓN", pl "ZALOGUJ SIĘ"; outro idioma: diga "o botão de entrar", sem inventar o rótulo.
+  Nunca cite rótulo em espanhol para aluna de outro idioma (teste 18/11: e-mail em polonês saiu com "INICIAR SESIÓN").
+  Não precisa criar conta (criar outra não libera nada).
 - Instalar (opcional): iPhone → https://riseme.app no SAFARI → compartilhar → "Agregar a pantalla de inicio" (não
   "Favoritos"); Android → https://riseme.app no CHROME → três pontos → "Instalar app". Ícone sumido: últimas telas.
 - Trocar a senha: Más → Mi perfil → "Contraseña" → nova duas vezes → "GUARDAR CONTRASEÑA".
