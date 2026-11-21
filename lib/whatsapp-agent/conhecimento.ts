@@ -265,11 +265,17 @@ feito pelo NOSSO sistema (API do produtor) funciona depois disso (fato de 09/11/
   seguinte (prazo do banco, em geral até 10 dias úteis); PayPal → conta PayPal; BLIK/Przelewy24/transferência → conta de
   origem. Nunca pedimos número de cartão nem dados bancários por e-mail ou WhatsApp.
 - STRIPE (CL-PL): o meio de pagamento e o reembolso de cada compra estão no CARTÃO DA ALUNA ("Pagamentos na Stripe"): use o
-  fato, nunca pergunte "BLIK ou cartão?". Prazo do reembolso concluído: BLIK = até 2 horas (doc da Stripe; volta como crédito
-  na conta bancária ligada ao BLIK, não como "przelew na telefon"); cartão = 5 a 10 dias úteis. Se ela diz que o reembolso BLIK
-  não entrou e já passaram 2 horas: dê a data e a REFERÊNCIA do banco que está no cartão, peça que confira esse crédito no
-  extrato/app do banco com a referência e, se o banco não achar, transfira para a equipe (ação: abrir investigação na Stripe
-  com o extrato dela). Caso 16/11/2026 (aluna PL): o bot perguntou o meio e deu prazo de cartão a quem pagou com BLIK.
+  fato, nunca pergunte "BLIK ou cartão?". Prazo do reembolso concluído: BLIK = de 1 a 3 dias úteis (volta como crédito na
+  conta bancária ligada ao BLIK, não como "przelew na telefon"); cartão = 5 a 10 dias úteis. NUNCA diga "2 horas" para o
+  BLIK: nos 3 reembolsos BLIK acompanhados em novembro/2026 a Stripe concluiu na hora e o banco só creditou no 3º dia (as
+  3 alunas reclamaram depois de ouvir "2 horas" e as 3 receberam). Se ela diz que o reembolso BLIK não entrou: dê a data e
+  a REFERÊNCIA do banco que está no cartão e diga, com calma, que o banco costuma creditar até o 3º dia útil. Só depois de
+  3 dias úteis sem o crédito: peça que confira no extrato/app do banco com a referência e transfira para a equipe (ação:
+  abrir investigação na Stripe). Caso 16/11/2026 (aluna PL): o bot perguntou o meio e deu prazo de cartão a quem pagou com BLIK.
+- STRIPE, compra "em OUTRA conta" (aviso ATENÇÃO na linha do pagamento): é dela, paga do mesmo telefone, só que com o e-mail
+  digitado diferente no checkout do Protokół. NUNCA diga que "só vejo um pagamento" ou que a cobrança não é nossa: diga que
+  achou as duas compras. Se ela quer o reembolso, vale a regra normal e o pi_ dessa linha. Se ela quer usar o produto,
+  transfira com a ação "liberar o produto dessa compra na conta com que ela entra" e diga que fica pronto hoje.
 - Cartão trocado, perdido ou cancelado NÃO atrapalha, em qualquer meio: o estorno vai ao banco emissor, que credita na
   conta dela (regra das bandeiras; artigo oficial da Hotmart). Se ela oferece mandar o número do cartão novo: não é preciso
   e não deve mandar. Responda isso; não transfira.

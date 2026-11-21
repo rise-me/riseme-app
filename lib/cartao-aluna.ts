@@ -66,12 +66,27 @@ const NOME_STRIPE: Record<string, string> = {
   'CL-PL-DS1': 'Protokół Metaboliczny 28 Dni (downsell, 47 zł)',
 }
 
-const PRAZO_REEMBOLSO: Record<string, string> = { blik: 'até 2 horas', card: '5 a 10 dias úteis', link: '5 a 10 dias úteis (cartão salvo no Link)', p24: 'até 3 dias úteis' }
+// BLIK: a doc da Stripe diz até 2 horas, mas nos 3 reembolsos BLIK que acompanhamos (14, 16 e 17/11/2026) o crédito só
+// apareceu na conta da aluna no 3º dia, e as 3 reclamaram depois de ouvir "2 horas". Vale o que aconteceu.
+const PRAZO_REEMBOLSO: Record<string, string> = { blik: '1 a 3 dias úteis (o banco credita depois; NÃO prometa 2 horas)', card: '5 a 10 dias úteis', link: '5 a 10 dias úteis (cartão salvo no Link)', p24: 'até 3 dias úteis' }
 async function pagamentosStripe(db: SupabaseClient, userId: string): Promise<string[]> {
-  const { data: vendas } = await db.from('stripe_vendas').select('session_id, payment_intent, oferta, valor_centavos, moeda, created_at, reembolso_id, reembolso_status').eq('user_id', userId).order('created_at', { ascending: false }).limit(4)
+  const cols = 'session_id, payment_intent, oferta, valor_centavos, moeda, created_at, reembolso_id, reembolso_status, user_id, email, phone'
+  const { data: dela } = await db.from('stripe_vendas').select(cols).eq('user_id', userId).order('created_at', { ascending: false }).limit(4)
+  // Mesma pessoa, OUTRA conta: no upsell ela digita o e-mail de novo no checkout e uma letra errada cria uma 2ª conta
+  // (3 de 219 upsells até 21/11/2026). Caso de 19/11: a aluna pagou 87 + 97 zł e o bot respondeu "vejo só um pagamento",
+  // porque a 2ª compra estava na outra conta. Aqui entram as vendas do MESMO telefone do checkout, marcadas como tal.
+  const { data: eu } = await db.from('users').select('phone').eq('id', userId).maybeSingle()
+  const fones = [...new Set([...(dela ?? []).map((v) => v.phone as string | null), (eu?.phone as string | null) ?? null].filter((f): f is string => Boolean(f)))]
+  const { data: outras } = fones.length ? await db.from('stripe_vendas').select(cols).in('phone', fones).neq('user_id', userId).not('user_id', 'is', null).order('created_at', { ascending: false }).limit(4) : { data: [] }
+  const vendas = [...(dela ?? []), ...(outras ?? [])]
+  // Compra dela que está em outra conta: o bot precisa do pi_ (para devolver) e do e-mail (para explicar onde ficou).
+  const outraConta = (v: (typeof vendas)[number]) => (v.user_id !== userId ? ` · ${v.payment_intent ?? ''} · ATENÇÃO: compra DELA (mesmo telefone do checkout) que ficou em OUTRA conta, com o e-mail ${v.email} (digitado diferente); o produto desta compra NÃO aparece na conta com que ela entra` : '')
+  // Sem a Stripe (erro ou demora) a venda continua aparecendo, só sem o meio de pagamento: nunca some do cartão.
+  const semStripe = (v: (typeof vendas)[number]) => `- ${v.created_at.slice(0, 10)} · ${v.oferta ?? 'compra'} · ${v.valor_centavos != null ? `${(v.valor_centavos / 100).toFixed(2)} ${(v.moeda ?? '').toUpperCase()}` : 'valor ?'} · meio de pagamento não consultado agora${v.reembolso_id ? ` · reembolso ${v.reembolso_status ?? 'registrado'}` : ''}${outraConta(v)}`
   if (!vendas?.length) return []
-  const { stripe, stripeConfigurada } = await import('@/lib/stripe-api')
-  if (!stripeConfigurada()) return []
+  const api = await import('@/lib/stripe-api').catch(() => null)
+  if (!api || !api.stripeConfigurada()) return vendas.map(semStripe)
+  const { stripe } = api
   const fmt = (t: number) => new Date(t * 1000).toLocaleString('pt-BR', { timeZone: 'Europe/Warsaw', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' (Varsóvia)'
   const umaVenda = async (v: (typeof vendas)[number]): Promise<string> => {
     const valor = v.valor_centavos != null ? `${(v.valor_centavos / 100).toFixed(2)} ${(v.moeda ?? '').toUpperCase()}` : 'valor ?'
@@ -87,10 +102,10 @@ async function pagamentosStripe(db: SupabaseClient, userId: string): Promise<str
         reembolso += ` · REEMBOLSO ${(r.amount / 100).toFixed(2)} ${r.currency.toUpperCase()} ${r.status === 'succeeded' ? 'CONCLUÍDO pela Stripe' : r.status} em ${fmt(r.created)}${refBanco ? `, referência do banco ${refBanco}` : ''}; prazo para aparecer na conta dela: ${PRAZO_REEMBOLSO[tipo] ?? 'depende do banco'}`
       }
     }
-    return `- ${v.created_at.slice(0, 10)} · ${v.oferta ?? 'compra'} · ${valor} · pagou com ${meio}${reembolso || (v.reembolso_id ? ' · reembolso registrado' : '')}`
+    return `- ${v.created_at.slice(0, 10)} · ${v.oferta ?? 'compra'} · ${valor} · pagou com ${meio}${reembolso || (v.reembolso_id ? ' · reembolso registrado' : '')}${outraConta(v)}`
   }
-  const tempo = new Promise<string[]>((res) => setTimeout(() => res([]), 4000))
-  return Promise.race([Promise.all(vendas.map((v) => umaVenda(v).catch(() => ''))).then((l) => l.filter(Boolean)), tempo])
+  const tempo = new Promise<string[]>((res) => setTimeout(() => res(vendas.map(semStripe)), 4000))
+  return Promise.race([Promise.all(vendas.map((v) => umaVenda(v).catch(() => semStripe(v)))), tempo])
 }
 
 export async function cartaoDaAluna(db: SupabaseClient, p: { userId: string; user?: User | null; variantes: string[] }): Promise<string> {
