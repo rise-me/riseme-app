@@ -76,7 +76,10 @@ export async function enviarListaReembolsos(): Promise<string | null> {
 
 // Artigo da central de ajuda da Hotmart para a COMPRADORA ("como solicitar o reembolso da minha compra"), indicado pelo Bruno 05/11/2026.
 const LINK_HOTMART = 'https://help.hotmart.com/es/article/360061973392'
-const LOCAL = /BILLET|MERCADO|PSE|PIX|OXXO|EFECTY|YAPE|BOLETO/i
+// Meio LOCAL = tudo que não é cartão (nem carteira de cartão) nem PayPal. Antes era uma lista de nomes e os que faltavam
+// (Nequi, Servipag…) caíam em "pagaste con tarjeta" (21/11/2026: aviso a uma aluna que tinha dito "pagué por Nequi").
+const CARTAO = /CREDIT|DEBIT|CARD|APPLE_PAY|GOOGLE_PAY|SAMSUNG_PAY/i
+const LOCAL = { test: (pag: string) => Boolean(pag) && !CARTAO.test(pag) && !/PAYPAL/i.test(pag) }
 const comoVolta = {
   es: (pag: string) => /PAYPAL/i.test(pag) ? 'El dinero vuelve a tu cuenta de PayPal.' : LOCAL.test(pag) ? 'Como pagaste por un medio local, Hotmart puede pedirte por correo los datos de tu cuenta para hacer la devolución; el dinero llega en hasta 7 días hábiles después de la aprobación.' : 'Como pagaste con tarjeta, el dinero vuelve al banco emisor y aparece en tu factura actual o en la siguiente (el plazo exacto lo define tu banco).',
   pl: (pag: string) => /PAYPAL/i.test(pag) ? 'Pieniądze wrócą na Twoje konto PayPal.' : 'Jeśli płaciłaś kartą, pieniądze wrócą do banku i pojawią się na bieżącym lub następnym wyciągu (dokładny termin zależy od banku).',
@@ -121,6 +124,11 @@ const CONFIRMA: Record<string, (p: PedidoReembolso) => string> = {
     LINK_HOTMART.replace('/es/', '/en/'),
     fecho('en', p.produto, 'Any questions, just write here. Thank you for giving us a chance 💛'),
   ].join('\n\n'),
+}
+
+/** O texto de confirmação que a aluna recebe (também usado quando o reembolso foi feito fora daqui, pelo painel ou conector). */
+export function textoConfirmaReembolso(p: PedidoReembolso): string {
+  return (CONFIRMA[p.idioma] ?? CONFIRMA.es)(p)
 }
 
 async function executarUm(id: number, p: PedidoReembolso): Promise<string> {
