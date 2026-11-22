@@ -13,6 +13,7 @@ import 'server-only'
 import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/admin-server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
+import { guardarSenhaDaConta, senhaDaConta } from '@/lib/senha-conta'
 import { sendWhatsAppAccess, mensagensDeAcesso, avisarProdutoExtra } from '@/lib/whatsapp-access'
 import { enfileirar } from '@/lib/whatsapp-outbox'
 import { sendAccessEmail, estadoEmail, sendEmailProdutoExtra } from '@/lib/email'
@@ -256,18 +257,11 @@ async function entregar(db: Db, v: Venda): Promise<void> {
       // Bruno 13/11: o e-mail sai SEM nome em lugar nenhum (assunto e saudação).
       await sendEmailProdutoExtra({ email: v.email, produto: v.challenge_id, locale: v.locale, nome: null, valor, home: `${APP_URL()}/${v.locale}`, whatsapp: 'https://wa.me/riseme' }).catch(() => null)
     } else if (existente?.length) {
-      // Já tinha conta (ex.: comprou antes por outra plataforma): senha nova, para ela receber um acesso que funciona.
-      // Se outra venda Stripe dela ainda está em entrega (compra repetida), reaproveita a MESMA senha: senão o 1º
-      // WhatsApp, ainda na fila, chegaria com uma senha que já não vale.
+      // Já tinha conta (comprou antes, aqui ou em outra plataforma). Regra do Bruno (18/11): UMA senha por conta, para
+      // sempre — manda a senha de sempre (lib/senha-conta.ts, que também cobre a de uma venda ainda em entrega) e a
+      // regrava no login; só gera uma se a conta nunca teve senha registrada.
       userId = existente[0].id as string
-      const { data: emEntrega } = await db.from('stripe_vendas').select('codigo').eq('user_id', userId).neq('session_id', v.session_id)
-        .not('codigo', 'is', null).gte('created_at', new Date(Date.now() - DIAS_CONFERE * 86_400_000).toISOString()).order('created_at', { ascending: false }).limit(1)
-      const reaproveitada = (emEntrega?.[0]?.codigo as string | undefined) ?? null
-      if (reaproveitada) codigo = reaproveitada
-      else {
-        const { error } = await db.auth.admin.updateUserById(userId, { password: codigo })
-        if (error) throw new Error(`senha nova falhou (${v.email}): ${error.message}`)
-      }
+      codigo = (await senhaDaConta({ userId, email: v.email })).code
       if (!existente[0].phone && v.phone) await db.from('users').update({ phone: v.phone }).eq('id', userId)
     } else {
       const { data: novo, error } = await db.auth.admin.createUser({
@@ -279,6 +273,7 @@ async function entregar(db: Db, v: Venda): Promise<void> {
       if (error || !novo.user) throw new Error(`conta não criada (${v.email}): ${error?.message}`)
       userId = novo.user.id
       contaNova = true
+      await guardarSenhaDaConta(userId, codigo!) // a senha de sempre desta conta (regra de 18/11)
       if (v.phone) await db.from('users').update({ phone: v.phone }).eq('id', userId)
     }
     await db.from('stripe_vendas').update({ user_id: userId, codigo, conta_nova: contaNova, updated_at: agora() }).eq('session_id', v.session_id)
