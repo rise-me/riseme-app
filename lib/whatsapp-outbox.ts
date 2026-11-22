@@ -350,6 +350,14 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
         const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: (string | { a: 'student' | 'agent' | 'human'; t: string; em?: string })[]; conviteHotmart?: { presente: string | null }; conviteVideo?: boolean; hotmart?: string; hotmartEmail?: string; emailSemConta?: string }
         const agora = new Date().toISOString()
         // cartaoDe = user_id real: monta o cartão da aluna como em produção (teste do cartão sem falar com ela; 16/11/2026)
+        // redacao = testa o REDATOR da resposta aprovada pelo responsável (só a decisão; não envia nem reembolsa nada). 21/11/2026
+        const redacao = (caso as { redacao?: { resumo: string; opcaoA: string; opcaoB: string; orientacao: string; comprasStripe?: string[] } }).redacao
+        if (redacao) {
+          const { redigirRespostaAprovada } = await import('@/lib/whatsapp-agent/responder')
+          const r = await redigirRespostaAprovada({ perfil: caso.perfil, conversa: caso.msgs.map((m) => (typeof m === 'string' ? { autor: 'student' as const, texto: m, em: agora } : { autor: m.a, texto: m.t, em: m.em ?? agora })), ...redacao })
+          await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: JSON.stringify({ ...caso, resultado: r }) }).eq('id', item.id)
+          continue
+        }
         const cartaoDe = (caso as { cartaoDe?: string }).cartaoDe
         if (cartaoDe && caso.perfil) { const { cartaoDaAluna } = await import('@/lib/cartao-aluna'); caso.perfil = { ...caso.perfil, cartao: await cartaoDaAluna(admin(), { userId: cartaoDe, variantes: [] }) } }
         // hotmartEmail = consulta real à Hotmart no teste; hotmart = bloco pronto (teste sem credencial)

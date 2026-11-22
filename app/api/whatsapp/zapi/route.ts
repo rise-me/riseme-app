@@ -28,6 +28,7 @@ import {
   passarParaHumano,
   perfilDaAluna,
   registrarMensagem,
+  variantesTelefone,
   pareceRobo,
   respostasRecentes,
   salvarLid,
@@ -201,14 +202,41 @@ async function responderConsulta(texto: string, citada: string | undefined) {
     const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
     const userId = chat.userId ?? porEmail
     const perfil = userId ? await perfilDaAluna(userId, !porEmail, consulta.phone) : null
-    const { enviar, nota, mensagem, aprendizado } = await redigirRespostaAprovada({
+    // Compras da Stripe dela ainda sem reembolso (da conta e do mesmo telefone em outra conta): se o responsável mandar
+    // devolver, o SISTEMA devolve. Bruno 21/11/2026 escreveu "#182 Reembolsa para evitar problemas" e o bot respondeu
+    // "faça no painel da Stripe"; ele não entra em painel para isso.
+    const fones = variantesTelefone(consulta.phone).flatMap((f) => [f, `+${f}`])
+    const filtros = [`phone.in.(${fones.map((f) => `"${f}"`).join(',')})`, ...(userId ? [`user_id.eq.${userId}`] : [])]
+    const { data: semReembolso } = await admin().from('stripe_vendas').select('payment_intent, oferta, valor_centavos, moeda, created_at').or(filtros.join(',')).is('reembolso_id', null).not('payment_intent', 'is', null).order('created_at', { ascending: false }).limit(6)
+    const comprasStripe = (semReembolso ?? []).map((v) => `${v.payment_intent} · ${v.oferta ?? 'compra'} · ${v.valor_centavos != null ? (Number(v.valor_centavos) / 100).toFixed(2) : '?'} ${String(v.moeda ?? '').toUpperCase()} · ${String(v.created_at).slice(0, 10)}`)
+    const { enviar, nota, mensagem, aprendizado, reembolsarStripe: aDevolver } = await redigirRespostaAprovada({
       perfil,
       conversa,
       resumo: consulta.resumo,
       opcaoA: consulta.opcaoA,
       opcaoB: consulta.opcaoB,
       orientacao,
+      comprasStripe,
     })
+    const pis = aDevolver.filter((pi) => (semReembolso ?? []).some((v) => v.payment_intent === pi)) // só o que é dela e está sem reembolso
+    if (pis.length) {
+      const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
+      const falhas = res.map((r, i) => (r.ok ? null : `${pis[i]}: ${'erro' in r ? r.erro : '?'}`)).filter(Boolean)
+      const valores = pis.map((pi) => comprasStripe.find((c) => c.startsWith(pi))?.split(' · ').slice(1, 3).join(' ') ?? pi).join(' + ')
+      if (falhas.length) {
+        await dizerAoResponsavel(`❌ Consulta #${consulta.id} — tentei o reembolso na Stripe e falhou: ${falhas.join('; ').slice(0, 300)}. Nada foi dito à aluna; a consulta continua pendente.`)
+        return
+      }
+      // O que ela ouve agora é o mesmo texto de quando o bot reembolsa; a confirmação "Gotowe" sai sozinha quando a Stripe concluir.
+      const aviso = textoReembolsoStripe(perfil?.idioma ?? 'pl', perfil?.nome, true)
+      const envio = await sendZapiText({ phone: consulta.phone, message: aviso, delayTyping: 2 })
+      if (envio.ok) await registrarMensagem({ phone: consulta.phone, direction: 'out', author: 'agent', body: aviso, waMessageId: envio.messageId })
+      await registrarPedidoReembolso({ phone: consulta.phone, canal: 'whatsapp', categoria: 'aprovado_pelo_responsavel', devolveu: pis, motivo: orientacao.slice(0, 200) }).catch(() => {})
+      await fecharConsulta(consulta.id, { status: 'respondida', orientacao, respostaEnviada: aviso })
+      await voltarParaBot(consulta.phone)
+      await dizerAoResponsavel(`✅ Consulta #${consulta.id} — reembolso pedido na Stripe: ${valores}. ${envio.ok ? 'A aluna já foi avisada' : 'O aviso à aluna falhou no envio'} e recebe a confirmação quando a Stripe concluir. Você não precisa fazer nada.`)
+      return
+    }
     if (!enviar) {
       // Orientação era pergunta/pedido de ação: nada vai para a aluna, a consulta segue pendente.
       await dizerAoResponsavel(`✋ Consulta #${consulta.id} — não enviei nada para a aluna.\n${nota || 'Não ficou claro o que responder a ela.'}\n\nQuando decidir, responda de novo citando a consulta.`)

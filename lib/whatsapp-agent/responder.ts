@@ -726,11 +726,12 @@ const FORMATO_REDACAO = {
       enviar: { type: 'boolean' },
       nota_ao_responsavel: { type: 'string' },
       mensagem: { type: 'string' },
+      reembolsar_stripe: { type: 'array', items: { type: 'string' } },
       salvar_aprendizado: { type: 'boolean' },
       aprendizado_pergunta: { type: 'string' },
       aprendizado_resposta: { type: 'string' },
     },
-    required: ['enviar', 'nota_ao_responsavel', 'mensagem', 'salvar_aprendizado', 'aprendizado_pergunta', 'aprendizado_resposta'],
+    required: ['enviar', 'nota_ao_responsavel', 'mensagem', 'reembolsar_stripe', 'salvar_aprendizado', 'aprendizado_pergunta', 'aprendizado_resposta'],
     additionalProperties: false,
   },
 }
@@ -742,7 +743,9 @@ export async function redigirRespostaAprovada(params: {
   opcaoA: string
   opcaoB: string
   orientacao: string // o que o responsável escreveu (português), do jeito dele: "A", "B)", "A, mas…", texto livre
-}): Promise<{ enviar: boolean; nota: string; mensagem: string; aprendizado: Aprendizado | null }> {
+  /** Compras da Stripe desta aluna ainda sem reembolso (uma por linha, começando pelo pi_): as que o sistema sabe devolver. */
+  comprasStripe?: string[]
+}): Promise<{ enviar: boolean; nota: string; mensagem: string; reembolsarStripe: string[]; aprendizado: Aprendizado | null }> {
   const transcricao = params.conversa.map((m) => `[${m.em}] ${ROTULO[m.autor]}: ${m.texto}`).join('\n')
   const res = await anthropic().beta.messages.create({
     model: CLAUDE_MODEL,
@@ -767,6 +770,13 @@ export async function redigirRespostaAprovada(params: {
       'para <email>", "reenvia o acesso de <email>", "troca o email de <email> para <novo>", "dá um cardápio extra para ' +
       '<email>" — e que depois responda a consulta de novo. Nunca deixe a nota vazia. Só marque "enviar" = true ' +
       'quando dá para mandar à aluna exatamente o que ele decidiu; aí "nota_ao_responsavel" = "".\n' +
+      '- EXCEÇÃO, REEMBOLSO DE COMPRA DA STRIPE (21/11/2026: o responsável escreveu "#182 Reembolsa para evitar problemas" e ' +
+      'ouviu "faça no painel da Stripe"; ele NÃO vai ao painel): quando a mensagem traz a lista "COMPRAS DA STRIPE SEM ' +
+      'REEMBOLSO" e a orientação dele manda devolver o dinheiro ("reembolsa", "devolve", "pode devolver", "estorna"), isso o ' +
+      'SISTEMA FAZ. Ponha em "reembolsar_stripe" os códigos pi_ a devolver: todos os da lista, a não ser que ele diga qual ' +
+      'compra ou valor. Aí "enviar" = false, "mensagem" = "" e "nota_ao_responsavel" = "" (o sistema reembolsa, avisa a aluna ' +
+      'e confirma a ele). NUNCA mande o responsável ao painel da Stripe por uma compra que está nessa lista. Sem a lista, ou ' +
+      'se a orientação não manda devolver, "reembolsar_stripe" = [].\n' +
       '- Opção escolhida que começa com "[FAZER ANTES: …]": ela diz à aluna que algo já foi feito na conta. Só envie se a ' +
       'resposta dele disser que já fez ("feito", "já troquei", "liberei", "A, já fiz") ou se a conversa mostrar o sistema ' +
       'fazendo. Só a letra ("A") NÃO basta (26/10: a aluna ouviu "ya corregimos tu correo" e ninguém tinha trocado): ' +
@@ -789,6 +799,7 @@ export async function redigirRespostaAprovada(params: {
           `Nome: ${params.perfil?.nome ?? 'desconhecido'}\n\nConversa:\n${transcricao}\n\n` +
           `Dúvida dela (resumo): ${params.resumo}\n\n` +
           `Opções que foram oferecidas ao responsável:\nA) ${params.opcaoA || '(sem opção A)'}\nB) ${params.opcaoB || '(sem opção B)'}\n\n` +
+          (params.comprasStripe?.length ? `COMPRAS DA STRIPE SEM REEMBOLSO (o sistema sabe devolver estas):\n${params.comprasStripe.join('\n')}\n\n` : '') +
           `Resposta do responsável: ${params.orientacao}`,
       },
     ],
@@ -801,11 +812,13 @@ export async function redigirRespostaAprovada(params: {
     enviar: boolean
     nota_ao_responsavel: string
     mensagem: string
+    reembolsar_stripe?: string[]
     salvar_aprendizado: boolean
     aprendizado_pergunta: string
     aprendizado_resposta: string
   }
   return {
+    reembolsarStripe: (out.reembolsar_stripe ?? []).map((x) => x.trim()).filter((x) => x.startsWith('pi_')),
     enviar: out.enviar && Boolean(out.mensagem.trim()),
     nota: out.nota_ao_responsavel.trim(),
     mensagem: out.mensagem.trim(),
