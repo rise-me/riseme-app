@@ -776,7 +776,8 @@ export async function redigirRespostaAprovada(params: {
       'SISTEMA FAZ. Ponha em "reembolsar_stripe" os códigos pi_ a devolver: todos os da lista, a não ser que ele diga qual ' +
       'compra ou valor. Aí "enviar" = false, "mensagem" = "" e "nota_ao_responsavel" = "" (o sistema reembolsa, avisa a aluna ' +
       'e confirma a ele). NUNCA mande o responsável ao painel da Stripe por uma compra que está nessa lista. Sem a lista, ou ' +
-      'se a orientação não manda devolver, "reembolsar_stripe" = [].\n' +
+      'se a orientação não manda devolver, "reembolsar_stripe" = []. Se ele manda devolver e NÃO há lista, a nota diz que ' +
+      'não achei compra da Stripe sem reembolso para esta aluna (pode já estar devolvida, ou ser de outra plataforma).\n' +
       '- Opção escolhida que começa com "[FAZER ANTES: …]": ela diz à aluna que algo já foi feito na conta. Só envie se a ' +
       'resposta dele disser que já fez ("feito", "já troquei", "liberei", "A, já fiz") ou se a conversa mostrar o sistema ' +
       'fazendo. Só a letra ("A") NÃO basta (26/10: a aluna ouviu "ya corregimos tu correo" e ninguém tinha trocado): ' +
