@@ -156,6 +156,7 @@ export function notaCompraAchada(a: CompraAchada, p: { de: string; corrigido: bo
 O que fazer AGORA, numa resposta só: peça desculpas pela demora em 1 frase, explique em 1 frase o que houve (o e-mail da compra ficou com ${p.emailAntigo.split('@')[1]} no lugar de ${p.de.split('@')[1]}) e:
   (a) se ela NÃO pediu o dinheiro de volta nesta conversa → "reenviar_acesso" = true (o e-mail de acesso sai agora para ${p.de}; diga isso);
   (b) se ela JÁ pediu o dinheiro de volta nesta conversa → "reembolso_transacoes" = o pi_ da compra do cartão abaixo, sem perguntar motivo e sem oferecer nada (ela esperou por erro nosso; conta como decisão clara).
+  (c) se o cartão abaixo JÁ mostra REEMBOLSO desta compra → não devolva de novo: diga que o reembolso já foi feito (data e prazo do cartão). O acesso continua dela, de presente: se ela quiser entrar, "reenviar_acesso" = true.
 PROIBIDO: pedir de novo e-mail, comprovante ou telefone; dizer "vamos verificar", "przekazuję do zespołu", "sprawdzamy"; transferir.`
   }
   return `COMPRA ACHADA PELO SISTEMA ${COMO[a.como]} (${a.pista}): ela escreve de ${p.de} e a conta dela está com o e-mail ${a.emailConta}${a.nuncaEntrou ? ' (a conta NUNCA ENTROU)' : ''}. NÃO peça mais dados e NÃO diga "vamos verificar": a compra é a do cartão abaixo.

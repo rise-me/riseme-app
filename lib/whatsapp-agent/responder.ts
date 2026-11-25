@@ -536,7 +536,12 @@ export async function decidirResposta(params: {
       'suponha nada da conta e não dê orientação que dependa dela (dúvida geral de uso do app pode responder curto, junto ' +
       'com o pedido do e-mail). Se é dinheiro/reclamação séria sem conta, transfira (e peça o e-mail na mesma mensagem). ' +
       'E-mail que ela mandou sem conta: o sistema consulta a Hotmart sozinho (veja E-MAIL SEM COMPRA quando aparecer). ' +
-      'Exceções que não pedem e-mail: "no"/"stop" e resposta automática de outro WhatsApp.') +
+      'Exceções que não pedem e-mail: "no"/"stop" e resposta automática de outro WhatsApp.' +
+      (params.canal === 'email'
+        ? '\nCANAL E-MAIL, SEM CONTA (vale acima do parágrafo anterior): o endereço de onde ela escreve não bate com nenhuma compra, nem igual nem parecido. ' +
+          'Na 1ª resposta peça, na MESMA frase, as DUAS coisas: o e-mail usado na compra E o número de telefone digitado no pagamento (com qualquer um dos dois o sistema acha a compra). ' +
+          'Nunca escreva "WhatsApp" nesta resposta. Se ela já deu os dois e continua sem conta, siga a regra 7 do canal (transferir).'
+        : '')) +
     (params.emailSemConta ? `\nELA MANDOU O E-MAIL ${params.emailSemConta} E NÃO HÁ CONTA NEM COMPRA PAGA COM ELE (o sistema consultou a Hotmart agora; bloco abaixo). Siga E-MAIL SEM COMPRA.` : '') + convite + video
 
   const p = params.perfil
