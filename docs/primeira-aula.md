@@ -105,6 +105,11 @@ respostas (20%) de 309 alunas (30% de quem respondeu) · "Bien" 2.304 (72%) · "
 Quase tudo na Calistenia (desafio 1). Por idioma: PL "Fácil" 22% (591 de 2.663) × ES 11% (59 de 529). Versión suave
 (oferecida no "Muy difícil" desde 16/11): 19 alunas concluíram 31 aulas. RESUMO-INTENSA do Subidor ainda não saiu
 (fila parada atrás do Pase 31; Air sem SSH em 25/11) → Bruno decide a intensa com a contagem; o resumo vem depois.
+DECIDIDO 25/11 (Bruno: "pode furar a fila"): versión intensa = 7 aulas do rapidos17 (R16 R18 R20 R24 R25 R27 R28),
+na frente do Pase 31 e do 2/4/5; Air religado pelo Bruno 25/11 (62 GB livres). Chat do Subidor FECHADO → pedido
+escrito em `fabrica-dublagem/trabalho/intensa/HANDOFF-INTENSA-RAPIDOS.md` + topo da FILA.md. RETOMAR (riseme-c2):
+Bruno abre o Subidor → ele dubla e sobe (desafio 20) → eu monto tipo 'intensa' em lib/cuidado.ts (oferta no "Fácil",
+igual à suave, flag INTENSA_ATIVO desligada) → prévia da tela inteira com o antes ao lado → ok do Bruno → ligar.
 (3) lista → dublagem es+pl → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
 CUSTO (Subidor 16/11): a voz das aulas agora é do Google (aprovada pelo Bruno); 28 aulas es+pl cabem na cota grátis do
 mês. ElevenLabs deixou de ser trava pra aula (fica pra criativo/VSL). Vale também pra dublar Pilates/Yoga/Cuerpo Sexy (2/4/5).
