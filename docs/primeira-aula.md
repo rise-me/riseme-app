@@ -115,7 +115,7 @@ igual à suave, flag INTENSA_ATIVO desligada) → prévia da tela inteira com o 
 intermediárias → avançadas), `aulasDaTrilha()` em `cuidado-server.ts` (suave e intensa, cada uma com a sua chave), oferta no
 "Fácil" em `ComoTeFue.tsx` ("¿Lista para más?…"), textos nos 7 idiomas, 🔥 na lista. Prévia es/pl (antes × depois) em
 `/dev-aula/player/3` e `?antes=1`. FALTA: (1) títulos es/pl = PROVISÓRIOS nossos → trocar pelos nomes.tsv do Subidor;
-(2) aulas no R2 → conferir tocando es e pl (duração real 5–11 min, a prévia mostra 20 simulados); (3) ok do Bruno na prévia →
+(2) aulas no R2 → conferir tocando es e pl (duração real 5–11 min, a prévia mostra 20 simulados); (3) OK DO BRUNO DADO 25/11 ("pode ligar quando as aulas subirem") → assim que as aulas forem conferidas tocando:
 `printf '1' | vercel env add INTENSA_ATIVO production` + redeploy; (4) avisar o Arquiteto (bot oferece a intensa a quem acha
 fácil; `lib/cartao-aluna.ts` e conhecimento são dele). Air sem rede em 25/11 21h → dublagem no Mac depois das 23h.
 (3) lista → dublagem es+pl → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
