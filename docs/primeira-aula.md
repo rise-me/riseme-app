@@ -100,12 +100,18 @@ conferir se as 5 coincidentes são os mesmos arquivos. Sem dublar até a decisã
 do 53. As 18 restantes do 53 (1–7, 10–19, 22) indo pro Air; transcrição depois da dublagem da suave →
 `fabrica-dublagem/trabalho/intensa/RESUMO-INTENSA.md`.
 (2) ~23/11: ler quantas marcam "Fácil" em `user_metadata.como_te_fue` → Bruno decide;
+CONTAGEM 25/11 (user_metadata.como_te_fue, desde 15/11): 1.041 alunas responderam, 3.195 respostas. "Fácil" 650
+respostas (20%) de 309 alunas (30% de quem respondeu) · "Bien" 2.304 (72%) · "Muy difícil" 241 (8%) de 164 alunas.
+Quase tudo na Calistenia (desafio 1). Por idioma: PL "Fácil" 22% (591 de 2.663) × ES 11% (59 de 529). Versión suave
+(oferecida no "Muy difícil" desde 16/11): 19 alunas concluíram 31 aulas. RESUMO-INTENSA do Subidor ainda não saiu
+(fila parada atrás do Pase 31; Air sem SSH em 25/11) → Bruno decide a intensa com a contagem; o resumo vem depois.
 (3) lista → dublagem es+pl → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
 CUSTO (Subidor 16/11): a voz das aulas agora é do Google (aprovada pelo Bruno); 28 aulas es+pl cabem na cota grátis do
 mês. ElevenLabs deixou de ser trava pra aula (fica pra criativo/VSL). Vale também pra dublar Pilates/Yoga/Cuerpo Sexy (2/4/5).
 
 ## Próximos (ordem combinada 14/11)
 1. FEITO 14/11: Bruno viu e aprovou; ligado. Ler em 24/11.
+   - 25/11 (monitor automático): leitura manual necessária — a régua (contas criadas de 14/11 15h a 21/11, 1 aula em 72 h entre as que entraram) vem do banco do app, que o leitor do dash não cobre. Nova data ~02/12.
 2. Tela de conquista: LIGADA 15/11; parabéns por WhatsApp quando ele voltar (Arquiteto).
 3. "Versión suave" (ver acima): Subidor transcrevendo os módulos 17, 40 e 61 (confirmou 15/11) → ler aula por aula → lista ao Bruno.
 4. Aviso nos dias pesados da Calistenia (fase 2 do Tu cuidado): ler as 28 aulas uma a uma.
