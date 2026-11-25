@@ -29,7 +29,23 @@ const HOTMART_PROTESTED = `HOTMART (consultado agora pelo e-mail maria@example.c
 Resumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 1 reembolso(s) em análise.
 Assinaturas: nenhuma.`
 
-export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; hotmartEmail?: string; emailSemConta?: string }[] = [
+// Compra achada pela busca (lib/whatsapp-agent/achar-compra.ts, 25/11/2026). Dados fictícios; o caso real é de uma aluna PL que
+// digitou o domínio errado no checkout e escreveu 9 e-mails em 7 dias sem que o sistema ligasse o endereço à compra.
+const NOTA_ACHADA = `COMPRA ACHADA PELO SISTEMA (fato; NÃO peça confirmação nem dado nenhum): ela escreve de ewa.wisniewska@o2.pl. No checkout o e-mail ficou gravado como ewa.wisniewska@gmail.com (digitado diferente), por isso o e-mail de acesso foi para um endereço que não é dela e a conta NUNCA ENTROU: ela pagou e ficou sem acesso por erro de digitação que o nosso sistema deveria ter visto. O sistema JÁ CORRIGIU o e-mail da conta: o login dela agora é ewa.wisniewska@o2.pl.
+O que fazer AGORA, numa resposta só: peça desculpas pela demora em 1 frase, explique em 1 frase o que houve (o e-mail da compra ficou com gmail.com no lugar de o2.pl) e:
+  (a) se ela NÃO pediu o dinheiro de volta nesta conversa → "reenviar_acesso" = true (o e-mail de acesso sai agora para ewa.wisniewska@o2.pl; diga isso);
+  (b) se ela JÁ pediu o dinheiro de volta nesta conversa → "reembolso_transacoes" = o pi_ da compra do cartão abaixo, sem perguntar motivo e sem oferecer nada (ela esperou por erro nosso; conta como decisão clara).
+PROIBIDO: pedir de novo e-mail, comprovante ou telefone; dizer "vamos verificar", "przekazuję do zespołu", "sprawdzamy"; transferir.
+
+CARTÃO DA ALUNA (dados reais do sistema, use como fato):
+Compras (o que ela pagou, de onde):
+- ${D4} (há 4 dias) · Kalistenika (desafio) · 87 PLN · Stripe · pi_3TesteAchada0000000001
+Pagamentos na Stripe (fato, consultado agora; NUNCA pergunte o meio de pagamento):
+- ${D4} · CL-PL · 87.00 PLN · pagou com cartão mastercard final 4242`
+const achadaPL: PerfilAluna = { nome: 'Ewa Wiśniewska', idioma: 'pl', compradaEm: `${D4}T14:00:00Z`, ultimoLogin: null, diasFeitos: 0, ultimoTreino: null, liberados: ['Kalistenika'], confirmadaPorTelefone: true, cartao: NOTA_ACHADA }
+const comCompraPL: PerfilAluna = { ...achadaPL, cartao: NOTA_ACHADA.slice(NOTA_ACHADA.indexOf('CARTÃO DA ALUNA')) }
+
+export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; hotmartEmail?: string; emailSemConta?: string; canal?: 'email'; antes?: { a: 'student' | 'agent'; t: string }[]; idiomaPadrao?: string }[] = [
   { nome: 'lesão: manguito rotador (caso real 01/11)', perfil: base, msg: 'Buenas noche una pregunta tengo mal el hombro derecho puedo hacer los ejercicios normales. Tengo problemas con el manguito rotador y me han hecho infiltración dos veces, hay días que no me duele pero hay días que siento mucho dolor' },
   { nome: 'PL: cartão trocado, mandar número novo? (caso real 31/10)', perfil: { ...base, nome: 'Maria', idioma: 'pl' }, msg: 'Dzień dobry, zmieniłam kartę, bo nie chciałam zostać oszukana. Prześlę numer nowej karty?' },
   { nome: 'c5: pagou por Oxxo há 1 h e não chegou → prazo de 1–3 dias úteis, sem transferir', perfil: null, msg: 'Hola, pagué el desafío en el Oxxo hace una hora y no me llega nada, ya me están cobrando?' },
@@ -91,6 +107,12 @@ export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hot
   { nome: 'ÁUDIO: Pilates en inglés → confirma que é em inglês, segue pela imagem, sem prometer dublagem (16/11)', perfil: base, msg: 'por qué el pilates en la pared está en inglés? no entiendo nada' },
   { nome: 'SALTO ES: tem salto? → só os dias 25 e 27 (16/11)', perfil: base, msg: 'tengo problemas en las rodillas, el reto tiene saltos?' },
   { nome: 'E-MAIL SEM COMPRA: pergunta se usou outro e-mail', perfil: null, emailSemConta: 'rosa.perez@hotmail.com', hotmart: 'HOTMART (consultado agora pelo e-mail rosa.perez@hotmail.com; é o que a Hotmart REALMENTE registra, use como fato):\nNenhuma compra na Hotmart com o e-mail rosa.perez@hotmail.com (nem aprovada, nem tentativa).\nResumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.\nAssinaturas: nenhuma.', msg: 'rosa.perez@hotmail.com' },
+  // 25/11/2026 — e-mail: achar a compra, prometer é fazer, promessa de pessoa só com transferência
+  { nome: 'E-MAIL ACHADA: e-mail do checkout digitado errado, pede o acesso → desculpa + reenviar_acesso, sem "vamos verificar"', perfil: achadaPL, canal: 'email', msg: 'Witam, nie otrzymałam od was maila ze swoim programem, za który zapłaciłam.' },
+  { nome: 'E-MAIL ACHADA: já pediu o dinheiro → devolve o pi_ sem perguntar motivo', perfil: achadaPL, canal: 'email', antes: [{ a: 'student', t: 'Witam, nie otrzymałam maila z dostępem. Żądam zwrotu pieniędzy.' }, { a: 'agent', t: 'Dzień dobry, bardzo przepraszam za czekanie 🙏 Sprawdzamy zamówienie.' }], msg: 'Kilka godzin minęło. Co z moim zwrotem? Proszę o natychmiastowy zwrot pieniędzy.' },
+  { nome: 'E-MAIL 2º PEDIDO: compra no cartão → pi_ em reembolso_transacoes, nunca „zgłaszam do realizacji” sem o código', perfil: comCompraPL, canal: 'email', antes: [{ a: 'student', t: 'Chcę zwrot pieniędzy za: Kalistenika.' }, { a: 'agent', t: 'To płatność jednorazowa, bez subskrypcji. Mogę pomóc z logowaniem? Jeśli wolisz zwrot, wystarczy odpisać „chcę zwrot”, a zwrócimy od razu.' }], msg: 'OSTATECZNE WEZWANIE DO ZWROTU. Chcę zwrot.' },
+  { nome: 'E-MAIL SEM CONTA: já deu e-mail e comprovante, pede o dinheiro → TRANSFERE (consulta), sem promessa solta', perfil: null, canal: 'email', idiomaPadrao: 'pl', antes: [{ a: 'student', t: 'Nie dostałam dostępu. Kupiłam na adres jolanta.testowa@wp.pl, telefon 600 100 200.' }, { a: 'agent', t: 'Dziękuję! Podaj proszę e-mail z zakupu i telefon z płatności.' }], msg: 'Podałam już e-mail i telefon i wysłałam potwierdzenie przelewu. Proszę o zwrot pieniędzy.' },
+  { nome: 'E-MAIL SEM CONTA, 1ª mensagem → pede e-mail da compra E telefone do pagamento, sem transferir', perfil: null, canal: 'email', idiomaPadrao: 'pl', msg: 'Dzień dobry, zapłaciłam wczoraj i nie dostałam dostępu.' },
 ]
 
 async function main() {
@@ -99,10 +121,12 @@ async function main() {
   const t = Date.now()
   const d = await decidirResposta({
     perfil: c.perfil,
-    conversa: [{ autor: 'student', texto: c.msg, em: '2026-10-05T12:00:00Z' }],
+    conversa: [...(c.antes ?? []).map((m, i) => ({ autor: m.a, texto: m.t, em: `2026-10-05T11:${String(10 + i).padStart(2, '0')}:00Z` })), { autor: 'student' as const, texto: c.msg, em: '2026-10-05T12:00:00Z' }],
     agora: '2026-10-05T12:00:10Z',
     hotmart: c.hotmart,
     emailSemConta: c.emailSemConta,
+    canal: c.canal,
+    idiomaPadrao: c.idiomaPadrao,
   })
   console.log(`\n━━━ ${c.nome} (${((Date.now() - t) / 1000).toFixed(1)}s) [${d.assuntos ?? ''}] ${d.tipo === 'humano' ? '→ TRANSFERE: ' + d.motivo : ''}${d.tipo === 'responder' && d.reembolsoTransacoes?.length ? ' → REEMBOLSO ' + d.reembolsoTransacoes.join(',') : ''}${d.tipo === 'responder' && d.reenviarAcesso ? ' → REENVIAR ACESSO' : ''}${d.tipo === 'responder' && d.novoEmail ? ' → NOVO E-MAIL ' + d.novoEmail : ''}\nALUNA: ${c.msg}\n\n${d.texto}`)
 }

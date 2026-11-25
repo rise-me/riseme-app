@@ -244,3 +244,36 @@ export async function registrarPedidoReembolso(p: { phone: string; canal: 'whats
     attempts: 5,
   })
 }
+
+// ── Reembolso PROMETIDO pelo bot é reembolso FEITO (Bruno, 25/11/2026: "que dinâmica é essa em que a gente promete um
+// reembolso e não faz?"). Caso de origem: 21/11, e-mail em polonês; a compra estava no cartão, o bot escreveu "zgłaszam
+// teraz do realizacji" e NÃO devolveu o código pi_ ao sistema: nada aconteceu por 3 dias e a aluna mandou notificação formal.
+// O texto que vai para a aluna é a prova: se ele diz que o reembolso está sendo feito/encaminhado e ela pediu o dinheiro,
+// o sistema devolve a compra da Stripe dela (quando é UMA só sem reembolso; com duas, o bot pergunta qual).
+const PEDE_DINHEIRO = /zwrot|zwr[oó][cć]|oddajcie|oddać pieni|pieni[ąa]dz|reembols|devoluci|devuelv|devolv|mi dinero|meu dinheiro|refund|money back|rimbors|vrácen|iade/i
+const PROMETE: RegExp[] = [
+  /(zwrot\w*[\s\S]{0,70}(zgłasz|zgłosz|zlec|realiz|przekaz|w trakcie|zajm|uruchom))|((zgłasz|zgłosz|zlec|przekaz|realizuj)\w*[\s\S]{0,70}zwrot)/i,
+  /(reembolso[\s\S]{0,70}(registr|proces|tramit|solicit|gestion|en curso|en marcha|encaminh|a caminho))|((registr|tramit|solicit|gestion|encaminh)\w*[\s\S]{0,70}reembolso)/i,
+  /(refund[\s\S]{0,70}(process|request|submitt|forward|on its way|under way))|((process|request|submitt|forward)\w*[\s\S]{0,70}refund)/i,
+]
+// Frase que só OFERECE o reembolso (resposta do 1º pedido: "basta responder e devolvemos") não é promessa.
+const SO_OFERECE = /(^|[^\p{L}])(jeśli|jeżeli|gdyby|gdy tylko|jak tylko|wystarczy|odpisz|odpowiedz|si prefieres|si quieres|si respondes|en cuanto|basta|se preferir|se quiser|if you|just reply|as soon as)([^\p{L}]|$)/iu
+/** O texto do bot diz que o reembolso está sendo feito ou encaminhado? (não vale "se preferir, devolvemos") */
+export function prometeReembolso(textoBot: string): boolean {
+  const afirma = textoBot.split(/(?<=[.!?\n])/).filter((f) => !SO_OFERECE.test(f)).join(' ')
+  return PROMETE.some((re) => re.test(afirma))
+}
+/**
+ * Códigos pi_ que o sistema deve devolver AGORA porque o bot prometeu e não pediu. [] = nada a fazer.
+ * Só quando: ela pediu o dinheiro 2 vezes (a última agora), o texto do bot promete, e a conta tem UMA compra da Stripe e nenhum reembolso.
+ */
+export async function reembolsoPrometido(p: { userId: string | null; textoBot: string; textosDela: string[]; pisDoBot: string[] }): Promise<string[]> {
+  if (!p.userId || p.pisDoBot.length || !prometeReembolso(p.textoBot)) return []
+  // 2 pedidos dela (o 1º pedido tem a resposta que tira a dúvida: regra de 17/11, teste CL-PL T13) e o último é recente.
+  if (p.textosDela.filter((t) => PEDE_DINHEIRO.test(t)).length < 2 || !p.textosDela.slice(-3).some((t) => PEDE_DINHEIRO.test(t))) return []
+  const { admin } = await import('./conversa')
+  const { data } = await admin().from('stripe_vendas').select('payment_intent, reembolso_id').eq('user_id', p.userId).not('payment_intent', 'is', null).limit(6)
+  // Já existe reembolso de outra compra dela: o texto pode estar falando DAQUELE; não devolve mais nada sozinho.
+  if (!data || data.some((v) => v.reembolso_id)) return []
+  return data.length === 1 ? [data[0].payment_intent as string] : []
+}

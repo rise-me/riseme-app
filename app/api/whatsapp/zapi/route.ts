@@ -42,7 +42,7 @@ import { blocoHotmart } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsosPendentes, aprovarReembolsos, criarPedidosDaDecisao } from '@/lib/whatsapp-agent/reembolsos'
 import { emailNaConversa } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsarStripe } from '@/lib/stripe-api'
-import { textoReembolsoStripe, registrarPedidoReembolso } from '@/lib/whatsapp-agent/reembolsos'
+import { textoReembolsoStripe, registrarPedidoReembolso, reembolsoPrometido } from '@/lib/whatsapp-agent/reembolsos'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.
@@ -197,6 +197,13 @@ async function responderConsulta(texto: string, citada: string | undefined) {
   }
 
   try {
+    // Consulta aberta pelo suporte por E-MAIL (25/11/2026): a resposta sai por e-mail, com as mesmas regras (redator,
+    // reembolso da Stripe quando o responsável manda devolver).
+    if (consulta.phone.includes('@') && !consulta.phone.endsWith('@lid')) {
+      const { responderConsultaPorEmail } = await import('@/lib/email-suporte')
+      await dizerAoResponsavel(await responderConsultaPorEmail(consulta, orientacao))
+      return
+    }
     const chat = await abrirChat(consulta.phone)
     const conversa = await historico(consulta.phone)
     const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
@@ -481,6 +488,19 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   // Compra da Stripe (Bruno 09/11/2026, teste CL-PL; zero chargeback): reembolso AUTOMÁTICO, sem lista nem aprovação.
   // O texto é fixo (nunca "devolvido"); a confirmação final, com o presente do acesso, sai pelo webhook da Stripe.
   // Motivo de toda conversa de reembolso da Stripe (teste CL-PL T11, 17/11/2026), devolvendo ou não.
+  // Reembolso PROMETIDO no texto é reembolso FEITO (Bruno 25/11/2026; lib/whatsapp-agent/reembolsos.ts): o bot escreveu que
+  // está encaminhando o reembolso e não devolveu o código pi_ (ou transferiu) → o sistema devolve a compra da Stripe dela.
+  // Só em conta confirmada (telefone ou compra), nunca na achada pelo e-mail digitado.
+  {
+    const pisDoBot = decisao.tipo === 'responder' ? (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_')) : []
+    const prometidos = await reembolsoPrometido({ userId: porEmail ? null : userId, textoBot: decisao.texto ?? '', textosDela: conversa.filter((m) => m.autor === 'student').map((m) => m.texto), pisDoBot }).catch(() => [] as string[])
+    if (prometidos.length) {
+      console.log(`[stripe] reembolso prometido no texto sem o código (${phone}): o sistema executa ${prometidos.join(', ')}`)
+      decisao = decisao.tipo === 'responder'
+        ? { ...decisao, reembolsoTransacoes: [...(decisao.reembolsoTransacoes ?? []), ...prometidos], reembolsoCategoria: decisao.reembolsoCategoria ?? 'prometido_pelo_bot' }
+        : { tipo: 'responder', texto: decisao.texto, pedirDepoimento: false, liberarBrinde: false, pararMensagens: false, reembolsoTransacoes: prometidos, reembolsoCategoria: 'prometido_pelo_bot' }
+    }
+  }
   if (decisao.tipo === 'responder' && (decisao.reembolsoCategoria || decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))))
     await registrarPedidoReembolso({ phone, canal: 'whatsapp', categoria: decisao.reembolsoCategoria, devolveu: (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_')), motivo: decisao.reembolsoMotivo }).catch((err) => console.error('[reembolso-pedido] falhou:', err))
   if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))) {

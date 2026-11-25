@@ -10,9 +10,11 @@
 // Histórico: linhas inertes em whatsapp_outbox (kind 'email-in' / 'email-out', phone = endereço da aluna, body = JSON).
 // Fica separado de whatsapp_messages de propósito: nada do fluxo do WhatsApp varre essas linhas.
 
-import { admin, aprendizadosAtivos, perfilDaAluna } from '@/lib/whatsapp-agent/conversa'
-import { decidirResposta, type MensagemConversa } from '@/lib/whatsapp-agent/responder'
-import { textoReembolsoStripe, registrarPedidoReembolso } from '@/lib/whatsapp-agent/reembolsos'
+import { admin, aprendizadosAtivos, perfilDaAluna, criarConsulta, fecharConsulta, salvarAprendizado, type ConsultaAberta } from '@/lib/whatsapp-agent/conversa'
+import { decidirResposta, redigirRespostaAprovada, type MensagemConversa } from '@/lib/whatsapp-agent/responder'
+import { textoReembolsoStripe, registrarPedidoReembolso, reembolsoPrometido } from '@/lib/whatsapp-agent/reembolsos'
+import { acharCompra, notaCompraAchada, type CompraAchada } from '@/lib/whatsapp-agent/achar-compra'
+import { trocarEmail, KIND_EMAIL_TROCADO } from '@/lib/whatsapp-agent/acesso'
 import { reembolsarStripe } from '@/lib/stripe-api'
 import { buildAccessLink } from '@/lib/access-code'
 import { senhaDaConta } from '@/lib/senha-conta'
@@ -269,20 +271,18 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
     return `teto diário (${r.de})`
   }
 
-  // Quem é: conta com este e-mail. Escrever do e-mail da conta confirma a identidade (o acesso só vai para esse endereço).
-  const { data: conta } = await db.from('users').select('id, email').eq('email', r.de).limit(1)
-  let userId = (conta?.[0]?.id as string | undefined) ?? null
-  let emailConta = r.de
-  if (!userId) {
-    // Escreveu de outro endereço e citou o e-mail da compra: vale para achar a conta. O acesso novo vai SEMPRE para o e-mail
-    // da conta (nunca para quem escreveu), então quem não é a dona não ganha nada com isso.
-    const citados = [...new Set((await conversaDoEndereco(r.de)).filter((m) => m.autor === 'student').flatMap((m) => m.texto.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) ?? []).map((e) => e.toLowerCase()))].filter((e) => !/@riseme\.app$/.test(e))
-    if (citados.length) {
-      const { data: porCitado } = await db.from('users').select('id, email').in('email', citados).limit(1)
-      if (porCitado?.[0]) { userId = porCitado[0].id as string; emailConta = (porCitado[0].email as string).toLowerCase() }
-    }
+  // Quem é: conta com este e-mail; senão e-mail citado; senão a compra é PROCURADA (e-mail parecido, código, telefone, nome).
+  const conversaAntes = await conversaDoEndereco(r.de)
+  const quem = await identificar(r.de, r.nome, conversaAntes, true)
+  const userId = quem.userId
+  let emailConta = quem.emailConta
+  // Achada só pelo NOME: prova fraca; o bot vê a compra, mas trata como conta não confirmada (não revela dados dela).
+  const perfil = userId ? await perfilDaAluna(userId, quem.achada?.como !== 'nome', null).catch(() => null) : null
+  if (perfil) {
+    const nota = quem.achada ? notaCompraAchada(quem.achada, { de: r.de, corrigido: quem.corrigido, emailAntigo: quem.emailAntigo ?? '' })
+      : quem.emailAntigo ? `E-MAIL DA CONTA JÁ CORRIGIDO PELO SISTEMA: no checkout ficou gravado ${quem.emailAntigo} (digitado diferente); o login dela agora é ${r.de}. Não peça e-mail nem comprovante.` : ''
+    if (nota) perfil.cartao = `${nota}\n\n${perfil.cartao ?? ''}`
   }
-  const perfil = userId ? await perfilDaAluna(userId, true, null).catch(() => null) : null
   const idiomaDoEndereco = r.para.some((t) => t.startsWith('pomoc@')) || /\.pl$/i.test(r.de) ? 'pl' : r.para.some((t) => t.startsWith('ayuda@')) ? 'es' : undefined
   const idioma = perfil?.idioma ?? idiomaDoEndereco ?? 'es'
   if (perfil) {
@@ -291,7 +291,7 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
   }
   const de = r.para.find((t) => /@riseme\.app$/.test(t) && !/^acesso@/.test(t)) ?? enderecoSuporte(idioma)
   const assunto = /^re:/i.test(r.assunto) ? r.assunto : `Re: ${r.assunto || ASSUNTO_PADRAO[idioma] || ASSUNTO_PADRAO.en}`
-  const conversa = await conversaDoEndereco(r.de)
+  const conversa = conversaAntes
   if (!conversa.length) return `sem conversa (${r.de})`
 
   let decisao
@@ -304,10 +304,15 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
 
   let resposta = decisao.texto ?? ''
   const notas: string[] = []
-  if (decisao.tipo === 'responder') {
-    // Reembolso da Stripe: automático, já no 1º pedido (Bruno 09/11 e 12/11; zero chargeback).
-    const pis = (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_'))
-    if (decisao.reembolsoCategoria || pis.length) await registrarPedidoReembolso({ phone: r.de, canal: 'email', categoria: decisao.reembolsoCategoria, devolveu: pis, motivo: decisao.reembolsoMotivo }).catch((err) => console.error('[reembolso-pedido] falhou:', err))
+  if (quem.achada) notas.push(`compra achada (${quem.achada.como}${quem.corrigido ? '; e-mail da conta corrigido' : ''})`)
+  const d = decisao.tipo === 'responder' ? decisao : null
+  let pis = (d?.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_'))
+  // Reembolso prometido no texto é reembolso feito (25/11/2026): o bot escreveu que encaminha e não devolveu o código.
+  const prometidos = await reembolsoPrometido({ userId, textoBot: resposta, textosDela: conversa.filter((m) => m.autor === 'student').map((m) => m.texto), pisDoBot: pis }).catch(() => [] as string[])
+  if (prometidos.length) { pis = prometidos; notas.push('o texto prometia o reembolso sem o código: o sistema executou') }
+  if (d || prometidos.length) {
+    // Reembolso da Stripe: automático (Bruno 09/11 e 12/11; zero chargeback), no 2º pedido ou decisão clara (17/11).
+    if (d?.reembolsoCategoria || pis.length) await registrarPedidoReembolso({ phone: r.de, canal: 'email', categoria: d?.reembolsoCategoria ?? (prometidos.length ? 'prometido_pelo_bot' : undefined), devolveu: pis, motivo: d?.reembolsoMotivo }).catch((err) => console.error('[reembolso-pedido] falhou:', err))
     if (pis.length) {
       const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
       const falhas = res.map((x, i) => (x.ok ? null : `${pis[i]}: ${'erro' in x ? x.erro : '?'}`)).filter(Boolean)
@@ -315,24 +320,109 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
       notas.push(`reembolso Stripe ${pis.join(', ')}${falhas.length ? ` FALHOU (${falhas.join('; ')})` : ' pedido'}`)
       if (falhas.length) await avisarEquipe(`REEMBOLSO STRIPE falhou (${r.de})`, [falhas.join('; '), 'Conferir no painel da Stripe.'])
     }
-    const outros = (decisao.reembolsoTransacoes ?? []).filter((t) => !t.startsWith('pi_'))
-    if (outros.length) await avisarEquipe(`reembolso para aprovar (${r.de})`, [`Transações: ${outros.join(', ')}`, `Motivo: ${decisao.reembolsoMotivo ?? '-'}`, '', 'O bot já respondeu a ela. Aprovar no chat do bot.', '', 'Mensagem dela:', texto.slice(0, 1500)])
-    if (decisao.novoEmail) await avisarEquipe(`troca de e-mail pedida (${r.de})`, [`Novo e-mail: ${decisao.novoEmail}`, 'Por e-mail a troca não é automática: fazer pelo chat do bot.'])
+    const outros = (d?.reembolsoTransacoes ?? []).filter((t) => !t.startsWith('pi_'))
+    if (outros.length) await avisarEquipe(`reembolso para aprovar (${r.de})`, [`Transações: ${outros.join(', ')}`, `Motivo: ${d?.reembolsoMotivo ?? '-'}`, '', 'O bot já respondeu a ela. Aprovar no chat do bot.', '', 'Mensagem dela:', texto.slice(0, 1500)])
+    let trocouAgora = false
+    if (d?.novoEmail) {
+      // Ela escreve DO endereço novo (prova que é dela) e a conta nunca entrou: o sistema corrige e manda o acesso para lá.
+      const t = d.novoEmail === r.de && userId && perfil && !perfil.ultimoLogin ? await trocarEmail({ userId, atual: emailConta, novo: r.de }) : null
+      if (t?.ok) { await gravar(r.de, KIND_EMAIL_TROCADO, { de: emailConta, para: r.de, motivo: 'pedido dela; conta nunca entrou' }); notas.push(`e-mail da conta corrigido: ${emailConta} → ${r.de}`); emailConta = r.de; trocouAgora = true }
+      else await avisarEquipe(`troca de e-mail pedida (${r.de})`, [`Novo e-mail: ${d.novoEmail}`, 'Por e-mail a troca só é automática quando ela escreve do endereço novo e a conta nunca entrou: fazer pelo chat do bot.'])
+    }
     // Acesso de novo: e-mail de acesso separado, sempre para o e-mail da conta, com a senha DE SEMPRE (18/11/2026:
-    // nunca geramos outra; lib/senha-conta.ts).
-    if (decisao.reenviarAcesso && userId && !perfil?.reenvioRecente) {
+    // nunca geramos outra; lib/senha-conta.ts). E-mail da conta corrigido agora = ela nunca recebeu o acesso: vai sem pedir.
+    if ((d?.reenviarAcesso || quem.corrigido || trocouAgora) && !pis.length && userId && !perfil?.reenvioRecente) {
       const senha = await senhaDaConta({ userId, email: emailConta }).catch((err) => ({ erro: String(err instanceof Error ? err.message : err) }))
       const envio = 'erro' in senha ? { ok: false as const, erro: senha.erro } : await sendAccessEmail({ email: emailConta, code: senha.code, link: buildAccessLink(APP_URL(), idioma, emailConta, senha.code), locale: idioma })
       notas.push(envio.ok ? `acesso reenviado para ${emailConta}` : `REENVIO DO ACESSO FALHOU: ${envio.erro}`)
       if (envio.ok) await gravar(r.de, KIND_REENVIO, { email: r.de })
       else await avisarEquipe(`o bot prometeu acesso novo a ${r.de} e o envio falhou`, [envio.erro])
     }
-  } else {
-    await avisarEquipe(`${perfil?.nome ?? r.nome ?? 'aluna'} <${r.de}> precisa de você`, [`Motivo: ${decisao.motivo}`, decisao.consulta?.resumo ?? '', decisao.consulta?.opcaoA ? `A) ${decisao.consulta.opcaoA}` : '', decisao.consulta?.opcaoB ? `B) ${decisao.consulta.opcaoB}` : '', '', 'O bot respondeu a ela:', resposta, '', 'Mensagem dela:', texto.slice(0, 2000), '', 'Para responder: diga no chat do bot "responde por e-mail a <endereço>: …".'])
-    notas.push(`transferido: ${decisao.motivo}`)
+  } else if (decisao.tipo !== 'responder') {
+    // Transferência por e-mail entra na MESMA fila do WhatsApp (25/11/2026). Antes virava só um e-mail de aviso, fora da
+    // lista das 20h e sem número: 9 avisos de uma mesma aluna em 7 dias e ninguém respondeu. Agora é consulta #id: aparece
+    // na lista, e a resposta do responsável ("#id …") sai por e-mail para ela (responderConsultaPorEmail).
+    const consultaId = await criarConsulta({ phone: r.de, nome: perfil?.nome ?? r.nome ?? undefined, motivo: `[E-MAIL] ${decisao.motivo}`, resumo: `✉️ por e-mail · ${decisao.consulta?.resumo ?? decisao.motivo}`, opcaoA: decisao.consulta?.opcaoA ?? '', opcaoB: decisao.consulta?.opcaoB ?? '' }).catch(() => null)
+    await avisarEquipe(`consulta #${consultaId ?? '?'}: ${perfil?.nome ?? r.nome ?? 'aluna'} <${r.de}> precisa de você`, [`Motivo: ${decisao.motivo}`, decisao.consulta?.resumo ?? '', decisao.consulta?.opcaoA ? `A) ${decisao.consulta.opcaoA}` : '', decisao.consulta?.opcaoB ? `B) ${decisao.consulta.opcaoB}` : '', '', 'O bot respondeu a ela:', resposta, '', 'Mensagem dela:', texto.slice(0, 2000), '', `Para responder: no WhatsApp do bot, "#${consultaId ?? 'id'} <o que responder>" (a resposta sai por e-mail para ela).`])
+    notas.push(`transferido (consulta #${consultaId ?? '?'}): ${decisao.motivo}`)
   }
   if (!resposta.trim()) return `sem resposta (${r.de}; ${notas.join('; ')})`
   const envio = await enviarEmailSuporte({ para: r.de, assunto, texto: resposta, idioma, de, emRespostaA: r.messageId, auto: true })
   if (!envio.ok) await avisarEquipe(`a resposta a ${r.de} NÃO saiu`, [envio.erro, '', resposta])
   return `${envio.ok ? 'respondido' : 'RESPOSTA FALHOU'} (${r.de}; ${idioma}${notas.length ? `; ${notas.join('; ')}` : ''})`
+}
+
+// ── Quem escreve ────────────────────────────────────────────────────────────────────────────────────────────────
+interface Quem { userId: string | null; emailConta: string; achada: CompraAchada | null; corrigido: boolean; emailAntigo: string | null }
+
+/**
+ * Acha a conta de quem escreve. 1) conta com este e-mail; 2) e-mail que ela citou; 3) a compra é procurada pelo que ela
+ * já deu (lib/whatsapp-agent/achar-compra.ts). `corrigir`: e-mail do checkout digitado errado + conta que NUNCA entrou +
+ * ela escreve do endereço certo (o que prova que o endereço é dela) → o e-mail da conta é corrigido na hora.
+ */
+async function identificar(de: string, nome: string | null, conversa: MensagemConversa[], corrigir: boolean): Promise<Quem> {
+  const db = admin()
+  const { data: conta } = await db.from('users').select('id, email').eq('email', de).limit(1)
+  if (conta?.[0]) {
+    const { data: troca } = await db.from('whatsapp_outbox').select('body').eq('phone', de).eq('kind', KIND_EMAIL_TROCADO).order('id', { ascending: false }).limit(1)
+    let antigo: string | null = null
+    try { antigo = troca?.[0] ? ((JSON.parse(troca[0].body as string) as { de?: string }).de ?? null) : null } catch { /* linha antiga em outro formato */ }
+    return { userId: conta[0].id as string, emailConta: de, achada: null, corrigido: false, emailAntigo: antigo }
+  }
+  const dela = conversa.filter((m) => m.autor === 'student').map((m) => m.texto)
+  // Escreveu de outro endereço e citou o e-mail da compra: vale para achar a conta. O acesso novo vai SEMPRE para o e-mail
+  // da conta (nunca para quem escreveu), então quem não é a dona não ganha nada com isso.
+  const citados = [...new Set(dela.flatMap((t) => t.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) ?? []).map((e) => e.toLowerCase()))].filter((e) => !/@riseme\.app$/.test(e))
+  if (citados.length) {
+    const { data: porCitado } = await db.from('users').select('id, email').in('email', citados).limit(1)
+    if (porCitado?.[0]) return { userId: porCitado[0].id as string, emailConta: (porCitado[0].email as string).toLowerCase(), achada: null, corrigido: false, emailAntigo: null }
+  }
+  const achada = await acharCompra({ de, nome, textos: dela })
+  if (!achada) return { userId: null, emailConta: de, achada: null, corrigido: false, emailAntigo: null }
+  if (corrigir && achada.como === 'email-parecido' && achada.emailDela === de && achada.nuncaEntrou) {
+    const t = await trocarEmail({ userId: achada.userId, atual: achada.emailConta, novo: de })
+    if (t.ok) {
+      await gravar(de, KIND_EMAIL_TROCADO, { de: achada.emailConta, para: de, motivo: 'digitado errado no checkout; conta nunca entrou' })
+      return { userId: achada.userId, emailConta: de, achada, corrigido: true, emailAntigo: achada.emailConta }
+    }
+    console.error(`[email-suporte] correção do e-mail falhou (${de}): ${t.erro}`)
+  }
+  return { userId: achada.userId, emailConta: achada.emailConta, achada, corrigido: false, emailAntigo: null }
+}
+
+// ── Consulta aberta por e-mail: a resposta do responsável ("#id …" no WhatsApp do bot) sai por e-mail ─────────────────────
+/** Devolve a frase para o responsável. Lança se o envio falhar (a consulta continua pendente). */
+export async function responderConsultaPorEmail(consulta: ConsultaAberta, orientacao: string): Promise<string> {
+  const endereco = consulta.phone
+  const conversa = await conversaDoEndereco(endereco)
+  const quem = await identificar(endereco, consulta.nome, conversa, false)
+  const perfil = quem.userId ? await perfilDaAluna(quem.userId, quem.achada?.como !== 'nome', null).catch(() => null) : null
+  const idioma = perfil?.idioma ?? (/\.pl$/i.test(endereco) ? 'pl' : 'es')
+  const { data: semReembolso } = quem.userId
+    ? await admin().from('stripe_vendas').select('payment_intent, oferta, valor_centavos, moeda, created_at').eq('user_id', quem.userId).is('reembolso_id', null).not('payment_intent', 'is', null).order('created_at', { ascending: false }).limit(6)
+    : { data: [] as { payment_intent: string; oferta: string | null; valor_centavos: number | null; moeda: string | null; created_at: string }[] }
+  const comprasStripe = (semReembolso ?? []).map((v) => `${v.payment_intent} · ${v.oferta ?? 'compra'} · ${v.valor_centavos != null ? (Number(v.valor_centavos) / 100).toFixed(2) : '?'} ${String(v.moeda ?? '').toUpperCase()} · ${String(v.created_at).slice(0, 10)}`)
+  const { enviar, nota, mensagem, aprendizado, reembolsarStripe: aDevolver } = await redigirRespostaAprovada({ perfil, conversa, resumo: consulta.resumo, opcaoA: consulta.opcaoA, opcaoB: consulta.opcaoB, orientacao, comprasStripe })
+  const pis = aDevolver.filter((pi) => (semReembolso ?? []).some((v) => v.payment_intent === pi))
+  let texto = mensagem
+  let feito = ''
+  if (pis.length) {
+    const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
+    const falhas = res.map((x, i) => (x.ok ? null : `${pis[i]}: ${'erro' in x ? x.erro : '?'}`)).filter(Boolean)
+    if (falhas.length) return `❌ Consulta #${consulta.id} (e-mail) — tentei o reembolso na Stripe e falhou: ${falhas.join('; ').slice(0, 300)}. Nada foi dito à aluna; a consulta continua pendente.`
+    texto = textoReembolsoStripe(idioma, perfil?.nome, true)
+    feito = ` Reembolso pedido na Stripe: ${pis.map((pi) => comprasStripe.find((c) => c.startsWith(pi))?.split(' · ').slice(1, 3).join(' ') ?? pi).join(' + ')}.`
+    await registrarPedidoReembolso({ phone: endereco, canal: 'email', categoria: 'aprovado_pelo_responsavel', devolveu: pis, motivo: orientacao.slice(0, 200) }).catch(() => {})
+  } else if (!enviar) {
+    return `✋ Consulta #${consulta.id} (e-mail) — não enviei nada para a aluna.\n${nota || 'Não ficou claro o que responder a ela.'}\n\nQuando decidir, responda de novo com #${consulta.id}.`
+  }
+  const { data: ultimo } = await admin().from('whatsapp_outbox').select('body').eq('phone', endereco).eq('kind', KIND_IN).order('id', { ascending: false }).limit(1)
+  let assunto = ASSUNTO_PADRAO[idioma] ?? ASSUNTO_PADRAO.en
+  let messageId: string | null = null
+  try { const b = JSON.parse((ultimo?.[0]?.body as string) ?? '{}') as { assunto?: string; messageId?: string }; if (b.assunto) assunto = b.assunto; messageId = b.messageId ?? null } catch { /* sem o último: assunto padrão */ }
+  const envio = await enviarEmailSuporte({ para: endereco, assunto: /^(re|odp):/i.test(assunto) ? assunto : `Re: ${assunto}`, texto, idioma, emRespostaA: messageId })
+  if (!envio.ok) throw new Error(`envio do e-mail à aluna falhou: ${envio.erro}`)
+  await fecharConsulta(consulta.id, { status: 'respondida', orientacao, respostaEnviada: texto })
+  if (aprendizado && !pis.length) await salvarAprendizado(aprendizado, consulta.id)
+  return `✅ Consulta #${consulta.id} — enviado por e-mail para ${consulta.nome ?? 'a aluna'}:${feito}\n\n«${texto}»`
 }
