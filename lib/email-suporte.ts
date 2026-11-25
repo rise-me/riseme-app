@@ -346,6 +346,8 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
     await avisarEquipe(`consulta #${consultaId ?? '?'}: ${perfil?.nome ?? r.nome ?? 'aluna'} <${r.de}> precisa de você`, [`Motivo: ${decisao.motivo}`, decisao.consulta?.resumo ?? '', decisao.consulta?.opcaoA ? `A) ${decisao.consulta.opcaoA}` : '', decisao.consulta?.opcaoB ? `B) ${decisao.consulta.opcaoB}` : '', '', 'O bot respondeu a ela:', resposta, '', 'Mensagem dela:', texto.slice(0, 2000), '', `Para responder: no WhatsApp do bot, "#${consultaId ?? 'id'} <o que responder>" (a resposta sai por e-mail para ela).`])
     notas.push(`transferido (consulta #${consultaId ?? '?'}): ${decisao.motivo}`)
   }
+  // Rede: resposta por e-mail nunca promete retorno "aqui, no WhatsApp" (teste de 25/11/2026: saiu numa transferência).
+  resposta = resposta.replace(/(tutaj|aquí|aqui|here|qui|tady),?\s*(w|na|por|en el|en|no|on|su)\s+WhatsApp\w*/gi, '$1')
   if (!resposta.trim()) return `sem resposta (${r.de}; ${notas.join('; ')})`
   const envio = await enviarEmailSuporte({ para: r.de, assunto, texto: resposta, idioma, de, emRespostaA: r.messageId, auto: true })
   if (!envio.ok) await avisarEquipe(`a resposta a ${r.de} NÃO saiu`, [envio.erro, '', resposta])
