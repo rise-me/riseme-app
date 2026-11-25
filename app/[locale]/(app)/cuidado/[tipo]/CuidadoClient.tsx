@@ -29,8 +29,8 @@ export function CuidadoClient({ tipo, aulas, locale }: Props) {
           <ArrowLeft size={18} className="text-background" />
         </button>
 
-        <div className="text-6xl mb-4">{tipo === 'suave' ? '🌱' : '🎁'}</div>
-        <p className="text-background/60 text-xs font-bold uppercase tracking-wide">{tipo === 'suave' ? t('suave.label') : t('tabName')}</p>
+        <div className="text-6xl mb-4">{tipo === 'suave' ? '🌱' : tipo === 'intensa' ? '🔥' : '🎁'}</div>
+        <p className="text-background/60 text-xs font-bold uppercase tracking-wide">{tipo === 'suave' || tipo === 'intensa' ? t(`${tipo}.label`) : t('tabName')}</p>
         <h1 className="text-2xl font-black leading-tight mb-2">{t(`${tipo}.name`)}</h1>
         <p className="text-background/80 text-sm leading-relaxed">{t(`${tipo}.topLine`)}</p>
 

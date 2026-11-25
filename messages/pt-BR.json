@@ -738,6 +738,12 @@
       "name": "Aulas suaves",
       "topLine": "Aulas mais suaves para ir no seu ritmo. Faça quando quiser: contam nos seus dias seguidos e o seu desafio continua igual.",
       "cardLine": "{n, plural, one {# aula suave} other {# aulas suaves}}"
+    },
+    "intensa": {
+      "label": "Versão intensa",
+      "name": "Aulas intensas",
+      "topLine": "Aulas curtas e mais puxadas para quando você quiser mais. Faça quando quiser: contam nos seus dias seguidos e o seu desafio continua igual.",
+      "cardLine": "{n, plural, one {# aula intensa} other {# aulas intensas}}"
     }
   },
   "claseHoy": {
@@ -762,7 +768,11 @@
     "hardTip": "Vá no seu ritmo: pause o vídeo quando precisar e descanse entre os exercícios.",
     "suaveOffer": "Temos uma versão mais suave para começar. Quer experimentar?",
     "suaveYes": "Sim, mostrar",
-    "suaveNo": "Não, sigo assim"
+    "suaveNo": "Não, sigo assim",
+    "thanksEasy": "Boa! 😎",
+    "intensaOffer": "Pronta para mais? Temos uma versão mais intensa: aulas curtas e mais puxadas. Quer experimentar?",
+    "intensaYes": "Sim, mostrar",
+    "intensaNo": "Não, sigo assim"
   },
   "conquista": {
     "cta": "Continuar",

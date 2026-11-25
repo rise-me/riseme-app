@@ -13,7 +13,11 @@ export type TipoCuidado = 'rodillas' | 'espalda'
 export const TIPOS_CUIDADO: TipoCuidado[] = ['rodillas', 'espalda']
 // "Versión suave" (Bruno 15/11): trilha OPCIONAL de aulas leves, oferecida só a quem marca "Muy difícil" no fim da aula
 // (há alunas que acham a Calistenia fácil demais). Usa a mesma lista/página/player do cuidado, sem depender de dor marcada.
-export type TipoLista = TipoCuidado | 'suave'
+// "Versión intensa" (Bruno 16/11 e 25/11): o espelho — trilha OPCIONAL de aulas curtas e mais exigentes, oferecida só a
+// quem marca "Fácil" (30% das que responderam marcaram ao menos uma vez, contagem de 25/11).
+export type TipoLista = TipoCuidado | 'suave' | 'intensa'
+export const TRILHAS_OPCIONAIS = ['suave', 'intensa'] as const
+export type TrilhaOpcional = (typeof TRILHAS_OPCIONAIS)[number]
 
 // ES e PL primeiro (Bruno 11/11). Outro idioma entra quando as aulas e os textos dele existirem.
 export const CUIDADO_IDIOMAS = ['es', 'pl']
@@ -111,13 +115,33 @@ const AULAS: Record<TipoLista, AulaCuidado[]> = {
     { codigo: 'C15', desafio: '18', dia: 15,
       titulo: { es: 'Pasos laterales y trabajo de brazos', pl: 'Kroki w bok z ruchami rąk', en: 'Side Steps and Arms' } },
   ],
+  // Versión intensa: 7 aulas do Treinos Rápidos (módulo 17), decididas pelo Bruno 25/11 depois da leitura aula a aula
+  // (secao-rapidos17.md do Subidor). Força/core curto, sem equipamento além do colchonete; R20 tem salto lateral (01:39).
+  // Desafio 20 no R2, dia = nº da aula no módulo (confirmado pelo Subidor 25/11). Ordem = intermediárias → avançadas.
+  // Títulos PROVISÓRIOS (nossos): trocar pelos nomes.{es,pl}.tsv do Subidor quando a tradução com revisão nativa fechar.
+  intensa: [
+    { codigo: 'R16', desafio: '20', dia: 16,
+      titulo: { es: 'Plancha y plancha lateral', pl: 'Deska i deska bokiem', en: 'Plank Set' } },
+    { codigo: 'R18', desafio: '20', dia: 18,
+      titulo: { es: 'Espalda y brazos firmes', pl: 'Mocne plecy i ramiona', en: 'Fabulous Upper Back' } },
+    { codigo: 'R20', desafio: '20', dia: 20,
+      titulo: { es: 'De la cabeza a los pies', pl: 'Od stóp do głów', en: 'Head-to-Toe Set' } },
+    { codigo: 'R27', desafio: '20', dia: 27,
+      titulo: { es: 'HIIT silencioso', pl: 'Cichy HIIT', en: 'Silent HIIT' } },
+    { codigo: 'R28', desafio: '20', dia: 28,
+      titulo: { es: 'Entrenamiento de plancha', pl: 'Trening z deską', en: 'Plank Workout' } },
+    { codigo: 'R25', desafio: '20', dia: 25,
+      titulo: { es: 'Core fuerte', pl: 'Silny brzuch', en: 'Strong Core' } },
+    { codigo: 'R24', desafio: '20', dia: 24,
+      titulo: { es: 'HIIT rápido', pl: 'Szybki HIIT', en: 'Quick HIIT' } },
+  ],
 }
 
 export function ehTipoCuidado(s: string): s is TipoCuidado {
   return (TIPOS_CUIDADO as string[]).includes(s)
 }
 export function ehTipoLista(s: string): s is TipoLista {
-  return s === 'suave' || ehTipoCuidado(s)
+  return (TRILHAS_OPCIONAIS as readonly string[]).includes(s) || ehTipoCuidado(s)
 }
 
 /** O que a aluna tem marcado. */

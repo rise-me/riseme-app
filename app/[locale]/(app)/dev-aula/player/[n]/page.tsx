@@ -17,14 +17,17 @@ export default async function DevAula({
 }) {
   if (process.env.NODE_ENV !== 'development') notFound()
   const { locale, n } = await params
-  const conquista = Boolean((await searchParams).conquista)
+  const sp = await searchParams
+  const conquista = Boolean(sp.conquista)
+  // ?antes=1: sem as ofertas das trilhas (para a prévia "antes × depois")
+  const antes = Boolean(sp.antes)
   const dia = parseInt(n) || 3
   const tDays = await getTranslations('challengeDays')
   const days = getMockDays('1', (tDays.raw('1') as string[]) ?? [], locale).map((d) => ({ ...d, video: undefined }))
   const challenge = mockChallenges.find((c) => c.id === '1')!
   return (
     <>
-      <VideoPlayer challenge={challenge} days={days} currentDayNumber={dia} locale={locale} hasPase hlsPath={null} perguntar previaConcluida suaveHref={`/${locale}/dev-cuidado?tela=lista&tipo=suave&simula=1`} />
+      <VideoPlayer challenge={challenge} days={days} currentDayNumber={dia} locale={locale} hasPase hlsPath={null} perguntar previaConcluida suaveHref={antes ? null : `/${locale}/dev-cuidado?tela=lista&tipo=suave&simula=1`} intensaHref={antes ? null : `/${locale}/dev-cuidado?tela=lista&tipo=intensa&simula=1`} />
       {conquista && <ConquistaPrevia dia={dia} locale={locale} />}
     </>
   )

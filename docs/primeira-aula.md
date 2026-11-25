@@ -110,6 +110,14 @@ na frente do Pase 31 e do 2/4/5; Air religado pelo Bruno 25/11 (62 GB livres). C
 escrito em `fabrica-dublagem/trabalho/intensa/HANDOFF-INTENSA-RAPIDOS.md` + topo da FILA.md. RETOMAR (riseme-c2):
 Bruno abre o Subidor → ele dubla e sobe (desafio 20) → eu monto tipo 'intensa' em lib/cuidado.ts (oferta no "Fácil",
 igual à suave, flag INTENSA_ATIVO desligada) → prévia da tela inteira com o antes ao lado → ok do Bruno → ligar.
+25/11 ~21h30: APP PRONTO E DESLIGADO (INTENSA_ATIVO não existe na Vercel; conta admin vê só quando houver aula no R2):
+`lib/cuidado.ts` tipo 'intensa' (desafio 20, dias 16/18/20/27/28/25/24 = nº da aula, confirmado pelo Subidor; ordem
+intermediárias → avançadas), `aulasDaTrilha()` em `cuidado-server.ts` (suave e intensa, cada uma com a sua chave), oferta no
+"Fácil" em `ComoTeFue.tsx` ("¿Lista para más?…"), textos nos 7 idiomas, 🔥 na lista. Prévia es/pl (antes × depois) em
+`/dev-aula/player/3` e `?antes=1`. FALTA: (1) títulos es/pl = PROVISÓRIOS nossos → trocar pelos nomes.tsv do Subidor;
+(2) aulas no R2 → conferir tocando es e pl (duração real 5–11 min, a prévia mostra 20 simulados); (3) ok do Bruno na prévia →
+`printf '1' | vercel env add INTENSA_ATIVO production` + redeploy; (4) avisar o Arquiteto (bot oferece a intensa a quem acha
+fácil; `lib/cartao-aluna.ts` e conhecimento são dele). Air sem rede em 25/11 21h → dublagem no Mac depois das 23h.
 (3) lista → dublagem es+pl → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
 CUSTO (Subidor 16/11): a voz das aulas agora é do Google (aprovada pelo Bruno); 28 aulas es+pl cabem na cota grátis do
 mês. ElevenLabs deixou de ser trava pra aula (fica pra criativo/VSL). Vale também pra dublar Pilates/Yoga/Cuerpo Sexy (2/4/5).

@@ -775,6 +775,12 @@
       "name": "Gentle classes",
       "topLine": "Gentler classes to go at your own pace. Do them whenever you like: they count toward your streak and your challenge stays the same.",
       "cardLine": "{n, plural, one {# gentle class} other {# gentle classes}}"
+    },
+    "intensa": {
+      "label": "Intense version",
+      "name": "Intense classes",
+      "topLine": "Short, more demanding classes for when you want more. Do them whenever you like: they count toward your streak and your challenge stays the same.",
+      "cardLine": "{n, plural, one {# intense class} other {# intense classes}}"
     }
   },
   "claseHoy": {
@@ -799,7 +805,11 @@
     "hardTip": "Go at your own pace: pause the video when you need to and rest between exercises.",
     "suaveOffer": "We have a gentler version to start with. Want to try it?",
     "suaveYes": "Yes, show me",
-    "suaveNo": "No, I'll keep going"
+    "suaveNo": "No, I'll keep going",
+    "thanksEasy": "Awesome! 😎",
+    "intensaOffer": "Ready for more? We have a more intense version: short, tougher classes. Want to try it?",
+    "intensaYes": "Yes, show me",
+    "intensaNo": "No, I'll keep going"
   },
   "conquista": {
     "cta": "Continue",

@@ -28,7 +28,7 @@ export default async function CuidadoPlayerPage({
   const pseudo: MockChallenge = {
     id: `cuidado-${tipo}`,
     days_count: days.length,
-    thumbnail_emoji: tipo === 'rodillas' ? '🦵' : tipo === 'suave' ? '🌱' : '🌿',
+    thumbnail_emoji: tipo === 'rodillas' ? '🦵' : tipo === 'suave' ? '🌱' : tipo === 'intensa' ? '🔥' : '🌿',
     is_free: false,
     status: 'active',
   }

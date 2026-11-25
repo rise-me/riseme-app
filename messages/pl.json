@@ -775,6 +775,12 @@
       "name": "Łagodne lekcje",
       "topLine": "Łagodniejsze lekcje, żeby ćwiczyć w swoim tempie. Rób je, kiedy chcesz: liczą się do Twojej serii dni, a wyzwanie się nie zmienia.",
       "cardLine": "{n, plural, one {# łagodna lekcja} few {# łagodne lekcje} many {# łagodnych lekcji} other {# łagodnej lekcji}}"
+    },
+    "intensa": {
+      "label": "Wersja intensywna",
+      "name": "Intensywne lekcje",
+      "topLine": "Krótkie, bardziej wymagające lekcje na dni, kiedy masz ochotę na więcej. Rób je, kiedy chcesz: liczą się do Twojej serii dni, a wyzwanie się nie zmienia.",
+      "cardLine": "{n, plural, one {# intensywna lekcja} few {# intensywne lekcje} many {# intensywnych lekcji} other {# intensywnej lekcji}}"
     }
   },
   "claseHoy": {
@@ -799,7 +805,11 @@
     "hardTip": "Ćwicz w swoim tempie: zatrzymaj film, kiedy tylko potrzebujesz, i odpoczywaj między ćwiczeniami.",
     "suaveOffer": "Mamy łagodniejszą wersję na początek. Chcesz spróbować?",
     "suaveYes": "Tak, pokaż",
-    "suaveNo": "Nie, zostaję"
+    "suaveNo": "Nie, zostaję",
+    "thanksEasy": "Super! 😎",
+    "intensaOffer": "Gotowa na więcej? Mamy intensywniejszą wersję: krótkie, bardziej wymagające lekcje. Chcesz spróbować?",
+    "intensaYes": "Tak, pokaż",
+    "intensaNo": "Nie, zostaję"
   },
   "conquista": {
     "cta": "Dalej",

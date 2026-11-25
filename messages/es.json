@@ -767,6 +767,12 @@
       "name": "Clases suaves",
       "topLine": "Clases más suaves para ir a tu ritmo. Hazlas cuando quieras: cuentan en tus días seguidos y tu desafío sigue igual.",
       "cardLine": "{n, plural, one {# clase suave} other {# clases suaves}}"
+    },
+    "intensa": {
+      "label": "Versión intensa",
+      "name": "Clases intensas",
+      "topLine": "Clases cortas y más exigentes para cuando quieras más. Hazlas cuando quieras: cuentan en tus días seguidos y tu desafío sigue igual.",
+      "cardLine": "{n, plural, one {# clase intensa} other {# clases intensas}}"
     }
   },
   "claseHoy": {
@@ -791,7 +797,11 @@
     "hardTip": "Ve a tu ritmo: pausa el video cuando lo necesites y descansa entre ejercicios.",
     "suaveOffer": "Tenemos una versión más suave para empezar. ¿Quieres probarla?",
     "suaveYes": "Sí, mostrarme",
-    "suaveNo": "No, sigo así"
+    "suaveNo": "No, sigo así",
+    "thanksEasy": "¡Genial! 😎",
+    "intensaOffer": "¿Lista para más? Tenemos una versión más intensa: clases cortas y más exigentes. ¿Quieres probarla?",
+    "intensaYes": "Sí, mostrarme",
+    "intensaNo": "No, sigo así"
   },
   "conquista": {
     "cta": "Seguir",
