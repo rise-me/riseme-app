@@ -358,6 +358,13 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
           await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: JSON.stringify({ ...caso, resultado: r }) }).eq('id', item.id)
           continue
         }
+        // lancador = testa a leitura da resposta do responsável à lista de anúncios (sem banco nem envio). 26/11/2026
+        const lanc = (caso as { lancador?: { itens: { n: number; oferta?: string; nome: string }[]; falas: string[]; outras?: string } }).lancador
+        if (lanc) {
+          const { simularLancador } = await import('@/lib/whatsapp-agent/lancador')
+          await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: JSON.stringify({ ...caso, resultado: await simularLancador(lanc) }) }).eq('id', item.id)
+          continue
+        }
         const cartaoDe = (caso as { cartaoDe?: string }).cartaoDe
         if (cartaoDe && caso.perfil) { const { cartaoDaAluna } = await import('@/lib/cartao-aluna'); caso.perfil = { ...caso.perfil, cartao: await cartaoDaAluna(admin(), { userId: cartaoDe, variantes: [] }) } }
         // hotmartEmail = consulta real à Hotmart no teste; hotmart = bloco pronto (teste sem credencial)

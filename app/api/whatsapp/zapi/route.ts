@@ -45,6 +45,7 @@ import { reembolsosPendentes, aprovarReembolsos, criarPedidosDaDecisao } from '@
 import { emailNaConversa } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsarStripe } from '@/lib/stripe-api'
 import { textoReembolsoStripe, registrarPedidoReembolso, reembolsoPrometido } from '@/lib/whatsapp-agent/reembolsos'
+import { tratarRespostaLancador } from '@/lib/whatsapp-agent/lancador'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.
@@ -753,6 +754,13 @@ export async function POST(request: NextRequest) {
         await registrarMensagem({ phone: phone.replace(/\D/g, ''), direction: 'in', author: 'human', body: fala, waMessageId }).catch(() => false)
         const ehConsulta = (citada && (await consultaPorAlerta(citada))) || /^#\d+/.test(fala.trim())
         if (!ehConsulta) {
+          // Lista noturna de anúncios (26/11/2026): com uma lista aberta, a resposta dele é lida por IA ANTES dos comandos
+          // (um "pode subir" não pode ser confundido com o "sim" de um comando pendente). Não é sobre a lista → segue.
+          try {
+            if (await tratarRespostaLancador(fala, citada)) return
+          } catch (err) {
+            console.error('[lancador] falhou:', err)
+          }
           try {
             if (await tratarComando(fala, dizerAoResponsavel)) return
           } catch (err) {

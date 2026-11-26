@@ -910,6 +910,81 @@ export async function interpretarRespostaResponsavel(p: {
   return { tipo: o.tipo, consultaId: o.consulta_id, orientacao: o.orientacao.trim(), aprovar: o.aprovar, todos: o.todos, numeros: o.numeros }
 }
 
+// ─── Lista noturna de anúncios (lançador): entender a resposta do responsável ────────────────────────────
+// Bruno, 26/11/2026: "é muito ruim no WhatsApp a minha comunicação com o bot… não tem inteligência de compreender o que eu
+// tô respondendo… às vezes eu explico de uma forma que não é 100% padronizada". Aqui só se ENTENDE; quem guarda a
+// decisão e responde é lib/whatsapp-agent/lancador.ts, e quem sobe os anúncios é o lançador (~/Ferramentas/lancador-ads).
+export interface ItemLancador { n: number; oferta?: string; nome: string; conta?: string; orcamento?: string }
+export interface LeituraLancador { sobreALista: boolean; subir: number[]; fora: number[]; segurarTudo: boolean; observacoes: string; duvida: string }
+
+export async function interpretarDecisaoLancador(p: {
+  texto: string
+  itens: ItemLancador[]
+  historico: { de: 'bruno' | 'bot'; texto: string }[] // o que já foi dito sobre ESTA lista, em ordem
+  decisaoAnterior: { subir: number[]; fora: number[] } | null
+  outrasPendencias: string // o que mais está aberto com ele (consultas, reembolsos), para não confundir um "sim" solto
+  citouALista: boolean // ele respondeu citando a mensagem da lista
+}): Promise<LeituraLancador> {
+  const res = await anthropic().beta.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 1500,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    output_config: {
+      effort: 'medium',
+      format: {
+        type: 'json_schema',
+        schema: {
+          type: 'object',
+          properties: {
+            sobre_a_lista: { type: 'boolean' },
+            subir: { type: 'array', items: { type: 'integer' } },
+            fora: { type: 'array', items: { type: 'integer' } },
+            segurar_tudo: { type: 'boolean' },
+            observacoes: { type: 'string' },
+            duvida: { type: 'string' },
+          },
+          required: ['sobre_a_lista', 'subir', 'fora', 'segurar_tudo', 'observacoes', 'duvida'],
+          additionalProperties: false,
+        },
+      },
+    },
+    system:
+      'O dono do RiseMe recebeu no WhatsApp a lista de anúncios (criativos) prontos para subir hoje e respondeu do jeito dele, em português falado, sem padrão. ' +
+      'Sua tarefa é ENTENDER o que ele decidiu sobre cada item. Só sobe o que ele aprovar.\n' +
+      'Como ele se refere aos itens: pelo número da lista ("o 3", "1 e 2", "do 4 ao 7"), pelo nome do criativo inteiro ou por um pedaço ("AD38", "o V42.11", "o da Agnieszka", "os H3"), ' +
+      'pela oferta ("os da Polônia", "os poloneses", "PL" = CL-PL; "os do espanhol", "latino", "ES" = CL-ES), pela conta ("os da CA-2") ou em bloco ("tudo", "todos", "o resto", "nenhum", "só esses").\n' +
+      'Campos:\n' +
+      '- sobre_a_lista: true se a mensagem é a resposta dele a esta lista. false se é claramente outra coisa (resposta a uma consulta de aluna, reembolso, um comando ao sistema, conversa solta). ' +
+      'Se ele CITOU a mensagem da lista, é true.\n' +
+      '- subir: os números que ele aprovou. "pode", "sobe", "manda", "aprovado", "ok", "bora", "tudo certo" = aprova aquilo a que se refere. "Todos menos X" = todos os outros.\n' +
+      '- fora: os números que NÃO sobem hoje (ele tirou, ou não aprovou). Quando não há dúvida, TODO item da lista está em subir ou em fora; o que ele não citou e não entra em "todos/o resto" vai para fora.\n' +
+      '- segurar_tudo: true se ele disse que hoje não sobe nada ("hoje não", "segura", "deixa pra amanhã", "não sobe nada"). Aí subir = [] e fora = todos.\n' +
+      '- observacoes: o que ele pediu e que NÃO é aprovar/tirar item: mudar orçamento, conta, horário, público, refazer ou testar um criativo de outro jeito, qualquer recado. Em português, fiel ao que ele disse. Isso NÃO muda subir/fora, a não ser que ele também tire o item. Sem nada disso: "".\n' +
+      '- duvida: preencha SÓ quando não dá para saber com segurança quais itens sobem: a referência casa com mais de um item e ele não disse qual, a fala se contradiz, ou é um "sim"/"ok" solto e há outras pendências abertas a que ele pode estar respondendo. ' +
+      'Escreva UMA pergunta curta e objetiva em português, já com as opções (ex.: "O AD38 tem duas versões na lista, a 3 (H1) e a 4 (H3). Sobem as duas ou só uma?"). Com dúvida, subir = [] e fora = []. Sem dúvida: "".\n' +
+      'Regras: nunca invente número que não está na lista. Na dúvida entre aprovar e não aprovar, NÃO aprove: pergunte. ' +
+      'Se já existe uma decisão anterior e ele corrige ("tira o 3", "na verdade sobe o 5 também"), devolva a decisão COMPLETA nova (a anterior com a correção aplicada). ' +
+      'Se ele responde a uma pergunta sua que está no histórico, use o histórico para completar o sentido.',
+    messages: [
+      {
+        role: 'user',
+        content:
+          `Lista de hoje:\n${p.itens.map((i) => `${i.n} — ${[i.oferta, i.nome, i.conta, i.orcamento].filter(Boolean).join(' · ')}`).join('\n')}\n\n` +
+          `Decisão anterior sobre esta lista: ${p.decisaoAnterior ? `sobem ${p.decisaoAnterior.subir.join(', ') || 'nenhum'}; fora ${p.decisaoAnterior.fora.join(', ') || 'nenhum'}` : '(nenhuma ainda)'}\n\n` +
+          `Conversa sobre esta lista até agora:\n${p.historico.map((h) => `${h.de === 'bruno' ? 'Ele' : 'Sistema'}: ${h.texto}`).join('\n') || '(só a lista foi enviada)'}\n\n` +
+          `Outras coisas abertas com ele agora: ${p.outrasPendencias || '(nada)'}\n\n` +
+          `${p.citouALista ? 'Ele respondeu CITANDO a mensagem da lista.\n' : ''}Mensagem dele agora: «${p.texto}»`,
+      },
+    ],
+  })
+  registrarUso('lancador', res, { assuntos: 'lancador', fonte: 'lancador', certeza: '-' }).catch(() => undefined)
+  const bloco = res.content.find((b) => b.type === 'text')
+  if (!bloco || bloco.type !== 'text') return { sobreALista: false, subir: [], fora: [], segurarTudo: false, observacoes: '', duvida: '' }
+  const o = JSON.parse(bloco.text) as { sobre_a_lista: boolean; subir: number[]; fora: number[]; segurar_tudo: boolean; observacoes: string; duvida: string }
+  return { sobreALista: o.sobre_a_lista, subir: o.subir, fora: o.fora, segurarTudo: o.segurar_tudo, observacoes: o.observacoes.trim(), duvida: o.duvida.trim() }
+}
+
 // ─── Comandos do responsável ──────────────────────────────────────────────────────────────
 // Ele escreve em português ("libera o Protocolo para fulana@gmail.com"); aqui só se ENTENDE o pedido.
 // Quem executa (depois do "sim") é lib/whatsapp-agent/comandos.ts.
