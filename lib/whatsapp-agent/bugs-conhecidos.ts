@@ -54,16 +54,16 @@ export const BUGS_CONHECIDOS: BugConhecido[] = [
     sintoma: 'progresso não registra, dia marcado errado, círculo cinza num dia treinado, "HOY" em outro dia',
     status: 'contorno',
     desde: '18/10/2026',
-    resposta: 'O dia conta quando 80% do vídeo é assistido DENTRO do app (pela playlist do YouTube não conta). O calendário semanal vira o dia pelo horário universal (na Colômbia/México/Peru por volta das 19h–21h): treino à noite pode cair no dia seguinte; o progresso em si está certo. Se um dia feito no app não apareceu → ticket com a data.',
-    casos: '#70 #79 #86 #91',
+    resposta: 'O dia conta quando 80% do vídeo é assistido DENTRO do app (pela playlist do YouTube não conta). O calendário semanal vira o dia pelo horário universal (na Colômbia/México/Peru por volta das 19h–21h): treino à noite pode cair no dia seguinte; o progresso em si está certo. Corrigido em 26/11/2026: rever uma aula já concluída tirava o dia original do calendário (o dia "sumia"); desde 26/11 rever aula NÃO move mais o dia, e o total de minutos passou a somar a duração real de cada vídeo (antes eram 20 min fixos por aula). Se um dia feito no app não apareceu → ticket com a data.',
+    casos: '#70 #79 #86 #91 #183 #184',
   },
   {
     id: 'B6',
     sintoma: 'vídeo sem som (Android)',
-    status: 'contorno',
+    status: 'investigando',
     desde: '04/11/2026',
-    resposta: 'Em alguns celulares o vídeo começa MUDO e os botões de volume do aparelho não desmutam o player. Desde 05/11 o app mostra um botão branco "Toca aquí para activar el sonido" quando isso acontece: tocar nele uma vez. Sem o botão: tocar no ícone de som do próprio vídeo, tirar o modo silencioso e subir o volume de mídia (não o de toque). Se seguir sem som → ticket com o modelo do celular.',
-    casos: '#149',
+    resposta: 'Em alguns celulares o vídeo começa MUDO e os botões de volume do aparelho não desmutam o player. Desde 05/11 o app mostra um botão branco "Toca aquí para activar el sonido" quando isso acontece: tocar nele uma vez. Sem o botão: tocar no ícone de som do próprio vídeo, tirar o modo silencioso e subir o volume de mídia (não o de toque). O botão NÃO resolve em todo aparelho (caso de 26/11: Android/Chrome, o volume do player não sobe mesmo com o botão): aí o que funciona hoje é assistir pela playlist do YouTube do desafio (ofereça o link da playlist; pela playlist o dia não é marcado sozinho no app) e abrir ticket com o modelo do celular. Não prometa data de correção.',
+    casos: '#149 #160',
   },
 ]
 
