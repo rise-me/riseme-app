@@ -73,8 +73,8 @@ const PEDIDO_TARDIO_MS = 48 * 3_600_000
 // Mensagem pronta do botão "abrir conversa" (página de obrigado, e-mail): código da venda da Stripe entre parênteses,
 // ou a frase fixa (Hotmart, sem código). Quem só apertou o botão recebe o acesso e nada mais (sem resposta do agente).
 const CODIGO_BOTAO = /\((?:kod|c[oó]digo|code):\s*([A-Za-z0-9]{6,12})\)/i
-const FRASE_BOTAO = /acabo de unirme al reto riseme|w[łl]a[śs]nie do[łl][ąa]czy[łl]am do wyzwania riseme/i
-const FALA_DE_ACESSO = /acces|dost[eę]p|contrase|has[łl]|password|entrar|ingres|login|zalog|wej[śs][ćc]/i
+const FRASE_BOTAO = /acabo de unirme al reto riseme|w[łl]a[śs]nie do[łl][ąa]czy[łl]am do wyzwania riseme|net aangemeld voor de riseme challenge/i
+const FALA_DE_ACESSO = /acces|dost[eę]p|contrase|has[łl]|password|entrar|ingres|login|zalog|wej[śs][ćc]|inlog|wachtwoord|toegang/i
 
 /**
  * Chamado a cada mensagem recebida de aluna, antes do agente. Libera o que estava em espera para ela. Devolve true quando
