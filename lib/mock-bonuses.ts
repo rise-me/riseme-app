@@ -27,14 +27,15 @@ export interface MockBonus {
 export const mockBonuses: MockBonus[] = [
   // ES de propósito NÃO tem linha-suporte: a Central de Ajuda já leva ao WhatsApp
   // (decisão Bruno 2026-07-14). rastreador-progresso ES entra quando o PDF chegar.
-  { id: 'linha-suporte', emoji: '💬', pages: { tr: 3, pl: 3, cs: 3, it: 3 } },
-  { id: 'falsos-saudaveis', emoji: '🎭', pages: { tr: 7, es: 7, pl: 7, cs: 7, it: 7 } },
-  { id: 'anti-inchaco', emoji: '💧', pages: { tr: 11, es: 11, pl: 11, cs: 11, it: 11 } },
-  { id: 'vinagre-maca', emoji: '🍎', pages: { tr: 7, es: 9, pl: 7, cs: 7, it: 7 } },
-  { id: 'tres-botoes', emoji: '🔑', pages: { tr: 8, es: 8, pl: 8, cs: 8, it: 8 } },
-  { id: 'frutas-inocentes', emoji: '🍇', pages: { tr: 6, es: 6, pl: 6, cs: 6, it: 6 } },
-  { id: 'depois-28-dias', emoji: '🎯', pages: { tr: 7, es: 7, pl: 7, cs: 7, it: 7 } },
-  { id: 'rastreador-progresso', emoji: '📊', pages: { tr: 7, pl: 7, cs: 7, it: 7 } },
+  // EN = inglês GLOBAL (Bruno 26/11: no app sempre global; o indiano fica no funil da CL-IN). Fonte: CL-IN/bonus/en-global.
+  { id: 'linha-suporte', emoji: '💬', pages: { en: 3, tr: 3, pl: 3, cs: 3, it: 3 } },
+  { id: 'falsos-saudaveis', emoji: '🎭', pages: { en: 7, tr: 7, es: 7, pl: 7, cs: 7, it: 7 } },
+  { id: 'anti-inchaco', emoji: '💧', pages: { en: 11, tr: 11, es: 11, pl: 11, cs: 11, it: 11 } },
+  { id: 'vinagre-maca', emoji: '🍎', pages: { en: 7, tr: 7, es: 9, pl: 7, cs: 7, it: 7 } },
+  { id: 'tres-botoes', emoji: '🔑', pages: { en: 8, tr: 8, es: 8, pl: 8, cs: 8, it: 8 } },
+  { id: 'frutas-inocentes', emoji: '🍇', pages: { en: 6, tr: 6, es: 6, pl: 6, cs: 6, it: 6 } },
+  { id: 'depois-28-dias', emoji: '🎯', pages: { en: 7, tr: 7, es: 7, pl: 7, cs: 7, it: 7 } },
+  { id: 'rastreador-progresso', emoji: '📊', pages: { en: 7, tr: 7, pl: 7, cs: 7, it: 7 } },
   // Upsell vendido na Perfect Pay (ebook do sistema de chás de 28 dias)
   { id: 'protocolo-metabolico', emoji: '🍵', access: 'purchase', pages: { tr: 31, es: 31, pl: 31, cs: 31, it: 31 } },
 ]
