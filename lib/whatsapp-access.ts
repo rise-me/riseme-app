@@ -290,6 +290,45 @@ const COPY: Record<AppLocale, AccessCopy> = {
       '',
       'If you need help, just write to me. I am here so you have the best experience. 😄 ❤️',
     ].join('\n'),
+  nl: ({ email, code, link, homeUrl }) =>
+    [
+      'Welkom bij de RiseMe™️ Calisthenics Challenge! 🎉',
+      '',
+      'Super dat je deze stap zet! Ik weet zeker dat deze 28 dagen veel voor je gaan doen. 😍',
+      '',
+      'Je toegang tot de app staat klaar, hier zijn je inloggegevens 👇',
+      '',
+      `📧 E-mail: ${email}`,
+      `🔑 Wachtwoord: ${code}`,
+      '',
+      'Bewaar dit wachtwoord goed: daarmee log je in de app. 🔒',
+      '',
+      `Tik hier om meteen in te loggen: 👉 ${link}`,
+      '',
+      '(Als je erop tikt, opent de app vanzelf en hoef je niet eens je wachtwoord in te typen – je challenge staat al voor je klaar!) 💪',
+      '',
+      '⚠️ Blijft het scherm wit of kom je weer op de startpagina? Open de link dan buiten WhatsApp: op je iPhone in Safari, op Android in Chrome.',
+      '',
+      '📌 Hoe log je de volgende keer in?',
+      `👉 Ga naar ${homeUrl} en log in met je e-mailadres en het wachtwoord hierboven.`,
+      'Liever een eigen wachtwoord? Dat kun je in de app aanpassen.',
+      'Weet je je wachtwoord niet meer? Tik op het inlogscherm op "Wachtwoord vergeten?".',
+      '',
+      '📱 Optioneel: zet de app op je telefoon',
+      'RiseMe™️ werkt op je telefoon als een echte app 👇',
+      '',
+      `📲 iPhone: open ${homeUrl} in SAFARI → knop "Deel" (vierkantje met pijltje omhoog; soms eerst via •••) → "Zet op beginscherm" → "Voeg toe"`,
+      '⚠️ De juiste optie is "Zet op beginscherm" (NIET "Voeg toe aan favorieten")',
+      '',
+      `📲 Android: open ${homeUrl} in CHROME → menu ⋮ → "App installeren" (of "Toevoegen aan startscherm") → "Installeren"`,
+      '',
+      '✅ Het RiseMe-icoontje verschijnt op je beginscherm. Zie je het niet? Veeg naar de laatste schermen van je telefoon, soms staat het helemaal achteraan. 😉',
+      '',
+      'Zo heb je je challenge altijd binnen handbereik! 🚀',
+      '(Lukt het niet? Geen probleem: de app werkt ook prima in je browser.)',
+      '',
+      'Hulp nodig? Stuur me gewoon een berichtje, ik help je graag. 😄 ❤️',
+    ].join('\n'),
 }
 
 // Grupo 'Comunidad RiseMe World' (do número do suporte; só a equipe posta): enquetes e avisos da cocriação do app (Bruno, 24/10–05/11/2026;
@@ -426,6 +465,24 @@ const SUPPORT: Record<AppLocale, SupportCopy> = {
       '',
       'See you in the challenge! 💪',
     ].join('\n'),
+  nl: ({ playlist }) =>
+    [
+      '💛 Nog één belangrijk berichtje:',
+      '',
+      'Heb je alle stappen gevolgd en lukt het nog steeds niet om in de app te komen? Stuur me een bericht, dan helpt ons supportteam je verder. 😉',
+      ...(playlist
+        ? [
+            '',
+            'Zo mis je in de tussentijd geen enkele dag van de challenge. Je kunt de lessen bekijken in een speciale YouTube-afspeellijst:',
+            '',
+            `👉 ${playlist}`,
+            '',
+            '🙏 Deze link is alleen voor deelneemsters van de challenge, deel hem alsjeblieft niet met anderen.',
+          ]
+        : []),
+      '',
+      'Veel plezier met je eerste training! 💪',
+    ].join('\n'),
 }
 
 export async function sendWhatsAppAccess(params: {
@@ -494,6 +551,7 @@ const NOME_DO_DESAFIO: Record<string, Partial<Record<AppLocale, string>>> = {
 const COMO_REEMBOLSAR: Partial<Record<string, (homeUrl: string) => string>> & { en: (homeUrl: string) => string } = {
   pl: (h) => `Gdybyś kiedyś chciała zwrot pieniędzy, wystarczy napisać tutaj albo wejść na: ${h}/refund`,
   en: (h) => `If you ever want a refund, just write to us here or go to: ${h}/refund`,
+  nl: (h) => `Mocht je je geld terug willen, stuur me dan gewoon hier een berichtje of ga naar: ${h}/refund`,
 }
 
 /**
@@ -551,6 +609,7 @@ const ABERTURA_REENVIO: Record<string, string> = {
   cs: 'Ahoj! 💛 Posíláme ti sem znovu přístup do RiseMe. *Správné heslo je to v této zprávě* a je pořád stejné: nemění se. Pokud ti telefon nabízí jiné uložené heslo, smaž ho a napiš tohle, nebo prostě klikni na odkaz níže a jsi hned uvnitř.',
   tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. *Doğru şifre bu mesajdaki şifredir* ve hep aynıdır: değişmez. Telefonun kayıtlı başka bir şifre önerirse onu sil ve bunu yaz ya da aşağıdaki bağlantıya dokun, doğrudan girersin.',
   en: 'Hi! 💛 We are resending your RiseMe access here. *The correct password is the one in this message*, and it is always the same: it does not change. If your phone suggests another saved password, delete it and type this one, or just tap the link below and you are in.',
+  nl: 'Hoi! 💛 Hier zijn opnieuw je inloggegevens voor RiseMe. *Het juiste wachtwoord is dat in dit bericht*, en het is altijd hetzelfde: het verandert niet. Stelt je telefoon een ander, opgeslagen wachtwoord voor? Verwijder dat en typ dit wachtwoord in, of tik gewoon op de link hieronder, dan ben je meteen binnen.',
   'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. *A senha certa é a desta mensagem*, e é sempre a mesma: não muda. Se o celular sugerir outra senha salva, apague e digite esta, ou simplesmente toque no link abaixo e você entra direto.',
 }
 
