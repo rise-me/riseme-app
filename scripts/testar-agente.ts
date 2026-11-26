@@ -43,9 +43,14 @@ Compras (o que ela pagou, de onde):
 Pagamentos na Stripe (fato, consultado agora; NUNCA pergunte o meio de pagamento):
 - ${D4} · CL-PL · 87.00 PLN · pagou com cartão mastercard final 4242`
 const achadaPL: PerfilAluna = { nome: 'Ewa Wiśniewska', idioma: 'pl', compradaEm: `${D4}T14:00:00Z`, ultimoLogin: null, diasFeitos: 0, ultimoTreino: null, liberados: ['Kalistenika'], confirmadaPorTelefone: true, cartao: NOTA_ACHADA }
+const alunaIN: PerfilAluna = { nome: 'Priya Sharma', idioma: 'en', compradaEm: `${D4}T14:00:00Z`, ultimoLogin: `${D4}T15:00:00Z`, diasFeitos: 1, ultimoTreino: `${D2}T12:00:00Z`, liberados: ['Calisthenics at Home'], confirmadaPorTelefone: true, cartao: `CARTÃO DA ALUNA (dados reais do sistema, use como fato):
+Compras (o que ela pagou, de onde):
+- ${D4} (há 4 dias) · The RiseMe Calisthenics Challenge (Índia, ₹499) · 499 INR · Stripe · pi_3TesteIndia00000000001
+Pagamentos na Stripe (fato, consultado agora; NUNCA pergunte o meio de pagamento):
+- ${D4} · CL-IN · 499.00 INR · pagou com UPI · REEMBOLSO 499.00 INR CONCLUÍDO pela Stripe em ${D2.slice(8, 10)}/${D2.slice(5, 7)}, 10:15; prazo para aparecer na conta dela: até 7 dias úteis (o banco credita depois; NÃO prometa "na hora")` }
 const comCompraPL: PerfilAluna = { ...achadaPL, cartao: NOTA_ACHADA.slice(NOTA_ACHADA.indexOf('CARTÃO DA ALUNA')) }
 
-export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; hotmartEmail?: string; emailSemConta?: string; canal?: 'email'; antes?: { a: 'student' | 'agent'; t: string }[]; idiomaPadrao?: string }[] = [
+export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; hotmartEmail?: string; emailSemConta?: string; canal?: 'email'; phone?: string; antes?: { a: 'student' | 'agent'; t: string }[]; idiomaPadrao?: string }[] = [
   { nome: 'lesão: manguito rotador (caso real 01/11)', perfil: base, msg: 'Buenas noche una pregunta tengo mal el hombro derecho puedo hacer los ejercicios normales. Tengo problemas con el manguito rotador y me han hecho infiltración dos veces, hay días que no me duele pero hay días que siento mucho dolor' },
   { nome: 'PL: cartão trocado, mandar número novo? (caso real 31/10)', perfil: { ...base, nome: 'Maria', idioma: 'pl' }, msg: 'Dzień dobry, zmieniłam kartę, bo nie chciałam zostać oszukana. Prześlę numer nowej karty?' },
   { nome: 'c5: pagou por Oxxo há 1 h e não chegou → prazo de 1–3 dias úteis, sem transferir', perfil: null, msg: 'Hola, pagué el desafío en el Oxxo hace una hora y no me llega nada, ya me están cobrando?' },
@@ -113,6 +118,10 @@ export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hot
   { nome: 'E-MAIL 2º PEDIDO: compra no cartão → pi_ em reembolso_transacoes, nunca „zgłaszam do realizacji” sem o código', perfil: comCompraPL, canal: 'email', antes: [{ a: 'student', t: 'Chcę zwrot pieniędzy za: Kalistenika.' }, { a: 'agent', t: 'To płatność jednorazowa, bez subskrypcji. Mogę pomóc z logowaniem? Jeśli wolisz zwrot, wystarczy odpisać „chcę zwrot”, a zwrócimy od razu.' }], msg: 'OSTATECZNE WEZWANIE DO ZWROTU. Chcę zwrot.' },
   { nome: 'E-MAIL SEM CONTA: já deu e-mail e comprovante, pede o dinheiro → TRANSFERE (consulta), sem promessa solta', perfil: null, canal: 'email', idiomaPadrao: 'pl', antes: [{ a: 'student', t: 'Nie dostałam dostępu. Kupiłam na adres jolanta.testowa@wp.pl, telefon 600 100 200.' }, { a: 'agent', t: 'Dziękuję! Podaj proszę e-mail z zakupu i telefon z płatności.' }], msg: 'Podałam już e-mail i telefon i wysłałam potwierdzenie przelewu. Proszę o zwrot pieniędzy.' },
   { nome: 'E-MAIL SEM CONTA, 1ª mensagem → pede e-mail da compra E telefone do pagamento, sem transferir', perfil: null, canal: 'email', idiomaPadrao: 'pl', msg: 'Dzień dobry, zapłaciłam wczoraj i nie dostałam dostępu.' },
+  // 25/11/2026 — CL-IN (Índia, inglês, Stripe em INR com UPI)
+  { nome: 'IN: reembolso UPI concluído e não entrou → até 7 dias úteis, sem BLIK nem "instantly"', perfil: alunaIN, phone: '919812345678', msg: 'Hi, you said my refund was done but I did not get the money in my bank yet. When will it come?' },
+  { nome: 'IN sem conta: pagou ₹499 por UPI e não recebeu acesso → inglês, sem Hotmart, pede e-mail e telefone, transfere', perfil: null, phone: '919812345678', msg: 'Hello, I paid 499 rupees by Google Pay UPI yesterday but I did not receive any access. Please help.' },
+  { nome: 'IN sem conta: hinglish → responde em inglês simples e pede o e-mail da compra', perfil: null, phone: '919812345678', msg: 'Hi, maine kal payment kiya tha, login nahi ho raha hai. Kya karu?' },
 ]
 
 async function main() {
@@ -120,6 +129,7 @@ async function main() {
   for (const c of CASOS.filter((c) => !filtro || c.nome.includes(filtro))) {
   const t = Date.now()
   const d = await decidirResposta({
+    phone: c.phone,
     perfil: c.perfil,
     conversa: [...(c.antes ?? []).map((m, i) => ({ autor: m.a, texto: m.t, em: `2026-10-05T11:${String(10 + i).padStart(2, '0')}:00Z` })), { autor: 'student' as const, texto: c.msg, em: '2026-10-05T12:00:00Z' }],
     agora: '2026-10-05T12:00:10Z',

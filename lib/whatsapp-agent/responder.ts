@@ -597,7 +597,7 @@ export async function decidirResposta(params: {
               (aulas ? `${aulas}\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
               (params.hotmart ? `${params.hotmart}\n\n` : '') +
-              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília; NUNCA prometa outro horário): use esta frase no idioma dela: "${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora))}"\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
+              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília; NUNCA prometa outro horário): use esta frase no idioma dela: "${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}"\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
               (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
               'Escreva a próxima mensagem para a aluna (respondendo o que ela mandou por último).',
@@ -665,8 +665,8 @@ export async function decidirResposta(params: {
   out.resposta = trava.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
-  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
-    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora))}`
+  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|few hours|within a day|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
+    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}`
   }
 
   const assuntos = `${[...cls.assuntos].join(',')} (${cls.fonte})`
@@ -695,6 +695,8 @@ const PRAZO: Record<string, [string, string]> = {
   cs: ['Odpovím ti tady během několika hodin.', 'Odpovím ti tady do jednoho dne.'],
   tr: ['Birkaç saat içinde buradan yanıt vereceğim.', 'Bir gün içinde buradan yanıt vereceğim.'],
   en: ['I will reply here today by 8 pm.', 'I will reply here tomorrow by 8 pm.'],
+  // Índia (CL-IN, 25/11/2026): 20h de Brasília = 04h30 em Délhi; como na Europa, sem hora.
+  'en-IN': ['I will reply here within the next few hours.', 'I will reply here within a day.'],
   ro: ['Îți răspund aici în câteva ore.', 'Îți răspund aici în cel mult o zi.'],
   'pt-BR': ['Te respondo por aqui hoje até as 20h.', 'Te respondo por aqui amanhã até as 20h.'],
 }
@@ -702,11 +704,12 @@ const PRAZO: Record<string, [string, string]> = {
 export function idiomaPeloTelefone(phone?: string): string {
   const t = (phone ?? '').replace(/\D/g, '')
   if (!t || (phone ?? '').includes('@lid')) return 'es'
-  const ddi: [string, string][] = [['48', 'pl'], ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['1', 'es']]
+  const ddi: [string, string][] = [['48', 'pl'], ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['91', 'en'], ['1', 'es']]
   return ddi.find(([d]) => t.startsWith(d))?.[1] ?? 'es'
 }
-export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha'): string {
-  return (PRAZO[idioma] ?? PRAZO.es)[prazo === 'hoje' ? 0 : 1]
+export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha', phone?: string): string {
+  const india = idioma.startsWith('en') && (phone ?? '').replace(/\D/g, '').startsWith('91') && !(phone ?? '').includes('@lid')
+  return (PRAZO[india ? 'en-IN' : idioma] ?? PRAZO.es)[prazo === 'hoje' ? 0 : 1]
 }
 
 // ─── Registro de uso (tokens e custo por resposta) ──────────────────────────────────────────

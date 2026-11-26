@@ -9,7 +9,9 @@ import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
 import { conviteHotmartDela, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
 import { contaPelaCompraHotmart, reenviarAcesso, reenvioRecente, trocarEmail, emailsDaConta, textoVamosVer, textoOlvidaste, KIND_EMAIL_TROCADO } from '@/lib/whatsapp-agent/acesso'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
-import { decidirResposta, redigirRespostaAprovada, interpretarRespostaResponsavel, type Consulta } from '@/lib/whatsapp-agent/responder'
+import { decidirResposta, redigirRespostaAprovada, interpretarRespostaResponsavel, idiomaPeloTelefone, type Consulta } from '@/lib/whatsapp-agent/responder'
+// Reembolso da Stripe sem perfil: idioma pelo DDI (+91 → inglês, CL-IN 25/11/2026); DDI desconhecido ou LID segue polonês (era o padrão).
+const idiomaSemPerfil = (phone: string) => { const i = idiomaPeloTelefone(phone); return i === 'es' ? 'pl' : i }
 import {
   abrirChat,
   aprendizadosAtivos,
@@ -235,7 +237,7 @@ async function responderConsulta(texto: string, citada: string | undefined) {
         return
       }
       // O que ela ouve agora é o mesmo texto de quando o bot reembolsa; a confirmação "Gotowe" sai sozinha quando a Stripe concluir.
-      const aviso = textoReembolsoStripe(perfil?.idioma ?? 'pl', perfil?.nome, true)
+      const aviso = textoReembolsoStripe(perfil?.idioma ?? idiomaSemPerfil(consulta.phone), perfil?.nome, true)
       const envio = await sendZapiText({ phone: consulta.phone, message: aviso, delayTyping: 2 })
       if (envio.ok) await registrarMensagem({ phone: consulta.phone, direction: 'out', author: 'agent', body: aviso, waMessageId: envio.messageId })
       await registrarPedidoReembolso({ phone: consulta.phone, canal: 'whatsapp', categoria: 'aprovado_pelo_responsavel', devolveu: pis, motivo: orientacao.slice(0, 200) }).catch(() => {})
@@ -505,7 +507,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     await registrarPedidoReembolso({ phone, canal: 'whatsapp', categoria: decisao.reembolsoCategoria, devolveu: (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_')), motivo: decisao.reembolsoMotivo }).catch((err) => console.error('[reembolso-pedido] falhou:', err))
   if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))) {
     const pis = decisao.reembolsoTransacoes.filter((t) => t.startsWith('pi_'))
-    const idioma = perfil?.idioma ?? 'pl'
+    const idioma = perfil?.idioma ?? idiomaSemPerfil(phone)
     const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
     const falhas = res.map((r, i) => (r.ok ? null : `${pis[i]}: ${r.erro}`)).filter(Boolean)
     decisao = { ...decisao, texto: textoReembolsoStripe(idioma, perfil?.nome, falhas.length === 0), reembolsoTransacoes: decisao.reembolsoTransacoes.filter((t) => !t.startsWith('pi_')) }
