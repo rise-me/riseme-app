@@ -1,0 +1,236 @@
+{
+ "1": {
+  "key": "objetivo",
+  "pergunta": "What is your main goal with calisthenics?",
+  "opcoes": {
+   "perder_peso": "Lose weight",
+   "ganar_fuerza": "Build muscle strength and tone my body",
+   "ganar_flexibilidad": "Become more flexible",
+   "eliminar_tensiones": "Get rid of tension and worries",
+   "controlar_azucar": "Control my blood sugar to improve my health and prevent and/or manage type 2 diabetes"
+  }
+ },
+ "3": {
+  "key": "tipo_cuerpo_actual",
+  "pergunta": "Which of these best describes your body?",
+  "opcoes": {
+   "delgada": "Slim",
+   "media": "Average",
+   "grande": "Heavy",
+   "con_sobrepeso": "Overweight"
+  }
+ },
+ "4": {
+  "key": "pais",
+  "pergunta": "Which country do you live in?",
+  "opcoes": {
+   "india": "India",
+   "otro": "Other country"
+  }
+ },
+ "6": {
+  "key": "rango_edad",
+  "pergunta": "What is your age?",
+  "opcoes": {
+   "edad_18_29": "18 - 29 years",
+   "edad_30_39": "30 - 39 years",
+   "edad_40_49": "40 - 49 years",
+   "edad_mas_50": "50 years or more"
+  }
+ },
+ "7": {
+  "key": "experiencia_calistenia",
+  "pergunta": "Have you tried calisthenics before?",
+  "opcoes": {
+   "si_algunas_veces": "Yes, I’ve done it a few times.",
+   "nunca_lo_intente": "No, I’ve never tried it."
+  }
+ },
+ "9": {
+  "key": "experiencia_cuerpo",
+  "pergunta": "Which of these sounds most like your body?",
+  "opcoes": {
+   "cuesta_ganar_peso": "I find it hard to gain weight or muscle",
+   "gano_pierdo_facil": "I gain and lose weight easily",
+   "gano_rapido_pierdo_lento": "I gain weight fast, but lose it slowly",
+   "ninguna_de_estas": "None of these"
+  }
+ },
+ "10": {
+  "key": "ultima_satisfaccion_cuerpo",
+  "pergunta": "When was the last time you felt happy with your body?",
+  "opcoes": {
+   "menos_1_ano": "Less than 1 year ago",
+   "entre_1_2_anos": "Between 1 and 2 years ago",
+   "mas_3_anos": "More than 3 years ago",
+   "nunca": "Never"
+  }
+ },
+ "11": {
+  "key": "areas_trabajar",
+  "pergunta": "Choose the main areas you want to work on:",
+  "opcoes": {
+   "vientre": "Tummy",
+   "gluteos": "Glutes",
+   "piernas": "Legs",
+   "pecho": "Chest",
+   "todo": "Full body"
+  }
+ },
+ "12": {
+  "key": "tipo_cuerpo_deseado",
+  "pergunta": "Choose the body you want to achieve!",
+  "opcoes": {
+   "delgada": "Slim",
+   "tonificada": "Toned",
+   "con_curvas": "Curvy",
+   "promedio": "Average"
+  }
+ },
+ "13": {
+  "key": "problemas_fisicos",
+  "pergunta": "Do you have trouble with any of these?",
+  "opcoes": {
+   "espalda_sensible": "Sensitive back",
+   "rodillas_sensibles": "Sensitive knees",
+   "ninguna_de_las_anteriores": "None of the above"
+  }
+ },
+ "14": {
+  "key": "frecuencia_ejercicio",
+  "pergunta": "How often do you exercise?",
+  "opcoes": {
+   "casi_todos_los_dias": "Almost every day",
+   "varias_veces_semana": "A few times a week",
+   "algunas_veces_mes": "A few times a month",
+   "nunca": "Never"
+  }
+ },
+ "15": {
+  "key": "consumo_agua",
+  "pergunta": "How much water do you drink in a day?",
+  "opcoes": {
+   "solo_cafe_o_te": "I only drink chai or coffee",
+   "dos_vasos": "Two glasses",
+   "dos_a_seis_vasos": "Two to six glasses",
+   "mas_de_seis_vasos": "More than six glasses"
+  }
+ },
+ "17": {
+  "key": "falta_aire_escaleras",
+  "pergunta": "Do you get breathless climbing stairs?",
+  "opcoes": {
+   "sin_aliento_no_hablo": "I get so breathless that I can’t talk",
+   "poco_aire_puedo_hablar": "I get a little breathless, but I can still talk",
+   "bien_un_tramo": "I’m fine after one flight of stairs",
+   "varios_tramos": "I can manage a few flights of stairs"
+  }
+ },
+ "18": {
+  "key": "frecuencia_caminar",
+  "pergunta": "How often do you go for a walk?",
+  "opcoes": {
+   "casi_todos_los_dias": "Almost every day",
+   "varias_veces_semana": "A few times a week",
+   "algunas_veces_mes": "A few times a month",
+   "nunca": "Never"
+  }
+ },
+ "19": {
+  "key": "nivel_energia",
+  "pergunta": "How is your energy during the day?",
+  "opcoes": {
+   "bajos_cansada_todo_dia": "Low, I feel tired the whole day",
+   "caida_despues_almuerzo": "My energy drops after lunch",
+   "me_arrastro_entre_comidas": "I drag myself from one meal to the next",
+   "altos_y_estables": "High and steady"
+  }
+ },
+ "21": {
+  "key": "horas_sueno",
+  "pergunta": "How much do you usually sleep?",
+  "opcoes": {
+   "menos_5_horas": "Less than 5 hours",
+   "de_5_a_6_horas": "5-6 hours",
+   "de_7_a_8_horas": "7-8 hours",
+   "mas_8_horas": "More than 8 hours"
+  }
+ },
+ "22": {
+  "key": "malos_habitos",
+  "pergunta": "Do you have any of these bad habits?",
+  "opcoes": {
+   "comer_por_emocion": "Emotional eating or eating out of boredom",
+   "comer_en_exceso": "Overeating",
+   "bocadillos_de_noche": "Late-night snacking",
+   "saltar_comidas": "Skipping meals too often",
+   "ninguna_de_las_anteriores": "None of the above"
+  }
+ },
+ "23": {
+  "key": "eventos_aumento_peso",
+  "pergunta": "Have any of these life events made you gain weight in the last few years?",
+  "opcoes": {
+   "presion_laboral": "Pressure at work",
+   "vida_familiar_ocupada": "Busy family life",
+   "divorcio_o_ruptura": "Divorce or break-up",
+   "metabolismo_lento": "Slower metabolism with age",
+   "menopausia": "Menopause",
+   "embarazo_posparto": "Changes after pregnancy or delivery",
+   "desafios_financieros": "Financial stress",
+   "otros_eventos_estresantes": "Other stressful events",
+   "pandemia_covid": "Covid-19 pandemic",
+   "ninguno_de_los_anteriores": "None of the above"
+  }
+ },
+ "24": {
+  "key": "razon_principal",
+  "pergunta": "What is your main reason for getting in shape?",
+  "opcoes": {
+   "mas_confianza_cuerpo": "To feel more confident in my body",
+   "mas_saludable_energia": "To feel healthier and more energetic",
+   "ropa_quede_mejor": "To fit better into my clothes",
+   "recuperar_forma_posparto": "To get my shape back after having a baby",
+   "otra": "Other"
+  }
+ },
+ "25": {
+  "key": "altura",
+  "pergunta": "What is your height?",
+  "opcoes": {}
+ },
+ "26": {
+  "key": "peso_actual",
+  "pergunta": "What is your current weight?",
+  "opcoes": {}
+ },
+ "27": {
+  "key": "peso_objetivo",
+  "pergunta": "Got it! And what is your goal weight?",
+  "opcoes": {}
+ },
+ "28": {
+  "key": "edad",
+  "pergunta": "What is your age?",
+  "opcoes": {}
+ },
+ "30": {
+  "key": "evento_importante",
+  "pergunta": "Do you have an important event coming up?",
+  "opcoes": {
+   "vacaciones": "Holiday trip",
+   "boda": "Wedding",
+   "reunion": "Family get-together",
+   "cumpleanos": "Birthday",
+   "dia_festivo": "Festival (Diwali, Eid, Christmas…)",
+   "evento_deportivo": "Sports event",
+   "otro": "Other",
+   "ningun_evento": "No event coming up soon"
+  }
+ },
+ "33": {
+  "key": "nombre",
+  "pergunta": "What is your name?",
+  "opcoes": {}
+ }
+}

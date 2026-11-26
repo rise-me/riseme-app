@@ -34,6 +34,10 @@ const COMMON = {
     fallback: 'Pokud tlačítko nefunguje, zkopíruj tento odkaz a vlož ho do prohlížeče:',
     signoff: 'S láskou,<br />Tým RiseMe',
   },
+  en: {
+    fallback: 'If the button does not work, copy and paste this link into your browser:',
+    signoff: 'With love,<br />The RiseMe team',
+  },
   it: {
     fallback: "Se il pulsante non funziona, copia questo link e incollalo nel browser:",
     signoff: 'Con affetto,<br />Il team RiseMe',
@@ -59,6 +63,13 @@ const TEXT = {
       body: 'Satın alman onaylandı ve hesabın hazır. Tek bir adım kaldı: uygulamaya girmek için şifreni belirle.',
       button: 'Şifremi belirle',
       note: 'Soruların mı var? Bu e-postayı yanıtla, sana yardımcı olalım.',
+    },
+    en: {
+      title: 'Welcome to RiseMe',
+      h1: 'Welcome to RiseMe!',
+      body: 'Your purchase is confirmed and your account is ready. Just one step left: set your password to get into the app.',
+      button: 'Set my password',
+      note: 'Any questions? Just reply to this e-mail and we will help.',
     },
     pl: {
       title: 'Witaj w RiseMe',
@@ -98,6 +109,14 @@ const TEXT = {
       button: 'Şifremi sıfırla',
       note: 'Bu talebi sen yapmadıysan bu e-postayı görmezden gelebilirsin. Mevcut şifren çalışmaya devam edecek.',
     },
+    en: {
+      subject: 'New password', // assunto curto: o completo estoura os 255 do Supabase
+      title: 'Reset your password',
+      h1: 'Reset your password',
+      body: 'We received a request to reset your password. Tap the button below to create a new one.',
+      button: 'Reset my password',
+      note: 'If you did not ask for this, you can ignore this e-mail. Your current password will keep working.',
+    },
     pl: {
       title: 'Zresetuj hasło',
       h1: 'Zresetuj hasło',
@@ -136,6 +155,14 @@ const TEXT = {
       button: 'Hesabımı onayla',
       note: 'Bu hesabı sen oluşturmadıysan bu e-postayı görmezden gelebilirsin.',
     },
+    en: {
+      subject: 'Confirm', // curto: os 255 do Supabase
+      title: 'Confirm your account',
+      h1: 'Confirm your account',
+      body: 'Welcome to RiseMe! Confirm your e-mail address by tapping the button below and start your first challenge.',
+      button: 'Confirm my account',
+      note: 'If you did not create this account, you can ignore this e-mail.',
+    },
     pl: {
       title: 'Potwierdź swoje konto',
       h1: 'Potwierdź swoje konto',
@@ -173,6 +200,14 @@ const TEXT = {
       body: `Hesabının e-postasını ${NEW_EMAIL} olarak değiştirmek istedin. Aşağıdaki butona tıklayarak bu değişikliği onayla.`,
       button: 'Yeni e-postayı onayla',
       note: 'Bu değişikliği sen istemediysen bu e-postayı görmezden gel ve şifreni değiştirmeyi düşün.',
+    },
+    en: {
+      subject: null, // o assunto do email-change já estava no limite de 255: en usa o assunto padrão (es); o corpo sai em inglês
+      title: 'Confirm your new e-mail',
+      h1: 'Confirm your new e-mail address',
+      body: `You asked to change your account e-mail to ${NEW_EMAIL}. Confirm this change by tapping the button below.`,
+      button: 'Confirm new e-mail',
+      note: 'If you did not ask for this change, ignore this e-mail and consider changing your password.',
     },
     pl: {
       title: 'Potwierdź nowy adres e-mail',
@@ -243,8 +278,9 @@ function block(t, c, link) {
 
 // Encadeia {{ if eq $l "tr" }}…{{ else if eq $l "pl" }}…{{ else }}<default>{{ end }}.
 // $l vem de `or .Data.locale "es"`: conta sem locale não quebra a comparação.
-function byLocale(render) {
-  const others = Object.keys(COMMON).filter((l) => l !== DEFAULT_LOCALE)
+// pular = idiomas que caem no padrão (usado no assunto quando o idioma não cabe nos 255 do Supabase).
+function byLocale(render, pular = []) {
+  const others = Object.keys(COMMON).filter((l) => l !== DEFAULT_LOCALE && !pular.includes(l))
   let out = ''
   others.forEach((l, i) => {
     out += `{{ ${i === 0 ? 'if' : 'else if'} eq $l "${l}" }}\n${render(l)}\n`
@@ -300,7 +336,7 @@ for (const [name, spec] of Object.entries(TEXT)) {
   // O assunto é um campo à parte no painel ("Subject heading") — mesma lógica, numa linha
   // Limite do Supabase: assunto <= 255 caracteres (o "it" estourou o email-change em 25/10/2026) → `subject` curto
   // por idioma quando precisar, e as tags sem espaço interno ({{if …}} vale igual a {{ if … }}).
-  const subject = byLocale((l) => spec[l].subject ?? spec[l].title).replace(/\n/g, '').replace(/\{\{ /g, '{{').replace(/ \}\}/g, '}}')
+  const subject = byLocale((l) => spec[l].subject ?? spec[l].title, Object.keys(COMMON).filter((l) => spec[l].subject === null)).replace(/\n/g, '').replace(/\{\{ /g, '{{').replace(/ \}\}/g, '}}')
   const assunto = `{{$l := or .Data.locale "${DEFAULT_LOCALE}"}}${subject}${EMOJI_ASSUNTO[name] ?? ''}`
   if ([...assunto].length > 255) throw new Error(`${name}: assunto com ${[...assunto].length} caracteres (> 255 do Supabase)`)
   console.log(`ok ${name}.html\n   assunto: ${assunto}`)
