@@ -9,6 +9,6 @@ export const linkWhatsAppSuporte = (texto: string) => `https://wa.me/${SUPPORT_W
 // 15/11/2026 ~16h35 BRT: restrição caiu, Z-API reconectada, 1º clique real no botão conferido → false.
 export const WHATSAPP_FORA_DO_AR = false
 // en = help@ (Bruno 25/11, CL-IN). Qualquer endereço @riseme.app chega ao bot (conferido: acesso@ e noreply@ já receberam).
-export const EMAIL_SUPORTE: Record<string, string> = { pl: 'pomoc@riseme.app', es: 'ayuda@riseme.app', en: 'help@riseme.app' }
+export const EMAIL_SUPORTE: Record<string, string> = { pl: 'pomoc@riseme.app', es: 'ayuda@riseme.app', en: 'help@riseme.app', nl: 'help@riseme.app' } // nl: 'help' também é holandês
 export const emailSuporte = (idioma?: string | null) => EMAIL_SUPORTE[idioma ?? ''] ?? 'ayuda@riseme.app'
 export const linkEmailSuporte = (idioma: string | null | undefined, assunto: string) => `mailto:${emailSuporte(idioma)}?subject=${encodeURIComponent(assunto)}`

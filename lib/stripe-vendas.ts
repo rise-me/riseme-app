@@ -87,6 +87,7 @@ const SELO_EMAIL: Record<string, string> = {
 // WhatsApp fora do ar (lib/suporte.ts WHATSAPP_FORA_DO_AR): a nota avisa e manda responder o próprio e-mail.
 const NOTA_EMAIL_SEM_WHATS: Record<string, (url: string) => string> = {
   pl: (url) => `Ważne: nasz WhatsApp chwilowo nie działa, dlatego dostęp wysyłamy teraz tylko e-mailem. Masz pytanie? Odpowiedz na tę wiadomość albo napisz na ${emailSuporte('pl')}. Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, odpowiedz na tę wiadomość albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
+  nl: (url) => `Belangrijk: onze WhatsApp is tijdelijk niet bereikbaar, daarom sturen we je toegang nu alleen per e-mail. Een vraag? Beantwoord dit bericht of mail naar ${emailSuporte('nl')}. Garantie: wil je om welke reden dan ook je geld terug? Beantwoord dit bericht of ga naar ${url}. We zetten de terugbetaling meteen in gang, zonder lastige vragen.`,
   en: (url) => `Important: our WhatsApp is temporarily unavailable, so we send access by e-mail only. Questions? Reply to this message. Guarantee: if for any reason you want your money back, reply to this message or go to ${url}. We start the refund right away, no questions asked.`,
 }
 const NOTA_EMAIL: Record<string, (url: string) => string> = {
