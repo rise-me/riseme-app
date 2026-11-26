@@ -609,7 +609,7 @@ const ABERTURA_REENVIO: Record<string, string> = {
   cs: 'Ahoj! 💛 Posíláme ti sem znovu přístup do RiseMe. *Správné heslo je to v této zprávě* a je pořád stejné: nemění se. Pokud ti telefon nabízí jiné uložené heslo, smaž ho a napiš tohle, nebo prostě klikni na odkaz níže a jsi hned uvnitř.',
   tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. *Doğru şifre bu mesajdaki şifredir* ve hep aynıdır: değişmez. Telefonun kayıtlı başka bir şifre önerirse onu sil ve bunu yaz ya da aşağıdaki bağlantıya dokun, doğrudan girersin.',
   en: 'Hi! 💛 We are resending your RiseMe access here. *The correct password is the one in this message*, and it is always the same: it does not change. If your phone suggests another saved password, delete it and type this one, or just tap the link below and you are in.',
-  nl: 'Hoi! 💛 Hier zijn opnieuw je inloggegevens voor RiseMe. *Het juiste wachtwoord is dat in dit bericht*, en het is altijd hetzelfde: het verandert niet. Stelt je telefoon een ander, opgeslagen wachtwoord voor? Verwijder dat en typ dit wachtwoord in, of tik gewoon op de link hieronder, dan ben je meteen binnen.',
+  nl: 'Hoi! 💛 Hier zijn opnieuw je inloggegevens voor RiseMe. *Het juiste wachtwoord staat in dit bericht*, en het is altijd hetzelfde: het verandert niet. Stelt je telefoon een ander opgeslagen wachtwoord voor? Verwijder dat en typ dit wachtwoord in, of tik gewoon op de link hieronder, dan ben je meteen binnen.',
   'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. *A senha certa é a desta mensagem*, e é sempre a mesma: não muda. Se o celular sugerir outra senha salva, apague e digite esta, ou simplesmente toque no link abaixo e você entra direto.',
 }
 
