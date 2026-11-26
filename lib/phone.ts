@@ -20,6 +20,8 @@ const COUNTRY_TO_DDI: Record<string, string> = {
   CZ: '420', SK: '421', DE: '49', AT: '43', GB: '44', IE: '353',
   // CL-IT (Hotmart, euro): Italia + Svizzera e San Marino (italofone vicine).
   IT: '39', CH: '41', SM: '378',
+  // CL-IN (Stripe, INR): Índia.
+  IN: '91',
 }
 
 // Locales de país ÚNICO → DDI (fallback quando o payload não traz `country`).

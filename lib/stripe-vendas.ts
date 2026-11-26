@@ -96,21 +96,27 @@ const NOTA_EMAIL: Record<string, (url: string) => string> = {
 
 // Confirmação final (só com o reembolso 'succeeded'). Termina no presente do acesso (regra do Bruno de 09/11: só é dito
 // aqui, na mensagem final, e a mensagem termina nisso).
-const CONFIRMA_REEMBOLSO: Record<string, (p: { nome: string | null; valor: string }) => string> = {
+const CONFIRMA_REEMBOLSO: Record<string, (p: { nome: string | null; valor: string; moeda?: string | null }) => string> = {
   pl: ({ nome, valor }) => [
     `Gotowe${nome ? `, ${nome.split(' ')[0]}` : ''}. Zwrot ${valor} został zrealizowany. Nie musisz nic więcej robić.`,
     'Pieniądze wracają tą samą drogą, którą płaciłaś: jeśli BLIK-iem, na Twoje konto bankowe, a jeśli kartą, na kartę. Dokładny termin zależy od banku.',
     textoPresente('pl'),
   ].join('\n\n'),
-  en: ({ nome, valor }) => [
+  // CL-IN (Índia, 25/11): UPI devolve à conta do banco ligada ao app de UPI, em até 7 dias úteis (doc Stripe "UPI payments").
+  en: ({ nome, valor, moeda }) => [
     `Done${nome ? `, ${nome.split(' ')[0]}` : ''}. Your refund of ${valor} has been completed. Nothing else to do on your side.`,
-    'The money goes back the same way you paid: with BLIK to your bank account, with a card to your card. The exact timing depends on your bank.',
+    (moeda ?? '').toLowerCase() === 'inr'
+      ? 'The money goes back the same way you paid: with UPI to the bank account linked to your UPI app (usually within 7 business days), with a card to your card (usually 5–10 business days). The exact timing depends on your bank.'
+      : 'The money goes back the same way you paid: to the account or card you paid with. The exact timing depends on your bank.',
     textoPresente('en'),
   ].join('\n\n'),
 }
 
 const valorBonito = (centavos: number | null, moeda: string | null) =>
-  centavos == null ? '' : `${(centavos / 100).toFixed(2).replace('.', ',')} ${(moeda ?? '').toLowerCase() === 'pln' ? 'zł' : (moeda ?? '').toUpperCase()}`
+  centavos == null ? ''
+    // INR (CL-IN): como a aluna viu no checkout, "₹499" (tem 2 casas na Stripe, então /100 está certo).
+    : (moeda ?? '').toLowerCase() === 'inr' ? `₹${centavos % 100 === 0 ? centavos / 100 : (centavos / 100).toFixed(2)}`
+    : `${(centavos / 100).toFixed(2).replace('.', ',')} ${(moeda ?? '').toLowerCase() === 'pln' ? 'zł' : (moeda ?? '').toUpperCase()}`
 
 const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -194,7 +200,9 @@ export async function processarSessaoPaga(s: Stripe.Checkout.Session): Promise<{
 
   const pais = s.customer_details?.address?.country ?? null
   // A Stripe garante E.164 no campo de telefone, MENOS com Apple/Google Pay (vem o que a carteira mandar): toE164 com o país.
-  const { phone } = toE164(s.customer_details?.phone ?? undefined, { countryIso: pais ?? undefined, locale: mapa.locale })
+  // Sem país (carteira), a moeda diz: INR só vende na Índia (CL-IN) → +91.
+  const paisOuMoeda = pais ?? ((s.currency ?? '').toLowerCase() === 'inr' ? 'IN' : undefined)
+  const { phone } = toE164(s.customer_details?.phone ?? undefined, { countryIso: paisOuMoeda, locale: mapa.locale })
   const pi = typeof s.payment_intent === 'string' ? s.payment_intent : s.payment_intent?.id ?? null
 
   const db = createServiceClient()
@@ -569,7 +577,7 @@ export async function atualizarReembolso(pi: string): Promise<void> {
 
   if (r.status === 'succeeded' && !v.reembolso_avisado_em && origem !== 'aviso-fraude') {
     // Aviso de fraude: quem marcou "não reconheço" talvez nem seja a aluna. O responsável já foi avisado na hora.
-    const texto = (CONFIRMA_REEMBOLSO[v.locale] ?? CONFIRMA_REEMBOLSO.en)({ nome: v.nome, valor: valorBonito(r.amount, r.currency) })
+    const texto = (CONFIRMA_REEMBOLSO[v.locale] ?? CONFIRMA_REEMBOLSO.en)({ nome: v.nome, valor: valorBonito(r.amount, r.currency), moeda: r.currency })
     if (await avisarAluna(v, texto)) muda.reembolso_avisado_em = new Date().toISOString()
   }
   if (r.status === 'failed' && !v.reembolso_alerta_em) {

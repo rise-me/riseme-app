@@ -73,7 +73,7 @@ const TEXTO: Record<string, Texto> = {
     ],
     quandoTitulo: 'When the money comes back',
     quando: [
-      'BLIK: the money goes back to the bank account you paid from, usually within a few hours to a few days, depending on your bank.',
+      'UPI: the money goes back to the bank account linked to your UPI app, usually within 7 business days, depending on your bank.',
       'Card: the money goes back to your card, usually within 5–10 business days, depending on your bank.',
     ],
     extratoTitulo: 'How the purchase shows on your statement',
