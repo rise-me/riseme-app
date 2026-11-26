@@ -22,7 +22,7 @@ export interface Produto {
   id: string // id no app (user_challenges.challenge_id) ou nome interno
   nome: string // como a aluna chama
   hotmartId?: number
-  plataforma: 'hotmart' | 'perfectpay' | 'app'
+  plataforma: 'hotmart' | 'perfectpay' | 'app' | 'stripe'
   idioma: string
   tipo: 'desafio' | 'material' | 'assinatura' | 'bump'
   garantiaDias: number
@@ -151,6 +151,19 @@ export const CATALOGO: Produto[] = [
     suporteVende: false,
     meiosPagamento: 'cartão (banco polonês recusa ~metade), PayPal, Apple Pay, Google Pay; sem BLIK',
     ofertas: [{ codigo: 'PPPBFHGM', preco: '67 zł', status: 'vigente', link: 'https://go.centerpag.com/PPU38CQGNRM', nota: 'produto PPPBFHGM; reembolso manual no painel da Perfect Pay' }],
+  },
+  {
+    id: '1-nl',
+    nome: 'De RiseMe Calisthenics Challenge (CL-NL)',
+    plataforma: 'stripe',
+    idioma: 'nl',
+    tipo: 'desafio',
+    garantiaDias: 30,
+    oQueE: 'A Calistenia em holandês (Holanda e Bélgica), vendida pela Stripe da LLC; no app o desafio chama "Calisthenics thuis". Link INATIVO até o Portão (26/11/2026).',
+    suporteVende: false,
+    meiosPagamento: 'iDEAL, Bancontact, cartão, Apple Pay',
+    ofertas: [{ codigo: 'CL-NL', preco: '€ 19', status: 'vigente', nota: 'pagamento único, btw incluído; reembolso automático pelo bot (regra COMPRA DA STRIPE); extrato "RISEME* CALISTHENICS"' }],
+    funil: 'https://calisthenics-nl.riseme.fitness',
   },
   {
     id: '1-cz',

@@ -67,11 +67,12 @@ const NOME_STRIPE: Record<string, string> = {
   'CL-PL-UP1': 'Protokół Metaboliczny 28 Dni (upsell, 97 zł)',
   'CL-PL-DS1': 'Protokół Metaboliczny 28 Dni (downsell, 47 zł)',
   'CL-IN': 'The RiseMe Calisthenics Challenge (Índia, ₹499)',
+  'CL-NL': 'De RiseMe Calisthenics Challenge (Holanda/Bélgica, € 19)',
 }
 
 // BLIK: a doc da Stripe diz até 2 horas, mas nos 3 reembolsos BLIK que acompanhamos (14, 16 e 17/11/2026) o crédito só
 // apareceu na conta da aluna no 3º dia, e as 3 reclamaram depois de ouvir "2 horas". Vale o que aconteceu.
-const PRAZO_REEMBOLSO: Record<string, string> = { blik: '1 a 3 dias úteis (o banco credita depois; NÃO prometa 2 horas)', card: '5 a 10 dias úteis', link: '5 a 10 dias úteis (cartão salvo no Link)', p24: 'até 3 dias úteis', upi: 'até 7 dias úteis (o banco credita depois; NÃO prometa "na hora")' }
+const PRAZO_REEMBOLSO: Record<string, string> = { blik: '1 a 3 dias úteis (o banco credita depois; NÃO prometa 2 horas)', card: '5 a 10 dias úteis', link: '5 a 10 dias úteis (cartão salvo no Link)', p24: 'até 3 dias úteis', upi: 'até 7 dias úteis (o banco credita depois; NÃO prometa "na hora")', ideal: '5 a 10 dias úteis (volta para a conta bancária do iDEAL)', bancontact: '5 a 10 dias úteis (volta para a conta bancária)' }
 async function pagamentosStripe(db: SupabaseClient, userId: string): Promise<string[]> {
   const cols = 'session_id, payment_intent, oferta, valor_centavos, moeda, created_at, reembolso_id, reembolso_status, user_id, email, phone'
   const { data: dela } = await db.from('stripe_vendas').select(cols).eq('user_id', userId).order('created_at', { ascending: false }).limit(4)
@@ -98,7 +99,7 @@ async function pagamentosStripe(db: SupabaseClient, userId: string): Promise<str
       const pi = await stripe().paymentIntents.retrieve(v.payment_intent, { expand: ['latest_charge.refunds'] })
       const ch = pi.latest_charge && typeof pi.latest_charge !== 'string' ? pi.latest_charge : null
       const tipo = ch?.payment_method_details?.type ?? '?'
-      meio = tipo === 'blik' ? 'BLIK' : tipo === 'upi' ? 'UPI' : tipo === 'card' ? `cartão ${ch?.payment_method_details?.card?.brand ?? ''} final ${ch?.payment_method_details?.card?.last4 ?? '?'}`.trim() : tipo
+      meio = tipo === 'blik' ? 'BLIK' : tipo === 'upi' ? 'UPI' : tipo === 'ideal' ? 'iDEAL' : tipo === 'bancontact' ? 'Bancontact' : tipo === 'card' ? `cartão ${ch?.payment_method_details?.card?.brand ?? ''} final ${ch?.payment_method_details?.card?.last4 ?? '?'}`.trim() : tipo
       for (const r of ch?.refunds?.data ?? []) {
         const ref = (r.destination_details as { blik?: { reference?: string | null }; card?: { reference?: string | null } } | null)
         const refBanco = ref?.blik?.reference ?? ref?.card?.reference ?? null

@@ -552,7 +552,44 @@
     "pageCount": "PDF · {count} pages",
     "emptyState": "Your bonuses will appear here soon."
   },
-  "bonusData": {},
+  "bonusData": {
+    "falsos-saudaveis": {
+      "title": "Healthy only on the label",
+      "description": "Foods labelled “healthy” that quietly slow down your weight loss — and what to eat instead."
+    },
+    "anti-inchaco": {
+      "title": "The 3-Day Anti-Bloating Plan",
+      "description": "72 hours to a flatter, firmer belly. No teas, no pills — just the right food."
+    },
+    "vinagre-maca": {
+      "title": "The apple cider vinegar trick",
+      "description": "3 minutes of movement + a spoonful of apple cider vinegar. A duo that helps keep your blood sugar steady."
+    },
+    "tres-botoes": {
+      "title": "3 hidden switches",
+      "description": "Three switches that kick-start fat burning quickly and naturally. Most women never turn them on."
+    },
+    "frutas-inocentes": {
+      "title": "3 “innocent” fruits that slow your metabolism",
+      "description": "Three fruits you eat every day because you think they’re “healthy” — and that slow down your results."
+    },
+    "depois-28-dias": {
+      "title": "After the 28 days",
+      "description": "How to make the results you’ve achieved last for good. A map of what comes next."
+    },
+    "protocolo-metabolico": {
+      "title": "Metabolic Protocol",
+      "description": "A 28-day tea system that powers your challenge. Four phases: ignite, cleanse, accelerate and stabilise."
+    },
+    "linha-suporte": {
+      "title": "WhatsApp support",
+      "description": "28 days of one-on-one support from our team, on WhatsApp or by email."
+    },
+    "rastreador-progresso": {
+      "title": "Your progress diary",
+      "description": "Measure, track and celebrate your 28-day transformation. A printable tool."
+    }
+  },
   "firstAccess": {
     "title": "You're in! 🎉",
     "body": "Your access password is in your WhatsApp. Save it to log in anytime — or set your own password now.",
