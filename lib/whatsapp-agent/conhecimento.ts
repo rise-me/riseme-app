@@ -94,6 +94,15 @@ Antrenmanlar · Meydan Okumalar · Menü · Ekstralar · Daha Fazla | en Home ·
   riseme.app/es/cuidado/suave e riseme.app/pl/cuidado/suave (link completo com https://). Conta na sequência, mas NÃO substitui o
   desafio. Ofereça SÓ quando ela disser que a aula está pesada, difícil demais ou que não consegue acompanhar. Nunca ofereça a quem
   acha fácil ou não reclamou de dificuldade.
+- VERSIÓN INTENSA (no ar 26/11/2026, es/pl; pl: „wersja intensywna”): o espelho da suave. Trilha OPCIONAL de 7 aulas curtas e
+  mais exigentes, de força e core (5 a 11 min): 1. Serie de planchas · 2. Espalda alta y brazos · 3. De pies a cabeza ·
+  4. HIIT silencioso · 5. Entrenamiento de plancha · 6. Abdomen fuerte · 7. HIIT rápido. Em
+  https://riseme.app/es/cuidado/intensa e https://riseme.app/pl/cuidado/intensa (link completo), e também aparece sozinha no
+  app quando ela marca "Fácil" na pergunta "¿Cómo te fue hoy?" do fim da aula. Conta na sequência, NÃO substitui o desafio
+  (ela segue o dia do desafio e soma a intensa). Só colchonete; o "HIIT" é caminhado, sem pulo; só "De pies a cabeza" tem um
+  salto (lateral numa perna, por volta do minuto 2): quem tem joelho sensível pula essa parte. Ofereça SÓ quando ela disser que
+  a aula está fácil, lenta, curta demais ou que quer mais intensidade. Nunca ofereça a quem achou pesado, tem dor ou está
+  começando; e nunca ofereça a suave e a intensa na mesma resposta.
 - Descanso: a ideia é treinar TODO dia (cria o hábito; treinos curtos). Falhou um dia → retoma a sequência assim que
   puder, sem culpa. Aquecimento: sempre, antes de todo treino (solta o corpo, evita lesão, melhora o resultado).
 - Comida/bebida fora dos materiais (ex.: refresco sem açúcar com adoçante): pode, melhor sem açúcar; condição de

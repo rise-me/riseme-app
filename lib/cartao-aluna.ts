@@ -24,6 +24,8 @@ const NOME: Record<string, string> = {
   'cuidado:11': 'Tu cuidado · Espalda', 'cuidado:12': 'Tu cuidado · Alivio', 'cuidado:13': 'Tu cuidado · Menisco',
   'cuidado:14': 'Tu cuidado · Osteoartritis', 'cuidado:15': 'Tu cuidado · Sofá', 'cuidado:16': 'Tu cuidado · Cama',
   'cuidado:4': 'Tu cuidado · Yoga', 'cuidado:17': 'Tu cuidado · Yoga',
+  // Trilhas opcionais (lib/cuidado.ts): suave = desafios 18 e 19 (16/11/2026), intensa = desafio 20 (26/11/2026)
+  'cuidado:18': 'Versión suave', 'cuidado:19': 'Versión suave', 'cuidado:20': 'Versión intensa',
 }
 
 /**
