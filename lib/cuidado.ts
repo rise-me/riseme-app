@@ -118,20 +118,20 @@ const AULAS: Record<TipoLista, AulaCuidado[]> = {
   // Versión intensa: 7 aulas do Treinos Rápidos (módulo 17), decididas pelo Bruno 25/11 depois da leitura aula a aula
   // (secao-rapidos17.md do Subidor). Força/core curto, sem equipamento além do colchonete; R20 tem salto lateral (01:39).
   // Desafio 20 no R2, dia = nº da aula no módulo (confirmado pelo Subidor 25/11). Ordem = intermediárias → avançadas.
-  // Títulos PROVISÓRIOS (nossos): trocar pelos nomes.{es,pl}.tsv do Subidor quando a tradução com revisão nativa fechar.
+  // Títulos = rapidos17/nomes.{en,es,pl}.tsv do Subidor (revisão nativa, 25/11). Só a R20 tem salto (01:39–02:31).
   intensa: [
     { codigo: 'R16', desafio: '20', dia: 16,
-      titulo: { es: 'Plancha y plancha lateral', pl: 'Deska i deska bokiem', en: 'Plank Set' } },
+      titulo: { es: 'Serie de planchas', pl: 'Seria desek', en: 'Plank Series' } },
     { codigo: 'R18', desafio: '20', dia: 18,
-      titulo: { es: 'Espalda y brazos firmes', pl: 'Mocne plecy i ramiona', en: 'Fabulous Upper Back' } },
+      titulo: { es: 'Espalda alta y brazos', pl: 'Górna część pleców i ramiona', en: 'Upper Back and Arms' } },
     { codigo: 'R20', desafio: '20', dia: 20,
-      titulo: { es: 'De la cabeza a los pies', pl: 'Od stóp do głów', en: 'Head-to-Toe Set' } },
+      titulo: { es: 'De pies a cabeza', pl: 'Od stóp do głów', en: 'Head-to-Toe Workout' } },
     { codigo: 'R27', desafio: '20', dia: 27,
       titulo: { es: 'HIIT silencioso', pl: 'Cichy HIIT', en: 'Silent HIIT' } },
     { codigo: 'R28', desafio: '20', dia: 28,
-      titulo: { es: 'Entrenamiento de plancha', pl: 'Trening z deską', en: 'Plank Workout' } },
+      titulo: { es: 'Entrenamiento de plancha', pl: 'Trening deski', en: 'Plank Workout' } },
     { codigo: 'R25', desafio: '20', dia: 25,
-      titulo: { es: 'Core fuerte', pl: 'Silny brzuch', en: 'Strong Core' } },
+      titulo: { es: 'Abdomen fuerte', pl: 'Mocny brzuch', en: 'Strong Core' } },
     { codigo: 'R24', desafio: '20', dia: 24,
       titulo: { es: 'HIIT rápido', pl: 'Szybki HIIT', en: 'Quick HIIT' } },
   ],
