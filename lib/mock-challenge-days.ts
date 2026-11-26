@@ -163,7 +163,10 @@ export function getMockDays(challengeId: string, dayTitles: string[], locale?: s
     const lang = locale ? audioLang(locale) : undefined
     const stream = streamDays?.[String(i + 1)]
     const own = lang ? hlsFor(challengeId, i + 1, lang) : undefined
-    const fallback = !own && !stream && !overrides?.[i] ? hlsFor(challengeId, i + 1, AUDIO_PADRAO) : undefined
+    // O YouTube no idioma dela vence o inglês do R2 (26/11/2026: com o en da Calistenia no R2, a aluna ES passou a
+    // receber a aula em inglês no lugar do YouTube em espanhol).
+    const youtubeNoIdioma = Boolean(videos[i]) && (IDIOMA_YOUTUBE[challengeId] === null || (lang !== undefined && IDIOMA_YOUTUBE[challengeId] === lang))
+    const fallback = !own && !stream && !overrides?.[i] && !youtubeNoIdioma ? hlsFor(challengeId, i + 1, AUDIO_PADRAO) : undefined
     const hls = own ?? fallback
     const hlsLang = own ? lang : AUDIO_PADRAO
     const youtubeId = overrides?.[i] ?? videos[i]

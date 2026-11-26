@@ -10,6 +10,7 @@ import { FirstAccessNotice } from '@/components/home/FirstAccessNotice'
 import { IndicaAmiga } from '@/components/home/IndicaAmiga'
 import { diaNoFuso, numeroDoDia, sequenciaDeDias } from '@/lib/dias'
 import { ClaseDeHoy, type ClaseDeHoyProps } from '@/components/home/ClaseDeHoy'
+import { getMockDays } from '@/lib/mock-challenge-days'
 
 const MINUTES_PER_DAY_AVG = 20
 
@@ -42,6 +43,19 @@ export async function ProgressView({ locale, progress, user, tz, clase }: Props)
   const WEEK_DAYS = t('weekDays').split(',')
 
   const totalCompleted = progress.length
+  // Minutos de verdade (fila técnica #184, 26/11/2026): soma a duração do vídeo que ela assistiu em cada aula; antes era
+  // 20 min fixos por aula e a aula PL de ~10 min contava 20. Aula sem duração conhecida (ex.: Tu cuidado) segue com 20.
+  const duracoes = new Map<string, Map<number, number | undefined>>()
+  const totalMinutes = Math.round(
+    progress.reduce((soma, p) => {
+      if (!duracoes.has(p.challenge_id)) {
+        const dias = p.challenge_id.startsWith('cuidado:') ? [] : getMockDays(p.challenge_id, [], locale)
+        duracoes.set(p.challenge_id, new Map(dias.map((d) => [d.day_number, d.duration_seconds])))
+      }
+      const seg = duracoes.get(p.challenge_id)!.get(p.day_number)
+      return soma + (seg ? seg / 60 : MINUTES_PER_DAY_AVG)
+    }, 0),
+  )
   const streak = sequenciaDeDias(progress.map((p) => new Date(p.completed_at)), tz)
 
   const todayKey = diaNoFuso(new Date(), tz)
@@ -90,7 +104,7 @@ export async function ProgressView({ locale, progress, user, tz, clase }: Props)
 
   const STATS = [
     { label: t('statTrainingsThisWeek'), value: String(weekCompleted.size), icon: <Zap size={16} className="text-yellow-500" /> },
-    { label: t('statTotalMinutes'), value: String(totalCompleted * MINUTES_PER_DAY_AVG), icon: <Clock size={16} className="text-blue-500" /> },
+    { label: t('statTotalMinutes'), value: String(totalMinutes), icon: <Clock size={16} className="text-blue-500" /> },
     { label: t('statCompletedChallenges'), value: String(completedChallenges), icon: <Trophy size={16} className="text-amber-500" /> },
     { label: t('statActiveDaysMonth'), value: String(monthDays.size), icon: <Calendar size={16} className="text-green-600" /> },
   ]
