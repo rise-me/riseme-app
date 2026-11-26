@@ -253,11 +253,13 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
   if (auto) return `ignorado: ${auto} (${r.de})`
   if (!texto.trim()) {
     // Chegou sem texto nenhum (só a citação, ou enviado em branco): em vez de silêncio, pede a dúvida. 1 vez por dia por endereço.
-    const lingua = r.para.some((t) => t.startsWith('pomoc@')) || /\.pl$/i.test(r.de) ? 'pl' : 'es'
+    const lingua = r.para.some((t) => t.startsWith('pomoc@')) || /\.pl$/i.test(r.de) ? 'pl' : r.para.some((t) => t.startsWith('help@')) ? 'en' : 'es'
     const { count: jaPediu } = await db.from('whatsapp_outbox').select('id', { count: 'exact', head: true }).eq('phone', r.de).eq('kind', KIND_OUT).gte('created_at', new Date(Date.now() - 24 * 3_600_000).toISOString()).like('body', '%"vazio":true%')
     if ((jaPediu ?? 0) > 0) return `vazio de novo (${r.de})`
     const pedido = lingua === 'pl'
       ? 'Cześć! Dostaliśmy Twoją wiadomość, ale dotarła do nas bez treści. Napisz proszę jeszcze raz, w czym możemy pomóc (dostęp, logowanie, aplikacja, zwrot), a od razu się tym zajmiemy. 💚'
+      : lingua === 'en'
+      ? 'Hi! We received your message, but it arrived without any text. Please write to us again and tell us how we can help (access, login, the app, a refund) and we will look into it right away. 💛'
       : '¡Hola! Recibimos tu mensaje, pero nos llegó sin texto. Escríbenos de nuevo contándonos en qué te ayudamos (acceso, inicio de sesión, la app, reembolso) y lo vemos enseguida. 💛'
     const env = await enviarEmailSuporte({ para: r.de, assunto: /^re:/i.test(r.assunto) ? r.assunto : `Re: ${r.assunto || ASSUNTO_PADRAO[lingua]}`, texto: pedido, idioma: lingua, emRespostaA: r.messageId, auto: true, registrar: false })
     if (env.ok) await gravar(r.de, KIND_OUT, { assunto: r.assunto, texto: pedido, resendId: env.id, auto: true, vazio: true })
@@ -283,7 +285,8 @@ export async function processarEmailRecebido(emailId: string): Promise<string> {
       : quem.emailAntigo ? `E-MAIL DA CONTA JÁ CORRIGIDO PELO SISTEMA: no checkout ficou gravado ${quem.emailAntigo} (digitado diferente); o login dela agora é ${r.de}. Não peça e-mail nem comprovante.` : ''
     if (nota) perfil.cartao = `${nota}\n\n${perfil.cartao ?? ''}`
   }
-  const idiomaDoEndereco = r.para.some((t) => t.startsWith('pomoc@')) || /\.pl$/i.test(r.de) ? 'pl' : r.para.some((t) => t.startsWith('ayuda@')) ? 'es' : undefined
+  // help@ = caixa em inglês (CL-IN, 25/11/2026: escolhida pelo Bruno; sem isto, remetente sem conta ouvia espanhol)
+  const idiomaDoEndereco = r.para.some((t) => t.startsWith('pomoc@')) || /\.pl$/i.test(r.de) ? 'pl' : r.para.some((t) => t.startsWith('ayuda@')) ? 'es' : r.para.some((t) => t.startsWith('help@')) ? 'en' : undefined
   const idioma = perfil?.idioma ?? idiomaDoEndereco ?? 'es'
   if (perfil) {
     const { count: reenvios } = await db.from('whatsapp_outbox').select('id', { count: 'exact', head: true }).eq('phone', r.de).eq('kind', KIND_REENVIO).gte('created_at', new Date(Date.now() - 2 * 3_600_000).toISOString())
