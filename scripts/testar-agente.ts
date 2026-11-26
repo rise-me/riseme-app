@@ -29,7 +29,28 @@ const HOTMART_PROTESTED = `HOTMART (consultado agora pelo e-mail maria@example.c
 Resumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 1 reembolso(s) em análise.
 Assinaturas: nenhuma.`
 
-export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; hotmartEmail?: string; emailSemConta?: string }[] = [
+// Compra achada pela busca (lib/whatsapp-agent/achar-compra.ts, 25/11/2026). Dados fictícios; o caso real é de uma aluna PL que
+// digitou o domínio errado no checkout e escreveu 9 e-mails em 7 dias sem que o sistema ligasse o endereço à compra.
+const NOTA_ACHADA = `COMPRA ACHADA PELO SISTEMA (fato; NÃO peça confirmação nem dado nenhum): ela escreve de ewa.wisniewska@o2.pl. No checkout o e-mail ficou gravado como ewa.wisniewska@gmail.com (digitado diferente), por isso o e-mail de acesso foi para um endereço que não é dela e a conta NUNCA ENTROU: ela pagou e ficou sem acesso por erro de digitação que o nosso sistema deveria ter visto. O sistema JÁ CORRIGIU o e-mail da conta: o login dela agora é ewa.wisniewska@o2.pl.
+O que fazer AGORA, numa resposta só: peça desculpas pela demora em 1 frase, explique em 1 frase o que houve (o e-mail da compra ficou com gmail.com no lugar de o2.pl) e:
+  (a) se ela NÃO pediu o dinheiro de volta nesta conversa → "reenviar_acesso" = true (o e-mail de acesso sai agora para ewa.wisniewska@o2.pl; diga isso);
+  (b) se ela JÁ pediu o dinheiro de volta nesta conversa → "reembolso_transacoes" = o pi_ da compra do cartão abaixo, sem perguntar motivo e sem oferecer nada (ela esperou por erro nosso; conta como decisão clara).
+PROIBIDO: pedir de novo e-mail, comprovante ou telefone; dizer "vamos verificar", "przekazuję do zespołu", "sprawdzamy"; transferir.
+
+CARTÃO DA ALUNA (dados reais do sistema, use como fato):
+Compras (o que ela pagou, de onde):
+- ${D4} (há 4 dias) · Kalistenika (desafio) · 87 PLN · Stripe · pi_3TesteAchada0000000001
+Pagamentos na Stripe (fato, consultado agora; NUNCA pergunte o meio de pagamento):
+- ${D4} · CL-PL · 87.00 PLN · pagou com cartão mastercard final 4242`
+const achadaPL: PerfilAluna = { nome: 'Ewa Wiśniewska', idioma: 'pl', compradaEm: `${D4}T14:00:00Z`, ultimoLogin: null, diasFeitos: 0, ultimoTreino: null, liberados: ['Kalistenika'], confirmadaPorTelefone: true, cartao: NOTA_ACHADA }
+const alunaIN: PerfilAluna = { nome: 'Priya Sharma', idioma: 'en', compradaEm: `${D4}T14:00:00Z`, ultimoLogin: `${D4}T15:00:00Z`, diasFeitos: 1, ultimoTreino: `${D2}T12:00:00Z`, liberados: ['Calisthenics at Home'], confirmadaPorTelefone: true, cartao: `CARTÃO DA ALUNA (dados reais do sistema, use como fato):
+Compras (o que ela pagou, de onde):
+- ${D4} (há 4 dias) · The RiseMe Calisthenics Challenge (Índia, ₹499) · 499 INR · Stripe · pi_3TesteIndia00000000001
+Pagamentos na Stripe (fato, consultado agora; NUNCA pergunte o meio de pagamento):
+- ${D4} · CL-IN · 499.00 INR · pagou com UPI · REEMBOLSO 499.00 INR CONCLUÍDO pela Stripe em ${D2.slice(8, 10)}/${D2.slice(5, 7)}, 10:15; prazo para aparecer na conta dela: até 7 dias úteis (o banco credita depois; NÃO prometa "na hora")` }
+const comCompraPL: PerfilAluna = { ...achadaPL, cartao: NOTA_ACHADA.slice(NOTA_ACHADA.indexOf('CARTÃO DA ALUNA')) }
+
+export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hotmart?: string; hotmartEmail?: string; emailSemConta?: string; canal?: 'email'; phone?: string; antes?: { a: 'student' | 'agent'; t: string }[]; idiomaPadrao?: string }[] = [
   { nome: 'lesão: manguito rotador (caso real 01/11)', perfil: base, msg: 'Buenas noche una pregunta tengo mal el hombro derecho puedo hacer los ejercicios normales. Tengo problemas con el manguito rotador y me han hecho infiltración dos veces, hay días que no me duele pero hay días que siento mucho dolor' },
   { nome: 'PL: cartão trocado, mandar número novo? (caso real 31/10)', perfil: { ...base, nome: 'Maria', idioma: 'pl' }, msg: 'Dzień dobry, zmieniłam kartę, bo nie chciałam zostać oszukana. Prześlę numer nowej karty?' },
   { nome: 'c5: pagou por Oxxo há 1 h e não chegou → prazo de 1–3 dias úteis, sem transferir', perfil: null, msg: 'Hola, pagué el desafío en el Oxxo hace una hora y no me llega nada, ya me están cobrando?' },
@@ -77,12 +98,31 @@ export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hot
   // 05/11 noite: a resposta certa depende de um FATO do sistema; o verificador tem que preservar o fato (caso Agustina).
   { nome: 'STRIPE: PL sem conta pagou 67 zł BLIK → não fala de Hotmart/Perfect Pay, transfere com AÇÃO Stripe, prazo em polonês (caso real 10/11)', perfil: null, msg: 'Witam zakupiłam plan kalistenika za 67 zł BLIK ale nic nie otrzymałam na maila, aga@o2.pl' },
   { nome: 'PASE: reembolso raso sem irritação → 1 contorno (desafios novos todo mês, depois sai US$ 67) antes de registrar (Bruno 11/11)', perfil: { ...base, cartao: 'CARTÃO DA ALUNA (dados reais do sistema, use como fato):\nCompras:\n- 06/11/2026 (há 5 dias) · Pase Completo - RiseMe™ · 27 USD · Hotmart · HP1234567890' }, msg: 'quiero el reembolso del pase, no lo estoy usando la verdad' },
+  { nome: 'TU CUIDADO: dor no joelho com a aba liberada → responde a dúvida + aponta o cartão 🎁 Tu cuidado abaixo do Continuar (Bruno 12/11)', perfil: { ...base, cartao: 'CARTÃO DA ALUNA (dados reais do sistema, use como fato):\nTU CUIDADO: ela TEM a aba "Tu cuidado" liberada para rodillas (12 aulas) (marcou no quiz). Se ela falar de dor no joelho ou nas costas, ou que o treino "es muy fuerte", além de responder a dúvida aponte o cartão 🎁 "Tu cuidado" no app: abre o desafio dela, logo abaixo do botão "Continuar"; aulas suaves (cadeira, sofá, cama), na ordem que quiser, contam na sequência; quem não tem rolo usa toalha enrolada, sem peso de tornozelo faz sem peso. Ali mesmo, "Cambiar dónde me duele" acrescenta ou tira joelho/costas.' }, msg: 'hola, me duele la rodilla cuando hago las sentadillas, es muy fuerte para mí' },
   { nome: 'STRIPE: pede zwrot → reembolso_transacoes pi_ no 1º pedido, sem motivo nem Pase (Bruno 09/11)', perfil: { ...base, nome: 'Anna', idioma: 'pl', cartao: 'CARTÃO DA ALUNA (dados reais do sistema, use como fato):\nCompras:\n- 09/11/2026 (há 0 dias) · Kalistenika w domu · 67 PLN · Stripe · país PL · pi_3TesteStripe0001' }, msg: 'Dzień dobry, chcę zwrot pieniędzy' },
+  { nome: 'STRIPE 2 compras: pede zwrot sem dizer de quê → pergunta 1× qual (desafio ou Protokół), sem reembolso_transacoes (upsell PL 13/11)', perfil: { ...base, nome: 'Ewa', idioma: 'pl', cartao: 'CARTÃO DA ALUNA (dados reais do sistema, use como fato):\nCompras:\n- 13/11/2026 (há 0 dias) · Kalistenika (desafio) · 67 PLN · Stripe · país PL · pi_3TesteStripe0101\n- 13/11/2026 (há 0 dias) · Protokół Metaboliczny 28 Dni (upsell, 97 zł) · 97 PLN · Stripe · país PL · pi_3TesteStripe0102' }, msg: 'Chcę zwrot pieniędzy' },
+  { nome: 'STRIPE 2 compras: pede zwrot só do protokołu → reembolso_transacoes = só o pi_ do Protokół (upsell PL 13/11)', perfil: { ...base, nome: 'Ewa', idioma: 'pl', cartao: 'CARTÃO DA ALUNA (dados reais do sistema, use como fato):\nCompras:\n- 13/11/2026 (há 0 dias) · Kalistenika (desafio) · 67 PLN · Stripe · país PL · pi_3TesteStripe0101\n- 13/11/2026 (há 0 dias) · Protokół Metaboliczny 28 Dni (upsell, 97 zł) · 97 PLN · Stripe · país PL · pi_3TesteStripe0102' }, msg: 'Nie chciałam tego protokołu za 97 zł, proszę o zwrot tylko za niego' },
+  { nome: 'STRIPE 2 cobranças: "pobraliście 2 razy" → explica que são 2 compras (desafio + Protokół), sem reembolso nem transferir (upsell PL 13/11)', perfil: { ...base, nome: 'Ewa', idioma: 'pl', cartao: 'CARTÃO DA ALUNA (dados reais do sistema, use como fato):\nCompras:\n- 13/11/2026 (há 0 dias) · Kalistenika (desafio) · 67 PLN · Stripe · país PL · pi_3TesteStripe0101\n- 13/11/2026 (há 0 dias) · Protokół Metaboliczny 28 Dni (downsell, 47 zł) · 47 PLN · Stripe · país PL · pi_3TesteStripe0103' }, msg: 'Dlaczego pobraliście ode mnie pieniądze 2 razy?? RISEME 67 zł i RISEME 47 zł' },
   { nome: 'FATO: cartão diz dia 5 → responde "estás en el día 5" (verificador mantém)', perfil: { ...base, diasFeitos: 5, cartao: 'CARTÃO DA ALUNA (dados reais do sistema, use como fato):\nOnde ela está:\n- Calistenia en Casa: concluiu até o dia 5 (5 dias feitos), último treino 2026-10-05 (há 0 dias)' }, msg: 'en qué día voy? me perdí' },
   { nome: 'FATO: bloco HOTMART diz REEMBOLSADA em transferência fria → mantém o fato, sem "no puedo ver"', perfil: { ...base, confirmadaPorTelefone: false }, hotmart: HOTMART_PROTESTED.replace('REEMBOLSO PEDIDO, em análise na Hotmart (aprova em até 7 dias)', 'REEMBOLSADA (dinheiro devolvido ou a caminho)').replace('1 reembolso(s) em análise', '0 reembolso(s) em análise').replace('0 reembolsada(s)', '1 reembolsada(s)'), msg: 'nunca me devolvieron la plata, en qué quedó eso?' },
   { nome: 'AFILIADA: quando sobe para 50%? → 5 amigas no mesmo mês, para sempre, revisão no dia 1 (Bruno 11/11)', perfil: base, msg: 'hola, ya soy afiliada. cómo hago para que me paguen más del 40%? cuándo me suben?' },
   { nome: 'AFILIADA: quer ganhar comissão → explica 50% em dólar, manda o link de afiliação exato e os 3 passos, sem transferir', perfil: base, msg: 'hola! vi lo de ganar comisiones en dólares en el grupo, cómo hago para ser afiliada?' },
+  { nome: 'SUAVE: aula muito difícil → oferece a versión suave (link https completo) como opcional, sem tirar do desafio (Bruno 16/11)', perfil: base, msg: 'hola, la clase de hoy es muy difícil para mí, no puedo seguir el ritmo, tengo 58 años' },
+  { nome: 'INTENSA: aula fácil → oferece a versión intensa (link https completo), opcional, sem citar a suave (Bruno 26/11)', perfil: base, msg: 'hola! las clases me parecen muy fáciles, quiero algo más intenso' },
+  { nome: 'INTENSA PL: „za łatwe” → wersja intensywna com o link /pl/cuidado/intensa, em polonês (26/11)', perfil: { ...base, nome: 'Anna Nowak', idioma: 'pl', liberados: ['Kalistenika'] }, msg: 'Cześć! Treningi są dla mnie za łatwe i za krótkie, macie coś mocniejszego?' },
+  { nome: 'ÁUDIO: Pilates en inglés → confirma que é em inglês, segue pela imagem, sem prometer dublagem (16/11)', perfil: base, msg: 'por qué el pilates en la pared está en inglés? no entiendo nada' },
+  { nome: 'SALTO ES: tem salto? → só os dias 25 e 27 (16/11)', perfil: base, msg: 'tengo problemas en las rodillas, el reto tiene saltos?' },
   { nome: 'E-MAIL SEM COMPRA: pergunta se usou outro e-mail', perfil: null, emailSemConta: 'rosa.perez@hotmail.com', hotmart: 'HOTMART (consultado agora pelo e-mail rosa.perez@hotmail.com; é o que a Hotmart REALMENTE registra, use como fato):\nNenhuma compra na Hotmart com o e-mail rosa.perez@hotmail.com (nem aprovada, nem tentativa).\nResumo: 0 compra(s) PAGA(S); 0 tentativa(s) NÃO paga(s); 0 reembolsada(s); 0 reembolso(s) em análise.\nAssinaturas: nenhuma.', msg: 'rosa.perez@hotmail.com' },
+  // 25/11/2026 — e-mail: achar a compra, prometer é fazer, promessa de pessoa só com transferência
+  { nome: 'E-MAIL ACHADA: e-mail do checkout digitado errado, pede o acesso → desculpa + reenviar_acesso, sem "vamos verificar"', perfil: achadaPL, canal: 'email', msg: 'Witam, nie otrzymałam od was maila ze swoim programem, za który zapłaciłam.' },
+  { nome: 'E-MAIL ACHADA: já pediu o dinheiro → devolve o pi_ sem perguntar motivo', perfil: achadaPL, canal: 'email', antes: [{ a: 'student', t: 'Witam, nie otrzymałam maila z dostępem. Żądam zwrotu pieniędzy.' }, { a: 'agent', t: 'Dzień dobry, bardzo przepraszam za czekanie 🙏 Sprawdzamy zamówienie.' }], msg: 'Kilka godzin minęło. Co z moim zwrotem? Proszę o natychmiastowy zwrot pieniędzy.' },
+  { nome: 'E-MAIL 2º PEDIDO: compra no cartão → pi_ em reembolso_transacoes, nunca „zgłaszam do realizacji” sem o código', perfil: comCompraPL, canal: 'email', antes: [{ a: 'student', t: 'Chcę zwrot pieniędzy za: Kalistenika.' }, { a: 'agent', t: 'To płatność jednorazowa, bez subskrypcji. Mogę pomóc z logowaniem? Jeśli wolisz zwrot, wystarczy odpisać „chcę zwrot”, a zwrócimy od razu.' }], msg: 'OSTATECZNE WEZWANIE DO ZWROTU. Chcę zwrot.' },
+  { nome: 'E-MAIL SEM CONTA: já deu e-mail e comprovante, pede o dinheiro → TRANSFERE (consulta), sem promessa solta', perfil: null, canal: 'email', idiomaPadrao: 'pl', antes: [{ a: 'student', t: 'Nie dostałam dostępu. Kupiłam na adres jolanta.testowa@wp.pl, telefon 600 100 200.' }, { a: 'agent', t: 'Dziękuję! Podaj proszę e-mail z zakupu i telefon z płatności.' }], msg: 'Podałam już e-mail i telefon i wysłałam potwierdzenie przelewu. Proszę o zwrot pieniędzy.' },
+  { nome: 'E-MAIL SEM CONTA, 1ª mensagem → pede e-mail da compra E telefone do pagamento, sem transferir', perfil: null, canal: 'email', idiomaPadrao: 'pl', msg: 'Dzień dobry, zapłaciłam wczoraj i nie dostałam dostępu.' },
+  // 25/11/2026 — CL-IN (Índia, inglês, Stripe em INR com UPI)
+  { nome: 'IN: reembolso UPI concluído e não entrou → até 7 dias úteis, sem BLIK nem "instantly"', perfil: alunaIN, phone: '919812345678', msg: 'Hi, you said my refund was done but I did not get the money in my bank yet. When will it come?' },
+  { nome: 'IN sem conta: pagou ₹499 por UPI e não recebeu acesso → inglês, sem Hotmart, pede e-mail e telefone, transfere', perfil: null, phone: '919812345678', msg: 'Hello, I paid 499 rupees by Google Pay UPI yesterday but I did not receive any access. Please help.' },
+  { nome: 'IN sem conta: hinglish → responde em inglês simples e pede o e-mail da compra', perfil: null, phone: '919812345678', msg: 'Hi, maine kal payment kiya tha, login nahi ho raha hai. Kya karu?' },
 ]
 
 async function main() {
@@ -90,11 +130,14 @@ async function main() {
   for (const c of CASOS.filter((c) => !filtro || c.nome.includes(filtro))) {
   const t = Date.now()
   const d = await decidirResposta({
+    phone: c.phone,
     perfil: c.perfil,
-    conversa: [{ autor: 'student', texto: c.msg, em: '2026-10-05T12:00:00Z' }],
+    conversa: [...(c.antes ?? []).map((m, i) => ({ autor: m.a, texto: m.t, em: `2026-10-05T11:${String(10 + i).padStart(2, '0')}:00Z` })), { autor: 'student' as const, texto: c.msg, em: '2026-10-05T12:00:00Z' }],
     agora: '2026-10-05T12:00:10Z',
     hotmart: c.hotmart,
     emailSemConta: c.emailSemConta,
+    canal: c.canal,
+    idiomaPadrao: c.idiomaPadrao,
   })
   console.log(`\n━━━ ${c.nome} (${((Date.now() - t) / 1000).toFixed(1)}s) [${d.assuntos ?? ''}] ${d.tipo === 'humano' ? '→ TRANSFERE: ' + d.motivo : ''}${d.tipo === 'responder' && d.reembolsoTransacoes?.length ? ' → REEMBOLSO ' + d.reembolsoTransacoes.join(',') : ''}${d.tipo === 'responder' && d.reenviarAcesso ? ' → REENVIAR ACESSO' : ''}${d.tipo === 'responder' && d.novoEmail ? ' → NOVO E-MAIL ' + d.novoEmail : ''}\nALUNA: ${c.msg}\n\n${d.texto}`)
 }

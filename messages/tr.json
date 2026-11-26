@@ -303,7 +303,8 @@
     "technicalProblems": "Teknik sorunlar",
     "manageSubscription": "Aboneliği yönet",
     "otherQuestions": "Diğer sorular",
-    "whatsappIntro": "Merhaba, RiseMe üyesiyim 💛 Şu konuda yardıma ihtiyacım var: {topic}"
+    "whatsappIntro": "Merhaba, RiseMe üyesiyim 💛 Şu konuda yardıma ihtiyacım var: {topic}",
+    "emailBanner": "Our WhatsApp is temporarily unavailable. E-mail us at {email}: we answer everything there. Tap a topic and the e-mail opens ready to send."
   },
   "fasting": {
     "title": "Oruç",
@@ -718,5 +719,118 @@
     "then": "Hazır: uygulamaya dön ve oynat.",
     "note": "AirPlay destekli TV'lerde (Apple TV, Samsung, LG) veya Chromecast / Google TV ile çalışır.",
     "gotIt": "Anladım"
+  },
+  "cuidado": {
+    "tabName": "Your care",
+    "back": "Back",
+    "doneCount": "You did {done} of {total}",
+    "lessonLabel": "Class {n}",
+    "rodillas": {
+      "name": "Knees",
+      "topLine": "Extra classes to care for your knees. Do them whenever you like, on top of your challenge.",
+      "cardLine": "{n, plural, one {# gentle class} other {# gentle classes}} for your knees"
+    },
+    "espalda": {
+      "name": "Back",
+      "topLine": "Extra classes to care for your back. Do them whenever you like, on top of your challenge.",
+      "cardLine": "{n, plural, one {# gentle class} other {# gentle classes}} for your back"
+    },
+    "card": {
+      "title": "Your care: {name}",
+      "progress": "You did {done} of {total} classes"
+    },
+    "place": {
+      "silla": "🪑 You need a chair",
+      "sofa": "🛋️ Done on the sofa",
+      "cama": "🛏️ Done in bed",
+      "pared": "🧱 You need a wall"
+    },
+    "equipment": {
+      "rodillo": "No foam roller? Use a large towel, tightly rolled.",
+      "tobillera": "No ankle weight? Do it without weight: it still works."
+    },
+    "towelTip": "If kneeling bothers you, put a folded towel under your knees.",
+    "question": {
+      "title": "Does any part of your body hurt when you exercise?",
+      "why": "Tell us and we'll give you gentle classes to care for it.",
+      "knees": "Knees",
+      "back": "Back",
+      "both": "Both",
+      "no": "No",
+      "change": "Change where it hurts",
+      "changeNo": "Does something hurt when you exercise? Tell us",
+      "cancel": "Cancel"
+    },
+    "gift": {
+      "title": "A gift for you",
+      "body": {
+        "rodillas": "You told us your knees hurt. So we prepared {n, plural, one {# gentle class} other {# gentle classes}} to care for them.",
+        "espalda": "You told us your back hurts. So we prepared {n, plural, one {# gentle class} other {# gentle classes}} to care for it.",
+        "both": "You told us your knees and back hurt. So we prepared {n, plural, one {# gentle class} other {# gentle classes}} to care for them."
+      },
+      "same": "Your challenge stays the same: this is an extra.",
+      "cta": "See my classes",
+      "later": "Not now"
+    },
+    "suave": {
+      "label": "Gentle version",
+      "name": "Gentle classes",
+      "topLine": "Gentler classes to go at your own pace. Do them whenever you like: they count toward your streak and your challenge stays the same.",
+      "cardLine": "{n, plural, one {# gentle class} other {# gentle classes}}"
+    },
+    "intensa": {
+      "label": "Intense version",
+      "name": "Intense classes",
+      "topLine": "Short, more demanding classes for when you want more. Do them whenever you like: they count toward your streak and your challenge stays the same.",
+      "cardLine": "{n, plural, one {# intense class} other {# intense classes}}"
+    }
+  },
+  "claseHoy": {
+    "firstLabel": "Your first class",
+    "firstCta": "Start my first class",
+    "firstHint": "Tap the button and follow the video. That's all.",
+    "todayLabel": "Your class today",
+    "todayCta": "Start today's class",
+    "doneLabel": "You already trained today!",
+    "doneNext": "Your next class:",
+    "doneCta": "Do another class today",
+    "dayTitle": "Day {day} · {title}",
+    "meta": "{challenge} · {min} min"
+  },
+  "comoTeFue": {
+    "question": "How did it go today?",
+    "facil": "Easy",
+    "bien": "Good",
+    "dificil": "Very hard",
+    "thanks": "Thank you! 💪",
+    "thanksHard": "Thanks for telling us 💛",
+    "hardTip": "Go at your own pace: pause the video when you need to and rest between exercises.",
+    "suaveOffer": "We have a gentler version to start with. Want to try it?",
+    "suaveYes": "Yes, show me",
+    "suaveNo": "No, I'll keep going",
+    "thanksEasy": "Awesome! 😎",
+    "intensaOffer": "Ready for more? We have a more intense version: short, tougher classes. Want to try it?",
+    "intensaYes": "Yes, show me",
+    "intensaNo": "No, I'll keep going"
+  },
+  "conquista": {
+    "cta": "Continue",
+    "share": "Invite a friend 💛",
+    "d3": {
+      "title": "3 days done!",
+      "body": "Starting is the hardest part, and you already did it."
+    },
+    "d7": {
+      "title": "A whole week!",
+      "body": "Only 1 in 10 make it to day 7. You're now part of an exclusive group of women: those who start and keep going!"
+    },
+    "d14": {
+      "title": "Halfway there!",
+      "body": "14 days of training. You're building a habit: caring for yourself and loving yourself. Keep going!"
+    },
+    "d21": {
+      "title": "Just one week left!",
+      "body": "21 days without giving up. The final stretch is yours."
+    }
   }
 }

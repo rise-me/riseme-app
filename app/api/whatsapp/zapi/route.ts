@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse, after } from 'next/server'
 import { etiquetar, marcarNaoLida, sendZapiText } from '@/lib/zapi'
-import { acessoPendente, enfileirar, jaEnfileirou, marcarNaFila, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
+import { acessoPendente, atenderPedido, enfileirar, jaEnfileirou, marcarNaFila, pediuParaParar, registrarPedidoParaParar } from '@/lib/whatsapp-outbox'
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 import { ofertaPase } from '@/lib/whatsapp-agent/pase'
 import { darCardapioBonus } from '@/lib/diet/quota'
@@ -9,7 +9,9 @@ import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
 import { conviteHotmartDela, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
 import { contaPelaCompraHotmart, reenviarAcesso, reenvioRecente, trocarEmail, emailsDaConta, textoVamosVer, textoOlvidaste, KIND_EMAIL_TROCADO } from '@/lib/whatsapp-agent/acesso'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
-import { decidirResposta, redigirRespostaAprovada, interpretarRespostaResponsavel, type Consulta } from '@/lib/whatsapp-agent/responder'
+import { decidirResposta, redigirRespostaAprovada, interpretarRespostaResponsavel, idiomaPeloTelefone, type Consulta } from '@/lib/whatsapp-agent/responder'
+// Reembolso da Stripe sem perfil: idioma pelo DDI (+91 → inglês, CL-IN 25/11/2026); DDI desconhecido ou LID segue polonês (era o padrão).
+const idiomaSemPerfil = (phone: string) => { const i = idiomaPeloTelefone(phone); return i === 'es' ? 'pl' : i }
 import {
   abrirChat,
   aprendizadosAtivos,
@@ -28,6 +30,7 @@ import {
   passarParaHumano,
   perfilDaAluna,
   registrarMensagem,
+  variantesTelefone,
   pareceRobo,
   respostasRecentes,
   salvarLid,
@@ -41,18 +44,7 @@ import { blocoHotmart } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsosPendentes, aprovarReembolsos, criarPedidosDaDecisao } from '@/lib/whatsapp-agent/reembolsos'
 import { emailNaConversa } from '@/lib/whatsapp-agent/dinheiro'
 import { reembolsarStripe } from '@/lib/stripe-api'
-
-/** Resposta imediata ao pedido de reembolso da Stripe (texto do [Alunas Stripe], 09/11). Sem "devolvido". */
-function textoReembolsoStripe(idioma: string, nome: string | undefined, ok: boolean): string {
-  const n = nome?.trim().split(/\s+/)[0]
-  const pl = idioma === 'pl'
-  if (!ok) return pl
-    ? `${n ? `${n}, t` : 'T'}woja prośba o zwrot jest zapisana. Nasz zespół sprawdza to teraz i napiszemy do Ciebie tutaj. 💛`
-    : `${n ? `${n}, y` : 'Y'}our refund request is registered. Our team is checking it now and we'll write to you here. 💛`
-  return pl
-    ? `Jasne${n ? `, ${n}` : ''}. Twój zwrot jest już w trakcie realizacji — nie musisz nic więcej robić. Wszystkie informacje znajdziesz tutaj:\nhttps://riseme.app/pl/refund\nGdy zwrot zostanie zrealizowany, wyślę Ci tutaj potwierdzenie. 💛`
-    : `Of course${n ? `, ${n}` : ''}. Your refund is already being processed — you don't need to do anything else. All the details are here:\nhttps://riseme.app/en/refund\nOnce the refund is completed, I'll send you a confirmation here. 💛`
-}
+import { textoReembolsoStripe, registrarPedidoReembolso, reembolsoPrometido } from '@/lib/whatsapp-agent/reembolsos'
 
 // POST /api/whatsapp/zapi?s=<ZAPI_WEBHOOK_SECRET> — webhook "Ao receber" da Z-API.
 // A Z-API não assina o webhook: a autenticação é o segredo na URL + o instanceId.
@@ -207,19 +199,53 @@ async function responderConsulta(texto: string, citada: string | undefined) {
   }
 
   try {
+    // Consulta aberta pelo suporte por E-MAIL (25/11/2026): a resposta sai por e-mail, com as mesmas regras (redator,
+    // reembolso da Stripe quando o responsável manda devolver).
+    if (consulta.phone.includes('@') && !consulta.phone.endsWith('@lid')) {
+      const { responderConsultaPorEmail } = await import('@/lib/email-suporte')
+      await dizerAoResponsavel(await responderConsultaPorEmail(consulta, orientacao))
+      return
+    }
     const chat = await abrirChat(consulta.phone)
     const conversa = await historico(consulta.phone)
     const porEmail = chat.userId ? null : await vincularPorEmail(conversa)
     const userId = chat.userId ?? porEmail
     const perfil = userId ? await perfilDaAluna(userId, !porEmail, consulta.phone) : null
-    const { enviar, nota, mensagem, aprendizado } = await redigirRespostaAprovada({
+    // Compras da Stripe dela ainda sem reembolso (da conta e do mesmo telefone em outra conta): se o responsável mandar
+    // devolver, o SISTEMA devolve. Bruno 21/11/2026 escreveu "#182 Reembolsa para evitar problemas" e o bot respondeu
+    // "faça no painel da Stripe"; ele não entra em painel para isso.
+    const fones = variantesTelefone(consulta.phone).flatMap((f) => [f, `+${f}`])
+    const filtros = [`phone.in.(${fones.map((f) => `"${f}"`).join(',')})`, ...(userId ? [`user_id.eq.${userId}`] : [])]
+    const { data: semReembolso } = await admin().from('stripe_vendas').select('payment_intent, oferta, valor_centavos, moeda, created_at').or(filtros.join(',')).is('reembolso_id', null).not('payment_intent', 'is', null).order('created_at', { ascending: false }).limit(6)
+    const comprasStripe = (semReembolso ?? []).map((v) => `${v.payment_intent} · ${v.oferta ?? 'compra'} · ${v.valor_centavos != null ? (Number(v.valor_centavos) / 100).toFixed(2) : '?'} ${String(v.moeda ?? '').toUpperCase()} · ${String(v.created_at).slice(0, 10)}`)
+    const { enviar, nota, mensagem, aprendizado, reembolsarStripe: aDevolver } = await redigirRespostaAprovada({
       perfil,
       conversa,
       resumo: consulta.resumo,
       opcaoA: consulta.opcaoA,
       opcaoB: consulta.opcaoB,
       orientacao,
+      comprasStripe,
     })
+    const pis = aDevolver.filter((pi) => (semReembolso ?? []).some((v) => v.payment_intent === pi)) // só o que é dela e está sem reembolso
+    if (pis.length) {
+      const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
+      const falhas = res.map((r, i) => (r.ok ? null : `${pis[i]}: ${'erro' in r ? r.erro : '?'}`)).filter(Boolean)
+      const valores = pis.map((pi) => comprasStripe.find((c) => c.startsWith(pi))?.split(' · ').slice(1, 3).join(' ') ?? pi).join(' + ')
+      if (falhas.length) {
+        await dizerAoResponsavel(`❌ Consulta #${consulta.id} — tentei o reembolso na Stripe e falhou: ${falhas.join('; ').slice(0, 300)}. Nada foi dito à aluna; a consulta continua pendente.`)
+        return
+      }
+      // O que ela ouve agora é o mesmo texto de quando o bot reembolsa; a confirmação "Gotowe" sai sozinha quando a Stripe concluir.
+      const aviso = textoReembolsoStripe(perfil?.idioma ?? idiomaSemPerfil(consulta.phone), perfil?.nome, true)
+      const envio = await sendZapiText({ phone: consulta.phone, message: aviso, delayTyping: 2 })
+      if (envio.ok) await registrarMensagem({ phone: consulta.phone, direction: 'out', author: 'agent', body: aviso, waMessageId: envio.messageId })
+      await registrarPedidoReembolso({ phone: consulta.phone, canal: 'whatsapp', categoria: 'aprovado_pelo_responsavel', devolveu: pis, motivo: orientacao.slice(0, 200) }).catch(() => {})
+      await fecharConsulta(consulta.id, { status: 'respondida', orientacao, respostaEnviada: aviso })
+      await voltarParaBot(consulta.phone)
+      await dizerAoResponsavel(`✅ Consulta #${consulta.id} — reembolso pedido na Stripe: ${valores}. ${envio.ok ? 'A aluna já foi avisada' : 'O aviso à aluna falhou no envio'} e recebe a confirmação quando a Stripe concluir. Você não precisa fazer nada.`)
+      return
+    }
     if (!enviar) {
       // Orientação era pergunta/pedido de ação: nada vai para a aluna, a consulta segue pendente.
       await dizerAoResponsavel(`✋ Consulta #${consulta.id} — não enviei nada para a aluna.\n${nota || 'Não ficou claro o que responder a ela.'}\n\nQuando decidir, responda de novo citando a consulta.`)
@@ -261,6 +287,16 @@ async function avisarHumano(phone: string, nome: string | undefined, motivo: str
 // waMessageId null = reprocessar (sem esperar agrupamento): conversa que ficou sem resposta.
 // silencioso = pendente antigo: se o agente for transferir, NÃO manda de novo "vou transferir" pra aluna
 // (ela já ouviu isso) — só abre a consulta pro responsável. Se ele souber responder, responde.
+// Muitas conversas ao mesmo tempo (ex.: volta de uma queda, com mensagens acumuladas): as respostas saem espaçadas em vez
+// de dezenas no mesmo minuto (restrição da Meta em 14/11/2026). Melhor esforço, no máximo ~12 s de espera por resposta.
+async function espacarRespostas() {
+  for (let i = 0; i < 3; i++) {
+    const { count } = await admin().from('whatsapp_messages').select('created_at', { count: 'exact', head: true }).eq('direction', 'out').gte('created_at', new Date(Date.now() - 15_000).toISOString())
+    if ((count ?? 0) < 2) return
+    await esperar(3000 + Math.random() * 2000)
+  }
+}
+
 async function processarEntrada(phone: string, waMessageId: string | null, silencioso = false) {
   if (waMessageId) {
     await esperar(ESPERA_AGRUPAR_MS)
@@ -453,9 +489,25 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   // responsável (lista das 20h, ou na hora se estiver perto do dia 15). Sem pedido criado → vira consulta (05/11/2026).
   // Compra da Stripe (Bruno 09/11/2026, teste CL-PL; zero chargeback): reembolso AUTOMÁTICO, sem lista nem aprovação.
   // O texto é fixo (nunca "devolvido"); a confirmação final, com o presente do acesso, sai pelo webhook da Stripe.
+  // Motivo de toda conversa de reembolso da Stripe (teste CL-PL T11, 17/11/2026), devolvendo ou não.
+  // Reembolso PROMETIDO no texto é reembolso FEITO (Bruno 25/11/2026; lib/whatsapp-agent/reembolsos.ts): o bot escreveu que
+  // está encaminhando o reembolso e não devolveu o código pi_ (ou transferiu) → o sistema devolve a compra da Stripe dela.
+  // Só em conta confirmada (telefone ou compra), nunca na achada pelo e-mail digitado.
+  {
+    const pisDoBot = decisao.tipo === 'responder' ? (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_')) : []
+    const prometidos = await reembolsoPrometido({ userId: porEmail ? null : userId, textoBot: decisao.texto ?? '', textosDela: conversa.filter((m) => m.autor === 'student').map((m) => m.texto), pisDoBot }).catch(() => [] as string[])
+    if (prometidos.length) {
+      console.log(`[stripe] reembolso prometido no texto sem o código (${phone}): o sistema executa ${prometidos.join(', ')}`)
+      decisao = decisao.tipo === 'responder'
+        ? { ...decisao, reembolsoTransacoes: [...(decisao.reembolsoTransacoes ?? []), ...prometidos], reembolsoCategoria: decisao.reembolsoCategoria ?? 'prometido_pelo_bot' }
+        : { tipo: 'responder', texto: decisao.texto, pedirDepoimento: false, liberarBrinde: false, pararMensagens: false, reembolsoTransacoes: prometidos, reembolsoCategoria: 'prometido_pelo_bot' }
+    }
+  }
+  if (decisao.tipo === 'responder' && (decisao.reembolsoCategoria || decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))))
+    await registrarPedidoReembolso({ phone, canal: 'whatsapp', categoria: decisao.reembolsoCategoria, devolveu: (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_')), motivo: decisao.reembolsoMotivo }).catch((err) => console.error('[reembolso-pedido] falhou:', err))
   if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))) {
     const pis = decisao.reembolsoTransacoes.filter((t) => t.startsWith('pi_'))
-    const idioma = perfil?.idioma ?? 'pl'
+    const idioma = perfil?.idioma ?? idiomaSemPerfil(phone)
     const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
     const falhas = res.map((r, i) => (r.ok ? null : `${pis[i]}: ${r.erro}`)).filter(Boolean)
     decisao = { ...decisao, texto: textoReembolsoStripe(idioma, perfil?.nome, falhas.length === 0), reembolsoTransacoes: decisao.reembolsoTransacoes.filter((t) => !t.startsWith('pi_')) }
@@ -497,7 +549,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
   }
   if (decisao.tipo === 'responder' && (decisao.novoEmail || decisao.reenviarAcesso)) {
     const idioma = perfil?.idioma ?? 'es'
-    const pedido = decisao.novoEmail ? `trocar o e-mail para ${decisao.novoEmail}` : 'renovar a senha'
+    const pedido = decisao.novoEmail ? `trocar o e-mail para ${decisao.novoEmail}` : 'reenviar o acesso'
     if (!userId || !perfil?.confirmadaPorTelefone) {
       // O prompt não deveria marcar sem conta confirmada; segurança em profundidade (qualquer um digita um e-mail).
       decisao = decisao.novoEmail
@@ -530,6 +582,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     return
   }
   if (decisao.texto) {
+    await espacarRespostas()
     const envio = await sendZapiText({ phone, message: decisao.texto, delayTyping: 2 })
     if (envio.ok) {
       await registrarMensagem({ phone, direction: 'out', author: 'agent', body: decisao.texto, waMessageId: envio.messageId })
@@ -544,7 +597,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     } catch (err) {
       const detalhe = (err instanceof Error ? err.message : String(err)).slice(0, 200)
       console.error(`[acesso] reenvio pelo bot falhou (${phone}):`, err)
-      await consultarResponsavel(phone, perfil?.nome, perfil?.idioma ?? '?', ultimaDela, `ACESSO — o bot prometeu o acesso novo (${reenviarDepois}) e o envio falhou: ${detalhe}`, { resumo: `O bot disse à aluna que a senha foi renovada e o acesso chegaria aqui, mas o envio falhou (${detalhe}).`, opcaoA: 'Reenviar o acesso (comando "reenvia o acesso de <e-mail>").', opcaoB: 'Pedir que use "¿Olvidaste tu contraseña?" no login.' })
+      await consultarResponsavel(phone, perfil?.nome, perfil?.idioma ?? '?', ultimaDela, `ACESSO — o bot prometeu o acesso novo (${reenviarDepois}) e o envio falhou: ${detalhe}`, { resumo: `O bot disse à aluna que o acesso chegaria aqui, mas o envio falhou (${detalhe}).`, opcaoA: 'Reenviar o acesso (comando "reenvia o acesso de <e-mail>").', opcaoB: 'Pedir que use "¿Olvidaste tu contraseña?" no login.' })
     }
   }
 
@@ -733,6 +786,11 @@ export async function POST(request: NextRequest) {
 
   if (lid && !ehLid) await salvarLid(phone, lid)
   const nova = await registrarMensagem({ phone, direction: 'in', author: 'student', body: texto, waMessageId })
-  if (nova) after(() => processarEntrada(phone, waMessageId))
+  // Regime "a pedido" (14/11/2026): a mensagem dela libera o acesso que estava em espera; se era só o botão da página de
+  // obrigado (ou uma fala curta sobre acesso), o acesso que sai É a resposta e o agente não escreve por cima.
+  if (nova) after(async () => {
+    const atendida = await atenderPedido(phone, texto).catch((err) => { console.error('[a-pedido] falhou:', err); return false })
+    if (!atendida) await processarEntrada(phone, waMessageId)
+  })
   return NextResponse.json({ ok: true })
 }

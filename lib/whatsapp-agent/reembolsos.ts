@@ -76,7 +76,10 @@ export async function enviarListaReembolsos(): Promise<string | null> {
 
 // Artigo da central de ajuda da Hotmart para a COMPRADORA ("como solicitar o reembolso da minha compra"), indicado pelo Bruno 05/11/2026.
 const LINK_HOTMART = 'https://help.hotmart.com/es/article/360061973392'
-const LOCAL = /BILLET|MERCADO|PSE|PIX|OXXO|EFECTY|YAPE|BOLETO/i
+// Meio LOCAL = tudo que não é cartão (nem carteira de cartão) nem PayPal. Antes era uma lista de nomes e os que faltavam
+// (Nequi, Servipag…) caíam em "pagaste con tarjeta" (21/11/2026: aviso a uma aluna que tinha dito "pagué por Nequi").
+const CARTAO = /CREDIT|DEBIT|CARD|APPLE_PAY|GOOGLE_PAY|SAMSUNG_PAY/i
+const LOCAL = { test: (pag: string) => Boolean(pag) && !CARTAO.test(pag) && !/PAYPAL/i.test(pag) }
 const comoVolta = {
   es: (pag: string) => /PAYPAL/i.test(pag) ? 'El dinero vuelve a tu cuenta de PayPal.' : LOCAL.test(pag) ? 'Como pagaste por un medio local, Hotmart puede pedirte por correo los datos de tu cuenta para hacer la devolución; el dinero llega en hasta 7 días hábiles después de la aprobación.' : 'Como pagaste con tarjeta, el dinero vuelve al banco emisor y aparece en tu factura actual o en la siguiente (el plazo exacto lo define tu banco).',
   pl: (pag: string) => /PAYPAL/i.test(pag) ? 'Pieniądze wrócą na Twoje konto PayPal.' : 'Jeśli płaciłaś kartą, pieniądze wrócą do banku i pojawią się na bieżącym lub następnym wyciągu (dokładny termin zależy od banku).',
@@ -121,6 +124,11 @@ const CONFIRMA: Record<string, (p: PedidoReembolso) => string> = {
     LINK_HOTMART.replace('/es/', '/en/'),
     fecho('en', p.produto, 'Any questions, just write here. Thank you for giving us a chance 💛'),
   ].join('\n\n'),
+}
+
+/** O texto de confirmação que a aluna recebe (também usado quando o reembolso foi feito fora daqui, pelo painel ou conector). */
+export function textoConfirmaReembolso(p: PedidoReembolso): string {
+  return (CONFIRMA[p.idioma] ?? CONFIRMA.es)(p)
 }
 
 async function executarUm(id: number, p: PedidoReembolso): Promise<string> {
@@ -204,4 +212,68 @@ export async function criarPedidosDaDecisao(d: { phone: string; nome: string; id
   }
   if (criados.length && urgente) await enviarListaReembolsos().catch((err) => console.error('[reembolsos] lista urgente falhou:', err))
   return { criados, ignorados, urgente }
+}
+
+/** Resposta imediata ao pedido de reembolso da Stripe (texto do [Alunas Stripe], 09/11). Sem "devolvido". */
+export function textoReembolsoStripe(idioma: string, nome: string | undefined, ok: boolean): string {
+  const n = nome?.trim().split(/\s+/)[0]
+  const pl = idioma === 'pl'
+  if (!ok) return pl
+    ? `${n ? `${n}, t` : 'T'}woja prośba o zwrot jest zapisana. Nasz zespół sprawdza to teraz i napiszemy do Ciebie tutaj. 💛`
+    : `${n ? `${n}, y` : 'Y'}our refund request is registered. Our team is checking it now and we'll write to you here. 💛`
+  return pl
+    ? `Jasne${n ? `, ${n}` : ''}. Twój zwrot jest już w trakcie realizacji — nie musisz nic więcej robić. Wszystkie informacje znajdziesz tutaj:\nhttps://riseme.app/pl/refund\nGdy zwrot zostanie zrealizowany, wyślę Ci tutaj potwierdzenie. 💛`
+    : `Of course${n ? `, ${n}` : ''}. Your refund is already being processed — you don't need to do anything else. All the details are here:\nhttps://riseme.app/en/refund\nOnce the refund is completed, I'll send you a confirmation here. 💛`
+}
+
+/**
+ * Registro do MOTIVO de cada conversa de reembolso da Stripe (teste CL-PL T11, Bruno 17/11/2026): linha inerte em
+ * whatsapp_outbox, kind 'reembolso-pedido', body JSON {canal, categoria, devolveu, pis, motivo}. O monitor de testes lê
+ * daqui quantas pediram, por quê, e quantas ficaram depois de tirar a dúvida.
+ */
+export async function registrarPedidoReembolso(p: { phone: string; canal: 'whatsapp' | 'email'; categoria?: string; devolveu: string[]; motivo?: string }): Promise<void> {
+  if (!p.categoria && !p.devolveu.length) return
+  const { admin } = await import('./conversa')
+  const agora = new Date().toISOString()
+  await admin().from('whatsapp_outbox').insert({
+    phone: p.phone,
+    kind: 'reembolso-pedido',
+    body: JSON.stringify({ canal: p.canal, categoria: p.categoria ?? 'sem_motivo_dito', devolveu: p.devolveu.length > 0, pis: p.devolveu, motivo: (p.motivo ?? '').slice(0, 300) }),
+    send_after: agora,
+    sent_at: agora,
+    attempts: 5,
+  })
+}
+
+// ── Reembolso PROMETIDO pelo bot é reembolso FEITO (Bruno, 25/11/2026: "que dinâmica é essa em que a gente promete um
+// reembolso e não faz?"). Caso de origem: 21/11, e-mail em polonês; a compra estava no cartão, o bot escreveu "zgłaszam
+// teraz do realizacji" e NÃO devolveu o código pi_ ao sistema: nada aconteceu por 3 dias e a aluna mandou notificação formal.
+// O texto que vai para a aluna é a prova: se ele diz que o reembolso está sendo feito/encaminhado e ela pediu o dinheiro,
+// o sistema devolve a compra da Stripe dela (quando é UMA só sem reembolso; com duas, o bot pergunta qual).
+const PEDE_DINHEIRO = /zwrot|zwr[oó][cć]|oddajcie|oddać pieni|pieni[ąa]dz|reembols|devoluci|devuelv|devolv|mi dinero|meu dinheiro|refund|money back|rimbors|vrácen|iade/i
+const PROMETE: RegExp[] = [
+  /(zwrot\w*[\s\S]{0,70}(zgłasz|zgłosz|zlec|realiz|przekaz|w trakcie|zajm|uruchom))|((zgłasz|zgłosz|zlec|przekaz|realizuj)\w*[\s\S]{0,70}zwrot)/i,
+  /(reembolso[\s\S]{0,70}(registr|proces|tramit|solicit|gestion|en curso|en marcha|encaminh|a caminho))|((registr|tramit|solicit|gestion|encaminh)\w*[\s\S]{0,70}reembolso)/i,
+  /(refund[\s\S]{0,70}(process|request|submitt|forward|on its way|under way))|((process|request|submitt|forward)\w*[\s\S]{0,70}refund)/i,
+]
+// Frase que só OFERECE o reembolso (resposta do 1º pedido: "basta responder e devolvemos") não é promessa.
+const SO_OFERECE = /(^|[^\p{L}])(jeśli|jeżeli|gdyby|gdy tylko|jak tylko|wystarczy|odpisz|odpowiedz|si prefieres|si quieres|si respondes|en cuanto|basta|se preferir|se quiser|if you|just reply|as soon as)([^\p{L}]|$)/iu
+/** O texto do bot diz que o reembolso está sendo feito ou encaminhado? (não vale "se preferir, devolvemos") */
+export function prometeReembolso(textoBot: string): boolean {
+  const afirma = textoBot.split(/(?<=[.!?\n])/).filter((f) => !SO_OFERECE.test(f)).join(' ')
+  return PROMETE.some((re) => re.test(afirma))
+}
+/**
+ * Códigos pi_ que o sistema deve devolver AGORA porque o bot prometeu e não pediu. [] = nada a fazer.
+ * Só quando: ela pediu o dinheiro 2 vezes (a última agora), o texto do bot promete, e a conta tem UMA compra da Stripe e nenhum reembolso.
+ */
+export async function reembolsoPrometido(p: { userId: string | null; textoBot: string; textosDela: string[]; pisDoBot: string[] }): Promise<string[]> {
+  if (!p.userId || p.pisDoBot.length || !prometeReembolso(p.textoBot)) return []
+  // 2 pedidos dela (o 1º pedido tem a resposta que tira a dúvida: regra de 17/11, teste CL-PL T13) e o último é recente.
+  if (p.textosDela.filter((t) => PEDE_DINHEIRO.test(t)).length < 2 || !p.textosDela.slice(-3).some((t) => PEDE_DINHEIRO.test(t))) return []
+  const { admin } = await import('./conversa')
+  const { data } = await admin().from('stripe_vendas').select('payment_intent, reembolso_id').eq('user_id', p.userId).not('payment_intent', 'is', null).limit(6)
+  // Já existe reembolso de outra compra dela: o texto pode estar falando DAQUELE; não devolve mais nada sozinho.
+  if (!data || data.some((v) => v.reembolso_id)) return []
+  return data.length === 1 ? [data[0].payment_intent as string] : []
 }

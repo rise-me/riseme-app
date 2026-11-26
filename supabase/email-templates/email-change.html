@@ -10,6 +10,8 @@
     <title>Potwierdź nowy adres e-mail</title>
 {{ else if eq $l "cs" }}
     <title>Potvrď novou e-mailovou adresu</title>
+{{ else if eq $l "en" }}
+    <title>Confirm your new e-mail</title>
 {{ else if eq $l "it" }}
     <title>Conferma il tuo nuovo indirizzo e-mail</title>
 {{ else if eq $l "nl" }}
@@ -145,6 +147,46 @@
                 </p>
                 <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
                   S láskou,<br />Tým RiseMe
+                </p>
+              </td>
+            </tr>
+{{ else if eq $l "en" }}
+            <tr>
+              <td style="padding:8px 40px 8px 40px;">
+                <h1 style="margin:0; font-size:28px; line-height:1.2; font-weight:800; color:#171717;">Confirm your new e-mail address</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 8px 40px;">
+                <p style="margin:0; font-size:16px; line-height:1.6; color:#262626;">
+                  You asked to change your account e-mail to <strong style="color:#171717;">{{ .NewEmail }}</strong>. Confirm this change by tapping the button below.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 8px 40px;">
+                <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change" style="display:inline-block; background-color:#171717; color:#FFFFFF; text-decoration:none; font-weight:700; font-size:16px; padding:16px 32px; border-radius:999px;">
+                  Confirm new e-mail
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 24px 40px;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  If the button does not work, copy and paste this link into your browser:
+                </p>
+                <p style="margin:8px 0 0 0; font-size:12px; line-height:1.5; color:#171717; word-break:break-all;">
+                  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change" style="color:#171717; text-decoration:underline;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 40px 40px; border-top:1px solid #E8E2D5;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  If you did not ask for this change, ignore this e-mail and consider changing your password.
+                </p>
+                <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  With love,<br />The RiseMe team
                 </p>
               </td>
             </tr>

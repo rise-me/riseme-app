@@ -1,0 +1,8 @@
+ok invite.html
+   assunto: {{$l := or .Data.locale "es"}}{{if eq $l "tr"}}RiseMe'ye hoş geldin{{else if eq $l "pl"}}Witaj w RiseMe{{else if eq $l "cs"}}Vítej v RiseMe{{else if eq $l "en"}}Welcome to RiseMe{{else if eq $l "it"}}Benvenuta in RiseMe{{else}}Bienvenida a RiseMe{{end}} 💛
+ok recovery.html
+   assunto: {{$l := or .Data.locale "es"}}{{if eq $l "tr"}}Şifreni sıfırla{{else if eq $l "pl"}}Zresetuj hasło{{else if eq $l "cs"}}Obnov si heslo{{else if eq $l "en"}}New password{{else if eq $l "it"}}Reimposta la tua password{{else}}Recupera tu contraseña{{end}} 🙌
+ok confirmation.html
+   assunto: {{$l := or .Data.locale "es"}}{{if eq $l "tr"}}Hesabını onayla{{else if eq $l "pl"}}Potwierdź swoje konto{{else if eq $l "cs"}}Potvrď svůj účet{{else if eq $l "en"}}Confirm{{else if eq $l "it"}}Conferma il tuo account{{else}}Confirma tu cuenta{{end}} 🖤
+ok email-change.html
+   assunto: {{$l := or .Data.locale "es"}}{{if eq $l "tr"}}Yeni e-postanı onayla{{else if eq $l "pl"}}Potwierdź nowy adres e-mail{{else if eq $l "cs"}}Potvrď novou e-mailovou adresu{{else if eq $l "it"}}Conferma la nuova email{{else}}Confirma tu nuevo correo{{end}} ✨

@@ -1,7 +1,7 @@
 // Agente de WhatsApp: recebe o perfil da aluna + a conversa até agora e devolve
 // a próxima resposta OU o pedido de passar pra humano. Não tem ferramentas nem
 // acesso a nada além do que vem aqui — o texto da aluna é dado, não instrução.
-import { verificarResposta, registrarVerificacao } from './verificador'
+import { verificarResposta, registrarVerificacao, garantirIdioma } from './verificador'
 import { prazoDaLista } from './lista-20h'
 import { ASSUNTOS, TODOS, classificarAssuntos, montarSystem, porAssuntoLigado, type Assunto } from './assuntos'
 import { buscarAcervo, blocoAcervo, trechosPorIds } from './acervo'
@@ -41,7 +41,7 @@ export interface PerfilAluna {
   quiz?: string | null
   // Cartão da aluna: compras, onde está em cada desafio, casos abertos, último contato humano (lib/cartao-aluna.ts).
   cartao?: string | null
-  // Autosserviço de acesso (lib/whatsapp-agent/acesso.ts): conta nasceu AGORA pela compra Hotmart que ela indicou; senha já renovada há pouco.
+  // Autosserviço de acesso (lib/whatsapp-agent/acesso.ts): conta nasceu AGORA pela compra Hotmart que ela indicou; acesso já reenviado há pouco.
   contaCriadaAgora?: boolean
   reenvioRecente?: boolean
 }
@@ -61,7 +61,7 @@ export interface Consulta {
 }
 
 export type Decisao =
-  | { tipo: 'responder'; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; feedbackResumo?: string; assuntos?: string; paseEmVezDeReembolso?: boolean }
+  | { tipo: 'responder'; reembolsoCategoria?: string; texto: string; pedirDepoimento: boolean; liberarBrinde: boolean; pararMensagens: boolean; indicacaoEmail?: string; provaSocial?: boolean; presenteDesafio?: string; reembolsoTransacoes?: string[]; reembolsoMotivo?: string; reenviarAcesso?: boolean; novoEmail?: string; feedbackResumo?: string; assuntos?: string; paseEmVezDeReembolso?: boolean }
   | { tipo: 'humano'; texto: string; motivo: string; consulta: Consulta; assuntos?: string }
 
 /** Resposta que o Bruno já aprovou para um tipo de pergunta — vale como conhecimento. */
@@ -136,10 +136,35 @@ PARAR MENSAGENS ("parar_mensagens" = true): ela pede para não receber mais ("no
 "NIE"/"wypisz"; cs "NE"/"odhlásit"; it "NO"/"basta"/"annulla l'iscrizione"; tr "hayır"/"yazmayın"; en "stop"/"unsubscribe"):
 responda curto e educado que não vamos mais escrever, sem oferecer nada. Um "no" a uma pergunta sua NÃO é pedido para parar.
 
-COMPRA DA STRIPE (no cartão, compra com "· Stripe ·" e transação pi_…; Bruno 09/11/2026, fase de teste): se ela pede
-reembolso dessa compra, já no 1º pedido: "reembolso_transacoes" = o pi_… e NÃO transfira. Nada de perguntar o motivo,
-oferecer o Pase ou falar de Hotmart/7 dias. O sistema pede o reembolso na hora e escreve a resposta. Nunca diga "devolvido".
-Fora do pedido dela, não ofereça nem sugira reembolso.
+COMPRA DA STRIPE (no cartão, compra com "· Stripe ·" e transação pi_…). REGRA NOVA (Bruno 17/11/2026, teste CL-PL T11:
+reembolso PL em 3,6%, metade ~1 h depois da compra por DÚVIDA: "era pra ser um app?", "vai cobrar todo mês?"):
+  · 1º PEDIDO, sem ela ter dito que quer o dinheiro de qualquer jeito: NÃO preencha "reembolso_transacoes". Pergunte o motivo
+    em 1 frase curta e, na MESMA resposta, já tire a dúvida mais provável com o fato: é pagamento ÚNICO, sem assinatura, nada
+    mensal; é um app no navegador (riseme.app) com e-mail e senha do e-mail de acesso; se achou pesado, existe a versión suave
+    opcional; se não consegue entrar, "reenviar_acesso". Ofereça ajuda UMA vez, sem pressão, e diga que se ela preferir mesmo o
+    dinheiro de volta, é só responder que devolvemos na hora. Nada de Pase, desconto ou Hotmart.
+    PROIBIDO dizer que "nada mais será cobrado" / "nic więcej nie będzie pobierane" (há upsells): diga só "pagamento único,
+    sem assinatura" / "płatność jednorazowa, bez subskrypcji". Ela NÃO precisa explicar nada para receber o dinheiro: o motivo
+    é pergunta, nunca condição.
+  · 2º PEDIDO (ela insiste), OU já no 1º se ela diz claramente que quer o dinheiro mesmo assim / que já decidiu / "zwrot pieniędzy
+    teraz": "reembolso_transacoes" = o pi_… e NÃO transfira. Sem discutir. O sistema pede o reembolso na hora e escreve a resposta.
+    Nunca diga "devolvido".
+  · Nunca deixe sem resposta e nunca transfira pedido de reembolso da Stripe (chargeback vem de quem se sente enrolada).
+  · PROMETER É FAZER (Bruno 25/11/2026: "que dinâmica é essa em que a gente promete um reembolso e não faz?"): PROIBIDO escrever
+    que o reembolso "está sendo encaminhado / registrado / zgłaszam do realizacji / przekazuję do zespołu" sem o pi_… em
+    "reembolso_transacoes". Só existem duas respostas a um pedido de reembolso de compra da Stripe: a do 1º pedido (tira a
+    dúvida e diz que basta responder para devolvermos) ou a devolução (pi_ preenchido; o sistema escreve o texto). Caso real
+    21/11: a compra estava no cartão, o bot escreveu „zgłaszam teraz do realizacji” sem o pi_ e a aluna esperou 3 dias.
+  · "stripe_reembolso_categoria": em TODA resposta em que ela pede ou fala em reembolso de compra da Stripe, o motivo dela numa
+    destas: era_app_ou_expectativa · medo_assinatura_cobranca · achou_dificil · nao_consegue_entrar · arrependimento_dinheiro ·
+    nao_gostou_conteudo · compra_por_engano · sem_motivo_dito · outro. Fora disso, "".
+  · Mensagem pronta do BOTÃO "Zwrot" do app (desde 17/11): "Chcę zwrot pieniędzy za: <produto>. Kod zakupu: pi_…" (en: "I would
+    like a refund for: … Purchase code: pi_…"). Conta como 1º PEDIDO (siga o 1º pedido acima) e o pi_… da mensagem é a compra
+    que ela quer devolver: no 2º pedido use exatamente esse pi_… (sem perguntar qual, mesmo com duas compras).
+Fora do pedido dela, não ofereça nem sugira reembolso. DUAS OU MAIS compras da Stripe no cartão (ex.: Kalistenika + Protokół
+Metaboliczny, upsell do CL-PL desde 13/11/2026): devolva SÓ a que ela nomeia (só o pi_… dela). Se ela não disser de qual,
+pergunte UMA vez, sem preencher "reembolso_transacoes", qual quer devolver: o desafio (Kalistenika) ou o Protokół, ou os dois.
+"Wszystko"/"oba"/os dois → os pi_… das duas. Nunca devolva uma compra que ela não pediu.
 
 PEDIDO DE REEMBOLSO ("reembolso_transacoes"): a garantia da oferta é de 30 DIAS e o reembolso pelo sistema funciona nos 30
 (o link que a aluna usa sozinha é que fecha no dia 15; fato de 09/11/2026: a API aceitou no dia 20). Com o bloco
@@ -178,18 +203,21 @@ BOA NOTÍCIA, nesta ordem, e nunca abre com a palavra reembolso:
 Fora disso (sem bloco, mais de 30 dias, Perfect Pay) siga o CONHECIMENTO e deixe "" nos dois campos. Nunca invente
 transação: só as do bloco HOTMART.
 
-ACESSO — VOCÊ MESMA RESOLVE (Bruno, 05/11/2026: criar conta, renovar senha e corrigir e-mail sem transferir):
+ACESSO — VOCÊ MESMA RESOLVE (Bruno, 05/11/2026: criar conta, reenviar o acesso e corrigir e-mail sem transferir):
 REENVIAR ACESSO ("reenviar_acesso" = true): conta "confirmada pelo telefone" e ela diz que não consegue entrar, "correo o
 contraseña incorrectos", esqueceu ou perdeu a senha, não achou ou não recebeu a mensagem de acesso → true já na 1ª vez, sem
-mandar tentar nada antes. Resposta em 1–2 frases: renovamos a senha e o acesso novo chega AQUI em seguida (a senha anterior
-deixa de valer); nunca escreva a senha. NÃO marque quando: o perfil diz que a mensagem de acesso ainda vai sair (diga que chega
+mandar tentar nada antes. Resposta em 1–2 frases: o acesso chega AQUI em seguida, com a senha CERTA, e a senha dela é sempre
+a mesma, não muda (Bruno 18/11/2026: uma senha por conta, para sempre; o sistema NUNCA gera outra). Diga isso com clareza
+("la contraseña correcta es la del mensaje que te llega ahora; es siempre la misma") e, se o telefone sugerir outra senha
+guardada, que apague e use a da mensagem ou toque no link, que entra direto. PROIBIDO dizer "contraseña nueva", "renovamos
+tu contraseña", "nowe hasło" ou que a anterior deixou de valer; nunca escreva a senha. NÃO marque quando: o perfil diz que a mensagem de acesso ainda vai sair (diga que chega
 em instantes); o perfil diz "ACESSO REENVIADO HÁ POUCO" (aí é problema técnico: pergunte o que aparece na tela e peça um print,
 uma pergunta só); a conta foi achada só pelo e-mail digitado (não confirmada: oriente "¿Olvidaste tu contraseña?" no login, que
 manda o link para o e-mail da compra); ou ela só quer trocar a senha por vontade própria (Más → Mi perfil).
 CORRIGIR E-MAIL ("novo_email"): conta confirmada pelo telefone e ela diz que o e-mail da compra está errado (erro de digitação,
 e-mail que não usa) e qual é o certo. 1º passo: repita o e-mail novo por extenso e pergunte se está certo ("novo_email" = "").
 2º passo, ela confirmou ("sí", "correcto", repete o e-mail): "novo_email" = esse e-mail, e diga que trocamos e que o acesso novo
-chega aqui com o e-mail novo (senha nova). Sem o e-mail novo → pergunte qual é. Conta não confirmada → transfira, e a
+chega aqui com o e-mail novo (a senha continua a mesma de sempre). Sem o e-mail novo → pergunte qual é. Conta não confirmada → transfira, e a
 resposta diz só que vamos conferir e confirmamos por aqui hoje: NUNCA diga que o e-mail já foi trocado (teste 05/11: o modelo
 transferiu e ainda assim escreveu "ya quedó cambiado").
 CONTA CRIADA AGORA (o perfil diz): ela mandou o e-mail, a Hotmart confirmou a compra e a conta acabou de nascer: diga que
@@ -243,7 +271,8 @@ BRINDE DO DEPOIMENTO ("liberar_brinde" = true): ela mandou IMAGEM nova com um co
 (ou qualquer imagem nova depois do convite com 🎁). Não exija prova perfeita, elogio, nem o convite na conversa;
 conta achada pelo email que ela digitou vale (é presente, não dado sensível). NUNCA confira de quem é o comentário nem
 questione o print (Bruno 11/11/2026: "se ela se deu o trabalho de mandar o print, dificilmente está mentindo"; caso Beata PL:
-o comentário era dela, com outro sobrenome, e o bot disse que era de outra pessoa): print de post nosso = "liberar_brinde" true,
+o comentário era dela, com outro sobrenome, e o bot disse que era de outra pessoa; 14/11 PL final 3415: o bot disse "não vejo
+seu comentário, o campo está vazio" e pediu outro print). Mesmo sem enxergar o comentário no print: print de post nosso = "liberar_brinde" true,
 agradeça, dê os parabéns e diga que o cardápio extra está liberado. Sem conta no perfil → peça o email da compra (false; true quando a conta
 aparecer). Brinde já entregue → agradeça e diga que já está na app (false). O brinde é o direito de gerar MAIS 1
 cardápio (não há cardápio pronto). Resposta curta, no espírito de: "¡Muchas gracias por tu comentario! 💛 Ya puedes
@@ -297,8 +326,9 @@ const FORMATO = {
       precisa_materiais: { type: 'boolean' },
       acao_humana: { type: 'string' },
       pase_em_vez_de_reembolso: { type: 'boolean' },
+      stripe_reembolso_categoria: { type: 'string' },
     },
-    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo', 'precisa_materiais', 'acao_humana', 'pase_em_vez_de_reembolso'],
+    required: ['resposta', 'passar_para_humano', 'motivo', 'consulta_resumo', 'consulta_opcao_a', 'consulta_opcao_b', 'pedir_depoimento', 'liberar_brinde', 'parar_mensagens', 'indicacao_email', 'prova_social', 'presente_desafio', 'reembolso_transacoes', 'reembolso_motivo', 'reenviar_acesso', 'novo_email', 'feedback_resumo', 'precisa_materiais', 'acao_humana', 'pase_em_vez_de_reembolso', 'stripe_reembolso_categoria'],
     additionalProperties: false,
   },
 }
@@ -355,7 +385,7 @@ function blocoMateriais(idioma: string, temProtocolo: boolean): string {
 // conhecer as aulas. lib/whatsapp-agent/aulas-calistenia.json (scripts/gerar-aulas.mts) guarda a transcrição POR VERSÃO: 'en' =
 // as aulas em inglês, que são as mesmas dubladas para pl, cs, it, ro e tr; 'es' = as aulas em espanhol, que são OUTROS vídeos
 // (Bruno 05/11) e ainda não têm transcrição. Entra a aula do dia citado (ou o dia atual pelo cartão) + um índice curto.
-type Aula = { texto: string; exercicios: string[]; duracaoMin: number }
+type Aula = { texto: string; exercicios: string[]; duracaoMin: number; titulo?: string; salto?: boolean; obs?: string }
 const AULAS_POR_VERSAO = AULAS as Record<string, Record<string, Aula>>
 const versaoDasAulas = (idioma: string) => (idioma === 'es' ? 'es' : 'en')
 export function diasCitados(conversa: MensagemConversa[], cartao?: string | null): number[] {
@@ -373,8 +403,8 @@ export function blocoAulas(idioma: string, dias: number[]): string {
   if (!aulas || !Object.keys(aulas).length) {
     return 'AULAS DA CALISTENIA: a transcrição das aulas em espanhol ainda não está disponível (são vídeos diferentes dos outros idiomas). Para dúvida sobre um exercício, responda com o acervo e a anatomia básica consolidada (o que o exercício trabalha, como executar com segurança), nunca "não tenho nos materiais"; se precisar do detalhe exato do vídeo, peça que ela descreva o exercício em uma frase.'
   }
-  const indice = Object.entries(aulas).map(([d, a]) => `${d}: ${a.exercicios.slice(0, 5).join(', ')} (${a.duracaoMin} min)`).join(' · ')
-  const detalhe = dias.filter((d) => aulas[String(d)]).map((d) => { const a = aulas[String(d)]; return `AULA DO DIA ${d} (${a.duracaoMin} min; exercícios na ordem: ${a.exercicios.join(' → ')}). Narração do vídeo (inglês; a aluna ouve dublado no idioma dela):\n${a.texto}` })
+  const indice = Object.entries(aulas).map(([d, a]) => `${d}${a.titulo ? ` "${a.titulo}"` : ''}${a.salto ? ' [TEM SALTO]' : ''}: ${a.exercicios.slice(0, 5).join(', ')} (${a.duracaoMin} min)`).join(' · ')
+  const detalhe = dias.filter((d) => aulas[String(d)]).map((d) => { const a = aulas[String(d)]; return `AULA DO DIA ${d}${a.titulo ? ` "${a.titulo}" (título que ela vê no app)` : ''} (${a.duracaoMin} min${a.salto ? '; TEM SALTO' : ''}${a.obs ? `; ${a.obs}` : ''}; exercícios na ordem: ${a.exercicios.join(' → ')}). ${versaoDasAulas(idioma) === 'es' ? 'Narração do vídeo em espanhol (transcrição automática: nomes de exercício podem vir com erro de grafia; ignore palavras sem sentido)' : 'Narração do vídeo (inglês; a aluna ouve dublado no idioma dela)'}:\n${a.texto}` })
   return `AULAS DA CALISTENIA EN CASA (índice dos 28 dias, 5 primeiros exercícios de cada): ${indice}\n${detalhe.length ? '\n' + detalhe.join('\n\n') : '\n(Ela não citou o dia e o cartão não diz: para detalhar um exercício, pergunte em qual dia está.)'}`
 }
 
@@ -415,7 +445,7 @@ function descreverPerfil(p: PerfilAluna): string {
     p.contaCriadaAgora
       ? 'CONTA CRIADA AGORA pela compra Hotmart no e-mail que ela mandou: o acesso (e-mail + senha + link) sai NESTA conversa em instantes. Siga CONTA CRIADA AGORA.'
       : '',
-    p.reenvioRecente ? 'ACESSO REENVIADO HÁ POUCO (senha renovada nas últimas 2 h, mensagem de acesso já enviada aqui): não renove de novo; siga REENVIAR ACESSO.' : '',
+    p.reenvioRecente ? 'ACESSO REENVIADO HÁ POUCO (mensagem de acesso já enviada aqui nas últimas 2 h, com a senha de sempre): não reenvie de novo; siga REENVIAR ACESSO.' : '',
     p.cartao && p.confirmadaPorTelefone ? p.cartao : '',
     p.quiz && p.confirmadaPorTelefone ? p.quiz : '',
     p.confirmadaPorTelefone
@@ -424,6 +454,20 @@ function descreverPerfil(p: PerfilAluna): string {
         'Use só para orientar; não revele dados da conta (nome, datas, o que está liberado, progresso).',
   ].filter(Boolean).join('\n')
 }
+
+// Atendimento por E-MAIL (14/11/2026: a Meta restringiu o WhatsApp do suporte por 24 h; Bruno: "um e-mail que envia e recebe,
+// ligado a você, similar ao WhatsApp"). O cérebro e as regras são os mesmos; este bloco só ajusta o que muda no canal.
+const CANAL_EMAIL = `CANAL DESTA CONVERSA: E-MAIL (não é WhatsApp). O WhatsApp do suporte está temporariamente indisponível; o atendimento segue por este e-mail e a sua resposta sai por e-mail.
+Regras do canal (valem acima das regras que citam o WhatsApp):
+1. Nunca escreva "aqui no WhatsApp", "na mensagem acima", "nesta conversa do WhatsApp" nem peça print pelo WhatsApp. O acesso dela chegou POR E-MAIL (um e-mail da RiseMe com e-mail, senha e botão para entrar; pode estar em Spam/Promoções/Ofertas).
+2. Ela escreve do e-mail da conta: a identidade está confirmada. Não acha o e-mail de acesso, a senha não funciona ou não consegue entrar → "reenviar_acesso" = true: o sistema manda AGORA outro e-mail, separado, com a senha CERTA e botão para entrar. A senha dela é sempre a mesma, não muda (o sistema nunca gera outra). Diga isso com clareza ("te mandei agora o e-mail de acesso de novo; a senha certa é a que está nele, e é sempre a mesma; se o telefone ou o navegador sugerir outra senha guardada, apague e use essa, ou clique no botão do e-mail, que entra direto"). PROIBIDO dizer "senha nova" ou "nowe hasło".
+3. Se ela perguntar do WhatsApp ou disser que escreveu lá e ninguém respondeu: peça desculpas em 1 frase, diga que o WhatsApp está temporariamente indisponível e que o atendimento segue por este e-mail, sem perder nada. Não prometa dia nem hora de volta.
+4. E-mail não é bate-papo: responda TUDO de uma vez (os passos completos, o link completo com https://), porque cada ida e volta demora. No máximo 1 pergunta, só se sem ela não dá para resolver.
+5. Reembolso de compra da Stripe: mesma regra COMPRA DA STRIPE (1º pedido: motivo + tirar a dúvida + 1 oferta; 2º pedido ou decisão clara: "reembolso_transacoes" com o pi_…). Por e-mail, no 1º pedido, termine SEMPRE com a frase exata no idioma dela: se preferir o dinheiro de volta, basta responder "quero o reembolso" (pl: „chcę zwrot”) e devolvemos na hora, sem precisar explicar nada.
+6. Não ofereça convite de depoimento, brinde, indicação nem Pase por este canal. "pedir_depoimento" e "liberar_brinde" = false.
+7. Sem conta no perfil: o sistema JÁ procurou a compra dela por e-mail igual, e-mail parecido (domínio ou letra trocada), código pi_, telefone e nome, e não achou. Na 1ª vez, peça numa frase só DUAS coisas: o e-mail usado na compra e o telefone que ela digitou no pagamento (com qualquer um dos dois o sistema acha a compra sozinho), e NÃO transfira. Se ela JÁ mandou isso e o perfil continua sem conta, ou mandou comprovante de pagamento, ou pede o dinheiro de volta sem compra no perfil → TRANSFIRA ("passar_para_humano" = true; "acao_humana" = achar o pagamento na Stripe por nome, valor e data, e liberar o acesso ou devolver), com tudo o que ela deu no resumo: vira consulta numerada na fila do responsável. PROIBIDO, sem transferir, escrever que alguém "vai verificar", „przekazuję do zespołu”, „sprawdzamy ręcznie”, „zgłoszę zespołowi” ou dar prazo: promessa de uma pessoa só existe junto com a transferência (caso real 18–25/11/2026: 9 respostas assim e ninguém viu).
+8. NUNCA prometa nada pelo WhatsApp: nada de "o acesso chega no WhatsApp", "te escrevo no WhatsApp" ou "confirmo no WhatsApp". Tudo chega por e-mail. Isso vale também ao TRANSFERIR: a equipe responde "aqui, neste e-mail" (pl: „odpowiemy Ci tutaj, w tej wiadomości e-mail”), nunca "aqui no WhatsApp" / „tutaj, w WhatsAppie”. A regra "POLONÊS / compra da Stripe sem conta" vale aqui sem a parte do WhatsApp: diga que o pagamento está certo e que o acesso está (ou vai) no e-mail da compra.
+9. Conta achada pelo e-mail que ela CITOU (escreveu de outro endereço): o e-mail novo de acesso vai para o e-mail da conta, não para o endereço de onde ela escreve. Diga isso com o endereço da conta.`
 
 export async function decidirResposta(params: {
   phone?: string // só para o registro de uso (tokens/custo) por conversa
@@ -441,6 +485,8 @@ export async function decidirResposta(params: {
   diaAula?: number // interno (2ª rodada): dia e trechos já escolhidos na 1ª
   acervoIds?: string[]
   recusouTransferencia?: boolean // interno (2ª rodada): a 1ª quis transferir sem ação humana; o sistema exige a resposta
+  canal?: 'email' // atendimento por e-mail (lib/email-suporte.ts, 14/11/2026): mesmas regras, com o bloco CANAL abaixo
+  idiomaPadrao?: string // sem perfil e sem telefone (e-mail): idioma pelo endereço para onde ela escreveu
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -490,7 +536,12 @@ export async function decidirResposta(params: {
       'suponha nada da conta e não dê orientação que dependa dela (dúvida geral de uso do app pode responder curto, junto ' +
       'com o pedido do e-mail). Se é dinheiro/reclamação séria sem conta, transfira (e peça o e-mail na mesma mensagem). ' +
       'E-mail que ela mandou sem conta: o sistema consulta a Hotmart sozinho (veja E-MAIL SEM COMPRA quando aparecer). ' +
-      'Exceções que não pedem e-mail: "no"/"stop" e resposta automática de outro WhatsApp.') +
+      'Exceções que não pedem e-mail: "no"/"stop" e resposta automática de outro WhatsApp.' +
+      (params.canal === 'email'
+        ? '\nCANAL E-MAIL, SEM CONTA (vale acima do parágrafo anterior): o endereço de onde ela escreve não bate com nenhuma compra, nem igual nem parecido. ' +
+          'Na 1ª resposta peça, na MESMA frase, as DUAS coisas: o e-mail usado na compra E o número de telefone digitado no pagamento (com qualquer um dos dois o sistema acha a compra). ' +
+          'Nunca escreva "WhatsApp" nesta resposta. Se ela já deu os dois e continua sem conta, siga a regra 7 do canal (transferir).'
+        : '')) +
     (params.emailSemConta ? `\nELA MANDOU O E-MAIL ${params.emailSemConta} E NÃO HÁ CONTA NEM COMPRA PAGA COM ELE (o sistema consultou a Hotmart agora; bloco abaixo). Siga E-MAIL SEM COMPRA.` : '') + convite + video
 
   const p = params.perfil
@@ -542,10 +593,11 @@ export async function decidirResposta(params: {
             text:
               (params.recusouTransferencia ? 'TRANSFERÊNCIA RECUSADA PELO SISTEMA: na rodada anterior você quis transferir sem apontar nenhuma ação que só uma pessoa possa fazer. Logo a resposta existe (política pública do meio de pagamento, regra do produto, acervo, fato do sistema, conhecimento geral). RESPONDA a pergunta dela agora, direto, na primeira frase. Só transfira se houver uma ação humana concreta, escrita em "acao_humana".\n\n' : '') +
               (params.consultaPendente ? `CONSULTA PENDENTE #${params.consultaPendente.id} (aberta em ${params.consultaPendente.desde.slice(0, 10)}, ainda sem resposta): ${params.consultaPendente.resumo}\nA aluna espera ESSA resposta, não um "de nada". Responda a isso agora com o que você sabe hoje (Hotmart, acervo, catálogo, acesso); se não souber resolver, passar_para_humano = true e diga que a equipe já está vendo, sem repetir "vou ver".\n\n` : '') +
+              (params.canal === 'email' ? `${CANAL_EMAIL}\n\n` : '') +
               (aulas ? `${aulas}\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
               (params.hotmart ? `${params.hotmart}\n\n` : '') +
-              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília): ${prazoDaLista(params.agora) === 'hoje' ? 'HOJE (es "hoy hasta las 20h")' : 'AMANHÃ (es "mañana hasta las 20h")'}\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
+              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília; NUNCA prometa outro horário): use esta frase no idioma dela: "${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}"\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
               (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
               'Escreva a próxima mensagem para a aluna (respondendo o que ela mandou por último).',
@@ -583,6 +635,7 @@ export async function decidirResposta(params: {
     precisa_materiais: boolean
     acao_humana: string
     pase_em_vez_de_reembolso: boolean
+    stripe_reembolso_categoria?: string
   }
   // A 1ª rodada não tinha os materiais e precisava deles: refaz uma vez com o assunto 'conteudo' (prompt por assunto, 05/11/2026).
   if (out.precisa_materiais && !comMateriais && !params.forcarAssuntos) {
@@ -605,10 +658,15 @@ export async function decidirResposta(params: {
   const verificacao = await verificarResposta({ texto: out.resposta, conversa: params.conversa, agora: params.agora, permiteLongo, regras: (extra || base).slice(0, 28000), contexto: [params.hotmart, params.perfil?.cartao, params.consultaPendente ? `CONSULTA PENDENTE: ${params.consultaPendente.resumo}` : '', acervo, aulas].filter(Boolean).join('\n\n') })
   if (verificacao.corrigida || verificacao.problemas.length) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, verificacao).catch(() => undefined)
   out.resposta = verificacao.texto
+  // Trava de idioma (14/11/2026): resposta em espanhol/português para aluna de outro idioma é traduzida antes de sair.
+  const idiomaDela = params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone))
+  const trava = await garantirIdioma(out.resposta, idiomaDela)
+  if (trava.traduziu || trava.erro) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, { texto: trava.texto, corrigida: trava.traduziu, problemas: ['idioma_errado', ...(trava.erro ? [`nao_traduzido: ${trava.erro}`] : [])] }).catch(() => undefined)
+  out.resposta = trava.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
-  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm/i.test(out.resposta)) {
-    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? idiomaPeloTelefone(params.phone), prazoDaLista(params.agora))}`
+  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|few hours|within a day|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
+    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}`
   }
 
   const assuntos = `${[...cls.assuntos].join(',')} (${cls.fonte})`
@@ -624,29 +682,34 @@ export async function decidirResposta(params: {
           opcaoB: out.consulta_opcao_b.trim(),
         },
       }
-    : { tipo: 'responder', assuntos, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim()).map((t) => (/^pi_/i.test(t) ? t : t.toUpperCase())).filter((t) => /^[A-Z]{2}\d{6,}/.test(t) || /^pi_[A-Za-z0-9]{6,}$/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined, paseEmVezDeReembolso: Boolean(out.pase_em_vez_de_reembolso) }
+    : { tipo: 'responder', assuntos, reembolsoCategoria: out.stripe_reembolso_categoria?.trim() || undefined, texto: out.resposta.trim(), pedirDepoimento: Boolean(out.pedir_depoimento), liberarBrinde: Boolean(out.liberar_brinde), pararMensagens: Boolean(out.parar_mensagens), indicacaoEmail: out.indicacao_email?.trim() || undefined, provaSocial: Boolean(out.prova_social), presenteDesafio: out.presente_desafio?.trim() || undefined, reembolsoTransacoes: (out.reembolso_transacoes ?? '').split(/[,\s]+/).map((t) => t.trim()).map((t) => (/^pi_/i.test(t) ? t : t.toUpperCase())).filter((t) => /^[A-Z]{2}\d{6,}/.test(t) || /^pi_[A-Za-z0-9]{6,}$/.test(t)), reembolsoMotivo: out.reembolso_motivo?.trim() || undefined, reenviarAcesso: Boolean(out.reenviar_acesso), novoEmail: out.novo_email?.trim().toLowerCase() || undefined, feedbackResumo: out.feedback_resumo?.trim() || undefined, paseEmVezDeReembolso: Boolean(out.pase_em_vez_de_reembolso) }
 }
 
 // Frase curta do prazo da lista das 20h, por idioma (lib/whatsapp-agent/lista-20h.ts decide hoje/amanhã).
 const PRAZO: Record<string, [string, string]> = {
+  // Europa sem hora (11/11/2026, achado da revisão da CL-NL): "20h" é de Brasília = meia-noite em Varsóvia/Roma/Praga, a
+  // promessa quebrava todo dia. Lá vale "em poucas horas" (hoje) / "em até um dia" (amanhã). Américas seguem com 20h.
   es: ['Te respondo por aquí hoy hasta las 20h.', 'Te respondo por aquí mañana hasta las 20h.'],
-  pl: ['Odpowiem Ci tutaj dziś do 20:00.', 'Odpowiem Ci tutaj jutro do 20:00.'],
-  it: ['Ti rispondo qui oggi entro le 20.', 'Ti rispondo qui domani entro le 20.'],
-  cs: ['Odpovím ti tady dnes do 20:00.', 'Odpovím ti tady zítra do 20:00.'],
-  tr: ["Bugün saat 20:00'ye kadar buradan yanıt vereceğim.", "Yarın saat 20:00'ye kadar buradan yanıt vereceğim."],
+  pl: ['Odpowiem Ci tutaj w ciągu kilku godzin.', 'Odpowiem Ci tutaj w ciągu jednego dnia.'],
+  it: ['Ti rispondo qui entro poche ore.', 'Ti rispondo qui entro un giorno.'],
+  cs: ['Odpovím ti tady během několika hodin.', 'Odpovím ti tady do jednoho dne.'],
+  tr: ['Birkaç saat içinde buradan yanıt vereceğim.', 'Bir gün içinde buradan yanıt vereceğim.'],
   en: ['I will reply here today by 8 pm.', 'I will reply here tomorrow by 8 pm.'],
-  ro: ['Îți răspund aici azi până la ora 20.', 'Îți răspund aici mâine până la ora 20.'],
+  // Índia (CL-IN, 25/11/2026): 20h de Brasília = 04h30 em Délhi; como na Europa, sem hora.
+  'en-IN': ['I will reply here within the next few hours.', 'I will reply here within a day.'],
+  ro: ['Îți răspund aici în câteva ore.', 'Îți răspund aici în cel mult o zi.'],
   'pt-BR': ['Te respondo por aqui hoje até as 20h.', 'Te respondo por aqui amanhã até as 20h.'],
 }
 /** Aluna sem conta: idioma pelo DDI (10/11/2026: polonesa sem conta ouviu o prazo em espanhol). */
 export function idiomaPeloTelefone(phone?: string): string {
   const t = (phone ?? '').replace(/\D/g, '')
   if (!t || (phone ?? '').includes('@lid')) return 'es'
-  const ddi: [string, string][] = [['48', 'pl'], ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['1', 'es']]
+  const ddi: [string, string][] = [['48', 'pl'], ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['91', 'en'], ['1', 'es']]
   return ddi.find(([d]) => t.startsWith(d))?.[1] ?? 'es'
 }
-export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha'): string {
-  return (PRAZO[idioma] ?? PRAZO.es)[prazo === 'hoje' ? 0 : 1]
+export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha', phone?: string): string {
+  const india = idioma.startsWith('en') && (phone ?? '').replace(/\D/g, '').startsWith('91') && !(phone ?? '').includes('@lid')
+  return (PRAZO[india ? 'en-IN' : idioma] ?? PRAZO.es)[prazo === 'hoje' ? 0 : 1]
 }
 
 // ─── Registro de uso (tokens e custo por resposta) ──────────────────────────────────────────
@@ -676,11 +739,12 @@ const FORMATO_REDACAO = {
       enviar: { type: 'boolean' },
       nota_ao_responsavel: { type: 'string' },
       mensagem: { type: 'string' },
+      reembolsar_stripe: { type: 'array', items: { type: 'string' } },
       salvar_aprendizado: { type: 'boolean' },
       aprendizado_pergunta: { type: 'string' },
       aprendizado_resposta: { type: 'string' },
     },
-    required: ['enviar', 'nota_ao_responsavel', 'mensagem', 'salvar_aprendizado', 'aprendizado_pergunta', 'aprendizado_resposta'],
+    required: ['enviar', 'nota_ao_responsavel', 'mensagem', 'reembolsar_stripe', 'salvar_aprendizado', 'aprendizado_pergunta', 'aprendizado_resposta'],
     additionalProperties: false,
   },
 }
@@ -692,7 +756,9 @@ export async function redigirRespostaAprovada(params: {
   opcaoA: string
   opcaoB: string
   orientacao: string // o que o responsável escreveu (português), do jeito dele: "A", "B)", "A, mas…", texto livre
-}): Promise<{ enviar: boolean; nota: string; mensagem: string; aprendizado: Aprendizado | null }> {
+  /** Compras da Stripe desta aluna ainda sem reembolso (uma por linha, começando pelo pi_): as que o sistema sabe devolver. */
+  comprasStripe?: string[]
+}): Promise<{ enviar: boolean; nota: string; mensagem: string; reembolsarStripe: string[]; aprendizado: Aprendizado | null }> {
   const transcricao = params.conversa.map((m) => `[${m.em}] ${ROTULO[m.autor]}: ${m.texto}`).join('\n')
   const res = await anthropic().beta.messages.create({
     model: CLAUDE_MODEL,
@@ -717,6 +783,14 @@ export async function redigirRespostaAprovada(params: {
       'para <email>", "reenvia o acesso de <email>", "troca o email de <email> para <novo>", "dá um cardápio extra para ' +
       '<email>" — e que depois responda a consulta de novo. Nunca deixe a nota vazia. Só marque "enviar" = true ' +
       'quando dá para mandar à aluna exatamente o que ele decidiu; aí "nota_ao_responsavel" = "".\n' +
+      '- EXCEÇÃO, REEMBOLSO DE COMPRA DA STRIPE (21/11/2026: o responsável escreveu "#182 Reembolsa para evitar problemas" e ' +
+      'ouviu "faça no painel da Stripe"; ele NÃO vai ao painel): quando a mensagem traz a lista "COMPRAS DA STRIPE SEM ' +
+      'REEMBOLSO" e a orientação dele manda devolver o dinheiro ("reembolsa", "devolve", "pode devolver", "estorna"), isso o ' +
+      'SISTEMA FAZ. Ponha em "reembolsar_stripe" os códigos pi_ a devolver: todos os da lista, a não ser que ele diga qual ' +
+      'compra ou valor. Aí "enviar" = false, "mensagem" = "" e "nota_ao_responsavel" = "" (o sistema reembolsa, avisa a aluna ' +
+      'e confirma a ele). NUNCA mande o responsável ao painel da Stripe por uma compra que está nessa lista. Sem a lista, ou ' +
+      'se a orientação não manda devolver, "reembolsar_stripe" = []. Se ele manda devolver e NÃO há lista, a nota diz que ' +
+      'não achei compra da Stripe sem reembolso para esta aluna (pode já estar devolvida, ou ser de outra plataforma).\n' +
       '- Opção escolhida que começa com "[FAZER ANTES: …]": ela diz à aluna que algo já foi feito na conta. Só envie se a ' +
       'resposta dele disser que já fez ("feito", "já troquei", "liberei", "A, já fiz") ou se a conversa mostrar o sistema ' +
       'fazendo. Só a letra ("A") NÃO basta (26/10: a aluna ouviu "ya corregimos tu correo" e ninguém tinha trocado): ' +
@@ -739,6 +813,7 @@ export async function redigirRespostaAprovada(params: {
           `Nome: ${params.perfil?.nome ?? 'desconhecido'}\n\nConversa:\n${transcricao}\n\n` +
           `Dúvida dela (resumo): ${params.resumo}\n\n` +
           `Opções que foram oferecidas ao responsável:\nA) ${params.opcaoA || '(sem opção A)'}\nB) ${params.opcaoB || '(sem opção B)'}\n\n` +
+          (params.comprasStripe?.length ? `COMPRAS DA STRIPE SEM REEMBOLSO (o sistema sabe devolver estas):\n${params.comprasStripe.join('\n')}\n\n` : '') +
           `Resposta do responsável: ${params.orientacao}`,
       },
     ],
@@ -751,11 +826,13 @@ export async function redigirRespostaAprovada(params: {
     enviar: boolean
     nota_ao_responsavel: string
     mensagem: string
+    reembolsar_stripe?: string[]
     salvar_aprendizado: boolean
     aprendizado_pergunta: string
     aprendizado_resposta: string
   }
   return {
+    reembolsarStripe: (out.reembolsar_stripe ?? []).map((x) => x.trim()).filter((x) => x.startsWith('pi_')),
     enviar: out.enviar && Boolean(out.mensagem.trim()),
     nota: out.nota_ao_responsavel.trim(),
     mensagem: out.mensagem.trim(),
@@ -876,7 +953,7 @@ export async function interpretarComando(texto: string): Promise<PedidoComando> 
     system:
       'Você interpreta mensagens que o dono do RiseMe manda pelo WhatsApp. Identifique se é um PEDIDO DE AÇÃO:\n' +
       '- liberar_produto: liberar um desafio/produto na conta de uma aluna ("libera o Pilates para…").\n' +
-      '- reenviar_acesso: gerar senha nova e mandar o acesso de novo ("reenvia o acesso da…").\n' +
+      '- reenviar_acesso: mandar o acesso de novo, com a senha de sempre da conta ("reenvia o acesso da…").\n' +
       '- trocar_email: trocar o email da conta (precisa do email atual ou nome, e do novo email).\n' +
       '- cardapio_extra: dar 1 cardápio extra / menu a mais.\n' +
       '- pausar_bot: parar o bot na conversa de uma aluna.\n' +

@@ -13,17 +13,23 @@ import 'server-only'
 import type Stripe from 'stripe'
 import { createServiceClient } from '@/lib/admin-server'
 import { generateAccessCode, buildAccessLink } from '@/lib/access-code'
-import { sendWhatsAppAccess, mensagensDeAcesso } from '@/lib/whatsapp-access'
+import { guardarSenhaDaConta, senhaDaConta } from '@/lib/senha-conta'
+import { sendWhatsAppAccess, mensagensDeAcesso, avisarProdutoExtra } from '@/lib/whatsapp-access'
 import { enfileirar } from '@/lib/whatsapp-outbox'
-import { sendAccessEmail, estadoEmail } from '@/lib/email'
+import { sendAccessEmail, estadoEmail, sendEmailProdutoExtra } from '@/lib/email'
 import { toE164 } from '@/lib/phone'
 import { sendZapiText, toZapiPhone } from '@/lib/zapi'
 import { registrarMensagem } from '@/lib/whatsapp-agent/conversa'
 import { deveRevogar, registrarCompra } from '@/lib/compras'
 import { registrarCompraNaConta } from '@/lib/cartao-aluna'
 import { textoPresente } from '@/lib/whatsapp-agent/reembolsos'
+import { WHATSAPP_FORA_DO_AR, emailSuporte } from '@/lib/suporte'
 import { stripe, stripeConfigurada, reembolsarStripe } from '@/lib/stripe-api'
 import { buscarRespostasQuiz, guardarQuizNaConta } from '@/lib/quiz-contexto'
+import { mockBonuses } from '@/lib/mock-bonuses'
+
+// Produto vendido à parte (upsell/downsell, ex.: Protocolo Metabólico): libera na aba Extras de quem já tem conta.
+const COMPRA_ADICIONAL = new Set(mockBonuses.filter((b) => b.access === 'purchase').map((b) => b.id))
 
 const APP_URL = () => (process.env.NEXT_PUBLIC_APP_URL ?? 'https://riseme.app').replace(/\/$/, '')
 const MAX_WA = 2 // envios de WhatsApp por venda (o 1º + 1 reenvio); cada envio tem 5 tentativas na fila
@@ -72,6 +78,17 @@ export interface Venda {
 export const urlPaginaReembolso = (locale: string) => `${APP_URL()}${locale === 'es' ? '' : `/${locale}`}/refund` // es sem prefixo (as-needed)
 
 // Linha no fim do e-mail de acesso: como pedir reembolso (Bruno 09/11: tem que ficar claro para ela, caso deseje).
+// Destaque no topo do e-mail de acesso (Bruno 15/11/2026, mesma frase da página de obrigado): metade dos reembolsos sai em ~1 h
+// da compra, por susto na chegada ("vai cobrar todo mês?"). NÃO dizer "nada mais será cobrado": há upsells.
+const SELO_EMAIL: Record<string, string> = {
+  pl: 'Płatność jednorazowa · bez subskrypcji · dożywotni dostęp',
+  en: 'One-time payment · no subscription · lifetime access',
+}
+// WhatsApp fora do ar (lib/suporte.ts WHATSAPP_FORA_DO_AR): a nota avisa e manda responder o próprio e-mail.
+const NOTA_EMAIL_SEM_WHATS: Record<string, (url: string) => string> = {
+  pl: (url) => `Ważne: nasz WhatsApp chwilowo nie działa, dlatego dostęp wysyłamy teraz tylko e-mailem. Masz pytanie? Odpowiedz na tę wiadomość albo napisz na ${emailSuporte('pl')}. Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, odpowiedz na tę wiadomość albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
+  en: (url) => `Important: our WhatsApp is temporarily unavailable, so we send access by e-mail only. Questions? Reply to this message. Guarantee: if for any reason you want your money back, reply to this message or go to ${url}. We start the refund right away, no questions asked.`,
+}
 const NOTA_EMAIL: Record<string, (url: string) => string> = {
   pl: (url) => `Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, napisz do nas na WhatsAppie albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
   nl: (url) => `IJzersterke garantie: wil je om welke reden dan ook je geld terug? Stuur ons een WhatsApp-bericht of ga naar ${url}. We zetten de terugbetaling meteen in gang, zonder lastige vragen.`,
@@ -80,7 +97,7 @@ const NOTA_EMAIL: Record<string, (url: string) => string> = {
 
 // Confirmação final (só com o reembolso 'succeeded'). Termina no presente do acesso (regra do Bruno de 09/11: só é dito
 // aqui, na mensagem final, e a mensagem termina nisso).
-const CONFIRMA_REEMBOLSO: Record<string, (p: { nome: string | null; valor: string }) => string> = {
+const CONFIRMA_REEMBOLSO: Record<string, (p: { nome: string | null; valor: string; moeda?: string | null }) => string> = {
   pl: ({ nome, valor }) => [
     `Gotowe${nome ? `, ${nome.split(' ')[0]}` : ''}. Zwrot ${valor} został zrealizowany. Nie musisz nic więcej robić.`,
     'Pieniądze wracają tą samą drogą, którą płaciłaś: jeśli BLIK-iem, na Twoje konto bankowe, a jeśli kartą, na kartę. Dokładny termin zależy od banku.',
@@ -92,15 +109,23 @@ const CONFIRMA_REEMBOLSO: Record<string, (p: { nome: string | null; valor: strin
     'Het geld gaat terug via dezelfde betaalmethode die je hebt gebruikt: bij iDEAL of Bancontact naar je bankrekening, bij een kaart naar je kaart. Hoe snel dat precies gaat, hangt af van je bank.',
     textoPresente('nl'),
   ].join('\n\n'),
-  en: ({ nome, valor }) => [
+  // CL-IN (Índia, 25/11): UPI devolve à conta do banco ligada ao app de UPI, em até 7 dias úteis (doc Stripe "UPI payments").
+  en: ({ nome, valor, moeda }) => [
     `Done${nome ? `, ${nome.split(' ')[0]}` : ''}. Your refund of ${valor} has been completed. Nothing else to do on your side.`,
-    'The money goes back the same way you paid: with BLIK to your bank account, with a card to your card. The exact timing depends on your bank.',
+    (moeda ?? '').toLowerCase() === 'inr'
+      ? 'The money goes back the same way you paid: with UPI to the bank account linked to your UPI app (usually within 7 business days), with a card to your card (usually 5–10 business days). The exact timing depends on your bank.'
+      : 'The money goes back the same way you paid: to the account or card you paid with. The exact timing depends on your bank.',
     textoPresente('en'),
   ].join('\n\n'),
 }
 
 const valorBonito = (centavos: number | null, moeda: string | null) =>
-  centavos == null ? '' : `${(centavos / 100).toFixed(2).replace('.', ',')} ${(moeda ?? '').toLowerCase() === 'pln' ? 'zł' : (moeda ?? '').toUpperCase()}`
+  centavos == null ? ''
+    // INR (CL-IN): como a aluna viu no checkout, "₹499" (tem 2 casas na Stripe, então /100 está certo).
+    : (moeda ?? '').toLowerCase() === 'inr' ? `₹${centavos % 100 === 0 ? centavos / 100 : (centavos / 100).toFixed(2)}`
+    // EUR (CL-NL): "€19" como no checkout; com centavos, "€19,50".
+    : (moeda ?? '').toLowerCase() === 'eur' ? `€${centavos % 100 === 0 ? centavos / 100 : (centavos / 100).toFixed(2).replace('.', ',')}`
+    : `${(centavos / 100).toFixed(2).replace('.', ',')} ${(moeda ?? '').toLowerCase() === 'pln' ? 'zł' : (moeda ?? '').toUpperCase()}`
 
 const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -116,16 +141,46 @@ export function desafioDaSessao(s: Pick<Stripe.Checkout.Session, 'payment_link' 
   return null
 }
 
+// ── Nome pra saudação: só nome de verdade (Bruno 13/11: "{imię}", "undefined" ou o e-mail nunca podem sair) ─────────
+/** 1º nome com a 1ª maiúscula, ou null se não parecer nome (vazio, inicial, número, e-mail). */
+export function primeiroNome(bruto: string | null | undefined): string | null {
+  const p = String(bruto ?? '').trim().split(/\s+/)[0] ?? ''
+  if (p.length < 2 || !/^[\p{L}'-]+$/u.test(p) || /^(undefined|null|imi[eę])$/i.test(p)) return null
+  return p.split('-').map((x) => x.charAt(0).toLocaleUpperCase('pl') + x.slice(1).toLocaleLowerCase('pl')).join('-')
+}
+
+/** Nome digitado no quiz (tela 33, ligado à conta) ou o da Stripe, já validado. */
+async function nomeDaAluna(db: Db, userId: string | null, daStripe: string | null): Promise<string | null> {
+  if (userId) {
+    const meta = ((await db.auth.admin.getUserById(userId)).data.user?.user_metadata ?? {}) as { quiz?: { respostas?: Record<string, string> }; name?: string }
+    const doQuiz = primeiroNome(meta.quiz?.respostas?.['33']) ?? primeiroNome(meta.name)
+    if (doQuiz) return doQuiz
+  }
+  return primeiroNome(daStripe)
+}
+
 // ── Aviso ao responsável (WhatsApp) ─────────────────────────────────────────────────────────────────────────────
 export async function avisarResponsavel(texto: string): Promise<boolean> {
   const destino = (process.env.WHATSAPP_HANDOFF_PHONE ?? '').replace(/\D/g, '')
-  if (!destino) {
-    console.error('[stripe] sem WHATSAPP_HANDOFF_PHONE; aviso não saiu:', texto)
+  if (destino) {
+    const r = await sendZapiText({ phone: destino, message: texto, delayTyping: 1 })
+    if (r.ok) return true
+    console.error('[stripe] aviso ao responsável pelo WhatsApp falhou:', r.error)
+  } else console.error('[stripe] sem WHATSAPP_HANDOFF_PHONE')
+  // WhatsApp fora (14/11: instância desconectada/restrita) → e-mail ao ALERTA_EMAIL, pra o alerta não esperar a volta.
+  const apiKey = process.env.RESEND_API_KEY
+  const para = (process.env.ALERTA_EMAIL ?? '').split(',').map((e) => e.trim()).filter(Boolean)
+  if (!apiKey || !para.length) {
+    console.error('[stripe] aviso ao responsável não saiu (sem WhatsApp e sem ALERTA_EMAIL):', texto)
     return false
   }
-  const r = await sendZapiText({ phone: destino, message: texto, delayTyping: 1 })
-  if (!r.ok) console.error('[stripe] aviso ao responsável falhou:', r.error, texto)
-  return r.ok
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ from: process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>', to: para, subject: texto.split('\n')[0].slice(0, 180), text: texto }),
+  }).catch(() => null)
+  if (!res?.ok) console.error('[stripe] aviso ao responsável por e-mail falhou:', res?.status, texto)
+  return Boolean(res?.ok)
 }
 
 const quem = (v: Pick<Venda, 'nome' | 'email' | 'phone'>) => `${v.nome || 'sem nome'} · ${v.email}${v.phone ? ` · ${v.phone}` : ''}`
@@ -154,7 +209,9 @@ export async function processarSessaoPaga(s: Stripe.Checkout.Session): Promise<{
 
   const pais = s.customer_details?.address?.country ?? null
   // A Stripe garante E.164 no campo de telefone, MENOS com Apple/Google Pay (vem o que a carteira mandar): toE164 com o país.
-  const { phone } = toE164(s.customer_details?.phone ?? undefined, { countryIso: pais ?? undefined, locale: mapa.locale })
+  // Sem país (carteira), a moeda diz: INR só vende na Índia (CL-IN) → +91.
+  const paisOuMoeda = pais ?? ((s.currency ?? '').toLowerCase() === 'inr' ? 'IN' : undefined)
+  const { phone } = toE164(s.customer_details?.phone ?? undefined, { countryIso: paisOuMoeda, locale: mapa.locale })
   const pi = typeof s.payment_intent === 'string' ? s.payment_intent : s.payment_intent?.id ?? null
 
   const db = createServiceClient()
@@ -201,19 +258,27 @@ async function entregar(db: Db, v: Venda): Promise<void> {
     codigo = generateAccessCode()
     const { data: existente } = await db.from('users').select('id, phone').eq('email', v.email).limit(1)
     let contaNova = false
-    if (existente?.length) {
-      // Já tinha conta (ex.: comprou antes por outra plataforma): senha nova, para ela receber um acesso que funciona.
-      // Se outra venda Stripe dela ainda está em entrega (compra repetida), reaproveita a MESMA senha: senão o 1º
-      // WhatsApp, ainda na fila, chegaria com uma senha que já não vale.
+    if (existente?.length && COMPRA_ADICIONAL.has(v.challenge_id)) {
+      // Upsell/downsell de quem já tem conta (acabou de comprar o front): só libera o produto. Sem senha nova e sem
+      // mensagem de boas-vindas de novo: o acesso dela já foi entregue (ou está saindo) pela compra principal.
       userId = existente[0].id as string
-      const { data: emEntrega } = await db.from('stripe_vendas').select('codigo').eq('user_id', userId).neq('session_id', v.session_id)
-        .not('codigo', 'is', null).gte('created_at', new Date(Date.now() - DIAS_CONFERE * 86_400_000).toISOString()).order('created_at', { ascending: false }).limit(1)
-      const reaproveitada = (emEntrega?.[0]?.codigo as string | undefined) ?? null
-      if (reaproveitada) codigo = reaproveitada
-      else {
-        const { error } = await db.auth.admin.updateUserById(userId, { password: codigo })
-        if (error) throw new Error(`senha nova falhou (${v.email}): ${error.message}`)
-      }
+      codigo = null
+      const nota = 'compra adicional: acesso já entregue na compra principal'
+      await db.from('stripe_vendas').update({ user_id: userId, conta_nova: false, wa_ok: true, email_ok: true, wa_erro: nota, email_erro: nota, updated_at: agora() }).eq('session_id', v.session_id)
+      // Aviso curto "o Protocolo já está na aba Dodatki" (texto, horário, trava de 1 por venda e opt-out = dono do bot;
+      // texto aprovado pelo Bruno 13/11). Valor sem centavos, como ela viu na página.
+      const valor = v.valor_centavos == null ? null : `${Math.round(v.valor_centavos / 100)} ${(v.moeda ?? '').toLowerCase() === 'pln' ? 'zł' : (v.moeda ?? '').toUpperCase()}`
+      const nome = await nomeDaAluna(db, userId, v.nome)
+      if (v.phone) await avisarProdutoExtra({ phone: v.phone, produto: v.challenge_id, locale: v.locale, venda: v.session_id, nome, valor }).catch(() => null)
+      // Mesmo aviso por e-mail (Bruno 13/11), 1 por venda (este ramo só roda na 1ª entrega da sessão).
+      // Bruno 13/11: o e-mail sai SEM nome em lugar nenhum (assunto e saudação).
+      await sendEmailProdutoExtra({ email: v.email, produto: v.challenge_id, locale: v.locale, nome: null, valor, home: `${APP_URL()}/${v.locale}`, whatsapp: 'https://wa.me/riseme' }).catch(() => null)
+    } else if (existente?.length) {
+      // Já tinha conta (comprou antes, aqui ou em outra plataforma). Regra do Bruno (18/11): UMA senha por conta, para
+      // sempre — manda a senha de sempre (lib/senha-conta.ts, que também cobre a de uma venda ainda em entrega) e a
+      // regrava no login; só gera uma se a conta nunca teve senha registrada.
+      userId = existente[0].id as string
+      codigo = (await senhaDaConta({ userId, email: v.email })).code
       if (!existente[0].phone && v.phone) await db.from('users').update({ phone: v.phone }).eq('id', userId)
     } else {
       const { data: novo, error } = await db.auth.admin.createUser({
@@ -225,6 +290,7 @@ async function entregar(db: Db, v: Venda): Promise<void> {
       if (error || !novo.user) throw new Error(`conta não criada (${v.email}): ${error?.message}`)
       userId = novo.user.id
       contaNova = true
+      await guardarSenhaDaConta(userId, codigo!) // a senha de sempre desta conta (regra de 18/11)
       if (v.phone) await db.from('users').update({ phone: v.phone }).eq('id', userId)
     }
     await db.from('stripe_vendas').update({ user_id: userId, codigo, conta_nova: contaNova, updated_at: agora() }).eq('session_id', v.session_id)
@@ -323,13 +389,15 @@ async function enviarWhatsApp(db: Db, v: Venda, primeiro: boolean): Promise<void
 
 async function enviarEmail(db: Db, v: Venda): Promise<void> {
   const link = buildAccessLink(APP_URL(), v.locale, v.email, v.codigo!)
-  const nota = (NOTA_EMAIL[v.locale] ?? NOTA_EMAIL.en)(urlPaginaReembolso(v.locale))
+  const notas = WHATSAPP_FORA_DO_AR ? NOTA_EMAIL_SEM_WHATS : NOTA_EMAIL
+  const nota = (notas[v.locale] ?? notas.en)(urlPaginaReembolso(v.locale))
   const url = urlPaginaReembolso(v.locale)
   const r = await sendAccessEmail({
     email: v.email,
     code: v.codigo!,
     link,
     locale: v.locale,
+    destaque: SELO_EMAIL[v.locale],
     notaTexto: nota,
     notaHtml: escapeHtml(nota).replace(escapeHtml(url), `<a href="${url}" style="color:#1a1a1a;">${escapeHtml(url)}</a>`),
   })
@@ -356,11 +424,15 @@ export async function conferirVendas(): Promise<{ recuperadas: number; conferida
   if (stripeConfigurada()) {
     try {
       const desde = Math.floor(Date.now() / 1000) - 2 * 86_400
-      const sessoes = await stripe().checkout.sessions.list({ created: { gte: desde }, status: 'complete', limit: 100 })
-      const pagas = sessoes.data.filter((s) => s.payment_status === 'paid' && desafioDaSessao(s))
+      // Todas as páginas: com ~500 vendas/dia (14/11), 1 página de 100 cobria só ~4 h dos 2 dias.
+      const sessoes = await stripe().checkout.sessions.list({ created: { gte: desde }, status: 'complete', limit: 100 }).autoPagingToArray({ limit: 5000 })
+      const pagas = sessoes.filter((s) => s.payment_status === 'paid' && desafioDaSessao(s))
       if (pagas.length) {
-        const { data: ja } = await db.from('stripe_vendas').select('session_id').in('session_id', pagas.map((s) => s.id))
-        const tem = new Set((ja ?? []).map((r) => r.session_id as string))
+        const tem = new Set<string>()
+        for (let i = 0; i < pagas.length; i += 100) {
+          const { data: ja } = await db.from('stripe_vendas').select('session_id').in('session_id', pagas.slice(i, i + 100).map((s) => s.id))
+          for (const r of ja ?? []) tem.add(r.session_id as string)
+        }
         for (const s of pagas.filter((x) => !tem.has(x.id))) {
           console.warn(`[stripe] sessão paga sem webhook: ${s.id} → entregando pela conferência`)
           await processarSessaoPaga(s).catch((err) => console.error('[stripe] recuperação falhou:', s.id, err))
@@ -374,7 +446,17 @@ export async function conferirVendas(): Promise<{ recuperadas: number; conferida
 
   const desde = new Date(Date.now() - DIAS_CONFERE * 86_400_000).toISOString()
   const { data } = await db.from('stripe_vendas').select('*').gte('created_at', desde).or('email_ok.is.null,wa_ok.is.null,email_ok.eq.false,wa_ok.eq.false')
-  const lista = (data ?? []) as Venda[]
+  const todas = (data ?? []) as Venda[]
+  // Regime 'a pedido' do WhatsApp (14/11): quase toda venda fica com wa_ok null e a linha 'acesso' parada na fila. Com o
+  // e-mail confirmado e a linha só esperando (sem envio, < 5 tentativas), não há o que fazer: tira da volta numa leitura
+  // só, senão a conferência passa dos 120 s com ~3.500 vendas em 7 dias.
+  const parada = new Set<number>()
+  const ids = todas.filter((v) => v.email_ok === true && v.wa_ok == null && v.wa_outbox_id).map((v) => v.wa_outbox_id as number)
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data: f } = await db.from('whatsapp_outbox').select('id, sent_at, attempts').in('id', ids.slice(i, i + 200))
+    for (const r of f ?? []) if (!r.sent_at && (r.attempts as number) < 5) parada.add(r.id as number)
+  }
+  const lista = todas.filter((v) => !(v.email_ok === true && v.wa_ok == null && v.wa_outbox_id && parada.has(v.wa_outbox_id as number)))
   for (const venda of lista) {
     try {
       avisos += await conferirUma(db, venda)
@@ -398,6 +480,9 @@ async function conferirUma(db: Db, v0: Venda): Promise<number> {
   }
 
   const muda: Partial<Venda> = {}
+  // Regime 'a pedido' do bot (Bruno 14/11, restrição da Meta): a linha 'acesso' nasce em espera (send_after 2099) e só sai
+  // se a aluna escrever. Não é falha nem gera reenvio, mas NÃO é acesso garantido: com o e-mail falhando, ela fica sem nada.
+  let aPedido = false
 
   // WhatsApp
   if (v.wa_ok == null) {
@@ -405,7 +490,8 @@ async function conferirUma(db: Db, v0: Venda): Promise<number> {
       muda.wa_ok = false
       muda.wa_erro = 'sem telefone'
     } else if (v.wa_outbox_id) {
-      const { data: fila } = await db.from('whatsapp_outbox').select('sent_at, attempts, last_error').eq('id', v.wa_outbox_id).maybeSingle()
+      const { data: fila } = await db.from('whatsapp_outbox').select('sent_at, attempts, last_error, send_after').eq('id', v.wa_outbox_id).maybeSingle()
+      aPedido = Boolean(fila && !fila.sent_at && new Date(fila.send_after as string).getUTCFullYear() >= 2090)
       if (fila?.sent_at) muda.wa_ok = true
       else if (!fila || (fila.attempts as number) >= 5) {
         const erro = (fila?.last_error as string | null) ?? 'linha da fila sumiu'
@@ -456,16 +542,18 @@ async function conferirUma(db: Db, v0: Venda): Promise<number> {
   // Avisa 1x, com o quadro fechado: espera o outro canal se resolver (senão um "saiu só por um canal" chegaria antes de o
   // outro também falhar, e o alerta de "SEM ACESSO" nunca sairia). Teto: 2 h esperando o outro canal.
   const algumFalhou = waOk === false || emailOk === false
-  const quadroFechado = (waOk != null && emailOk != null) || Date.now() - new Date(v.created_at).getTime() > 2 * 3_600_000
+  // Sem acesso nenhum: e-mail falhou e o WhatsApp falhou ou só sai se ela escrever. Avisa na hora (não há canal a esperar).
+  const semAcesso = emailOk === false && (waOk === false || aPedido)
+  const quadroFechado = semAcesso || (waOk != null && emailOk != null) || Date.now() - new Date(v.created_at).getTime() > 2 * 3_600_000
   let avisou = 0
   if (algumFalhou && quadroFechado && !v.alerta_em) {
     const linhas = [
-      waOk === false && emailOk === false ? '🚨 Stripe: compradora SEM ACESSO (WhatsApp e e-mail falharam)' : '⚠️ Stripe: acesso saiu só por um canal',
+      semAcesso ? `🚨 Stripe: compradora SEM ACESSO (${aPedido ? 'e-mail falhou; o WhatsApp só sai se ela escrever' : 'WhatsApp e e-mail falharam'})` : '⚠️ Stripe: acesso saiu só por um canal',
       quem(v),
-      waOk === false ? `WhatsApp: ❌ ${muda.wa_erro ?? v.wa_erro ?? '?'}` : `WhatsApp: ${waOk ? '✅' : '⏳'}`,
+      waOk === false ? `WhatsApp: ❌ ${muda.wa_erro ?? v.wa_erro ?? '?'}` : aPedido ? 'WhatsApp: ⏸ a pedido (só sai se ela escrever)' : `WhatsApp: ${waOk ? '✅' : '⏳'}`,
       emailOk === false ? `E-mail: ❌ ${muda.email_erro ?? v.email_erro ?? '?'}` : `E-mail: ${emailOk ? '✅' : '⏳'}`,
       `Compra ${valorBonito(v.valor_centavos, v.moeda)} · sessão ${v.session_id}`,
-      waOk === false && emailOk === false ? 'Falar com ela por outro meio (o telefone/e-mail do checkout está acima).' : 'Ela tem o acesso pelo outro canal; conferir se o dado do canal que falhou está certo.',
+      semAcesso ? 'Falar com ela por outro meio (o telefone/e-mail do checkout está acima).' : 'Ela tem o acesso pelo outro canal; conferir se o dado do canal que falhou está certo.',
     ]
     if (await avisarResponsavel(linhas.join('\n'))) {
       muda.alerta_em = new Date().toISOString()
@@ -498,7 +586,7 @@ export async function atualizarReembolso(pi: string): Promise<void> {
 
   if (r.status === 'succeeded' && !v.reembolso_avisado_em && origem !== 'aviso-fraude') {
     // Aviso de fraude: quem marcou "não reconheço" talvez nem seja a aluna. O responsável já foi avisado na hora.
-    const texto = (CONFIRMA_REEMBOLSO[v.locale] ?? CONFIRMA_REEMBOLSO.en)({ nome: v.nome, valor: valorBonito(r.amount, r.currency) })
+    const texto = (CONFIRMA_REEMBOLSO[v.locale] ?? CONFIRMA_REEMBOLSO.en)({ nome: v.nome, valor: valorBonito(r.amount, r.currency), moeda: r.currency })
     if (await avisarAluna(v, texto)) muda.reembolso_avisado_em = new Date().toISOString()
   }
   if (r.status === 'failed' && !v.reembolso_alerta_em) {
@@ -533,6 +621,7 @@ async function avisarAluna(v: Venda, texto: string): Promise<boolean> {
     body: JSON.stringify({
       from: process.env.RESEND_FROM ?? 'RiseMe <acesso@riseme.app>',
       to: [v.email],
+      reply_to: emailSuporte(v.locale),
       subject: assunto,
       text: texto,
       html: `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;line-height:1.55;color:#1a1a1a;max-width:440px">${texto.split('\n\n').map((p) => `<p>${escapeHtml(p)}</p>`).join('')}</div>`,

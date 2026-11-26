@@ -23,6 +23,8 @@ const COUNTRY_TO_DDI: Record<string, string> = {
   // CL-NL (Stripe, euro): Nederland + België (Vlaanderen) + Suriname, Curaçao/Bonaire e Aruba. A diáspora da tela 4
   // (DE/ES/GB/US) já está acima. Com Apple/Google Pay o telefone pode vir sem +DDI: sem isto o WhatsApp não sai.
   NL: '31', BE: '32', SR: '597', CW: '599', BQ: '599', AW: '297',
+  // CL-IN (Stripe, INR): Índia.
+  IN: '91',
 }
 
 // Locales de país ÚNICO → DDI (fallback quando o payload não traz `country`).

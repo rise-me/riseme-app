@@ -303,7 +303,8 @@
     "technicalProblems": "Problemas técnicos",
     "manageSubscription": "Gestionar suscripción",
     "otherQuestions": "Otras preguntas",
-    "whatsappIntro": "Hola, soy alumna de RiseMe 💛 Necesito ayuda con: {topic}"
+    "whatsappIntro": "Hola, soy alumna de RiseMe 💛 Necesito ayuda con: {topic}",
+    "emailBanner": "Nuestro WhatsApp está temporalmente fuera de servicio. Escríbenos por correo a {email}: ahí respondemos todo. Toca un tema y se abrirá el correo listo."
   },
   "fasting": {
     "title": "Ayuno",
@@ -358,32 +359,32 @@
   },
   "challengeDays": {
     "1": [
-      "Calentamiento y Movilidad",
-      "Fuerza de Brazos",
-      "Core y Abdomen",
-      "Sentadillas y Glúteos",
-      "Empuje y Tracción",
-      "Cardio Activo",
-      "Recuperación Activa",
+      "Abdomen y Movilidad",
+      "Glúteos y Equilibrio",
+      "Hombros y Espalda",
+      "Espalda y Abdomen",
+      "Piernas y Glúteos",
+      "Flexibilidad de Cadera",
+      "Glúteos y Muslos",
       "Resistencia Muscular",
-      "Explosión y Potencia",
-      "Equilibrio y Estabilidad",
-      "Fuerza Total",
-      "Intervalos Cortos",
+      "Oblicuos y Abdomen",
+      "Brazos y Hombros",
+      "Glúteos y Caderas",
+      "Abdomen Completo",
       "Piernas y Posterior",
-      "Hombros y Trapecio",
-      "Core Profundo",
-      "Descanso Activo",
-      "Fuerza de Brazos II",
-      "Glúteos y Posterior",
-      "Cardio y Core",
+      "Oblicuos y Cadera",
+      "Movilidad y Estiramiento",
+      "Flexiones y Plancha",
+      "Movilidad y Core",
+      "Plancha y Abdomen",
+      "Plancha, Espalda y Glúteos",
       "Flexibilidad",
-      "Fuerza Total II",
-      "Potencia Muscular",
-      "Movilidad Avanzada",
-      "Resistencia Cardio",
-      "Fuerza y Control",
-      "Entrenamiento Completo",
+      "Abdomen Total",
+      "Brazos y Pecho",
+      "Brazos y Espalda",
+      "Abdomen y Plancha Lateral",
+      "Piernas y Cardio",
+      "Plancha y Oblicuos",
       "Desafío Final",
       "Celebración y Recuperación"
     ],
@@ -710,5 +711,118 @@
     "then": "Listo: vuelve a la app y dale play.",
     "note": "Funciona con TVs compatibles con AirPlay (Apple TV, Samsung, LG) o con Chromecast / Google TV.",
     "gotIt": "Entendido"
+  },
+  "cuidado": {
+    "tabName": "Tu cuidado",
+    "back": "Volver",
+    "doneCount": "Hiciste {done} de {total}",
+    "lessonLabel": "Clase {n}",
+    "rodillas": {
+      "name": "Rodillas",
+      "topLine": "Clases extra para cuidar tus rodillas. Hazlas cuando quieras, además de tu desafío.",
+      "cardLine": "{n, plural, one {# clase suave} other {# clases suaves}} para tus rodillas"
+    },
+    "espalda": {
+      "name": "Espalda",
+      "topLine": "Clases extra para cuidar tu espalda. Hazlas cuando quieras, además de tu desafío.",
+      "cardLine": "{n, plural, one {# clase suave} other {# clases suaves}} para tu espalda"
+    },
+    "card": {
+      "title": "Tu cuidado: {name}",
+      "progress": "Hiciste {done} de {total} clases"
+    },
+    "place": {
+      "silla": "🪑 Necesitas una silla",
+      "sofa": "🛋️ Se hace en el sofá",
+      "cama": "🛏️ Se hace en la cama",
+      "pared": "🧱 Necesitas una pared"
+    },
+    "equipment": {
+      "rodillo": "¿No tienes rodillo de espuma? Usa una toalla grande bien enrollada.",
+      "tobillera": "¿No tienes peso para el tobillo? Hazlo sin peso: también sirve."
+    },
+    "towelTip": "Si apoyar las rodillas te molesta, pon una toalla doblada debajo.",
+    "question": {
+      "title": "¿Te duele alguna parte del cuerpo al hacer ejercicio?",
+      "why": "Si nos dices, te regalamos clases suaves para cuidarla.",
+      "knees": "Rodillas",
+      "back": "Espalda",
+      "both": "Las dos",
+      "no": "No",
+      "change": "Cambiar dónde me duele",
+      "changeNo": "¿Te duele algo al hacer ejercicio? Cuéntanos",
+      "cancel": "Cancelar"
+    },
+    "gift": {
+      "title": "Un regalo para ti",
+      "body": {
+        "rodillas": "Nos contaste que te duelen las rodillas. Por eso preparamos {n, plural, one {# clase suave} other {# clases suaves}} para cuidarlas.",
+        "espalda": "Nos contaste que te duele la espalda. Por eso preparamos {n, plural, one {# clase suave} other {# clases suaves}} para cuidarla.",
+        "both": "Nos contaste que te duelen las rodillas y la espalda. Por eso preparamos {n, plural, one {# clase suave} other {# clases suaves}} para cuidarlas."
+      },
+      "same": "Tu desafío sigue igual: esto es un extra.",
+      "cta": "Ver mis clases",
+      "later": "Ahora no"
+    },
+    "suave": {
+      "label": "Versión suave",
+      "name": "Clases suaves",
+      "topLine": "Clases más suaves para ir a tu ritmo. Hazlas cuando quieras: cuentan en tus días seguidos y tu desafío sigue igual.",
+      "cardLine": "{n, plural, one {# clase suave} other {# clases suaves}}"
+    },
+    "intensa": {
+      "label": "Versión intensa",
+      "name": "Clases intensas",
+      "topLine": "Clases cortas y más exigentes para cuando quieras más. Hazlas cuando quieras: cuentan en tus días seguidos y tu desafío sigue igual.",
+      "cardLine": "{n, plural, one {# clase intensa} other {# clases intensas}}"
+    }
+  },
+  "claseHoy": {
+    "firstLabel": "Tu primera clase",
+    "firstCta": "Empezar mi primera clase",
+    "firstHint": "Toca el botón y sigue el video. Nada más.",
+    "todayLabel": "Tu clase de hoy",
+    "todayCta": "Empezar la clase de hoy",
+    "doneLabel": "¡Hoy ya entrenaste!",
+    "doneNext": "Tu próxima clase:",
+    "doneCta": "Hacer otra clase hoy",
+    "dayTitle": "Día {day} · {title}",
+    "meta": "{challenge} · {min} min"
+  },
+  "comoTeFue": {
+    "question": "¿Cómo te fue hoy?",
+    "facil": "Fácil",
+    "bien": "Bien",
+    "dificil": "Muy difícil",
+    "thanks": "¡Gracias! 💪",
+    "thanksHard": "Gracias por contarnos 💛",
+    "hardTip": "Ve a tu ritmo: pausa el video cuando lo necesites y descansa entre ejercicios.",
+    "suaveOffer": "Tenemos una versión más suave para empezar. ¿Quieres probarla?",
+    "suaveYes": "Sí, mostrarme",
+    "suaveNo": "No, sigo así",
+    "thanksEasy": "¡Genial! 😎",
+    "intensaOffer": "¿Lista para más? Tenemos una versión más intensa: clases cortas y más exigentes. ¿Quieres probarla?",
+    "intensaYes": "Sí, mostrarme",
+    "intensaNo": "No, sigo así"
+  },
+  "conquista": {
+    "cta": "Seguir",
+    "share": "Invitar a una amiga 💛",
+    "d3": {
+      "title": "¡3 días completados!",
+      "body": "Lo más difícil es empezar, y tú ya lo hiciste. Menos de 1 de cada 5 llega hasta aquí en su primera semana."
+    },
+    "d7": {
+      "title": "¡Una semana completa!",
+      "body": "Solo 1 de cada 10 llega al día 7. Ahora formas parte de un grupo selecto de mujeres: las que empiezan y persisten."
+    },
+    "d14": {
+      "title": "¡Mitad del desafío!",
+      "body": "14 días entrenando. Estás creando un hábito: el de cuidarte y quererte. ¡Sigue así!"
+    },
+    "d21": {
+      "title": "¡Solo te falta una semana!",
+      "body": "21 días sin rendirte. La recta final es tuya."
+    }
   }
 }

@@ -45,7 +45,18 @@ export const LINKS: Record<string, { url: string; versao: Versao }[]> = {
   // 09–10/11 (Meta, por plataforma): Facebook = 88% do gasto e 24 de 29 compras. Foco: AD07_H2-H1 (ROAS 7,85) no FB.
   // Próximo da fila, quando este tiver volume: AD05_H1.V3 (ROAS 7,00) FB 365563009981105/posts/122203961786483220.
   // Reserva (IG, ~10% das vendas): AD07 /p/DeN89o7glF-/ · AD05 /p/DeN8Gt1gHnt/
-  pl: [{ url: 'https://www.facebook.com/365563009981105/posts/122203962470483220', versao: 'v1' }], // AD07_H2-H1 · FB
+  // 15/11/2026 (Bruno: "tem que variar o anúncio que recebe os comentários, porque só tem um recebendo"): o AD07_H2-H1
+  // já juntou comentários (118 no registro do moderador) e SAI da roda; entram os outros anúncios em escala da CL-PL,
+  // todos com 0 a 5 comentários, alternados por aluna. Facebook (de onde vêm as vendas). v1 = volume.
+  // Ids do post = `effective_object_story_id` do criativo (Graph, 15/11). Quando juntarem comentários: trocar pelos próximos
+  // (AD12_H1 …/posts/122207604662483220 · AD10 AV79 …/posts/122207605700483220) ou devolver o AD07 com a v2.
+  pl: [
+    { url: 'https://www.facebook.com/365563009981105/posts/122203961786483220', versao: 'v1' }, // AD05_H1.V3
+    { url: 'https://www.facebook.com/365563009981105/posts/122207683322483220', versao: 'v1' }, // AD13_H1
+    { url: 'https://www.facebook.com/365563009981105/posts/122207683490483220', versao: 'v1' }, // AD14_H2
+    { url: 'https://www.facebook.com/365563009981105/posts/122207603240483220', versao: 'v1' }, // AD05_H1.V6
+  ],
+  // Fora da roda (já tem comentários): AD07_H2-H1 FB 365563009981105/posts/122203962470483220
 }
 
 // v1 — guardada para anúncios novos (ver LINKS).

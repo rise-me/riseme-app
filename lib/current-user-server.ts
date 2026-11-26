@@ -9,6 +9,8 @@ export interface CurrentUser {
   realName: string | null
   initial: string
   onboarded: boolean
+  /** Conta da equipe: vê recursos em prévia (lib/previa.ts). */
+  admin: boolean
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -22,5 +24,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const initial = (name || email).charAt(0).toUpperCase() || '?'
   const onboarded = user.user_metadata?.onboarded === true
 
-  return { id: user.id, email, name, realName: metaName || null, initial, onboarded }
+  const admin = user.app_metadata?.role === 'admin'
+
+  return { id: user.id, email, name, realName: metaName || null, initial, onboarded, admin }
 }

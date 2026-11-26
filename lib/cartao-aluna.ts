@@ -4,6 +4,7 @@
 // As compras ficam em auth user_metadata.compras (gravadas pelos webhooks; backfill do dash em 05/11); o resto é lido na hora.
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
+import { cuidadoDaAluna, CUIDADO_IDIOMAS } from '@/lib/cuidado'
 
 export interface CompraGuardada {
   plataforma: 'hotmart' | 'perfectpay' | 'stripe'
@@ -19,6 +20,29 @@ export interface CompraGuardada {
 const NOME: Record<string, string> = {
   ...Object.fromEntries(mockChallenges.map((c) => [c.id, challengeNameEs(c.id) ?? c.id])),
   'protocolo-metabolico': 'Protocolo Metabólico',
+  // Aulas do "Tu cuidado" (presente p/ dor de joelho/costas, 12/11/2026): progresso gravado como cuidado:<n>
+  'cuidado:11': 'Tu cuidado · Espalda', 'cuidado:12': 'Tu cuidado · Alivio', 'cuidado:13': 'Tu cuidado · Menisco',
+  'cuidado:14': 'Tu cuidado · Osteoartritis', 'cuidado:15': 'Tu cuidado · Sofá', 'cuidado:16': 'Tu cuidado · Cama',
+  'cuidado:4': 'Tu cuidado · Yoga', 'cuidado:17': 'Tu cuidado · Yoga',
+  // Trilhas opcionais (lib/cuidado.ts): suave = desafios 18 e 19 (16/11/2026), intensa = desafio 20 (26/11/2026)
+  'cuidado:18': 'Versión suave', 'cuidado:19': 'Versión suave', 'cuidado:20': 'Versión intensa',
+}
+
+/**
+ * "Tu cuidado" no cartão (Bruno 12/11/2026: o bot conhece a aba e aponta o cartão quando ela fala de dor no joelho/costas
+ * ou de "es muy fuerte"). Só com a aba LIGADA (CUIDADO_ATIVO=1, a mesma chave do app) e idioma com aulas (es/pl).
+ */
+function linhaCuidado(meta: Record<string, unknown>, comprou: boolean): string | null {
+  if (process.env.CUIDADO_ATIVO !== '1' || !comprou) return null
+  const locale = String(meta.locale ?? meta.idioma ?? 'es').split('-')[0]
+  if (!CUIDADO_IDIOMAS.includes(locale)) return null
+  const nome = locale === 'pl' ? '"Troska o siebie"' : '"Tu cuidado"'
+  const c = cuidadoDaAluna(meta)
+  const como = `Se ela falar de dor no joelho ou nas costas, ou que o treino "es muy fuerte", além de responder a dúvida aponte o cartão 🎁 ${nome} no app: abre o desafio dela, logo abaixo do botão "Continuar"; aulas suaves (cadeira, sofá, cama), na ordem que quiser, contam na sequência; quem não tem rolo usa toalha enrolada, sem peso de tornozelo faz sem peso. Ali mesmo, "Cambiar dónde me duele" acrescenta ou tira joelho/costas.`
+  if (!c) return `TU CUIDADO (presente para dor, aba ${nome}): ela AINDA NÃO respondeu se tem dor. ${como} Se ela tem dor, diga para responder a pergunta "¿Te duele alguna parte del cuerpo al hacer ejercicio?" dentro do desafio no app, que a aba aparece.`
+  const tem = [c.rodillas && 'rodillas (12 aulas)', c.espalda && 'espalda (6 aulas)'].filter(Boolean).join(' e ')
+  if (!tem) return `TU CUIDADO: ela respondeu que NÃO tem dor (${c.origem}). Se agora disser que tem: pode mudar em "Cambiar dónde me duele", dentro do desafio, e a aba ${nome} aparece. ${como}`
+  return `TU CUIDADO: ela TEM a aba ${nome} liberada para ${tem} (marcou no ${c.origem}). ${como}`
 }
 
 /** Acrescenta uma compra ao metadata (sem duplicar pela transação; guarda as 12 mais recentes). */
@@ -37,17 +61,73 @@ const data = (iso?: string | null) => (iso ? iso.slice(0, 10) : '?')
  * Texto do cartão para o perfil do agente. Variantes do telefone (com/sem 9, LID) vêm de quem chama.
  * Nunca lança: o que falhar fica de fora.
  */
+// Ofertas da Stripe (metadata.oferta do link) com nome legível para o bot: upsell PL de 13/11/2026 ([Alunas Stripe]).
+const NOME_STRIPE: Record<string, string> = {
+  'CL-PL': 'Kalistenika (desafio)',
+  'CL-PL-UP1': 'Protokół Metaboliczny 28 Dni (upsell, 97 zł)',
+  'CL-PL-DS1': 'Protokół Metaboliczny 28 Dni (downsell, 47 zł)',
+  'CL-IN': 'The RiseMe Calisthenics Challenge (Índia, ₹499)',
+}
+
+// BLIK: a doc da Stripe diz até 2 horas, mas nos 3 reembolsos BLIK que acompanhamos (14, 16 e 17/11/2026) o crédito só
+// apareceu na conta da aluna no 3º dia, e as 3 reclamaram depois de ouvir "2 horas". Vale o que aconteceu.
+const PRAZO_REEMBOLSO: Record<string, string> = { blik: '1 a 3 dias úteis (o banco credita depois; NÃO prometa 2 horas)', card: '5 a 10 dias úteis', link: '5 a 10 dias úteis (cartão salvo no Link)', p24: 'até 3 dias úteis', upi: 'até 7 dias úteis (o banco credita depois; NÃO prometa "na hora")' }
+async function pagamentosStripe(db: SupabaseClient, userId: string): Promise<string[]> {
+  const cols = 'session_id, payment_intent, oferta, valor_centavos, moeda, created_at, reembolso_id, reembolso_status, user_id, email, phone'
+  const { data: dela } = await db.from('stripe_vendas').select(cols).eq('user_id', userId).order('created_at', { ascending: false }).limit(4)
+  // Mesma pessoa, OUTRA conta: no upsell ela digita o e-mail de novo no checkout e uma letra errada cria uma 2ª conta
+  // (3 de 219 upsells até 21/11/2026). Caso de 19/11: a aluna pagou 87 + 97 zł e o bot respondeu "vejo só um pagamento",
+  // porque a 2ª compra estava na outra conta. Aqui entram as vendas do MESMO telefone do checkout, marcadas como tal.
+  const { data: eu } = await db.from('users').select('phone').eq('id', userId).maybeSingle()
+  const fones = [...new Set([...(dela ?? []).map((v) => v.phone as string | null), (eu?.phone as string | null) ?? null].filter((f): f is string => Boolean(f)))]
+  const { data: outras } = fones.length ? await db.from('stripe_vendas').select(cols).in('phone', fones).neq('user_id', userId).not('user_id', 'is', null).order('created_at', { ascending: false }).limit(4) : { data: [] }
+  const vendas = [...(dela ?? []), ...(outras ?? [])]
+  // Compra dela que está em outra conta: o bot precisa do pi_ (para devolver) e do e-mail (para explicar onde ficou).
+  const outraConta = (v: (typeof vendas)[number]) => (v.user_id !== userId ? ` · ${v.payment_intent ?? ''} · ATENÇÃO: compra DELA (mesmo telefone do checkout) que ficou em OUTRA conta, com o e-mail ${v.email} (digitado diferente); o produto desta compra NÃO aparece na conta com que ela entra` : '')
+  // Sem a Stripe (erro ou demora) a venda continua aparecendo, só sem o meio de pagamento: nunca some do cartão.
+  const semStripe = (v: (typeof vendas)[number]) => `- ${v.created_at.slice(0, 10)} · ${v.oferta ?? 'compra'} · ${v.valor_centavos != null ? `${(v.valor_centavos / 100).toFixed(2)} ${(v.moeda ?? '').toUpperCase()}` : 'valor ?'} · meio de pagamento não consultado agora${v.reembolso_id ? ` · reembolso ${v.reembolso_status ?? 'registrado'}` : ''}${outraConta(v)}`
+  if (!vendas?.length) return []
+  const api = await import('@/lib/stripe-api').catch(() => null)
+  if (!api || !api.stripeConfigurada()) return vendas.map(semStripe)
+  const { stripe } = api
+  const fmt = (t: number) => new Date(t * 1000).toLocaleString('pt-BR', { timeZone: 'Europe/Warsaw', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' (Varsóvia)'
+  const umaVenda = async (v: (typeof vendas)[number]): Promise<string> => {
+    const valor = v.valor_centavos != null ? `${(v.valor_centavos / 100).toFixed(2)} ${(v.moeda ?? '').toUpperCase()}` : 'valor ?'
+    let meio = '?', reembolso = ''
+    if (v.payment_intent) {
+      const pi = await stripe().paymentIntents.retrieve(v.payment_intent, { expand: ['latest_charge.refunds'] })
+      const ch = pi.latest_charge && typeof pi.latest_charge !== 'string' ? pi.latest_charge : null
+      const tipo = ch?.payment_method_details?.type ?? '?'
+      meio = tipo === 'blik' ? 'BLIK' : tipo === 'upi' ? 'UPI' : tipo === 'card' ? `cartão ${ch?.payment_method_details?.card?.brand ?? ''} final ${ch?.payment_method_details?.card?.last4 ?? '?'}`.trim() : tipo
+      for (const r of ch?.refunds?.data ?? []) {
+        const ref = (r.destination_details as { blik?: { reference?: string | null }; card?: { reference?: string | null } } | null)
+        const refBanco = ref?.blik?.reference ?? ref?.card?.reference ?? null
+        reembolso += ` · REEMBOLSO ${(r.amount / 100).toFixed(2)} ${r.currency.toUpperCase()} ${r.status === 'succeeded' ? 'CONCLUÍDO pela Stripe' : r.status} em ${fmt(r.created)}${refBanco ? `, referência do banco ${refBanco}` : ''}; prazo para aparecer na conta dela: ${PRAZO_REEMBOLSO[tipo] ?? 'depende do banco'}`
+      }
+    }
+    return `- ${v.created_at.slice(0, 10)} · ${v.oferta ?? 'compra'} · ${valor} · pagou com ${meio}${reembolso || (v.reembolso_id ? ' · reembolso registrado' : '')}${outraConta(v)}`
+  }
+  const tempo = new Promise<string[]>((res) => setTimeout(() => res(vendas.map(semStripe)), 4000))
+  return Promise.race([Promise.all(vendas.map((v) => umaVenda(v).catch(() => semStripe(v)))), tempo])
+}
+
 export async function cartaoDaAluna(db: SupabaseClient, p: { userId: string; user?: User | null; variantes: string[] }): Promise<string> {
   const linhas: string[] = []
   const meta = (p.user?.user_metadata ?? {}) as Record<string, unknown>
+  const cuidado = linhaCuidado(meta, Array.isArray(meta.compras) && meta.compras.length > 0)
+  if (cuidado) linhas.push(cuidado)
   if (meta.manter_acesso) linhas.push('ACESSO MANTIDO por decisão da equipe, mesmo com reembolso (gentileza, 08/11/2026): o acesso dela NÃO será retirado. Se ela perguntar, confirme que fica; nunca diga que será revisado.')
   const compras = (meta.compras as CompraGuardada[] | undefined) ?? []
   if (compras.length) {
     linhas.push('Compras (o que ela pagou, de onde):')
     for (const c of compras.slice(0, 6)) {
-      linhas.push(`- ${data(c.em)} (há ${dias(c.em)} dias) · ${c.produto}${c.oferta ? ` [oferta ${c.oferta}]` : ''} · ${c.valor != null ? `${c.valor} ${c.moeda ?? ''}` : 'valor ?'} · ${c.plataforma === 'hotmart' ? 'Hotmart' : c.plataforma === 'stripe' ? 'Stripe' : 'Perfect Pay'}${c.pais ? ` · país ${c.pais}` : ''} · ${c.transacao}`)
+      linhas.push(`- ${data(c.em)} (há ${dias(c.em)} dias) · ${NOME_STRIPE[c.produto] ?? c.produto}${c.oferta ? ` [oferta ${c.oferta}]` : ''} · ${c.valor != null ? `${c.valor} ${c.moeda ?? ''}` : 'valor ?'} · ${c.plataforma === 'hotmart' ? 'Hotmart' : c.plataforma === 'stripe' ? 'Stripe' : 'Perfect Pay'}${c.pais ? ` · país ${c.pais}` : ''} · ${c.transacao}`)
     }
   }
+  // Pagamentos da Stripe com o MEIO e o REEMBOLSO lidos na hora (16/11/2026, caso de uma aluna PL: o bot perguntou "BLIK ou cartão?"
+  // a uma aluna que pagou com BLIK e deu prazo de cartão). Lê stripe_vendas da conta e a Stripe (até 4 vendas, 4 s no total).
+  const stripeLinhas = await pagamentosStripe(db, p.userId).catch(() => [] as string[])
+  if (stripeLinhas.length) linhas.push('Pagamentos na Stripe (fato, consultado agora; NUNCA pergunte o meio de pagamento):', ...stripeLinhas)
   try {
     const [{ data: prog }, { data: consultas }, { data: cmds }, { data: chats }, { data: humano }, { count: total }, { data: primeira }] = await Promise.all([
       db.from('user_progress').select('challenge_id, day_number, completed_at').eq('user_id', p.userId).order('completed_at', { ascending: false }).limit(400),

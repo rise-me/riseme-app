@@ -10,6 +10,8 @@ import { track } from '@/lib/posthog/track'
 import { mockChallenges, type MockChallenge } from '@/lib/mock-challenges'
 import { HLS_BASE_URL, STREAM_CUSTOMER_HOST, type LessonVideo, type MockDay } from '@/lib/mock-challenge-days'
 import { CastTvHelp } from '@/components/challenges/CastTvHelp'
+import { ComoTeFue } from '@/components/challenges/ComoTeFue'
+import { Conquista, DIAS_CONQUISTA, conquistaJaMostrada, marcaConquista } from '@/components/challenges/Conquista'
 import { PaywallModal } from '@/components/subscription/PaywallModal'
 import { marcaOfertaDaAula, ofertaDaAulaJaMostrada, ofertaMostradaHoje } from '@/lib/pase-oferta'
 
@@ -20,6 +22,20 @@ interface Props {
   locale: string
   hasPase: boolean
   hlsPath?: string | null
+  // Aulas fora de um desafio ("Tu cuidado", lib/cuidado.ts): rota própria e nenhuma oferta do Pase no meio.
+  basePath?: string
+  semOferta?: boolean
+  // "¿Cómo te fue hoy?" quando a aula é concluída (components/challenges/ComoTeFue.tsx)
+  perguntar?: boolean
+  // Tela de conquista nos dias 3/7/14/21 (components/challenges/Conquista.tsx); userId = link de indicação dela
+  conquistas?: boolean
+  // "Muy difícil" oferece a versión suave quando há aulas dela no idioma (lib/cuidado.ts, tipo 'suave')
+  suaveHref?: string | null
+  // "Fácil" oferece a versión intensa (tipo 'intensa')
+  intensaHref?: string | null
+  userId?: string | null
+  // Só a prévia de desenvolvimento (/dev-aula): abre a tela como se a aula já tivesse sido concluída
+  previaConcluida?: boolean
 }
 
 // O que o poll de progresso precisa, igual pros dois provedores
@@ -231,7 +247,10 @@ function loadYouTubeAPI(): Promise<void> {
   return apiLoadingPromise
 }
 
-export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase, hlsPath }: Props) {
+export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase: temPase, hlsPath, basePath, semOferta, perguntar, previaConcluida, conquistas, userId, suaveHref, intensaHref }: Props) {
+  // Sem oferta = como quem já tem o Pase: nenhuma das 3 ofertas abre.
+  const hasPase = temPase || semOferta === true
+  const base = basePath ?? `/${locale}/challenges/${challenge.id}`
   const router = useRouter()
   const t = useTranslations('challenges')
   const tTv = useTranslations('castTv')
@@ -268,7 +287,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   // ou o vídeo chegar ao fim. Uma vez por aula, só pra quem não tem o Pase.
   const isFinalDay = currentDayNumber >= days.length
   const offerDay = !hasPase && (currentDayNumber === 1 || isFinalDay)
-  const [dayDone, setDayDone] = useState(false)
+  const [dayDone, setDayDone] = useState(previaConcluida === true)
   const [offerOpen, setOfferOpen] = useState(false)
   const pendingNavRef = useRef<(() => void) | null>(null)
 
@@ -293,11 +312,29 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
     setOfferOpen(true)
   }
 
-  // Sair do player passa por aqui: se a oferta da aula está pendente, ela aparece antes de seguir.
+  // Conquista (dias 3/7/14/21): ao sair da aula concluída ou no fim do vídeo, uma vez por desafio e dia.
+  const [conquistaOpen, setConquistaOpen] = useState(false)
+  function canConquista() {
+    return conquistas === true && dayDone && DIAS_CONQUISTA.includes(currentDayNumber) && !conquistaJaMostrada(challenge.id, currentDayNumber)
+  }
+  function openConquista(after: (() => void) | null) {
+    marcaConquista(challenge.id, currentDayNumber)
+    track('conquista_vista', { challenge_id: challenge.id, day_number: currentDayNumber })
+    pendingNavRef.current = after
+    setConquistaOpen(true)
+  }
+
+  // Sair do player passa por aqui: se a oferta da aula (ou a conquista) está pendente, ela aparece antes de seguir.
   function leave(go: () => void) {
     if (canOffer()) openOffer(go)
+    else if (canConquista()) openConquista(go)
     else go()
   }
+
+  useEffect(() => {
+    if (!conquistaOpen && duration > 0 && elapsed / duration >= 0.98 && canConquista()) openConquista(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elapsed, duration, dayDone, conquistaOpen])
 
   useEffect(() => {
     if (offerDay && dayDone && !offerOpen && duration > 0 && elapsed / duration >= 0.98 && canOffer()) openOffer(null)
@@ -307,7 +344,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
   useEffect(() => {
     savedRef.current = false
     heardRef.current = false
-    setDayDone(false)
+    setDayDone(previaConcluida === true)
     setElapsed(0)
     setFailCode(null)
     setMuted(false)
@@ -356,8 +393,8 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
           setDayDone(true)
           const watchedPct = Math.round((t / d) * 100)
           markDayComplete({
-            challengeId: challenge.id,
-            dayNumber: currentDayNumber,
+            challengeId: currentDay.progresso?.challengeId ?? challenge.id,
+            dayNumber: currentDay.progresso?.dayNumber ?? currentDayNumber,
             watchedPct,
           })
             .then(({ error }) => {
@@ -412,7 +449,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
 
   function navigate(day: MockDay | undefined) {
     if (!day) return
-    leave(() => router.push(`/${locale}/challenges/${challenge.id}/player/${day.day_number}`))
+    leave(() => router.push(`${base}/player/${day.day_number}`))
   }
 
   const SEGMENTS = 20
@@ -481,7 +518,7 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
           <Tv size={18} className="text-white" />
         </button>
         <button
-          onClick={() => leave(() => router.push(`/${locale}/challenges/${challenge.id}`))}
+          onClick={() => leave(() => router.push(base))}
           className="absolute top-12 right-4 z-20 w-9 h-9 rounded-full bg-black/60 backdrop-blur flex items-center justify-center"
         >
           <X size={18} className="text-white" />
@@ -541,7 +578,9 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
           </button>
         </div>
 
-        {nextDay && (
+        {perguntar && dayDone && <ComoTeFue challengeId={challenge.id} dayNumber={currentDayNumber} suaveHref={suaveHref} intensaHref={intensaHref} />}
+
+        {nextDay && !(perguntar && dayDone) && (
           <div className="flex items-center gap-3 bg-white/5 rounded-2xl p-3">
             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
               <span className="text-lg">{challenge.thumbnail_emoji}</span>
@@ -558,6 +597,20 @@ export function VideoPlayer({ challenge, days, currentDayNumber, locale, hasPase
       </div>
 
       <CastTvHelp open={tvOpen} onClose={() => setTvOpen(false)} />
+      {conquistaOpen && (
+        <Conquista
+          challengeId={challenge.id}
+          dia={currentDayNumber}
+          locale={locale}
+          userId={userId}
+          onClose={() => {
+            setConquistaOpen(false)
+            const go = pendingNavRef.current
+            pendingNavRef.current = null
+            go?.()
+          }}
+        />
+      )}
       <PaywallModal
         open={offerOpen}
         onClose={() => {

@@ -17,7 +17,7 @@
 import type { AppLocale } from '@/i18n/routing'
 import { sendVoxuyAccess } from '@/lib/voxuy'
 import { isZapiConfigured, toZapiPhone } from '@/lib/zapi'
-import { enfileirar } from '@/lib/whatsapp-outbox'
+import { enfileirar, jaEscreveu, ESPERA_PEDIDO } from '@/lib/whatsapp-outbox'
 import { conviteDepoimento } from '@/lib/whatsapp-agent/depoimentos'
 
 type AccessCopy = (p: { email: string; code: string; link: string; homeUrl: string }) => string
@@ -25,7 +25,6 @@ type SupportCopy = (p: { playlist?: string }) => string
 
 // Atraso do acesso: tempo da VSL do upsell (~15 min). Ajustável sem deploy de código.
 const ATRASO_ACESSO_MIN = Number(process.env.WHATSAPP_ACCESS_DELAY_MIN ?? 15)
-const ESPERA_MSG2_MS = 45_000
 const ESPERA_DEPOIMENTO_MS = 30 * 60_000 // "aproveitar que a pessoa está quente" (Bruno, 14/10)
 const CONVITE_PARA_TODAS = true
 
@@ -458,17 +457,14 @@ export async function sendWhatsAppAccess(params: {
   // NÃO envia na hora: a compradora está na VSL do upsell logo após pagar, e a
   // notificação do WhatsApp tira ela da página de venda. Enfileira com atraso; o cron
   // /api/whatsapp/outbox envia. O email (contingência) continua saindo na hora.
-  const [acesso, apoio] = mensagensDeAcesso(params)
-  const sendAt = new Date(Date.now() + ATRASO_ACESSO_MIN * 60_000)
-  const idAcesso = await enfileirar({ phone, kind: 'acesso', body: acesso, mask: params.code, sendAfter: sendAt })
+  // REGIME "A PEDIDO" (Bruno 14/11/2026, lib/whatsapp-outbox.ts): UMA mensagem (acesso + apoio + como pedir reembolso no
+  // fim), e ela só sai depois que a aluna nos escreve (botão da página de obrigado). Quem já nos escreveu antes por este
+  // número recebe no atraso normal. Até lá a linha fica em espera; o e-mail de acesso sai na hora, como sempre.
+  const unica = mensagensDeAcesso(params).join('\n\n')
+  const emEspera = !(await jaEscreveu(phone))
+  const sendAt = emEspera ? new Date(ESPERA_PEDIDO) : new Date(Date.now() + ATRASO_ACESSO_MIN * 60_000)
+  const idAcesso = await enfileirar({ phone, kind: 'acesso', body: unica, mask: params.code, sendAfter: sendAt })
   if (!idAcesso) return
-  await enfileirar({
-    phone,
-    kind: 'apoio',
-    body: apoio,
-    sendAfter: new Date(sendAt.getTime() + ESPERA_MSG2_MS),
-    dependsOn: idAcesso,
-  })
 
   // 3ª mensagem: convite de depoimento para TODA compradora, ~30 min depois do acesso (decisão do Bruno,
   // 14/10/2026: 85% nunca escreve, então o convite só pela conversa quase não saía). Na hora de enviar,
@@ -483,7 +479,7 @@ export async function sendWhatsAppAccess(params: {
       phone: chave,
       kind: 'depoimento',
       body: convite,
-      sendAfter: new Date(sendAt.getTime() + ESPERA_DEPOIMENTO_MS),
+      sendAfter: emEspera ? sendAt : new Date(sendAt.getTime() + ESPERA_DEPOIMENTO_MS), // em espera: liberarEspera põe 30 min depois do acesso
       dependsOn: idAcesso,
     })
   }
@@ -543,19 +539,76 @@ export function mensagensDeAcesso(p: {
   ]
 }
 
-// Abertura do REENVIO de acesso (senha nova) — usada pelo script de reenvio em lote e pelo comando
+// Abertura do REENVIO de acesso (mesma senha de sempre) — usada pelo script de reenvio em lote e pelo comando
 // "reenvia o acesso" do responsável. Sem a palavra "anterior": a msg de acesso diz "la contraseña
 // anterior" no sentido de "a de cima".
+// Bruno 18/11/2026: a senha da conta é UMA só, para sempre (lib/senha-conta.ts). O reenvio manda a mesma e diz isso com
+// todas as letras: "a senha certa é esta". O aviso do telefone existe porque o preenchimento automático guarda senha velha.
 const ABERTURA_REENVIO: Record<string, string> = {
-  es: '¡Hola! 💛 Te reenviamos por aquí tu acceso a RiseMe. Tu contraseña fue renovada: usa la que aparece en este mensaje.',
-  pl: 'Cześć! 💛 Przesyłamy Ci tutaj dostęp do RiseMe. Twoje hasło zostało odnowione: użyj tego z tej wiadomości.',
-  it: "Ciao! 💛 Ti rimandiamo qui il tuo accesso a RiseMe. La tua password è stata rinnovata: usa quella che trovi in questo messaggio.",
-  cs: 'Ahoj! 💛 Posíláme ti sem znovu přístup do RiseMe. Tvoje heslo bylo obnoveno: použij to, které je v této zprávě.',
-  tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. Şifren yenilendi: bu mesajdaki şifreyi kullan.',
-  en: 'Hi! 💛 We are resending your RiseMe access here. Your password was renewed: use the one in this message.',
-  'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. Sua senha foi renovada: use a que está nesta mensagem.',
+  es: '¡Hola! 💛 Te reenviamos por aquí tu acceso a RiseMe. *La contraseña correcta es la de este mensaje*, y es siempre la misma: no cambia. Si tu teléfono te sugiere otra contraseña guardada, bórrala y escribe esta, o simplemente toca el enlace de abajo y entras directo.',
+  pl: 'Cześć! 💛 Przesyłamy Ci tutaj jeszcze raz dostęp do RiseMe. *Prawidłowe hasło to to z tej wiadomości* i zawsze jest to samo: nie zmienia się. Jeśli telefon podpowiada inne, zapisane hasło, usuń je i wpisz to poniżej albo po prostu kliknij link na dole, a wejdziesz od razu.',
+  it: "Ciao! 💛 Ti rimandiamo qui il tuo accesso a RiseMe. *La password giusta è quella di questo messaggio* ed è sempre la stessa: non cambia. Se il telefono ti suggerisce un'altra password salvata, cancellala e scrivi questa, oppure tocca semplicemente il link qui sotto ed entri subito.",
+  cs: 'Ahoj! 💛 Posíláme ti sem znovu přístup do RiseMe. *Správné heslo je to v této zprávě* a je pořád stejné: nemění se. Pokud ti telefon nabízí jiné uložené heslo, smaž ho a napiš tohle, nebo prostě klikni na odkaz níže a jsi hned uvnitř.',
+  tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. *Doğru şifre bu mesajdaki şifredir* ve hep aynıdır: değişmez. Telefonun kayıtlı başka bir şifre önerirse onu sil ve bunu yaz ya da aşağıdaki bağlantıya dokun, doğrudan girersin.',
+  en: 'Hi! 💛 We are resending your RiseMe access here. *The correct password is the one in this message*, and it is always the same: it does not change. If your phone suggests another saved password, delete it and type this one, or just tap the link below and you are in.',
+  'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. *A senha certa é a desta mensagem*, e é sempre a mesma: não muda. Se o celular sugerir outra senha salva, apague e digite esta, ou simplesmente toque no link abaixo e você entra direto.',
 }
 
 export function aberturaReenvio(locale: string): string {
   return ABERTURA_REENVIO[locale] ?? ABERTURA_REENVIO.es
+}
+
+// ── Aviso de produto extra (upsell/downsell de quem JÁ tem conta) ─────────────────────────────────────────────────
+// Bruno 13/11/2026: quem compra o Protokół no upsell do CL-PL não recebia nada (o produto só aparece na aba "Dodatki").
+// Uma mensagem só, ~5 min depois do pagamento (ela já saiu do funil), dizendo o que comprou, que o login é o mesmo e o
+// caminho exato no app. Quem chama: a rota da Stripe ([Alunas Stripe]) quando entra a compra extra. 1 vez por venda.
+const AVISO_EXTRA: Partial<Record<string, Record<string, (n: string | undefined, valor: string | undefined, homeUrl: string) => string>>> = {
+  'protocolo-metabolico': {
+    pl: (n, valor, home) => `Gotowe${n ? `, ${n}` : ''}! 💛 Twój *Protokół Metaboliczny 28 Dni*${valor ? ` (${valor})` : ''} jest już w aplikacji.
+
+📲 Wchodzisz tak samo jak zawsze, *tym samym e-mailem i hasłem*. Nie ma nowego hasła.
+
+👉 Otwórz aplikację: ${home}
+👉 Na dole ekranu kliknij *„Dodatki"*
+👉 Tam znajdziesz *„Protokół metaboliczny"*
+
+Masz pytanie? Napisz tutaj 💛`,
+  },
+}
+
+export async function avisarProdutoExtra(p: {
+  phone: string
+  produto: string // id do produto no app, ex.: 'protocolo-metabolico'
+  locale: string
+  venda: string // id da venda (ex.: sessão da Stripe) — trava de 1 aviso por compra
+  nome?: string | null
+  valor?: string | null // como ela vê no extrato, ex.: '97 zł'
+}): Promise<number | null> {
+  const texto = AVISO_EXTRA[p.produto]?.[p.locale]
+  if (!texto || !isZapiConfigured()) return null
+  const phone = toZapiPhone(p.phone)
+  if (!phone) return null
+  const { jaEnfileirou, pediuParaParar } = await import('@/lib/whatsapp-outbox')
+  const kind = `aviso-extra:${p.venda}`.slice(0, 120)
+  if ((await jaEnfileirou(phone, kind)) || (await pediuParaParar(phone))) return null
+  // Sem nome (Bruno 13/11: 'para não ter problema e minimizar erros').
+  // O acesso do desafio (com a senha) sai 15 min depois da compra do front, por causa da VSL do upsell ([Alunas Stripe]).
+  // Se ele ainda está na fila, o aviso espera por ele: "mesmo e-mail e senha" nunca pode chegar antes da senha.
+  let sendAfter = new Date(Date.now() + 5 * 60_000)
+  let dependsOn: number | undefined
+  const { admin } = await import('@/lib/whatsapp-agent/conversa')
+  const { data: acesso } = await admin().from('whatsapp_outbox').select('id, send_after').eq('phone', phone).eq('kind', 'acesso').is('sent_at', null).order('send_after', { ascending: false }).limit(1)
+  if (acesso?.[0]) {
+    dependsOn = acesso[0].id as number
+    const depois = new Date(new Date(acesso[0].send_after as string).getTime() + 3 * 60_000)
+    if (depois > sendAfter) sendAfter = depois // acesso em espera (regime a pedido) → o aviso espera junto e sai 3 min depois dele
+  } else if (!(await jaEscreveu(phone))) {
+    sendAfter = new Date(ESPERA_PEDIDO) // nunca nos escreveu: só sai quando ela escrever (o e-mail do produto já avisou)
+  }
+  return enfileirar({ phone, kind, body: texto(undefined, p.valor ?? undefined, `https://riseme.app/${p.locale}`), sendAfter, dependsOn })
+}
+
+/** Texto do aviso (prévia ao Bruno, testes). */
+export function textoAvisoProdutoExtra(produto: string, locale: string, nome?: string, valor?: string): string | null {
+  return AVISO_EXTRA[produto]?.[locale]?.(nome, valor, `https://riseme.app/${locale}`) ?? null
 }

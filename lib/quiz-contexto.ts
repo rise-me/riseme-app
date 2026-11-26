@@ -10,10 +10,11 @@ import mapaClEs from './whatsapp-agent/quiz-cl-es.json'
 // Mapas de outros funis: gerados do copy.<idioma>.json com scripts/gerar-mapa-quiz.mts (fora da pasta do bot).
 import mapaClPl from './quiz-mapas/cl-pl.json'
 import mapaClNl from './quiz-mapas/cl-nl.json'
+import mapaClIn from './quiz-mapas/cl-in.json' // CL-IN (Índia, en), 25/11: mesmas chaves da PL
 
 type Mapa = Record<string, { key: string; pergunta: string; opcoes: Record<string, string> }>
 // CL-ES-BR (camuflagem do geo-gate) tem numeração de telas diferente: fica fora até ter mapa próprio (05/11/2026).
-const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa, 'CL-PL': mapaClPl as Mapa, 'CL-NL': mapaClNl as Mapa }
+const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa, 'CL-PL': mapaClPl as Mapa, 'CL-NL': mapaClNl as Mapa, 'CL-IN': mapaClIn as Mapa }
 
 // Rótulo curto por chave: a pergunta inteira é longa demais pro perfil.
 const ROTULO: Record<string, string> = {
@@ -74,6 +75,19 @@ export function resumirQuiz(q: { funil: string; respostas: Record<string, string
     linhas.push(`IMC calculado: ${imc.toFixed(1)}${alvo > 30 ? ` · quer chegar a ${alvo} kg (${(peso - alvo).toFixed(1)} kg a menos)` : ''}`)
   }
   return `O QUE ELA RESPONDEU NO QUIZ antes de comprar${q.em ? ` (${q.em.slice(0, 10)})` : ''} — é quem ela é e o que quer; use para entender e personalizar, sem recitar de volta nem dizer "você respondeu no quiz" (só cite se ajudar na resposta):\n- ${linhas.join('\n- ')}`
+}
+
+/**
+ * Opções marcadas numa pergunta do quiz, achada pela CHAVE (ex.: 'problemas_fisicos'), não pelo nº da tela: cada funil
+ * numera do seu jeito. null = o funil não tem mapa, não tem essa pergunta ou ela ficou sem resposta.
+ */
+export function respostaDoQuiz(q: { funil: string; respostas: Record<string, string> }, chave: string): string[] | null {
+  const mapa = MAPAS[q.funil]
+  if (!mapa) return null
+  const tela = Object.keys(mapa).find((t) => mapa[t].key === chave)
+  const resp = tela ? q.respostas[tela] : undefined
+  if (!resp) return null
+  return String(resp).split(',').map((s) => s.trim()).filter(Boolean)
 }
 
 /** Guarda sck e/ou respostas em user_metadata (sem migração; o perfil já lê o metadata). */

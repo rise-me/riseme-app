@@ -6,6 +6,9 @@ import { VideoPlayer } from './VideoPlayer'
 import { canAccessChallenge, getUserAccess } from '@/lib/user-access-server'
 import { getProgressForChallenge } from '@/lib/progress-server'
 import { signLessonPath } from '@/lib/hls-token'
+import { getCurrentUser } from '@/lib/current-user-server'
+import { recursoLigado } from '@/lib/previa'
+import { aulasDaTrilha } from '@/lib/cuidado-server'
 
 export default async function PlayerPage({
   params,
@@ -42,6 +45,16 @@ export default async function PlayerPage({
   // Aula no R2: passe assinado só depois das travas de acesso acima
   const hlsPath = currentDay.video?.provider === 'hls' ? signLessonPath(currentDay.video.id) : null
 
+  // "¿Cómo te fue hoy?" no fim da aula: es + pl, desligado para as alunas até COMO_TE_FUE_ATIVO=1 (admin vê)
+  const user = await getCurrentUser()
+  const esPl = ['es', 'pl'].includes(locale.split('-')[0])
+  const perguntar = esPl && recursoLigado('COMO_TE_FUE_ATIVO', user?.admin === true)
+  // Conquista nos dias 3/7/14/21: desligada até CONQUISTA_ATIVO=1 (admin vê)
+  const conquistas = esPl && recursoLigado('CONQUISTA_ATIVO', user?.admin === true)
+  const suaveHref = perguntar && (await aulasDaTrilha(access, locale, 'suave')) > 0 ? `/${locale}/cuidado/suave` : null
+  // "Fácil" oferece a versión intensa (desligada até INTENSA_ATIVO=1; admin vê)
+  const intensaHref = perguntar && (await aulasDaTrilha(access, locale, 'intensa')) > 0 ? `/${locale}/cuidado/intensa` : null
+
   return (
     <VideoPlayer
       challenge={challenge}
@@ -50,6 +63,11 @@ export default async function PlayerPage({
       locale={locale}
       hasPase={access.hasActiveSubscription}
       hlsPath={hlsPath}
+      perguntar={perguntar}
+      conquistas={conquistas}
+      userId={user?.id ?? null}
+      suaveHref={suaveHref}
+      intensaHref={intensaHref}
     />
   )
 }

@@ -7,7 +7,7 @@ const intlMiddleware = createIntlMiddleware(routing)
 
 const LOCALE_PREFIX = new RegExp(`^/(${routing.locales.join('|')})`)
 
-const APP_PATHS = ['/home', '/challenges', '/workouts', '/progress', '/more', '/menu']
+const APP_PATHS = ['/home', '/challenges', '/workouts', '/progress', '/more', '/menu', '/cuidado']
 
 function isAppPath(pathname: string): boolean {
   const withoutLocale = pathname.replace(LOCALE_PREFIX, '')

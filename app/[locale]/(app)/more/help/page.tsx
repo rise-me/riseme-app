@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-import { linkWhatsAppSuporte } from '@/lib/suporte'
+import { linkWhatsAppSuporte, linkEmailSuporte, emailSuporte, WHATSAPP_FORA_DO_AR } from '@/lib/suporte'
 
 const HELP_KEYS = [
   { emoji: '💪', key: 'trainingDoubts' },
@@ -35,19 +35,20 @@ export default async function HelpPage({
       <div className="bg-orange-50 border border-orange-100 rounded-2xl px-4 py-3 flex items-start gap-3">
         <span className="text-orange-500 text-sm mt-0.5">ⓘ</span>
         <p className="text-xs text-orange-700 leading-relaxed">
-          {t('infoBanner')}
+          {/* WhatsApp fora do ar (lib/suporte.ts): o atendimento vai para o e-mail, com o endereço à vista para copiar */}
+          {WHATSAPP_FORA_DO_AR ? t('emailBanner', { email: emailSuporte(locale) }) : t('infoBanner')}
         </p>
       </div>
 
       <div className="space-y-2">
         {HELP_KEYS.map((item) => {
           const message = t('whatsappIntro', { topic: t(item.key) })
-          const href = linkWhatsAppSuporte(message)
+          const href = WHATSAPP_FORA_DO_AR ? linkEmailSuporte(locale, `RiseMe: ${t(item.key)}`) : linkWhatsAppSuporte(message)
           return (
             <a
               key={item.key}
               href={href}
-              target="_blank"
+              target={WHATSAPP_FORA_DO_AR ? undefined : '_blank'}
               rel="noopener noreferrer"
               className="w-full flex items-center gap-4 bg-card border border-border rounded-2xl px-4 py-4 text-left active:bg-secondary/50 transition-colors"
             >

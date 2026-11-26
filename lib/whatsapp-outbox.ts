@@ -2,7 +2,7 @@
 // o cron /api/whatsapp/outbox (a cada minuto) chama processarFila(), que envia o que
 // venceu, registra no histórico como 'system' e apaga a senha do body depois do envio.
 
-import { sendZapiText, temWhatsApp, toZapiPhone } from '@/lib/zapi'
+import { conexaoZapi, filaZapi, sendZapiText, temWhatsApp, toZapiPhone } from '@/lib/zapi'
 import { admin, registrarMensagem, variantesTelefone } from '@/lib/whatsapp-agent/conversa'
 import { decidirResposta } from '@/lib/whatsapp-agent/responder'
 
@@ -11,6 +11,92 @@ const REPROGRAMAR_MS = 2 * 60_000
 const POR_RODADA = 15 // ~3 s por envio (delayTyping) — cabe nos 60 s do cron; pico real é bem menor
 const TRAVA_EXPIRA_MS = 5 * 60_000 // função morta no meio do envio não prende o item pra sempre
 const MASCARA = '••••••'
+// PAUSADOS = envios a quem não nos escreveu que seguem desligados até o Bruno decidir (restrição da Meta em 14/11).
+// Acesso, convite de depoimento e aviso do Protokół saíram daqui: valem pelo REGIME "A PEDIDO" logo abaixo.
+const PAUSADOS = new Set(['pase', 'convite-comunidade', 'convite-grupo', 'lembrete-24h', 'recuperacao', 'recuperacao-2', 'video-convite', 'depo-hotmart', 'acesso-retro'])
+const pausado = (kind: string) => PAUSADOS.has(kind)
+
+// ── REGIME "A PEDIDO" (Bruno 14/11/2026: "ela clica, cai no WhatsApp com a mensagem pronta, envia, o bot responde, e
+// ninguém recebe mensagem sem ter escrito antes"; vale para todos os idiomas). Causa: ~3 mensagens com link por compradora
+// a ~280 polonesas/dia que nunca respondiam = WhatsApp restrito pela Meta. Como funciona: a mensagem de acesso (uma só) e
+// o que vem depois dela NASCEM EM ESPERA (send_after = ESPERA_PEDIDO, nunca vencem sozinhas). Quando a aluna escreve
+// (botão da página de obrigado ou qualquer mensagem), liberarEspera() põe o acesso para sair agora e o resto em seguida.
+export const ESPERA_PEDIDO = '2099-01-01T00:00:00.000Z'
+export const LIMITE_ESPERA = '2090-01-01T00:00:00.000Z' // send_after acima disto = em espera
+const formasDoNumero = (phone: string) => variantesTelefone(phone).flatMap((v) => [v, `+${v}`])
+
+/** A aluna já nos escreveu alguma vez por este número? (quem já escreveu pode receber sem pedir de novo) */
+export async function jaEscreveu(phone: string): Promise<boolean> {
+  const { data } = await admin().from('whatsapp_messages').select('created_at').in('phone', variantesTelefone(phone)).eq('direction', 'in').limit(1)
+  return Boolean(data?.length)
+}
+
+/**
+ * Libera o que está em espera para este número (ou, com outboxId, para a venda cujo acesso é essa linha: caso de quem
+ * escreve de um número diferente do checkout; aí as linhas passam a apontar para o número de onde ela escreveu).
+ * Acesso sai agora; aviso do Protokół 3 min depois; convite de depoimento 30 min depois. Devolve true se liberou um acesso.
+ */
+export async function liberarEspera(phone: string, outboxId?: number): Promise<boolean> {
+  const db = admin()
+  const base = db.from('whatsapp_outbox').select('id, kind, body, created_at').is('sent_at', null).lt('attempts', MAX_TENTATIVAS).gte('send_after', LIMITE_ESPERA)
+  const { data } = outboxId ? await base.or(`id.eq.${outboxId},depends_on.eq.${outboxId}`) : await base.in('phone', formasDoNumero(phone))
+  const linhas = (data ?? []) as { id: number; kind: string; body: string; created_at: string }[]
+  const destino = toZapiPhone(phone) ?? phone
+  const agora = Date.now()
+  const marcar = (id: number, nota: string) => db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), body: nota, claimed_at: null }).eq('id', id)
+  // Mais de uma compra em espera: só o acesso MAIS NOVO sai (a senha das linhas antigas já não vale). As antigas ficam
+  // como atendidas, sem apagar: linha de venda da Stripe que some faz a conferência re-enfileirar ([Alunas Stripe], 14/11).
+  const acessos = linhas.filter((r) => r.kind === 'acesso').sort((x, y) => y.id - x.id)
+  for (const velho of acessos.slice(1)) await marcar(velho.id, '(substituída: saiu o acesso mais novo desta aluna)')
+  const principal = acessos[0]
+  let reenviado = false
+  if (principal && agora - new Date(principal.created_at).getTime() > PEDIDO_TARDIO_MS) {
+    // Pediu dias depois da compra: a senha da conta pode ter sido mexida no meio → sai pelo caminho do reenvio, que manda
+    // a MESMA senha desta mensagem e a grava de novo na conta (18/11/2026: nunca senha nova; lib/senha-conta.ts). A senha
+    // é registrada aqui porque o texto da linha é trocado logo abaixo.
+    await (await import('@/lib/senha-conta')).guardarSenhaDaMensagem(principal.body)
+    const email = principal.body.match(/[^\s:<>*]+@[^\s<>*]+\.[a-z]{2,}/i)?.[0]
+    if (email && (await enfileirar({ phone: destino, kind: 'reenviar-acesso', body: JSON.stringify({ email }), sendAfter: new Date() }))) {
+      await marcar(principal.id, '(pedido tardio: acesso reenviado com a mesma senha)')
+      reenviado = true
+    }
+  }
+  for (const r of linhas) {
+    if (r.kind === 'acesso' && (r.id !== principal?.id || reenviado)) continue
+    const atraso = r.kind === 'acesso' ? 0 : r.kind.startsWith('aviso-extra:') ? 3 * 60_000 : r.kind === 'depoimento' ? 30 * 60_000 : 60_000
+    await db.from('whatsapp_outbox').update({ send_after: new Date(agora + atraso).toISOString(), ...(outboxId ? { phone: destino } : {}) }).eq('id', r.id)
+  }
+  return Boolean(principal)
+}
+const PEDIDO_TARDIO_MS = 48 * 3_600_000
+
+// Mensagem pronta do botão "abrir conversa" (página de obrigado, e-mail): código da venda da Stripe entre parênteses,
+// ou a frase fixa (Hotmart, sem código). Quem só apertou o botão recebe o acesso e nada mais (sem resposta do agente).
+const CODIGO_BOTAO = /\((?:kod|c[oó]digo|code):\s*([A-Za-z0-9]{6,12})\)/i
+const FRASE_BOTAO = /acabo de unirme al reto riseme|w[łl]a[śs]nie do[łl][ąa]czy[łl]am do wyzwania riseme/i
+const FALA_DE_ACESSO = /acces|dost[eę]p|contrase|has[łl]|password|entrar|ingres|login|zalog|wej[śs][ćc]/i
+
+/**
+ * Chamado a cada mensagem recebida de aluna, antes do agente. Libera o que estava em espera para ela. Devolve true quando
+ * a mensagem já está atendida pelo acesso que vai sair (botão, ou fala curta sobre acesso) e o agente NÃO deve responder:
+ * evita duas mensagens de acesso (a da fila e um reenvio do agente).
+ */
+export async function atenderPedido(phone: string, texto: string): Promise<boolean> {
+  const codigo = texto.match(CODIGO_BOTAO)?.[1]
+  const botao = Boolean(codigo) || FRASE_BOTAO.test(texto)
+  for (let tentativa = 0; tentativa < (botao ? 4 : 1); tentativa++) {
+    if (tentativa) await new Promise((r) => setTimeout(r, 5000)) // o botão pode chegar antes de o webhook da venda gravar
+    if (await liberarEspera(phone)) return botao || (texto.length <= 200 && FALA_DE_ACESSO.test(texto))
+    if (codigo) {
+      // Escreveu de um número diferente do checkout: acha a venda pelo fim do id da sessão da Stripe.
+      const { data: v } = await admin().from('stripe_vendas').select('wa_outbox_id').like('session_id', `%${codigo}`).limit(2)
+      if (v?.length === 1 && v[0].wa_outbox_id && (await liberarEspera(phone, v[0].wa_outbox_id as number))) return true
+    }
+  }
+  return false
+}
+// Com a instância DESCONECTADA só roda o que não entrega nada ao WhatsApp (a Z-API guardaria numa fila e soltaria tudo junto).
+const SEM_WHATSAPP = ['teste-agente', 'hotmart', 'zapi', 'email-suporte']
 
 export async function enfileirar(m: {
   phone: string
@@ -89,6 +175,7 @@ export async function acessoPendente(phone: string): Promise<string | null> {
     .in('kind', ['acesso', 'acesso-retro'])
     .is('sent_at', null)
     .lt('attempts', MAX_TENTATIVAS)
+    .lt('send_after', LIMITE_ESPERA) // em espera (regime a pedido) não tem hora marcada
     .order('send_after', { ascending: true })
     .limit(1)
   return data?.[0]?.send_after ?? null
@@ -107,7 +194,15 @@ export async function estaComProblema(phone: string): Promise<boolean> {
     .order('created_at', { ascending: false })
     .limit(40)
   const ms = (data ?? []).filter((m) => m.author !== 'system')
-  if (ms[0]?.author === 'student') return true
+  if (ms[0]?.author === 'student') {
+    // Regime "a pedido": a mensagem pronta do botão é respondida pela linha 'acesso' (author 'system'), não pelo agente.
+    // Sem esta exceção ela contava como "fala sem resposta" e o convite de depoimento era pulado para quem só apertou
+    // o botão (15/11/2026: 11 de 12 pulados no primeiro dia; Bruno: "é importante esse comentário").
+    const corpo = String(ms[0].body ?? '')
+    const doBotao = CODIGO_BOTAO.test(corpo) || FRASE_BOTAO.test(corpo)
+    const acessoSaiu = (data ?? []).some((m) => m.author === 'system' && m.created_at > ms[0].created_at)
+    if (!(doBotao && acessoSaiu)) return true
+  }
   // O que o CLASSIFICADOR entendeu nas últimas respostas (kind 'uso-llm' guarda os assuntos): dinheiro, técnico ou feedback = problema.
   // A lista de palavras fica só como atalho (Bruno 05/11: palavra exata não decide nada).
   const { data: usos } = await admin().from('whatsapp_outbox').select('body').eq('kind', 'uso-llm').in('phone', formas).gte('created_at', new Date(Date.now() - 3 * 86_400_000).toISOString()).order('created_at', { ascending: false }).limit(5)
@@ -117,6 +212,7 @@ export async function estaComProblema(phone: string): Promise<boolean> {
   return ms.some((m) => m.author === 'student' && SINAL_DE_PROBLEMA.test(m.body))
 }
 
+const TETO_CONVITES_HORA = 10
 async function motivoParaPular(phone: string, kind: string, id: number): Promise<string | null> {
   if (await pediuParaParar(phone)) return 'pediu para não receber mensagens'
   if ((kind === 'depoimento' || kind === 'convite-comunidade' || kind === 'convite-grupo') && (await estaComProblema(phone))) return 'aluna com problema/pergunta aberta'
@@ -130,6 +226,13 @@ async function motivoParaPular(phone: string, kind: string, id: number): Promise
   if (jaFoi) return 'já recebeu'
   if ((chats ?? []).some((c) => c.mode === 'human' && (!c.human_until || new Date(c.human_until) > new Date()))) return 'pessoa atendendo'
   if (consultas) return 'consulta aberta'
+  // Teto por hora do convite de depoimento (Bruno 15/11/2026, depois da restrição da Meta: "tem que ficar com bastante
+  // cuidado… se amanhã a gente coloca uma escala, vai ter um montão de mensagem de novo"). O convite dobra o volume por
+  // conversa; com escala ele não pode acompanhar o número de cliques. O que passa do teto NÃO sai (não fica para depois).
+  if (kind === 'depoimento') {
+    const { count: naHora } = await db.from('whatsapp_outbox').select('id', { count: 'exact', head: true }).eq('kind', 'depoimento').gte('sent_at', new Date(Date.now() - 3_600_000).toISOString())
+    if ((naHora ?? 0) >= TETO_CONVITES_HORA) return `teto de ${TETO_CONVITES_HORA} convites por hora`
+  }
   return null
 }
 
@@ -159,15 +262,19 @@ const travaVencida = () => new Date(Date.now() - TRAVA_EXPIRA_MS).toISOString()
 export async function processarFila(): Promise<{ enviados: number; falhas: number }> {
   const db = admin()
   const agora = new Date().toISOString()
-  const { data } = await db
+  const desconectada = (await conexaoZapi()).estado === 'desconectado'
+  let consulta = db
     .from('whatsapp_outbox')
     .select('id, phone, kind, body, mask, depends_on, attempts')
     .is('sent_at', null)
     .or(`claimed_at.is.null,claimed_at.lt.${travaVencida()}`)
     .lt('attempts', MAX_TENTATIVAS)
     .lte('send_after', agora)
-    .order('send_after', { ascending: true })
-    .limit(POR_RODADA)
+  if (desconectada) consulta = consulta.in('kind', SEM_WHATSAPP) // o resto fica na fila, intacto, até reconectar
+  // Pausados nem entram na rodada: na reconexão de 15/11 havia ~100 lembretes vencidos na frente e o acesso de quem
+  // escrevesse esperaria ~7 rodadas atrás deles (15 por minuto).
+  else consulta = consulta.not('kind', 'in', `(${[...PAUSADOS].map((k) => `"${k}"`).join(',')})`)
+  const { data } = await consulta.order('send_after', { ascending: true }).limit(POR_RODADA)
 
   let enviados = 0
   let falhas = 0
@@ -181,6 +288,13 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       .or(`claimed_at.is.null,claimed_at.lt.${travaVencida()}`)
       .select('id')
     if (!trava?.length) continue
+
+    // PAUSA (14/11/2026, WhatsApp do suporte RESTRITO pela Meta): nada que a aluna não pediu sai até o Bruno liberar.
+    // Só passam acesso, apoio, respostas e o que ele manda. Liberar = esvaziar PAUSADOS e republicar.
+    if (pausado(item.kind)) {
+      await db.from('whatsapp_outbox').update({ claimed_at: null, send_after: new Date(Date.now() + 7 * 24 * 3_600_000).toISOString() }).eq('id', item.id)
+      continue
+    }
 
     // Ordem garantida: a msg de apoio só sai depois da de acesso.
     if (item.depends_on && (await dependenciaPendente(item.depends_on))) {
@@ -235,10 +349,21 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
       try {
         const caso = JSON.parse(item.body) as { nome: string; perfil: Parameters<typeof decidirResposta>[0]['perfil']; msgs: (string | { a: 'student' | 'agent' | 'human'; t: string; em?: string })[]; conviteHotmart?: { presente: string | null }; conviteVideo?: boolean; hotmart?: string; hotmartEmail?: string; emailSemConta?: string }
         const agora = new Date().toISOString()
+        // cartaoDe = user_id real: monta o cartão da aluna como em produção (teste do cartão sem falar com ela; 16/11/2026)
+        // redacao = testa o REDATOR da resposta aprovada pelo responsável (só a decisão; não envia nem reembolsa nada). 21/11/2026
+        const redacao = (caso as { redacao?: { resumo: string; opcaoA: string; opcaoB: string; orientacao: string; comprasStripe?: string[] } }).redacao
+        if (redacao) {
+          const { redigirRespostaAprovada } = await import('@/lib/whatsapp-agent/responder')
+          const r = await redigirRespostaAprovada({ perfil: caso.perfil, conversa: caso.msgs.map((m) => (typeof m === 'string' ? { autor: 'student' as const, texto: m, em: agora } : { autor: m.a, texto: m.t, em: m.em ?? agora })), ...redacao })
+          await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: JSON.stringify({ ...caso, resultado: r }) }).eq('id', item.id)
+          continue
+        }
+        const cartaoDe = (caso as { cartaoDe?: string }).cartaoDe
+        if (cartaoDe && caso.perfil) { const { cartaoDaAluna } = await import('@/lib/cartao-aluna'); caso.perfil = { ...caso.perfil, cartao: await cartaoDaAluna(admin(), { userId: cartaoDe, variantes: [] }) } }
         // hotmartEmail = consulta real à Hotmart no teste; hotmart = bloco pronto (teste sem credencial)
         // hotmartEmail = a Hotmart é consultada só se o CLASSIFICADOR disser dinheiro (como em produção); hotmart = bloco pronto
         const { resumoHotmart } = await import('@/lib/hotmart-api')
-        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((m) => (typeof m === 'string' ? { autor: 'student' as const, texto: m, em: agora } : { autor: m.a, texto: m.t, em: m.em ?? agora })), agora, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo, hotmart: caso.hotmart ?? null, emailSemConta: caso.emailSemConta, buscarHotmart: caso.hotmartEmail ? () => resumoHotmart(caso.hotmartEmail!) : undefined })
+        const d = await decidirResposta({ perfil: caso.perfil, conversa: caso.msgs.map((m) => (typeof m === 'string' ? { autor: 'student' as const, texto: m, em: agora } : { autor: m.a, texto: m.t, em: m.em ?? agora })), agora, phone: (caso as { phone?: string }).phone, canal: (caso as { canal?: 'email' }).canal, idiomaPadrao: (caso as { idiomaPadrao?: string }).idiomaPadrao, conviteHotmart: caso.conviteHotmart, conviteVideo: caso.conviteVideo, hotmart: caso.hotmart ?? null, emailSemConta: caso.emailSemConta, buscarHotmart: caso.hotmartEmail ? () => resumoHotmart(caso.hotmartEmail!) : undefined })
         saida = JSON.stringify({ ...caso, resultado: d })
       } catch (err) {
         saida = JSON.stringify({ erro: String(err), entrada: item.body.slice(0, 500) })
@@ -251,6 +376,50 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     // {acao:'renomear', groupId, nome} ou {acao:'enquete', groupId, nome, opcoes} ou {acao:'texto', groupId, nome = a mensagem}) e grava o resultado no body. A chave da Z-API só existe no servidor (02/11/2026).
     // 'hotmart' não manda texto: consulta a Hotmart pelo e-mail (body = JSON {email}) e grava o bloco no body. Serve para
     // testar a credencial e para conferir consultas pendentes sem a chave sair da Vercel (04/11/2026).
+    // 'zapi' (14/11/2026): body = JSON {acao: 'status' | 'fila' | 'limpar-fila'}; olha/limpa a fila PRÓPRIA da Z-API (o chat não
+    // tem a chave localmente). Limpar antes de reconectar, senão tudo que ficou preso sai de uma vez.
+    if (item.kind === 'zapi') {
+      let saida: string
+      try {
+        const { acao, path } = JSON.parse(item.body) as { acao: 'status' | 'fila' | 'limpar-fila' | 'get'; path?: string }
+        if (acao === 'get') {
+          // Leitura qualquer da Z-API (só GET), para diagnóstico pelo chat: 'me' (webhooks), 'chats?page=1&pageSize=50'…
+          const { zapiGet } = await import('@/lib/zapi')
+          const r = await zapiGet(String(path ?? 'me').replace(/^\/+/, ''))
+          // Nunca guardar segredo no banco: chaves com token/secret saem mascaradas.
+          const limpo = JSON.stringify({ acao, path, r }, (k, v) => (/token|secret|password|senha/i.test(k) ? '•••' : v))
+          await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: limpo.slice(0, 60_000) }).eq('id', item.id)
+          continue
+        }
+        const conexao = await conexaoZapi()
+        saida = JSON.stringify({ acao, conexao, ...(acao === 'fila' ? { fila: await filaZapi('contar') } : acao === 'limpar-fila' ? { limpeza: await filaZapi('limpar'), depois: await filaZapi('contar') } : {}) })
+      } catch (err) {
+        saida = `erro: ${String(err).slice(0, 300)}`
+      }
+      await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, body: saida }).eq('id', item.id)
+      continue
+    }
+
+    // 'email-suporte' (14/11/2026): e-mail do suporte mandado pelo chat (a chave do Resend só existe no servidor).
+    // body = JSON {para, assunto, texto, idioma?, de?, titulo?, botao?: {rotulo, link}, rodape?}. Aviso às alunas e resposta manual.
+    if (item.kind === 'email-suporte') {
+      let erro: string | null = null
+      try {
+        const { enviarEmailSuporte } = await import('@/lib/email-suporte')
+        const e = JSON.parse(item.body) as Parameters<typeof enviarEmailSuporte>[0]
+        // para = 'responsavel' → ALERTA_EMAIL (prévia para o Bruno sem o chat conhecer o endereço)
+        const para = e.para === 'responsavel' || item.phone === 'responsavel' ? (process.env.ALERTA_EMAIL ?? '').split(',')[0]?.trim() : (e.para ?? item.phone)
+        if (!para) throw new Error('sem destinatário (ALERTA_EMAIL ausente?)')
+        const r = await enviarEmailSuporte({ ...e, para, registrar: e.para !== 'responsavel' && item.phone !== 'responsavel' })
+        if (!r.ok) erro = r.erro
+      } catch (err) {
+        erro = String(err).slice(0, 300)
+      }
+      if (erro) { falhas++; await db.from('whatsapp_outbox').update({ attempts: item.attempts + 1, last_error: erro, claimed_at: null, send_after: new Date(Date.now() + REPROGRAMAR_MS).toISOString() }).eq('id', item.id) }
+      else { enviados++; await db.from('whatsapp_outbox').update({ sent_at: new Date().toISOString(), attempts: item.attempts + 1, last_error: null }).eq('id', item.id) }
+      continue
+    }
+
     if (item.kind === 'hotmart') {
       let saida: string
       try {
@@ -299,7 +468,7 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     }
 
     // 'reenviar-acesso' (08/11/2026): body = JSON {email}; liga a conversa (item.phone) à conta desse e-mail, corrige o telefone da
-    // conta e reenvia o acesso com senha nova NESTA conversa. Para o caso em que o acesso foi para outro número (checkout errado).
+    // conta e reenvia o acesso (senha de sempre) NESTA conversa. Para o caso em que o acesso foi para outro número (checkout errado).
     if (item.kind === 'reenviar-acesso') {
       let saida: string
       try {
@@ -458,6 +627,9 @@ export async function processarFila(): Promise<{ enviados: number; falhas: numbe
     }
 
     enviados++
+    // A senha que acabou de ser entregue é a de sempre desta conta: fica no registro cifrado ANTES de sumir da linha
+    // (reenvio manda a mesma; Bruno 18/11/2026, lib/senha-conta.ts).
+    if (item.kind === 'acesso' && item.mask) await (await import('@/lib/senha-conta')).guardarSenhaDaMensagem(item.body)
     const corpoSeguro = item.mask ? item.body.replaceAll(item.mask, MASCARA) : item.body
     await db
       .from('whatsapp_outbox')
