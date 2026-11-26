@@ -118,6 +118,11 @@ intermediárias → avançadas), `aulasDaTrilha()` em `cuidado-server.ts` (suave
 (2) aulas no R2 → conferir tocando es e pl (duração real 5–11 min, a prévia mostra 20 simulados); (3) OK DO BRUNO DADO 25/11 ("pode ligar quando as aulas subirem") → assim que as aulas forem conferidas tocando:
 `printf '1' | vercel env add INTENSA_ATIVO production` + redeploy; (4) avisar o Arquiteto (bot oferece a intensa a quem acha
 fácil; `lib/cartao-aluna.ts` e conhecimento são dele). Air sem rede em 25/11 21h → dublagem no Mac depois das 23h.
+✅ LIGADA PARA AS ALUNAS 26/11 ~00h20 BRT: Subidor publicou o desafio 20 às 00:11 (4afe2be, en/es/pl); conferi tocando as
+14 versões es/pl (playlists inteiras com a duração do registro, áudio −21 a −26 dB, trecho transcrito no idioma certo; a 25
+aos 60 s é só música, conferida aos 5 s e aos 185 s); títulos do Subidor com revisão nativa (0e28e01); INTENSA_ATIVO=1 +
+redeploy (Ready, riseme.app). Arquiteto avisado 26/11 (oferta no bot + cartão, com ok do Bruno). Ler o uso junto com a suave
+(eventos `intensa_oferta` sim/não no PostHog; progresso `cuidado:20` no user_progress).
 (3) lista → dublagem es+pl → oferta no "Fácil" (mesma estrutura do tipo 'suave' em lib/cuidado.ts).
 CUSTO (Subidor 16/11): a voz das aulas agora é do Google (aprovada pelo Bruno); 28 aulas es+pl cabem na cota grátis do
 mês. ElevenLabs deixou de ser trava pra aula (fica pra criativo/VSL). Vale também pra dublar Pilates/Yoga/Cuerpo Sexy (2/4/5).
