@@ -93,6 +93,7 @@ const PRESENTE: Record<string, string> = {
   es: 'Y como prometimos, porque en RiseMe somos diferentes: vas a seguir con acceso al desafío que adquiriste. ¡Tómalo como un regalo nuestro! 💛',
   pl: 'I tak jak obiecaliśmy, bo w RiseMe robimy to inaczej: zachowujesz dostęp do wyzwania, które kupiłaś. Potraktuj to jako prezent od nas! 💛',
   en: "And as we promised, because at RiseMe we do things differently: you keep access to the challenge you bought. Take it as a gift from us! 💛",
+  nl: 'En zoals beloofd – want bij RiseMe doen we het anders: je houdt gewoon toegang tot de challenge die je hebt gekocht. Zie het als een cadeautje van ons! 💛',
 }
 /** Frase do presente do acesso (fonte única; o webhook da Stripe também usa). */
 export function textoPresente(idioma: string): string {
@@ -218,6 +219,10 @@ export async function criarPedidosDaDecisao(d: { phone: string; nome: string; id
 export function textoReembolsoStripe(idioma: string, nome: string | undefined, ok: boolean): string {
   const n = nome?.trim().split(/\s+/)[0]
   const pl = idioma === 'pl'
+  if (idioma === 'nl') {
+    if (!ok) return `${n ? `${n}, i` : 'I'}k heb je verzoek om je geld terug genoteerd. Ons team kijkt er nu naar en laat je hier iets weten. 💛`
+    return `Natuurlijk${n ? `, ${n}` : ''}. Je terugbetaling is al in gang gezet, je hoeft verder niets te doen. Alle informatie vind je hier:\nhttps://riseme.app/nl/refund\nZodra die rond is, stuur ik je hier een bevestiging. 💛`
+  }
   if (!ok) return pl
     ? `${n ? `${n}, t` : 'T'}woja prośba o zwrot jest zapisana. Nasz zespół sprawdza to teraz i napiszemy do Ciebie tutaj. 💛`
     : `${n ? `${n}, y` : 'Y'}our refund request is registered. Our team is checking it now and we'll write to you here. 💛`
@@ -250,14 +255,15 @@ export async function registrarPedidoReembolso(p: { phone: string; canal: 'whats
 // teraz do realizacji" e NÃO devolveu o código pi_ ao sistema: nada aconteceu por 3 dias e a aluna mandou notificação formal.
 // O texto que vai para a aluna é a prova: se ele diz que o reembolso está sendo feito/encaminhado e ela pediu o dinheiro,
 // o sistema devolve a compra da Stripe dela (quando é UMA só sem reembolso; com duas, o bot pergunta qual).
-const PEDE_DINHEIRO = /zwrot|zwr[oó][cć]|oddajcie|oddać pieni|pieni[ąa]dz|reembols|devoluci|devuelv|devolv|mi dinero|meu dinheiro|refund|money back|rimbors|vrácen|iade/i
+const PEDE_DINHEIRO = /zwrot|zwr[oó][cć]|oddajcie|oddać pieni|pieni[ąa]dz|reembols|devoluci|devuelv|devolv|mi dinero|meu dinheiro|refund|money back|rimbors|vrácen|iade|terugbetal|geld terug/i
 const PROMETE: RegExp[] = [
   /(zwrot\w*[\s\S]{0,70}(zgłasz|zgłosz|zlec|realiz|przekaz|w trakcie|zajm|uruchom))|((zgłasz|zgłosz|zlec|przekaz|realizuj)\w*[\s\S]{0,70}zwrot)/i,
   /(reembolso[\s\S]{0,70}(registr|proces|tramit|solicit|gestion|en curso|en marcha|encaminh|a caminho))|((registr|tramit|solicit|gestion|encaminh)\w*[\s\S]{0,70}reembolso)/i,
+  /(terugbetaling[\s\S]{0,70}(in gang|doorgegeven|doorgezet|geregeld|verwerk|aangevraagd))|((doorgegeven|doorgezet|aangevraagd|verwerk)\w*[\s\S]{0,70}(terugbetaling|geld terug))/i,
   /(refund[\s\S]{0,70}(process|request|submitt|forward|on its way|under way))|((process|request|submitt|forward)\w*[\s\S]{0,70}refund)/i,
 ]
 // Frase que só OFERECE o reembolso (resposta do 1º pedido: "basta responder e devolvemos") não é promessa.
-const SO_OFERECE = /(^|[^\p{L}])(jeśli|jeżeli|gdyby|gdy tylko|jak tylko|wystarczy|odpisz|odpowiedz|si prefieres|si quieres|si respondes|en cuanto|basta|se preferir|se quiser|if you|just reply|as soon as)([^\p{L}]|$)/iu
+const SO_OFERECE = /(^|[^\p{L}])(jeśli|jeżeli|gdyby|gdy tylko|jak tylko|wystarczy|odpisz|odpowiedz|si prefieres|si quieres|si respondes|en cuanto|basta|se preferir|se quiser|if you|just reply|as soon as|als je|mocht je|zodra je)([^\p{L}]|$)/iu
 /** O texto do bot diz que o reembolso está sendo feito ou encaminhado? (não vale "se preferir, devolvemos") */
 export function prometeReembolso(textoBot: string): boolean {
   const afirma = textoBot.split(/(?<=[.!?\n])/).filter((f) => !SO_OFERECE.test(f)).join(' ')

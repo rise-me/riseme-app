@@ -133,7 +133,7 @@ está vendo e você responde no PRAZO (pedido de reembolso repetido segue a regr
 Bloco "RESPOSTAS APROVADAS PELO RESPONSÁVEL" vale como conhecimento oficial: pergunta equivalente, responda com ele.
 
 PARAR MENSAGENS ("parar_mensagens" = true): ela pede para não receber mais ("no"/"stop"/"salir"/"baja"/"no me escribas"; pl
-"NIE"/"wypisz"; cs "NE"/"odhlásit"; it "NO"/"basta"/"annulla l'iscrizione"; tr "hayır"/"yazmayın"; en "stop"/"unsubscribe"):
+"NIE"/"wypisz"; cs "NE"/"odhlásit"; it "NO"/"basta"/"annulla l'iscrizione"; tr "hayır"/"yazmayın"; en "stop"/"unsubscribe"; nl "STOP"/"stoppen"/"afmelden"/"uitschrijven"/"uitzetten"/"geen berichten meer"/"niet meer sturen"/"stuur niks meer"/"geen interesse"/"laat me met rust"/"gelieve te stoppen"):
 responda curto e educado que não vamos mais escrever, sem oferecer nada. Um "no" a uma pergunta sua NÃO é pedido para parar.
 
 COMPRA DA STRIPE (no cartão, compra com "· Stripe ·" e transação pi_…). REGRA NOVA (Bruno 17/11/2026, teste CL-PL T11:
@@ -665,7 +665,7 @@ export async function decidirResposta(params: {
   out.resposta = trava.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
-  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|few hours|within a day|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
+  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|few hours|within a day|paar uur|binnen een dag|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
     out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}`
   }
 
@@ -698,13 +698,14 @@ const PRAZO: Record<string, [string, string]> = {
   // Índia (CL-IN, 25/11/2026): 20h de Brasília = 04h30 em Délhi; como na Europa, sem hora.
   'en-IN': ['I will reply here within the next few hours.', 'I will reply here within a day.'],
   ro: ['Îți răspund aici în câteva ore.', 'Îți răspund aici în cel mult o zi.'],
+  nl: ['Je hoort binnen een paar uur van me, hier in de chat.', 'Je hoort binnen een dag van me, hier in de chat.'],
   'pt-BR': ['Te respondo por aqui hoje até as 20h.', 'Te respondo por aqui amanhã até as 20h.'],
 }
 /** Aluna sem conta: idioma pelo DDI (10/11/2026: polonesa sem conta ouviu o prazo em espanhol). */
 export function idiomaPeloTelefone(phone?: string): string {
   const t = (phone ?? '').replace(/\D/g, '')
   if (!t || (phone ?? '').includes('@lid')) return 'es'
-  const ddi: [string, string][] = [['48', 'pl'], ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['91', 'en'], ['1', 'es']]
+  const ddi: [string, string][] = [['48', 'pl'], ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['91', 'en'], ['31', 'nl'], ['32', 'nl'], ['597', 'nl'], ['599', 'nl'], ['297', 'nl'], ['1', 'es']]
   return ddi.find(([d]) => t.startsWith(d))?.[1] ?? 'es'
 }
 export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha', phone?: string): string {
