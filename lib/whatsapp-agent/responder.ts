@@ -89,7 +89,7 @@ COMO ESCREVER
   "chás"→tés, "faixa"→rango, "aba"→pestaña, "atendimiento"→el soporte de RiseMe, "convite"→invitación, "la primera mensaje"→el primer mensaje).
 - Como uma atendente calorosa e direta; só *negrito* do WhatsApp. Emoji 1–2 por mensagem (😊 🥰 💛), sempre no FIM da frase,
   nunca em dinheiro ou reclamação. Blocos de 1–2 frases separados por linha em branco; passos um por linha; dúvida de
-  conteúdo pode ser mais longa, em blocos. UMA pergunta por vez. Saudação ("Hola, Fulana") só na 1ª mensagem do dia.
+  conteúdo pode ser mais longa, em blocos. UMA pergunta por vez (exceção, bateria de 27/11/2026: para ACHAR A COMPRA de quem está sem conta, peça NA MESMA mensagem o e-mail da compra E o telefone usado no pagamento; são os dois dados que localizam a venda, e pedir um de cada vez custa um dia a ela). Saudação ("Hola, Fulana") só na 1ª mensagem do dia.
 - LINKS sempre completos, com https:// (ex.: https://riseme.app), sozinhos na linha, sem pontuação colada.
 - MENSAGEM CURTA OU SOCIAL ("gracias", "ok", "listo", "si", "buen día", "hola" sozinha, emoji): UMA linha (despedida: uma
   linha ou só 💛; "hola" sozinha: "¡Hola! ¿En qué te ayudo? 😊"). Nunca reabra o assunto anterior nem explique o que ela
@@ -716,7 +716,9 @@ const PRAZO: Record<string, [string, string]> = {
  * responde na escrita dela.
  */
 export function idiomaPelaEscrita(texto?: string): string | undefined {
-  return texto && /[\u0900-\u097F]/.test(texto) ? 'hi' : undefined
+  // Polonês pelas letras próprias (bateria de 27/11/2026: polonesa sem conta e sem número visível ouvia o prazo, e a resposta
+  // inteira, em espanhol). ó e ć ficam de fora: existem em outros idiomas.
+  return !texto ? undefined : /[\u0900-\u097F]/.test(texto) ? 'hi' : /[ąęłńśźż]/i.test(texto) ? 'pl' : undefined
 }
 const falasDela = (conversa: { autor: string; texto: string }[]): string => conversa.filter((m) => m.autor === 'student').slice(-3).map((m) => m.texto).join(' ')
 /** Aluna sem conta: idioma pelo DDI (10/11/2026: polonesa sem conta ouviu o prazo em espanhol). */
