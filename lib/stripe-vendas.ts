@@ -82,17 +82,20 @@ export const urlPaginaReembolso = (locale: string) => `${APP_URL()}${locale === 
 // da compra, por susto na chegada ("vai cobrar todo mês?"). NÃO dizer "nada mais será cobrado": há upsells.
 const SELO_EMAIL: Record<string, string> = {
   pl: 'Płatność jednorazowa · bez subskrypcji · dożywotni dostęp',
+  hi: 'एक ही बार का पेमेंट · कोई सब्सक्रिप्शन नहीं · हमेशा के लिए ऐक्सेस',
   en: 'One-time payment · no subscription · lifetime access',
 }
 // WhatsApp fora do ar (lib/suporte.ts WHATSAPP_FORA_DO_AR): a nota avisa e manda responder o próprio e-mail.
 const NOTA_EMAIL_SEM_WHATS: Record<string, (url: string) => string> = {
   pl: (url) => `Ważne: nasz WhatsApp chwilowo nie działa, dlatego dostęp wysyłamy teraz tylko e-mailem. Masz pytanie? Odpowiedz na tę wiadomość albo napisz na ${emailSuporte('pl')}. Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, odpowiedz na tę wiadomość albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
   nl: (url) => `Belangrijk: onze WhatsApp is tijdelijk niet bereikbaar, daarom sturen we je toegang nu alleen per e-mail. Een vraag? Beantwoord dit bericht of mail naar ${emailSuporte('nl')}. Garantie: wil je om welke reden dan ook je geld terug? Beantwoord dit bericht of ga naar ${url}. We zetten de terugbetaling meteen in gang, zonder lastige vragen.`,
+  hi: (url) => `ज़रूरी: हमारा WhatsApp अभी कुछ समय के लिए बंद है, इसलिए ऐक्सेस सिर्फ़ ईमेल से भेज रहे हैं। कोई सवाल है? इसी ईमेल का जवाब दें या ${emailSuporte('hi')} पर लिखें। गारंटी: अगर किसी भी वजह से आपको पैसे वापस चाहिए, तो इस ईमेल का जवाब दें या ${url} पर जाएँ। हम बिना किसी सवाल के तुरंत रिफ़ंड शुरू कर देते हैं।`,
   en: (url) => `Important: our WhatsApp is temporarily unavailable, so we send access by e-mail only. Questions? Reply to this message. Guarantee: if for any reason you want your money back, reply to this message or go to ${url}. We start the refund right away, no questions asked.`,
 }
 const NOTA_EMAIL: Record<string, (url: string) => string> = {
   pl: (url) => `Gwarancja: jeśli z jakiegokolwiek powodu zechcesz zwrotu pieniędzy, napisz do nas na WhatsAppie albo wejdź na ${url}. Zlecamy zwrot od razu, bez zbędnych pytań.`,
   nl: (url) => `IJzersterke garantie: wil je om welke reden dan ook je geld terug? Stuur ons een WhatsApp-bericht of ga naar ${url}. We zetten de terugbetaling meteen in gang, zonder lastige vragen.`,
+  hi: (url) => `गारंटी: अगर किसी भी वजह से आपको पैसे वापस चाहिए, तो हमें WhatsApp पर लिखें या ${url} पर जाएँ। हम बिना किसी सवाल के तुरंत रिफ़ंड शुरू कर देते हैं।`,
   en: (url) => `Guarantee: if for any reason you want your money back, message us on WhatsApp or go to ${url}. We start the refund right away, no questions asked.`,
 }
 
@@ -109,6 +112,11 @@ const CONFIRMA_REEMBOLSO: Record<string, (p: { nome: string | null; valor: strin
     `Klaar${nome ? `, ${nome.split(' ')[0]}` : ''}. Je terugbetaling van ${valor} is afgerond. Je hoeft verder niets te doen.`,
     'Het geld gaat terug via dezelfde betaalmethode die je hebt gebruikt: bij iDEAL of Bancontact naar je bankrekening, bij een kaart naar je kaart. Hoe snel dat precies gaat, hangt af van je bank.',
     textoPresente('nl'),
+  ].join('\n\n'),
+  hi: ({ nome, valor }) => [
+    `हो गया${nome ? `, ${nome.split(' ')[0]}` : ''}। आपका ${valor} का रिफ़ंड पूरा हो गया है। आपको अब कुछ और करने की ज़रूरत नहीं है।`,
+    'पैसा उसी तरीके से वापस आता है जिससे आपने पेमेंट किया था: UPI से किया हो तो आपके UPI ऐप से जुड़े बैंक खाते में (आमतौर पर 7 कामकाजी दिनों में), कार्ड से किया हो तो कार्ड पर (आमतौर पर 5–10 कामकाजी दिनों में)। सही समय आपके बैंक पर निर्भर करता है।',
+    textoPresente('hi'),
   ].join('\n\n'),
   // CL-IN (Índia, 25/11): UPI devolve à conta do banco ligada ao app de UPI, em até 7 dias úteis (doc Stripe "UPI payments").
   en: ({ nome, valor, moeda }) => [
@@ -615,7 +623,7 @@ async function avisarAluna(v: Venda, texto: string): Promise<boolean> {
   }
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) return false
-  const assunto = v.locale === 'pl' ? 'Twój zwrot został zrealizowany 💛' : 'Your refund is complete 💛'
+  const assunto = v.locale === 'pl' ? 'Twój zwrot został zrealizowany 💛' : v.locale === 'hi' ? 'आपका रिफ़ंड पूरा हो गया 💛' : 'Your refund is complete 💛'
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },

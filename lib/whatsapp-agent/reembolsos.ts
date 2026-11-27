@@ -94,6 +94,7 @@ const PRESENTE: Record<string, string> = {
   pl: 'I tak jak obiecaliśmy, bo w RiseMe robimy to inaczej: zachowujesz dostęp do wyzwania, które kupiłaś. Potraktuj to jako prezent od nas! 💛',
   en: "And as we promised, because at RiseMe we do things differently: you keep access to the challenge you bought. Take it as a gift from us! 💛",
   nl: 'En zoals beloofd – want bij RiseMe doen we het anders: je houdt gewoon toegang tot de challenge die je hebt gekocht. Zie het als een cadeautje van ons! 💛',
+  hi: 'और जैसा हमने वादा किया था, RiseMe में हम थोड़ा अलग हैं: आपका चैलेंज आपके पास ही रहेगा। इसे हमारी तरफ़ से एक तोहफ़ा समझिए! 💛',
 }
 /** Frase do presente do acesso (fonte única; o webhook da Stripe também usa). */
 export function textoPresente(idioma: string): string {
@@ -219,6 +220,11 @@ export async function criarPedidosDaDecisao(d: { phone: string; nome: string; id
 export function textoReembolsoStripe(idioma: string, nome: string | undefined, ok: boolean): string {
   const n = nome?.trim().split(/\s+/)[0]
   const pl = idioma === 'pl'
+  // hi (CL-HI, 27/11/2026): nome com «जी»; sem prometer cobrança/não cobrança (regra de 17/11).
+  if (idioma === 'hi') {
+    if (!ok) return `${n ? `${n} जी, ` : ''}हमें आपकी रिफ़ंड की रिक्वेस्ट मिल गई है। हमारी टीम अभी इसे देख रही है और हम आपको यहीं लिखेंगे। 💛`
+    return `जी, ज़रूर${n ? `, ${n} जी` : ''}। आपका रिफ़ंड शुरू हो चुका है, आपको और कुछ नहीं करना है। पूरी जानकारी यहाँ है:\nhttps://riseme.app/hi/refund\nरिफ़ंड पूरा होते ही मैं आपको यहीं मैसेज करके बता दूँगी। 💛`
+  }
   if (idioma === 'nl') {
     if (!ok) return `${n ? `${n}, i` : 'I'}k heb je verzoek om je geld terug genoteerd. Ons team kijkt er nu naar en laat je hier iets weten. 💛`
     return `Natuurlijk${n ? `, ${n}` : ''}. Je terugbetaling is al in gang gezet, je hoeft verder niets te doen. Alle informatie vind je hier:\nhttps://riseme.app/nl/refund\nZodra die rond is, stuur ik je hier een bevestiging. 💛`

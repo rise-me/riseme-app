@@ -133,7 +133,7 @@ está vendo e você responde no PRAZO (pedido de reembolso repetido segue a regr
 Bloco "RESPOSTAS APROVADAS PELO RESPONSÁVEL" vale como conhecimento oficial: pergunta equivalente, responda com ele.
 
 PARAR MENSAGENS ("parar_mensagens" = true): ela pede para não receber mais ("no"/"stop"/"salir"/"baja"/"no me escribas"; pl
-"NIE"/"wypisz"; cs "NE"/"odhlásit"; it "NO"/"basta"/"annulla l'iscrizione"; tr "hayır"/"yazmayın"; en "stop"/"unsubscribe"; nl "STOP"/"stoppen"/"afmelden"/"uitschrijven"/"uitzetten"/"geen berichten meer"/"niet meer sturen"/"stuur niks meer"/"geen interesse"/"laat me met rust"/"gelieve te stoppen"):
+"NIE"/"wypisz"; cs "NE"/"odhlásit"; it "NO"/"basta"/"annulla l'iscrizione"; tr "hayır"/"yazmayın"; en "stop"/"unsubscribe"; nl "STOP"/"stoppen"/"afmelden"/"uitschrijven"/"uitzetten"/"geen berichten meer"/"niet meer sturen"/"stuur niks meer"/"geen interesse"/"laat me met rust"/"gelieve te stoppen"; hi «बंद करो»/«मैसेज मत भेजो»/«नहीं चाहिए» e em hinglish "band karo"/"message mat bhejo"/"nahi chahiye"/"stop"):
 responda curto e educado que não vamos mais escrever, sem oferecer nada. Um "no" a uma pergunta sua NÃO é pedido para parar.
 
 COMPRA DA STRIPE (no cartão, compra com "· Stripe ·" e transação pi_…). REGRA NOVA (Bruno 17/11/2026, teste CL-PL T11:
@@ -597,7 +597,7 @@ export async function decidirResposta(params: {
               (aulas ? `${aulas}\n\n` : '') +
               (acervo ? `${acervo}\n\n` : '') +
               (params.hotmart ? `${params.hotmart}\n\n` : '') +
-              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília; NUNCA prometa outro horário): use esta frase no idioma dela: "${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}"\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
+              `Agora: ${params.agora}\nPRAZO a prometer se transferir (a equipe revisa tudo às 20h de Brasília; NUNCA prometa outro horário): use esta frase no idioma dela: "${frasePrazo(params.perfil?.idioma ?? (idiomaPelaEscrita(falasDela(params.conversa)) ?? params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}"\n\nPerfil da aluna:\n${contexto}${aprovadas}\n\n` +
               `Conversa até agora:\n${transcricao}\n\n` +
               (imagens.length ? `(${imagens.length} imagem(ns) dela anexada(s) acima, da mais antiga para a mais recente.)\n\n` : '') +
               'Escreva a próxima mensagem para a aluna (respondendo o que ela mandou por último).',
@@ -659,14 +659,14 @@ export async function decidirResposta(params: {
   if (verificacao.corrigida || verificacao.problemas.length) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, verificacao).catch(() => undefined)
   out.resposta = verificacao.texto
   // Trava de idioma (14/11/2026): resposta em espanhol/português para aluna de outro idioma é traduzida antes de sair.
-  const idiomaDela = params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone))
+  const idiomaDela = params.perfil?.idioma ?? (idiomaPelaEscrita(falasDela(params.conversa)) ?? params.idiomaPadrao ?? idiomaPeloTelefone(params.phone))
   const trava = await garantirIdioma(out.resposta, idiomaDela)
   if (trava.traduziu || trava.erro) registrarVerificacao(params.phone ?? 'sem-telefone', out.resposta, { texto: trava.texto, corrigida: trava.traduziu, problemas: ['idioma_errado', ...(trava.erro ? [`nao_traduzido: ${trava.erro}`] : [])] }).catch(() => undefined)
   out.resposta = trava.texto
   // Garantia da promessa (05/11/2026, lista das 20h): ao transferir, a aluna SEMPRE ouve quando respondemos. Se o modelo (ou a
   // editora) deixou a frase sem prazo, o sistema acrescenta a frase curta no idioma dela.
-  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|few hours|within a day|paar uur|binnen een dag|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
-    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? (params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}`
+  if (out.passar_para_humano && !/^t[ée]cnico/i.test(out.motivo.trim()) && !/20\s*h|20:00|las 20|le 20|8 ?pm|few hours|within a day|paar uur|binnen een dag|घंटों में|एक दिन के अंदर|ghanto|ek din ke|kilku godzin|jednego dnia|poche ore|un giorno|několika hodin|jednoho dne|birkaç saat|bir gün|câteva ore|o zi/i.test(out.resposta)) {
+    out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? (idiomaPelaEscrita(falasDela(params.conversa)) ?? params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}`
   }
 
   const assuntos = `${[...cls.assuntos].join(',')} (${cls.fonte})`
@@ -699,8 +699,19 @@ const PRAZO: Record<string, [string, string]> = {
   'en-IN': ['I will reply here within the next few hours.', 'I will reply here within a day.'],
   ro: ['Îți răspund aici în câteva ore.', 'Îți răspund aici în cel mult o zi.'],
   nl: ['Je hoort binnen een paar uur van me, hier in de chat.', 'Je hoort binnen een dag van me, hier in de chat.'],
+  // Índia em hindi (CL-HI, 27/11/2026): sem hora, como o en-IN. Sem isto a conta hi ouvia o prazo em espanhol.
+  hi: ['मैं कुछ ही घंटों में आपको यहीं जवाब दूँगी।', 'मैं एक दिन के अंदर आपको यहीं जवाब दूँगी।'],
   'pt-BR': ['Te respondo por aqui hoje até as 20h.', 'Te respondo por aqui amanhã até as 20h.'],
 }
+/**
+ * Aluna sem conta, Índia (CL-HI, 27/11/2026): o +91 não diz se ela comprou em inglês (CL-IN) ou em hindi (CL-HI); a escrita
+ * diz. Devanágari → hi. Hinglish (hindi em letras latinas) não é detectado aqui: as frases fixas seguem o DDI (en) e o modelo
+ * responde na escrita dela.
+ */
+export function idiomaPelaEscrita(texto?: string): string | undefined {
+  return texto && /[\u0900-\u097F]/.test(texto) ? 'hi' : undefined
+}
+const falasDela = (conversa: { autor: string; texto: string }[]): string => conversa.filter((m) => m.autor === 'student').slice(-3).map((m) => m.texto).join(' ')
 /** Aluna sem conta: idioma pelo DDI (10/11/2026: polonesa sem conta ouviu o prazo em espanhol). */
 export function idiomaPeloTelefone(phone?: string): string {
   const t = (phone ?? '').replace(/\D/g, '')

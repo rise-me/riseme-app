@@ -7,7 +7,7 @@ import { vendasStripeDaConta } from '@/lib/stripe-api'
 
 // Reembolso no app: só para quem comprou pela Stripe (zero chargeback, Bruno 09/11/2026). Rótulo fora do messages/*.json
 // porque só existe nessas vendas (pl hoje; en de reserva).
-const ROTULO_REEMBOLSO: Record<string, string> = { pl: 'Zwrot pieniędzy', nl: 'Terugbetaling', en: 'Refund' }
+const ROTULO_REEMBOLSO: Record<string, string> = { pl: 'Zwrot pieniędzy', nl: 'Terugbetaling', hi: 'रिफ़ंड', en: 'Refund' }
 
 export default async function MorePage({
   params,

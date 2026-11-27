@@ -329,6 +329,46 @@ const COPY: Record<AppLocale, AccessCopy> = {
       '',
       'Hulp nodig? Stuur me gewoon een berichtje, ik help je graag. 😄 ❤️',
     ].join('\n'),
+  // hi (CL-HI, 27/11/2026): devanágari de conversa, «आप», atendente no feminino, sem 😉/❤️ (de número desconhecido a 40+ lê
+  // como suspeito), rótulos de botão do celular em inglês (é como estão nos aparelhos na Índia). Texto e revisão nativa:
+  // docs/HANDOFF-CL-HI-BOT.md. "पासवर्ड भूल गईं?" = auth.forgotPassword do messages/hi.json: mudar lá = mudar aqui.
+  hi: ({ email, code, link, homeUrl }) =>
+    [
+      'RiseMe™️ कैलिस्थेनिक्स चैलेंज में आपका स्वागत है! 🎉',
+      '',
+      'चैलेंज जॉइन करने के लिए बधाई हो! मुझे पूरा यक़ीन है कि ये 28 दिन आपके लिए बहुत कुछ बदल देंगे। 😍',
+      '',
+      'ऐप में आपका एक्सेस तैयार है, ये रही आपकी जानकारी 👇',
+      '',
+      `📧 ईमेल: ${email}`,
+      `🔑 पासवर्ड: ${code}`,
+      '',
+      'ये पासवर्ड सँभालकर रखिए, इसी से आप ऐप में लॉग इन करेंगी। 🔒',
+      '',
+      `अभी ऐप खोलने के लिए यहाँ टैप कीजिए: 👉 ${link}`,
+      '',
+      '(टैप करते ही ऐप अपने-आप खुल जाएगा, पासवर्ड टाइप करने की भी ज़रूरत नहीं। आपका चैलेंज तैयार है!) 💪',
+      '',
+      '📌 अगली बार लॉग इन कैसे करें?',
+      `👉 ${homeUrl} खोलिए और ऊपर वाले ईमेल और पासवर्ड से लॉग इन कीजिए।`,
+      'चाहें तो ऐप के अंदर अपनी पसंद का नया पासवर्ड बना सकती हैं।',
+      'पासवर्ड भूल गईं? लॉग इन वाली स्क्रीन पर "पासवर्ड भूल गईं?" वाला लिंक दबाइए।',
+      '',
+      '📱 चाहें तो ऐप को फ़ोन की होम स्क्रीन पर लगा लीजिए।',
+      'RiseMe™️ आपके फ़ोन पर बाक़ी ऐप्स की तरह ही चलता है। 👇',
+      '',
+      `📲 iPhone: ${homeUrl} को SAFARI में खोलिए → शेयर वाला बटन → "Add to Home Screen" → "Add"`,
+      '⚠️ सही ऑप्शन "Add to Home Screen" है ("Add to Favorites" नहीं)',
+      '',
+      `📲 Android: ${homeUrl} को CHROME में खोलिए → ऊपर तीन डॉट (⋮) वाला मेन्यू → "Install app" या "Add to Home screen" → "Install"`,
+      '',
+      '✅ RiseMe का आइकन आपकी होम स्क्रीन पर आ जाएगा। नहीं दिख रहा? फ़ोन की आख़िरी स्क्रीन तक स्वाइप कीजिए, कभी-कभी वो वहीं चला जाता है।',
+      '',
+      'अब बस एक टैप कीजिए और आपका चैलेंज शुरू! 🚀',
+      '(ये न हो पाए तो कोई बात नहीं, ऐप Chrome या Safari में खोलकर भी पूरा चलता है।)',
+      '',
+      'कोई भी मदद चाहिए तो बस मुझे लिखिए। मैं यहीं हूँ, आपकी पूरी मदद करूँगी। 😊',
+    ].join('\n'),
 }
 
 // Grupo 'Comunidad RiseMe World' (do número do suporte; só a equipe posta): enquetes e avisos da cocriação do app (Bruno, 24/10–05/11/2026;
@@ -483,6 +523,15 @@ const SUPPORT: Record<AppLocale, SupportCopy> = {
       '',
       'Veel plezier met je eerste training! 💪',
     ].join('\n'),
+  // hi: SEM a playlist do YouTube mesmo se vier (as aulas de lá são em espanhol/inglês, não em hindi).
+  hi: () =>
+    [
+      '💛 एक आख़िरी ज़रूरी मैसेज:',
+      '',
+      'अगर आपने सारे स्टेप कर लिए और फिर भी ऐप खोलने में दिक़्क़त हो रही है, तो मुझे यहीं लिखिए, हमारी सपोर्ट टीम आपकी मदद करेगी। 🙏',
+      '',
+      'चलिए, चैलेंज शुरू करते हैं! 💪',
+    ].join('\n'),
 }
 
 export async function sendWhatsAppAccess(params: {
@@ -552,6 +601,7 @@ const COMO_REEMBOLSAR: Partial<Record<string, (homeUrl: string) => string>> & { 
   pl: (h) => `Gdybyś kiedyś chciała zwrot pieniędzy, wystarczy napisać tutaj albo wejść na: ${h}/refund`,
   en: (h) => `If you ever want a refund, just write to us here or go to: ${h}/refund`,
   nl: (h) => `Mocht je je geld terug willen, stuur me dan gewoon hier een berichtje of ga naar: ${h}/refund`,
+  hi: (h) => `कभी भी पैसे वापस चाहिए हों, तो बस हमें यहीं WhatsApp पर लिखिए या इस लिंक पर जाइए: ${h}/refund`,
 }
 
 /**
@@ -610,6 +660,7 @@ const ABERTURA_REENVIO: Record<string, string> = {
   tr: 'Merhaba! 💛 RiseMe erişimini buradan tekrar gönderiyoruz. *Doğru şifre bu mesajdaki şifredir* ve hep aynıdır: değişmez. Telefonun kayıtlı başka bir şifre önerirse onu sil ve bunu yaz ya da aşağıdaki bağlantıya dokun, doğrudan girersin.',
   en: 'Hi! 💛 We are resending your RiseMe access here. *The correct password is the one in this message*, and it is always the same: it does not change. If your phone suggests another saved password, delete it and type this one, or just tap the link below and you are in.',
   nl: 'Hoi! 💛 Hier zijn opnieuw je inloggegevens voor RiseMe. *Het juiste wachtwoord staat in dit bericht*, en het is altijd hetzelfde: het verandert niet. Stelt je telefoon een ander opgeslagen wachtwoord voor? Verwijder dat en typ dit wachtwoord in, of tik gewoon op de link hieronder, dan ben je meteen binnen.',
+  hi: 'नमस्ते! 💛 हम आपका RiseMe एक्सेस यहाँ दोबारा भेज रहे हैं। *सही पासवर्ड वही है जो इस मैसेज में है*, हम हर बार यही पासवर्ड भेजते हैं, नया पासवर्ड नहीं बनता। अगर आपका फ़ोन कोई और सेव किया हुआ पासवर्ड दिखाए, तो उसे मिटाकर यही टाइप कीजिए, या बस नीचे वाले लिंक पर टैप कीजिए, आप सीधे ऐप में पहुँच जाएँगी।',
   'pt-BR': 'Oi! 💛 Estamos reenviando por aqui seu acesso ao RiseMe. *A senha certa é a desta mensagem*, e é sempre a mesma: não muda. Se o celular sugerir outra senha salva, apague e digite esta, ou simplesmente toque no link abaixo e você entra direto.',
 }
 

@@ -1,0 +1,236 @@
+{
+ "1": {
+  "key": "objetivo",
+  "pergunta": "कैलिस्थेनिक्स से आप सबसे ज़्यादा क्या पाना चाहती हैं?",
+  "opcoes": {
+   "perder_peso": "वज़न कम करना",
+   "ganar_fuerza": "मसल्स की ताक़त बढ़ाना और शरीर को टोन करना",
+   "ganar_flexibilidad": "शरीर को ज़्यादा फ़्लेक्सिबल बनाना",
+   "eliminar_tensiones": "टेंशन और फ़िक्र से छुटकारा पाना",
+   "controlar_azucar": "ब्लड शुगर कंट्रोल करना और टाइप 2 डायबिटीज़ से बचना या उसे संभालना"
+  }
+ },
+ "3": {
+  "key": "tipo_cuerpo_actual",
+  "pergunta": "आपका शरीर इनमें से किसके जैसा है?",
+  "opcoes": {
+   "delgada": "पतली",
+   "media": "मीडियम",
+   "grande": "भारी",
+   "con_sobrepeso": "ज़्यादा वज़न वाली"
+  }
+ },
+ "4": {
+  "key": "pais",
+  "pergunta": "आप किस देश में रहती हैं?",
+  "opcoes": {
+   "india": "भारत",
+   "otro": "कोई और देश"
+  }
+ },
+ "6": {
+  "key": "rango_edad",
+  "pergunta": "आपकी उम्र कितनी है?",
+  "opcoes": {
+   "edad_18_29": "18 - 29 साल",
+   "edad_30_39": "30 - 39 साल",
+   "edad_40_49": "40 - 49 साल",
+   "edad_mas_50": "50 साल से ज़्यादा"
+  }
+ },
+ "7": {
+  "key": "experiencia_calistenia",
+  "pergunta": "क्या आपने पहले कभी कैलिस्थेनिक्स किया है?",
+  "opcoes": {
+   "si_algunas_veces": "हाँ, कुछ बार किया है।",
+   "nunca_lo_intente": "नहीं, कभी ट्राई नहीं किया।"
+  }
+ },
+ "9": {
+  "key": "experiencia_cuerpo",
+  "pergunta": "वज़न के मामले में आपका शरीर कैसा है?",
+  "opcoes": {
+   "cuesta_ganar_peso": "मेरा वज़न या मसल्स मुश्किल से बढ़ते हैं",
+   "gano_pierdo_facil": "मेरा वज़न आसानी से बढ़ता भी है, घटता भी है",
+   "gano_rapido_pierdo_lento": "वज़न झट से बढ़ जाता है, पर घटने में बहुत टाइम लगता है",
+   "ninguna_de_estas": "इनमें से कोई नहीं"
+  }
+ },
+ "10": {
+  "key": "ultima_satisfaccion_cuerpo",
+  "pergunta": "आख़िरी बार आप अपने शरीर से कब ख़ुश थीं?",
+  "opcoes": {
+   "menos_1_ano": "1 साल से कम समय पहले",
+   "entre_1_2_anos": "1 से 2 साल पहले",
+   "mas_3_anos": "3 साल से भी ज़्यादा पहले",
+   "nunca": "कभी नहीं"
+  }
+ },
+ "11": {
+  "key": "areas_trabajar",
+  "pergunta": "शरीर के कौन-से हिस्से आप शेप में लाना चाहती हैं? चुनिए:",
+  "opcoes": {
+   "vientre": "पेट",
+   "gluteos": "हिप्स",
+   "piernas": "टाँगें",
+   "pecho": "छाती",
+   "todo": "पूरा शरीर"
+  }
+ },
+ "12": {
+  "key": "tipo_cuerpo_deseado",
+  "pergunta": "आप जैसा शरीर पाना चाहती हैं, वो चुनिए!",
+  "opcoes": {
+   "delgada": "पतली",
+   "tonificada": "टोन्ड",
+   "con_curvas": "कर्वी",
+   "promedio": "नॉर्मल"
+  }
+ },
+ "13": {
+  "key": "problemas_fisicos",
+  "pergunta": "क्या आपको इनमें से किसी चीज़ की परेशानी है?",
+  "opcoes": {
+   "espalda_sensible": "कमर जल्दी दुखती है",
+   "rodillas_sensibles": "घुटने जल्दी दुखते हैं",
+   "ninguna_de_las_anteriores": "इनमें से कोई नहीं"
+  }
+ },
+ "14": {
+  "key": "frecuencia_ejercicio",
+  "pergunta": "आप कितनी बार एक्सरसाइज़ करती हैं?",
+  "opcoes": {
+   "casi_todos_los_dias": "लगभग रोज़",
+   "varias_veces_semana": "हफ़्ते में कई बार",
+   "algunas_veces_mes": "महीने में कुछ बार",
+   "nunca": "कभी नहीं"
+  }
+ },
+ "15": {
+  "key": "consumo_agua",
+  "pergunta": "आप रोज़ कितना पानी पीती हैं?",
+  "opcoes": {
+   "solo_cafe_o_te": "मैं सिर्फ़ चाय या कॉफ़ी पीती हूँ",
+   "dos_vasos": "दो गिलास",
+   "dos_a_seis_vasos": "दो से छह गिलास",
+   "mas_de_seis_vasos": "छह गिलास से ज़्यादा"
+  }
+ },
+ "17": {
+  "key": "falta_aire_escaleras",
+  "pergunta": "क्या सीढ़ियाँ चढ़ते समय आपकी साँस फूल जाती है?",
+  "opcoes": {
+   "sin_aliento_no_hablo": "साँस इतनी फूल जाती है कि बोल भी नहीं पाती",
+   "poco_aire_puedo_hablar": "थोड़ी साँस फूलती है, पर बात कर लेती हूँ",
+   "bien_un_tramo": "एक मंज़िल की सीढ़ियाँ चढ़कर ठीक रहती हूँ",
+   "varios_tramos": "कुछ मंज़िलें आराम से चढ़ लेती हूँ"
+  }
+ },
+ "18": {
+  "key": "frecuencia_caminar",
+  "pergunta": "आप कितनी बार वॉक पर जाती हैं?",
+  "opcoes": {
+   "casi_todos_los_dias": "लगभग रोज़",
+   "varias_veces_semana": "हफ़्ते में कई बार",
+   "algunas_veces_mes": "महीने में कुछ बार",
+   "nunca": "कभी नहीं"
+  }
+ },
+ "19": {
+  "key": "nivel_energia",
+  "pergunta": "दिन भर आपकी एनर्जी कैसी रहती है?",
+  "opcoes": {
+   "bajos_cansada_todo_dia": "कम, पूरे दिन थकान रहती है",
+   "caida_despues_almuerzo": "लंच के बाद एनर्जी एकदम गिर जाती है",
+   "me_arrastro_entre_comidas": "दो खानों के बीच सुस्ती छाई रहती है",
+   "altos_y_estables": "अच्छी और पूरे दिन एक जैसी रहती है"
+  }
+ },
+ "21": {
+  "key": "horas_sueno",
+  "pergunta": "आप आमतौर पर कितना सोती हैं?",
+  "opcoes": {
+   "menos_5_horas": "5 घंटे से कम",
+   "de_5_a_6_horas": "5-6 घंटे",
+   "de_7_a_8_horas": "7-8 घंटे",
+   "mas_8_horas": "8 घंटे से ज़्यादा"
+  }
+ },
+ "22": {
+  "key": "malos_habitos",
+  "pergunta": "क्या आपकी इनमें से कोई बुरी आदत है?",
+  "opcoes": {
+   "comer_por_emocion": "टेंशन, उदासी या बोरियत में खाना",
+   "comer_en_exceso": "ज़रूरत से ज़्यादा खाना",
+   "bocadillos_de_noche": "देर रात नमकीन-बिस्किट खाना",
+   "saltar_comidas": "बार-बार खाना छोड़ देना",
+   "ninguna_de_las_anteriores": "इनमें से कोई नहीं"
+  }
+ },
+ "23": {
+  "key": "eventos_aumento_peso",
+  "pergunta": "क्या पिछले कुछ सालों में ज़िंदगी की इनमें से किसी बात की वजह से आपका वज़न बढ़ा है?",
+  "opcoes": {
+   "presion_laboral": "काम का प्रेशर",
+   "vida_familiar_ocupada": "घर-परिवार की भागदौड़",
+   "divorcio_o_ruptura": "तलाक़ या ब्रेकअप",
+   "metabolismo_lento": "बढ़ती उम्र के साथ धीमा मेटाबॉलिज़्म",
+   "menopausia": "मेनोपॉज़",
+   "embarazo_posparto": "प्रेगनेंसी या डिलीवरी के बाद के बदलाव",
+   "desafios_financieros": "पैसों की परेशानी",
+   "otros_eventos_estresantes": "कोई और टेंशन वाली बात",
+   "pandemia_covid": "कोविड और लॉकडाउन",
+   "ninguno_de_los_anteriores": "इनमें से कुछ नहीं"
+  }
+ },
+ "24": {
+  "key": "razon_principal",
+  "pergunta": "फ़िट होने की आपकी सबसे बड़ी वजह क्या है?",
+  "opcoes": {
+   "mas_confianza_cuerpo": "अपने शरीर को लेकर ज़्यादा कॉन्फ़िडेंट महसूस करना",
+   "mas_saludable_energia": "ज़्यादा हेल्दी और एनर्जेटिक महसूस करना",
+   "ropa_quede_mejor": "मेरे कपड़े मुझ पर और अच्छे से फ़िट हों",
+   "recuperar_forma_posparto": "डिलीवरी के बाद अपना शेप वापस पाना",
+   "otra": "कुछ और"
+  }
+ },
+ "25": {
+  "key": "altura",
+  "pergunta": "आपकी हाइट कितनी है?",
+  "opcoes": {}
+ },
+ "26": {
+  "key": "peso_actual",
+  "pergunta": "आपका अभी का वज़न कितना है?",
+  "opcoes": {}
+ },
+ "27": {
+  "key": "peso_objetivo",
+  "pergunta": "समझ गए! और आपका टारगेट वज़न कितना है?",
+  "opcoes": {}
+ },
+ "28": {
+  "key": "edad",
+  "pergunta": "आपकी उम्र कितनी है?",
+  "opcoes": {}
+ },
+ "30": {
+  "key": "evento_importante",
+  "pergunta": "क्या जल्द ही आपका कोई ख़ास मौक़ा आने वाला है?",
+  "opcoes": {
+   "vacaciones": "छुट्टियों की ट्रिप",
+   "boda": "शादी",
+   "reunion": "फ़ैमिली गेट-टुगेदर",
+   "cumpleanos": "बर्थडे",
+   "dia_festivo": "त्योहार (दिवाली, ईद, क्रिसमस…)",
+   "evento_deportivo": "स्पोर्ट्स इवेंट",
+   "otro": "कुछ और",
+   "ningun_evento": "जल्द कोई ख़ास मौक़ा नहीं"
+  }
+ },
+ "33": {
+  "key": "nombre",
+  "pergunta": "आपका नाम क्या है?",
+  "opcoes": {}
+ }
+}

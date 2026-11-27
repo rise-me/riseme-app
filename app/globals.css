@@ -80,6 +80,8 @@
   }
   html {
     @apply font-sans;
+    /* Letra hindi (devanágari) cai na Mukta; o resto segue na Inter. */
+    font-family: var(--font-sans), var(--font-deva), ui-sans-serif, system-ui, sans-serif;
     /* Full height for mobile PWA */
     height: 100%;
     height: -webkit-fill-available;
@@ -115,3 +117,7 @@
     box-shadow: 0 0 14px 4px rgba(193, 145, 55, 0.55);
   }
 }
+
+/* Hindi (CL-HI): espaçamento entre letras quebra a linha de cima do devanágari; itálico não existe nessa escrita. */
+:lang(hi), [lang='hi'] { letter-spacing: 0 !important; }
+:lang(hi) em, :lang(hi) i { font-style: normal; }
