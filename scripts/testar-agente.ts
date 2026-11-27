@@ -48,6 +48,11 @@ Compras (o que ela pagou, de onde):
 - ${D4} (há 4 dias) · The RiseMe Calisthenics Challenge (Índia, ₹499) · 499 INR · Stripe · pi_3TesteIndia00000000001
 Pagamentos na Stripe (fato, consultado agora; NUNCA pergunte o meio de pagamento):
 - ${D4} · CL-IN · 499.00 INR · pagou com UPI · REEMBOLSO 499.00 INR CONCLUÍDO pela Stripe em ${D2.slice(8, 10)}/${D2.slice(5, 7)}, 10:15; prazo para aparecer na conta dela: até 7 dias úteis (o banco credita depois; NÃO prometa "na hora")` }
+const alunaHI: PerfilAluna = { nome: 'Neha Verma', idioma: 'hi', compradaEm: `${D4}T14:00:00Z`, ultimoLogin: `${D4}T15:00:00Z`, diasFeitos: 1, ultimoTreino: `${D2}T12:00:00Z`, liberados: ['घर पर कैलिस्थेनिक्स'], confirmadaPorTelefone: true, cartao: `CARTÃO DA ALUNA (dados reais do sistema, use como fato):
+Compras (o que ela pagou, de onde):
+- ${D4} (há 4 dias) · RiseMe कैलिस्थेनिक्स चैलेंज (Índia em hindi, ₹499) · 499 INR · Stripe · pi_3TesteHindi000000000001
+Pagamentos na Stripe (fato, consultado agora; NUNCA pergunte o meio de pagamento):
+- ${D4} · CL-HI · 499.00 INR · pagou com UPI` }
 const alunaNL: PerfilAluna = { nome: 'Sanne de Vries', idioma: 'nl', compradaEm: `${D4}T14:00:00Z`, ultimoLogin: `${D4}T15:00:00Z`, diasFeitos: 1, ultimoTreino: `${D2}T12:00:00Z`, liberados: ['Calisthenics thuis'], confirmadaPorTelefone: true, cartao: `CARTÃO DA ALUNA (dados reais do sistema, use como fato):
 Compras (o que ela pagou, de onde):
 - ${D4} (há 4 dias) · De RiseMe Calisthenics Challenge (Holanda/Bélgica, € 19) · 19 EUR · Stripe · pi_3TesteHolanda000000001
@@ -127,7 +132,13 @@ export const CASOS: { nome: string; perfil: PerfilAluna | null; msg: string; hot
   // 25/11/2026 — CL-IN (Índia, inglês, Stripe em INR com UPI)
   { nome: 'IN: reembolso UPI concluído e não entrou → até 7 dias úteis, sem BLIK nem "instantly"', perfil: alunaIN, phone: '919812345678', msg: 'Hi, you said my refund was done but I did not get the money in my bank yet. When will it come?' },
   { nome: 'IN sem conta: pagou ₹499 por UPI e não recebeu acesso → inglês, sem Hotmart, pede e-mail e telefone, transfere', perfil: null, phone: '919812345678', msg: 'Hello, I paid 499 rupees by Google Pay UPI yesterday but I did not receive any access. Please help.' },
-  { nome: 'IN sem conta: hinglish → responde em inglês simples e pede o e-mail da compra', perfil: null, phone: '919812345678', msg: 'Hi, maine kal payment kiya tha, login nahi ho raha hai. Kya karu?' },
+  { nome: 'IN sem conta: hinglish → responde em HINGLISH simples (letras latinas; pode ser CL-IN ou CL-HI) e pede o e-mail da compra', perfil: null, phone: '919812345678', msg: 'Hi, maine kal payment kiya tha, login nahi ho raha hai. Kya karu?' },
+  { nome: 'IN com conta en: hinglish → continua em INGLÊS simples', perfil: alunaIN, phone: '919812345678', msg: 'Hi, mera video nahi chal raha hai, kya karu?' },
+  // 27/11/2026 — CL-HI (Índia em hindi; responde na escrita dela: devanágari ou hinglish)
+  { nome: 'HI: conta hi em devanágari, senha não funciona → resposta em DEVANÁGARI de conversa, «आप», feminino', perfil: alunaHI, phone: '919812345678', msg: 'पासवर्ड काम नहीं कर रहा' },
+  { nome: 'HI: conta hi em hinglish → resposta em HINGLISH (letras latinas), sem a trava de idioma traduzir', perfil: alunaHI, phone: '919812345678', msg: 'mera password kaam nahi kar raha, app khul hi nahi raha' },
+  { nome: 'HI sem conta: devanágari, pagou ₹499 por UPI e não recebeu acesso → hindi, sem Hotmart, pede e-mail e telefone, transfere, prazo sem hora em hindi', perfil: null, phone: '919812345678', msg: 'नमस्ते, मैंने कल Google Pay से 499 रुपये पेमेंट किया था लेकिन मुझे कोई लॉगिन नहीं मिला। प्लीज़ मदद कीजिए।' },
+  { nome: 'STRIPE HI: 2º pedido de रिफ़ंड → pi_ em reembolso_transacoes, em hindi', perfil: alunaHI, phone: '919812345678', antes: [{ a: 'student', t: 'मुझे अपने पैसे वापस चाहिए।' }, { a: 'agent', t: 'नेहा जी, ये एक बार का पेमेंट है, कोई सब्सक्रिप्शन नहीं है। क्या मैं किसी चीज़ में आपकी मदद कर सकती हूँ? फिर भी रिफ़ंड चाहिए तो बस यहीं लिख दीजिए, मैं तुरंत कर दूँगी।' }], msg: 'नहीं, मुझे बस रिफ़ंड चाहिए।' },
   // 26/11/2026 — CL-NL (Holanda/Bélgica, holandês, Stripe em EUR com iDEAL)
   { nome: 'STRIPE NL: 2º pedido de terugbetaling → pi_ em reembolso_transacoes, em holandês', perfil: alunaNL, phone: '31612345678', antes: [{ a: 'student', t: 'Hoi, ik wil mijn geld terug voor de challenge.' }, { a: 'agent', t: 'Hoi Sanne! Het is een eenmalige betaling, geen abonnement. Kan ik je ergens mee helpen? Als je toch liever je geld terug wilt, stuur me dan een berichtje en ik regel het meteen.' }], msg: 'Nee dank je, ik wil gewoon mijn geld terug.' },
   { nome: 'NL sem conta: pagou € 19 por iDEAL e não recebeu acesso → holandês, sem Hotmart, pede e-mail e telefone, transfere, prazo sem hora', perfil: null, phone: '31612345678', msg: 'Hoi, ik heb gisteren 19 euro betaald met iDEAL maar ik heb geen inloggegevens ontvangen. Kun je helpen?' },

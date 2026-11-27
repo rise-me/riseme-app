@@ -68,6 +68,7 @@ const NOME_STRIPE: Record<string, string> = {
   'CL-PL-DS1': 'Protokół Metaboliczny 28 Dni (downsell, 47 zł)',
   'CL-IN': 'The RiseMe Calisthenics Challenge (Índia, ₹499)',
   'CL-NL': 'De RiseMe Calisthenics Challenge (Holanda/Bélgica, € 19)',
+  'CL-HI': 'RiseMe कैलिस्थेनिक्स चैलेंज (Índia em hindi, ₹499)',
 }
 
 // BLIK: a doc da Stripe diz até 2 horas, mas nos 3 reembolsos BLIK que acompanhamos (14, 16 e 17/11/2026) o crédito só

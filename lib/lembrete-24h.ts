@@ -27,6 +27,10 @@ const TEXTO: Record<string, (nome: string) => string> = {
     `Hoi${n ? ' ' + n : ''}! 💛 Gisteren kreeg je je inloggegevens, maar ik zie dat je nog niet bent ingelogd.\n\n` +
     'Je e-mailadres en wachtwoord staan in het bericht hierboven 👆 Dag 1 duurt ongeveer 15 minuten en die kun je vandaag nog doen.\n\n' +
     'Kun je je gegevens niet vinden of lukt inloggen niet? Stuur hier een berichtje, dan krijg je ze opnieuw van me.',
+  hi: (n) =>
+    `नमस्ते${n ? ' ' + n + ' जी' : ''}! 💛 कल हमने आपका एक्सेस भेजा था, पर लगता है आप अभी तक ऐप में नहीं आईं।\n\n` +
+    'आपका ईमेल और पासवर्ड ऊपर वाले मैसेज में हैं। 👆 पहले दिन की क्लास बस 15 मिनट की है, आज ही कर लीजिए!\n\n' +
+    'एक्सेस नहीं मिल रहा या लॉग इन नहीं हो रहा? यहीं जवाब दीजिए, मैं दोबारा भेज दूँगी।',
   en: (n) =>
     `Hi${n ? ', ' + n : ''}! 💛 Your access arrived yesterday and I see you haven't logged in yet.\n\n` +
     'Your email and password are in the message above 👆 Day 1 takes about 15 minutes and you can do it today.\n\n' +

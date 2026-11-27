@@ -29,7 +29,7 @@ const APP_URL = () => process.env.NEXT_PUBLIC_APP_URL ?? 'https://riseme.app'
 /** Endereço do suporte por idioma. Todos caem na mesma caixa (qualquer nome @riseme.app chega). */
 import { EMAIL_SUPORTE as ENDERECO_SUPORTE, emailSuporte as enderecoSuporte } from '@/lib/suporte' // fonte única dos endereços
 export { ENDERECO_SUPORTE, enderecoSuporte }
-const ASSINATURA: Record<string, string> = { pl: 'Zespół RiseMe', es: 'Equipo RiseMe', 'pt-BR': 'Equipe RiseMe', en: 'RiseMe Team', it: 'Il team RiseMe', cs: 'Tým RiseMe', tr: 'RiseMe Ekibi', ro: 'Echipa RiseMe', nl: 'Team RiseMe' }
+const ASSINATURA: Record<string, string> = { pl: 'Zespół RiseMe', es: 'Equipo RiseMe', 'pt-BR': 'Equipe RiseMe', en: 'RiseMe Team', it: 'Il team RiseMe', cs: 'Tým RiseMe', tr: 'RiseMe Ekibi', ro: 'Echipa RiseMe', nl: 'Team RiseMe', hi: 'RiseMe टीम' }
 const ASSUNTO_PADRAO: Record<string, string> = { pl: 'Twoja wiadomość do RiseMe', es: 'Tu mensaje a RiseMe', en: 'Your message to RiseMe' }
 
 // ── Texto do bot (formato do WhatsApp) → e-mail ─────────────────────────────────────────────────────────────────

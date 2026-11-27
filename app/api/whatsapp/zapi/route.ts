@@ -9,9 +9,10 @@ import { foiConvidadaParaVideo, receberVideo } from '@/lib/video-depoimento'
 import { conviteHotmartDela, liberarPresenteHotmart, marcarDepoimentoNoPost, marcarProvaSocial } from '@/lib/whatsapp-agent/prova-social'
 import { contaPelaCompraHotmart, reenviarAcesso, reenvioRecente, trocarEmail, emailsDaConta, textoVamosVer, textoOlvidaste, KIND_EMAIL_TROCADO } from '@/lib/whatsapp-agent/acesso'
 import { tratarComando } from '@/lib/whatsapp-agent/comandos'
-import { decidirResposta, redigirRespostaAprovada, interpretarRespostaResponsavel, idiomaPeloTelefone, type Consulta } from '@/lib/whatsapp-agent/responder'
+import { decidirResposta, redigirRespostaAprovada, interpretarRespostaResponsavel, idiomaPeloTelefone, idiomaPelaEscrita, type Consulta } from '@/lib/whatsapp-agent/responder'
 // Reembolso da Stripe sem perfil: idioma pelo DDI (+91 → inglês, CL-IN 25/11/2026); DDI desconhecido ou LID segue polonês (era o padrão).
-const idiomaSemPerfil = (phone: string) => { const i = idiomaPeloTelefone(phone); return i === 'es' ? 'pl' : i }
+// Índia sem perfil (CL-HI, 27/11/2026): se o texto da conversa (o que o bot acabou de escrever a ela) está em devanágari, é hindi.
+const idiomaSemPerfil = (phone: string, texto?: string) => { const i = idiomaPelaEscrita(texto) ?? idiomaPeloTelefone(phone); return i === 'es' ? 'pl' : i }
 import {
   abrirChat,
   aprendizadosAtivos,
@@ -508,7 +509,7 @@ async function processarEntrada(phone: string, waMessageId: string | null, silen
     await registrarPedidoReembolso({ phone, canal: 'whatsapp', categoria: decisao.reembolsoCategoria, devolveu: (decisao.reembolsoTransacoes ?? []).filter((t) => t.startsWith('pi_')), motivo: decisao.reembolsoMotivo }).catch((err) => console.error('[reembolso-pedido] falhou:', err))
   if (decisao.tipo === 'responder' && decisao.reembolsoTransacoes?.some((t) => t.startsWith('pi_'))) {
     const pis = decisao.reembolsoTransacoes.filter((t) => t.startsWith('pi_'))
-    const idioma = perfil?.idioma ?? idiomaSemPerfil(phone)
+    const idioma = perfil?.idioma ?? idiomaSemPerfil(phone, decisao.texto)
     const res = await Promise.all(pis.map((pi) => reembolsarStripe({ paymentIntent: pi, origem: 'aluna-whatsapp' }).catch((err) => ({ ok: false as const, erro: String(err) }))))
     const falhas = res.map((r, i) => (r.ok ? null : `${pis[i]}: ${r.erro}`)).filter(Boolean)
     decisao = { ...decisao, texto: textoReembolsoStripe(idioma, perfil?.nome, falhas.length === 0), reembolsoTransacoes: decisao.reembolsoTransacoes.filter((t) => !t.startsWith('pi_')) }

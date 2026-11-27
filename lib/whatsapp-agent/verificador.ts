@@ -138,16 +138,23 @@ export async function registrarVerificacao(phone: string, antes: string, v: Veri
 // pega isso (ela "mantém o idioma da resposta"). Aqui é conta fixa: se a resposta está claramente em espanhol/português e a
 // aluna é de outro idioma, traduz antes de enviar. Na dúvida, não mexe.
 const PALAVRAS: Record<'es' | 'pt' | 'pl', RegExp> = {
-  es: /\b(el|los|las|que|con|para|una|est[aá]s?|puedes|aplicaci[oó]n|contraseña|mensaje|navegador|hola|gracias|funciona|basta|entrar|pudiste|tienes|aqu[ií]|ahora|ya|muy|tambi[eé]n|cuando|d[ií]a)\b/gi,
+  es: /\b(el|los|las|que|con|para|una|est[aá]s?|puedes|aplicaci[oó]n|contraseña|mensaje|navegador|hola|gracias|funciona|basta|entrar|pudiste|tienes|aqu[ií]|ahora|muy|tambi[eé]n|cuando|d[ií]a)\b/gi,
   pt: /\b(voc[eê]|n[aã]o|clique|mensagem|cima|abre|sozinho|obrigad[ao]|tamb[eé]m|ent[aã]o|aqui|agora|j[aá]|muito|quando|seu|sua|dia)\b/gi,
-  pl: /\b(jest|nie|si[eę]|na|że|to|tw[oó]j|twoja|tutaj|mo[zż]esz|dzie[nń]|aplikacj[iaę]|has[lł]o|wiadomo[sś]ci?|kliknij|wejd[zź]|dost[eę]p)\b/gi,
+  pl: /\b(jest|nie|si[eę]|że|tw[oó]j|twoja|tutaj|mo[zż]esz|dzie[nń]|aplikacj[iaę]|has[lł]o|wiadomo[sś]ci?|kliknij|wejd[zź]|dost[eę]p)\b/gi,
 }
-const NOME_IDIOMA: Record<string, string> = { pl: 'polonês', cs: 'tcheco', it: 'italiano', tr: 'turco', ro: 'romeno', en: 'inglês', nl: 'holandês', es: 'espanhol', 'pt-BR': 'português do Brasil' }
+// Palavras curtas que também são hinglish do dia a dia ("app khol ke dekho na, to login ho jayega"; "aap ya to…"): só contam
+// quando o texto já tem 2 sinais fortes do idioma (CL-HI, 27/11/2026). Sem isto a trava "traduzia" resposta certa em hinglish.
+const FRACAS: Record<'es' | 'pl', RegExp> = { es: /\b(ya)\b/gi, pl: /\b(na|to)\b/gi }
+const NOME_IDIOMA: Record<string, string> = { hi: 'hindi em devanágari de conversa (tratamento «आप», verbos no feminino, palavras do dia a dia como ऐप, पासवर्ड, लॉग इन)', pl: 'polonês', cs: 'tcheco', it: 'italiano', tr: 'turco', ro: 'romeno', en: 'inglês', nl: 'holandês', es: 'espanhol', 'pt-BR': 'português do Brasil' }
 
 /** Idioma em que o texto claramente está (só es/pt/pl), ou null se não dá pra dizer. */
 export function idiomaClaro(texto: string): 'es' | 'pt' | 'pl' | null {
+  if (/[\u0900-\u097F]/.test(texto)) return null // tem devanágari: é hindi, nunca espanhol/português/polonês
   const limpo = texto.replace(/https?:\/\/\S+|\S+@\S+/g, ' ')
-  const c = { es: (limpo.match(PALAVRAS.es) ?? []).length, pt: (limpo.match(PALAVRAS.pt) ?? []).length, pl: (limpo.match(PALAVRAS.pl) ?? []).length + (limpo.match(/[ąćęłńśźż]/gi) ?? []).length }
+  const conta = (r: RegExp) => (limpo.match(r) ?? []).length
+  const es = conta(PALAVRAS.es)
+  const pl = conta(PALAVRAS.pl) + conta(/[ąćęłńśźż]/gi)
+  const c = { es: es + (es >= 2 ? conta(FRACAS.es) : 0), pt: conta(PALAVRAS.pt), pl: pl + (pl >= 2 ? conta(FRACAS.pl) : 0) }
   const [top, segundo] = (Object.entries(c) as ['es' | 'pt' | 'pl', number][]).sort((a, b) => b[1] - a[1])
   return top[1] >= 3 && top[1] >= 2 * Math.max(1, segundo[1]) ? top[0] : null
 }
