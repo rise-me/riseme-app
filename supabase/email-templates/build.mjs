@@ -42,6 +42,10 @@ const COMMON = {
     fallback: "Se il pulsante non funziona, copia questo link e incollalo nel browser:",
     signoff: 'Con affetto,<br />Il team RiseMe',
   },
+  hi: {
+    fallback: 'अगर बटन काम न करे, तो यह लिंक कॉपी करके अपने ब्राउज़र में खोलें:',
+    signoff: 'प्यार के साथ,<br />RiseMe टीम',
+  },
   nl: {
     fallback: 'Werkt de knop niet? Kopieer deze link en plak hem in je browser:',
     signoff: 'Liefs,<br />Het RiseMe-team',
@@ -96,8 +100,14 @@ const TEXT = {
       button: 'Imposta la mia password',
       note: 'Hai dubbi? Rispondi a questa e-mail e ti aiutiamo.',
     },
+    hi: {
+      title: 'RiseMe में आपका स्वागत है',
+      h1: 'RiseMe में आपका स्वागत है!',
+      body: 'आपकी खरीदारी कन्फ़र्म हो गई है और आपका अकाउंट तैयार है। बस एक कदम बाकी है: ऐप में आने के लिए अपना पासवर्ड बनाइए।',
+      button: 'मेरा पासवर्ड बनाएँ',
+      note: 'कोई सवाल है? इसी ईमेल का जवाब दें, हम मदद करेंगे।',
+    },
     nl: {
-      subject: null, // assunto não cabe nos 255 do Supabase com 7 idiomas: nl usa o padrão até o hook de e-mail (feat/auth-email-hook)
       title: 'Welkom bij RiseMe',
       h1: 'Welkom bij RiseMe!',
       body: 'Je aankoop is bevestigd en je account staat klaar. Nog één stap: stel je wachtwoord in om de app te openen.',
@@ -150,8 +160,14 @@ const TEXT = {
       button: 'Reimposta la password',
       note: 'Se non sei stata tu a fare questa richiesta, puoi ignorare questa e-mail. La tua password attuale continuerà a funzionare.',
     },
+    hi: {
+      title: 'अपना पासवर्ड बदलें',
+      h1: 'अपना पासवर्ड बदलें',
+      body: 'हमें आपका पासवर्ड बदलने का अनुरोध मिला है। नया पासवर्ड बनाने के लिए नीचे दिए बटन पर टैप करें।',
+      button: 'पासवर्ड बदलें',
+      note: 'अगर यह अनुरोध आपने नहीं किया, तो इस ईमेल को अनदेखा कर दें। आपका मौजूदा पासवर्ड चलता रहेगा।',
+    },
     nl: {
-      subject: null, // assunto não cabe nos 255 do Supabase com 7 idiomas: nl usa o padrão até o hook de e-mail (feat/auth-email-hook)
       title: 'Herstel je wachtwoord',
       h1: 'Herstel je wachtwoord',
       body: 'We hebben een verzoek ontvangen om je wachtwoord opnieuw in te stellen. Klik op de knop hieronder om een nieuw wachtwoord te maken.',
@@ -204,8 +220,14 @@ const TEXT = {
       button: 'Conferma il mio account',
       note: 'Se non hai creato tu questo account, puoi ignorare questa e-mail.',
     },
+    hi: {
+      title: 'अपना अकाउंट कन्फ़र्म करें',
+      h1: 'अपना अकाउंट कन्फ़र्म करें',
+      body: 'RiseMe में आपका स्वागत है! नीचे दिए बटन पर टैप करके अपना ईमेल कन्फ़र्म करें और अपना पहला चैलेंज शुरू करें।',
+      button: 'मेरा अकाउंट कन्फ़र्म करें',
+      note: 'अगर यह अकाउंट आपने नहीं बनाया, तो इस ईमेल को अनदेखा कर दें।',
+    },
     nl: {
-      subject: null, // assunto não cabe nos 255 do Supabase com 7 idiomas: nl usa o padrão até o hook de e-mail (feat/auth-email-hook)
       title: 'Bevestig je account',
       h1: 'Bevestig je account',
       body: 'Welkom bij RiseMe! Bevestig je e-mailadres met de knop hieronder en begin aan je eerste challenge.',
@@ -230,7 +252,6 @@ const TEXT = {
       note: 'Bu değişikliği sen istemediysen bu e-postayı görmezden gel ve şifreni değiştirmeyi düşün.',
     },
     en: {
-      subject: null, // o assunto do email-change já estava no limite de 255: en usa o assunto padrão (es); o corpo sai em inglês
       title: 'Confirm your new e-mail',
       h1: 'Confirm your new e-mail address',
       body: `You asked to change your account e-mail to ${NEW_EMAIL}. Confirm this change by tapping the button below.`,
@@ -259,8 +280,14 @@ const TEXT = {
       button: 'Conferma il nuovo indirizzo',
       note: 'Se non sei stata tu a chiedere questa modifica, ignora questa e-mail e valuta di cambiare la password.',
     },
+    hi: {
+      title: 'अपना नया ईमेल कन्फ़र्म करें',
+      h1: 'अपना नया ईमेल कन्फ़र्म करें',
+      body: `आपने अपने अकाउंट का ईमेल ${NEW_EMAIL} में बदलने को कहा है। नीचे दिए बटन पर टैप करके यह बदलाव कन्फ़र्म करें।`,
+      button: 'नया ईमेल कन्फ़र्म करें',
+      note: 'अगर यह बदलाव आपने नहीं माँगा, तो इस ईमेल को अनदेखा करें और अपना पासवर्ड बदलने के बारे में सोचें।',
+    },
     nl: {
-      subject: null, // assunto não cabe nos 255 do Supabase com 7 idiomas: nl usa o padrão até o hook de e-mail (feat/auth-email-hook)
       title: 'Bevestig je nieuwe e-mailadres',
       h1: 'Bevestig je nieuwe e-mailadres',
       body: `Je hebt gevraagd om het e-mailadres van je account te wijzigen in ${NEW_EMAIL}. Bevestig deze wijziging met de knop hieronder.`,
@@ -361,6 +388,9 @@ ${body}
 
 // Emoji no fim do assunto — existia só no painel do Supabase (achado ao colar o tcheco, 17/10/2026).
 // Fica aqui para quem colar de novo não apagar sem perceber.
+// Assunto curto em inglês (com contexto) para os idiomas fora de ASSUNTO_NATIVO (Bruno 27/11).
+const ASSUNTO_CURTO = { invite: 'RiseMe: your invitation', recovery: 'RiseMe: your password', confirmation: 'RiseMe: confirm your account', 'email-change': 'RiseMe: your new e-mail' }
+const ASSUNTO_NATIVO = ['pl', 'it']
 const EMOJI_ASSUNTO = { invite: ' 💛', recovery: ' 🙌', confirmation: ' 🖤', 'email-change': ' ✨' }
 
 const dir = dirname(fileURLToPath(import.meta.url))
@@ -375,7 +405,11 @@ for (const [name, spec] of Object.entries(TEXT)) {
   // O assunto é um campo à parte no painel ("Subject heading") — mesma lógica, numa linha
   // Limite do Supabase: assunto <= 255 caracteres (o "it" estourou o email-change em 25/10/2026) → `subject` curto
   // por idioma quando precisar, e as tags sem espaço interno ({{if …}} vale igual a {{ if … }}).
-  const subject = byLocale((l) => spec[l].subject ?? spec[l].title, Object.keys(COMMON).filter((l) => spec[l].subject === null)).replace(/\n/g, '').replace(/\{\{ /g, '{{').replace(/ \}\}/g, '}}')
+  // Assunto (Bruno 27/11): 255 caracteres não cabem 9 idiomas. Os idiomas de ASSUNTO_NATIVO têm assunto próprio; o espanhol
+  // é o padrão (else); os demais recebem um assunto curto em inglês COM contexto ("RiseMe: your password"). O corpo segue
+  // no idioma de cada uma. Idioma novo NÃO entra no assunto: entra só no corpo (COMMON/TEXT).
+  const nativos = [...ASSUNTO_NATIVO, DEFAULT_LOCALE]
+  const subject = nativos.map((l, k) => `{{${k ? 'else if' : 'if'} eq $l "${l}"}}${spec[l].subject ?? spec[l].title}`).join('') + `{{else}}${ASSUNTO_CURTO[name]}{{end}}`
   const assunto = `{{$l := or .Data.locale "${DEFAULT_LOCALE}"}}${subject}${EMOJI_ASSUNTO[name] ?? ''}`
   const tamanho = [...assunto].length
   if (tamanho > 255) estouros.push(`${name}: assunto com ${tamanho} caracteres (> 255 do Supabase)`)

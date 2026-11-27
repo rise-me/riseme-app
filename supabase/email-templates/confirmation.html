@@ -14,6 +14,8 @@
     <title>Confirm your account</title>
 {{ else if eq $l "it" }}
     <title>Conferma il tuo account</title>
+{{ else if eq $l "hi" }}
+    <title>अपना अकाउंट कन्फ़र्म करें</title>
 {{ else if eq $l "nl" }}
     <title>Bevestig je account</title>
 {{ else }}
@@ -227,6 +229,46 @@
                 </p>
                 <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
                   Con affetto,<br />Il team RiseMe
+                </p>
+              </td>
+            </tr>
+{{ else if eq $l "hi" }}
+            <tr>
+              <td style="padding:8px 40px 8px 40px;">
+                <h1 style="margin:0; font-size:28px; line-height:1.2; font-weight:800; color:#171717;">अपना अकाउंट कन्फ़र्म करें</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 8px 40px;">
+                <p style="margin:0; font-size:16px; line-height:1.6; color:#262626;">
+                  RiseMe में आपका स्वागत है! नीचे दिए बटन पर टैप करके अपना ईमेल कन्फ़र्म करें और अपना पहला चैलेंज शुरू करें।
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 8px 40px;">
+                <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup" style="display:inline-block; background-color:#171717; color:#FFFFFF; text-decoration:none; font-weight:700; font-size:16px; padding:16px 32px; border-radius:999px;">
+                  मेरा अकाउंट कन्फ़र्म करें
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 24px 40px;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  अगर बटन काम न करे, तो यह लिंक कॉपी करके अपने ब्राउज़र में खोलें:
+                </p>
+                <p style="margin:8px 0 0 0; font-size:12px; line-height:1.5; color:#171717; word-break:break-all;">
+                  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup" style="color:#171717; text-decoration:underline;">{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 40px 40px; border-top:1px solid #E8E2D5;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  अगर यह अकाउंट आपने नहीं बनाया, तो इस ईमेल को अनदेखा कर दें।
+                </p>
+                <p style="margin:16px 0 0 0; font-size:13px; line-height:1.6; color:#7A7361;">
+                  प्यार के साथ,<br />RiseMe टीम
                 </p>
               </td>
             </tr>
