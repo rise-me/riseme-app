@@ -38,6 +38,7 @@ const LOCALE_LABEL: Record<AppLocale, string> = {
   nl: 'Holandês',
   'pt-BR': 'Português',
   en: 'Inglês',
+  hi: 'Hindi',
 }
 const LOCALES = routing.locales.map((code) => ({ code, label: LOCALE_LABEL[code] }))
 

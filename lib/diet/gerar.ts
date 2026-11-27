@@ -56,12 +56,12 @@ export function momentosDoCardapio(numRefeicoes: number, incluiCafe: boolean): M
 
 /** Rótulos por momento no idioma da aluna (pro prompt; a tela usa i18n). */
 const MOMENTO_LABEL: Record<Momento, Record<AppLocale, string>> = {
-  cafe_da_manha: { es: 'Desayuno', tr: 'Kahvaltı', pl: 'Śniadanie', cs: 'Snídaně', it: 'Colazione', nl: 'Ontbijt', 'pt-BR': 'Café da manhã', en: 'Breakfast' },
-  lanche_da_manha: { es: 'Merienda de la mañana', tr: 'Kuşluk ara öğünü', pl: 'Drugie śniadanie', cs: 'Dopolední svačina', it: 'Spuntino di metà mattina', nl: 'Tussendoortje ’s ochtends', 'pt-BR': 'Lanche da manhã', en: 'Morning snack' },
-  almoco: { es: 'Almuerzo', tr: 'Öğle yemeği', pl: 'Obiad', cs: 'Oběd', it: 'Pranzo', nl: 'Lunch', 'pt-BR': 'Almoço', en: 'Lunch' },
-  lanche_da_tarde: { es: 'Merienda de la tarde', tr: 'İkindi ara öğünü', pl: 'Podwieczorek', cs: 'Odpolední svačina', it: 'Merenda', nl: 'Tussendoortje ’s middags', 'pt-BR': 'Lanche da tarde', en: 'Afternoon snack' },
-  jantar: { es: 'Cena', tr: 'Akşam yemeği', pl: 'Kolacja', cs: 'Večeře', it: 'Cena', nl: 'Avondeten', 'pt-BR': 'Jantar', en: 'Dinner' },
-  ceia: { es: 'Colación nocturna', tr: 'Gece ara öğünü', pl: 'Przekąska wieczorna', cs: 'Večerní svačina', it: 'Spuntino serale', nl: 'Avondsnack', 'pt-BR': 'Ceia', en: 'Evening snack' },
+  cafe_da_manha: { es: 'Desayuno', tr: 'Kahvaltı', pl: 'Śniadanie', cs: 'Snídaně', it: 'Colazione', nl: 'Ontbijt', 'pt-BR': 'Café da manhã', en: 'Breakfast', hi: 'नाश्ता' },
+  lanche_da_manha: { es: 'Merienda de la mañana', tr: 'Kuşluk ara öğünü', pl: 'Drugie śniadanie', cs: 'Dopolední svačina', it: 'Spuntino di metà mattina', nl: 'Tussendoortje ’s ochtends', 'pt-BR': 'Lanche da manhã', en: 'Morning snack', hi: 'सुबह का हल्का नाश्ता' },
+  almoco: { es: 'Almuerzo', tr: 'Öğle yemeği', pl: 'Obiad', cs: 'Oběd', it: 'Pranzo', nl: 'Lunch', 'pt-BR': 'Almoço', en: 'Lunch', hi: 'दोपहर का खाना' },
+  lanche_da_tarde: { es: 'Merienda de la tarde', tr: 'İkindi ara öğünü', pl: 'Podwieczorek', cs: 'Odpolední svačina', it: 'Merenda', nl: 'Tussendoortje ’s middags', 'pt-BR': 'Lanche da tarde', en: 'Afternoon snack', hi: 'शाम का नाश्ता' },
+  jantar: { es: 'Cena', tr: 'Akşam yemeği', pl: 'Kolacja', cs: 'Večeře', it: 'Cena', nl: 'Avondeten', 'pt-BR': 'Jantar', en: 'Dinner', hi: 'रात का खाना' },
+  ceia: { es: 'Colación nocturna', tr: 'Gece ara öğünü', pl: 'Przekąska wieczorna', cs: 'Večerní svačina', it: 'Spuntino serale', nl: 'Avondsnack', 'pt-BR': 'Ceia', en: 'Evening snack', hi: 'सोने से पहले हल्का खाना' },
 }
 
 const IDIOMA: Record<AppLocale, string> = {
@@ -73,6 +73,7 @@ const IDIOMA: Record<AppLocale, string> = {
   nl: 'Nederlands (holandês)',
   'pt-BR': 'português do Brasil',
   en: 'English (inglês)',
+  hi: 'हिंदी (hindi; Índia: comida vegetariana primeiro, dal, roti, sabzi)',
 }
 
 function kcalPorMomento(momentos: Momento[], kcalDia: number): Record<string, number> {

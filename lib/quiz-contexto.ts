@@ -11,10 +11,11 @@ import mapaClEs from './whatsapp-agent/quiz-cl-es.json'
 import mapaClPl from './quiz-mapas/cl-pl.json'
 import mapaClNl from './quiz-mapas/cl-nl.json'
 import mapaClIn from './quiz-mapas/cl-in.json' // CL-IN (Índia, en), 25/11: mesmas chaves da PL
+import mapaClHi from './quiz-mapas/cl-hi.json' // CL-HI (Índia, hi), 27/11: mesmas chaves da IN
 
 type Mapa = Record<string, { key: string; pergunta: string; opcoes: Record<string, string> }>
 // CL-ES-BR (camuflagem do geo-gate) tem numeração de telas diferente: fica fora até ter mapa próprio (05/11/2026).
-const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa, 'CL-PL': mapaClPl as Mapa, 'CL-NL': mapaClNl as Mapa, 'CL-IN': mapaClIn as Mapa }
+const MAPAS: Record<string, Mapa> = { 'CL-ES': mapaClEs as Mapa, 'CL-BIO': mapaClEs as Mapa, 'CL-PL': mapaClPl as Mapa, 'CL-NL': mapaClNl as Mapa, 'CL-IN': mapaClIn as Mapa, 'CL-HI': mapaClHi as Mapa }
 
 // Rótulo curto por chave: a pergunta inteira é longa demais pro perfil.
 const ROTULO: Record<string, string> = {

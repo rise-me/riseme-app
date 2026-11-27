@@ -84,6 +84,18 @@ const COPY: Record<AppLocale, Copy> = {
     changeNote: "Più avanti, se vuoi, potrai cambiarla con una tua password direttamente nell'app.",
     footer: 'Se non sei stata tu a fare questo acquisto, ignora questo messaggio.',
   },
+  hi: {
+    subject: 'RiseMe में आपका स्वागत है! आपकी लॉगिन जानकारी यहाँ है 💛',
+    preview: 'इसमें लॉगिन के लिए आपका ईमेल और पासवर्ड है।',
+    greeting: 'RiseMe में आपका स्वागत है! 💛',
+    intro: 'आपका अकाउंट तैयार है। ये रही आपकी लॉगिन जानकारी:',
+    emailLabel: 'ईमेल',
+    passwordLabel: 'पासवर्ड',
+    keepNote: 'यह पासवर्ड संभालकर रखें: हर बार लॉगिन करने के लिए इसी की ज़रूरत होगी।',
+    cta: 'ऐप खोलें',
+    changeNote: 'बाद में अपना पासवर्ड बदलना चाहें तो ऐप में ही बदल सकती हैं।',
+    footer: 'अगर यह खरीदारी आपने नहीं की है, तो इस ईमेल को अनदेखा कर दें।',
+  },
   nl: {
     subject: 'Welkom bij RiseMe! Hier zijn je inloggegevens 💛',
     preview: 'Hierin vind je je e-mailadres en wachtwoord om in te loggen.',
