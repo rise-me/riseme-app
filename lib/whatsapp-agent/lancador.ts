@@ -76,18 +76,28 @@ export async function avisarResultado(id: string, texto: string): Promise<boolea
 }
 
 // ── O que ele decidiu ────────────────────────────────────────────────────────────────────────────────────────────
-/** Nome curto para a confirmação: "AD38_H3-H2-H1_CTAU_…" → "AD38 H3-H2-H1"; "AD48_G2_G56[V21].V42.90_CALI_L" → "V42.90". */
-function curto(nome: string): string {
-  const v = nome.match(/\.(V\d+(?:\.[A-Z0-9]+)*)/)
-  if (v) return v[1]
+/**
+ * Nome curto para a confirmação: "AD38_H3-H2-H1_CTAU_…" → "AD38 H3-H2-H1"; "AD12_H1.V10_CTAU_…" → "AD12 H1.V10";
+ * "AD48_G2_G56[V21].V42.90_CALI_L" → "V42.90". Com `comAvatar`, soma a avatar ("AD15 H2 AV86") para separar irmãos.
+ * 1ª noite real (26/11): "AD12_H1.V10" saía só "V10" e dois "AD15 H2" de avatares diferentes saíam iguais.
+ */
+function curto(nome: string, comAvatar = false): string {
   const partes = nome.split('_')
-  return partes[1] && /^H\d/.test(partes[1]) ? `${partes[0]} ${partes[1]}` : partes[0]
+  if (/^AD\d/.test(partes[0]) && /^H\d/.test(partes[1] ?? '')) {
+    const av = comAvatar ? partes.find((x) => /^AV\d/.test(x) && x !== 'AV0') : undefined
+    return `${partes[0]} ${partes[1]}${av ? ` ${av}` : ''}`
+  }
+  const v = nome.match(/\.(V\d+(?:\.[A-Z0-9]+)*)/)
+  return v ? v[1] : partes[0]
 }
 function rotulo(itens: ItemLancador[], nums: number[]): string {
+  const base = itens.map((i) => curto(i.nome))
+  const repetido = new Set(base.filter((b, k) => base.indexOf(b) !== k))
+  const nomeDe = (i: ItemLancador) => curto(i.nome, repetido.has(curto(i.nome)))
   const sel = itens.filter((i) => nums.includes(i.n))
   const porOferta = new Map<string, ItemLancador[]>()
   for (const i of sel) porOferta.set(i.oferta ?? '', [...(porOferta.get(i.oferta ?? '') ?? []), i])
-  return [...porOferta.entries()].map(([of, l]) => `${l.length}${of ? ` ${of}` : ''} (${l.map((i) => `${i.n} ${curto(i.nome)}`).join(', ')})`).join(' + ')
+  return [...porOferta.entries()].map(([of, l]) => `${l.length}${of ? ` ${of}` : ''} (${l.map((i) => `${i.n} ${nomeDe(i)}`).join(', ')})`).join(' + ')
 }
 
 /**
