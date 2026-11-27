@@ -292,7 +292,9 @@
     "itLabel": "Italiano",
     "itRegion": "İtalya",
     "nlLabel": "Nederlands",
-    "nlRegion": "Hollanda ve Belçika"
+    "nlRegion": "Hollanda ve Belçika",
+    "hiLabel": "हिंदी",
+    "hiRegion": "Hindistan"
   },
   "help": {
     "title": "Yardım",

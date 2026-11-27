@@ -292,7 +292,9 @@
     "itLabel": "Italiano",
     "itRegion": "Itálie",
     "nlLabel": "Nederlands",
-    "nlRegion": "Nizozemsko a Belgie"
+    "nlRegion": "Nizozemsko a Belgie",
+    "hiLabel": "हिंदी",
+    "hiRegion": "Indie"
   },
   "help": {
     "title": "Nápověda",

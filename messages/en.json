@@ -292,7 +292,9 @@
     "itLabel": "Italiano",
     "itRegion": "Italy",
     "nlLabel": "Nederlands",
-    "nlRegion": "Netherlands & Belgium"
+    "nlRegion": "Netherlands & Belgium",
+    "hiLabel": "हिंदी",
+    "hiRegion": "India"
   },
   "help": {
     "title": "Help",
