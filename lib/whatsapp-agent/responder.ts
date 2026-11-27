@@ -7,7 +7,8 @@ import { ASSUNTOS, TODOS, classificarAssuntos, montarSystem, porAssuntoLigado, t
 import { buscarAcervo, blocoAcervo, trechosPorIds } from './acervo'
 import AULAS from './aulas-calistenia.json'
 import Anthropic from '@anthropic-ai/sdk'
-import { CONHECIMENTO } from './conhecimento'
+import { CONHECIMENTO_MODELO } from './conhecimento'
+import { FICHAS, DDI_DAS_FICHAS, aplicarFichas, fichaPorOfertaLigada, fichasDaConversa } from './ofertas'
 import MATERIAIS from './materiais.json'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 
@@ -74,7 +75,7 @@ export interface Aprendizado {
 // sem português (13–16/10: "chás", "aba", "atendimiento"); nome do dono (16/10); brinde sem trava (15/10, Bruno:
 // "se mandou o print, comentou"); cardápio extra = +1 crédito (16/10); indicação (19/10). Enxugado em 19/10/2026
 // a pedido do Bruno ("regra demais vai bugar mais ainda") — mesmas regras, sem repetição nem histórias de caso.
-export const SYSTEM = `Você é o atendimento do RiseMe no WhatsApp, falando com alunas que compraram. Você resolve (1) acesso e uso do app e
+export const SYSTEM_MODELO = `Você é o atendimento do RiseMe no WhatsApp, falando com alunas que compraram. Você resolve (1) acesso e uso do app e
 (2) dúvidas sobre o CONTEÚDO dos materiais dela (bônus e, para quem comprou, o Protocolo Metabólico), cujo texto vem no
 bloco MATERIAIS — responda com o que o material diz, concreto, citando de qual veio ("No Plano Antiinchaço, o dia 1…"). Transfira só o
 que não está nos MATERIAIS nem no CONHECIMENTO (abaixo). A aluna nunca fica sem resposta.
@@ -299,7 +300,9 @@ com esse email) → "indicacao_email" = esse email, e responda como se tivesse d
 💛 Ya te liberé 1 mes del Pase Completo: tienes todos los desafíos desbloqueados en la pestaña Desafíos." (o sistema
 confere e corrige se não achar). Sem o email da amiga → peça (""). Fora disso, "".
 
-${CONHECIMENTO}`
+${CONHECIMENTO_MODELO}`
+/** O prompt inteiro com todas as ofertas (igual ao de antes da ficha por oferta; a revisão semanal lê este). */
+export const SYSTEM = aplicarFichas(SYSTEM_MODELO, FICHAS)
 
 const FORMATO = {
   type: 'json_schema' as const,
@@ -487,6 +490,7 @@ export async function decidirResposta(params: {
   recusouTransferencia?: boolean // interno (2ª rodada): a 1ª quis transferir sem ação humana; o sistema exige a resposta
   canal?: 'email' // atendimento por e-mail (lib/email-suporte.ts, 14/11/2026): mesmas regras, com o bloco CANAL abaixo
   idiomaPadrao?: string // sem perfil e sem telefone (e-mail): idioma pelo endereço para onde ela escreveu
+  porFicha?: boolean // teste no servidor: força a ficha por oferta ligada/desligada (padrão: a chave de ofertas/index.ts)
 }): Promise<Decisao> {
   // Imagens que a aluna mandou vêm no texto como "[IMAGEM: <url>]". Só as NOVAS (depois da última fala nossa) vão
   // anexadas pro modelo ver; as antigas viram "[imagem anterior, já respondida]". Antes iam as 3 mais recentes de
@@ -551,7 +555,10 @@ export async function decidirResposta(params: {
   const cls = params.forcarAssuntos
     ? { assuntos: new Set<Assunto>(params.forcarAssuntos), certeza: '-', fonte: 'materiais', dia: params.diaAula, acervoIds: params.acervoIds ?? [] }
     : porAssuntoLigado() ? await classificarAssuntos(params.conversa, diaAtual) : { assuntos: new Set<Assunto>(TODOS), certeza: '-', fonte: 'off', dia: undefined, acervoIds: [] }
-  const { base, extra } = montarSystem(SYSTEM, cls.assuntos)
+  // Ficha por oferta (27/11/2026, ofertas/index.ts): o prompt leva só o conhecimento da(s) oferta(s) desta aluna.
+  const fichas = !(params.porFicha ?? fichaPorOfertaLigada()) ? FICHAS : fichasDaConversa({ temPerfil: Boolean(p), idioma: p?.idioma, cartao: p?.cartao ?? undefined, phone: params.phone, idiomaPadrao: params.idiomaPadrao, textos: params.conversa.filter((m) => m.autor === 'student').slice(-6).map((m) => m.texto).join(' ') })
+  const siglas = fichas.length === FICHAS.length ? 'todas' : fichas.map((f) => f.sigla).join(',') || 'nenhuma'
+  const { base, extra } = (() => { const m = montarSystem(SYSTEM_MODELO, cls.assuntos); return { base: aplicarFichas(m.base, fichas), extra: aplicarFichas(m.extra, fichas) } })()
   // Dinheiro pelo classificador (IA), não por lista de palavras (Bruno 05/11): se ele diz dinheiro e a Hotmart ainda não foi
   // consultada, consulta agora. O bloco entra no contexto abaixo.
   if (!params.hotmart && params.buscarHotmart && (cls.assuntos.has('dinheiro') || cls.assuntos.size >= ASSUNTOS.length)) {
@@ -607,7 +614,7 @@ export async function decidirResposta(params: {
     ],
   })
 
-  registrarUso(params.phone ?? 'sem-telefone', res, { assuntos: [...cls.assuntos].join(','), fonte: cls.fonte, certeza: cls.certeza }).catch(() => undefined)
+  registrarUso(params.phone ?? 'sem-telefone', res, { assuntos: [...cls.assuntos].join(','), fonte: cls.fonte, certeza: cls.certeza, fichas: siglas }).catch(() => undefined)
 
   if (res.stop_reason === 'refusal') {
     return { tipo: 'humano', texto: '', motivo: 'modelo recusou responder', consulta: { resumo: 'o modelo recusou responder esta conversa', opcaoA: '', opcaoB: '' } }
@@ -669,7 +676,7 @@ export async function decidirResposta(params: {
     out.resposta = `${out.resposta.trim()}\n\n${frasePrazo(params.perfil?.idioma ?? (idiomaPelaEscrita(falasDela(params.conversa)) ?? params.idiomaPadrao ?? idiomaPeloTelefone(params.phone)), prazoDaLista(params.agora), params.phone)}`
   }
 
-  const assuntos = `${[...cls.assuntos].join(',')} (${cls.fonte})`
+  const assuntos = `${[...cls.assuntos].join(',')} (${cls.fonte}; fichas ${siglas})`
   return out.passar_para_humano
     ? {
         tipo: 'humano',
@@ -716,7 +723,8 @@ const falasDela = (conversa: { autor: string; texto: string }[]): string => conv
 export function idiomaPeloTelefone(phone?: string): string {
   const t = (phone ?? '').replace(/\D/g, '')
   if (!t || (phone ?? '').includes('@lid')) return 'es'
-  const ddi: [string, string][] = [['48', 'pl'], ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['91', 'en'], ['31', 'nl'], ['32', 'nl'], ['597', 'nl'], ['599', 'nl'], ['297', 'nl'], ['1', 'es']]
+  // Ofertas com ficha (ofertas/index.ts) trazem o próprio DDI; o resto é das ofertas antigas sem ficha.
+  const ddi: [string, string][] = [...DDI_DAS_FICHAS, ['420', 'cs'], ['39', 'it'], ['90', 'tr'], ['40', 'ro'], ['55', 'pt-BR'], ['44', 'en'], ['1', 'es']]
   return ddi.find(([d]) => t.startsWith(d))?.[1] ?? 'es'
 }
 export function frasePrazo(idioma: string, prazo: 'hoje' | 'amanha', phone?: string): string {

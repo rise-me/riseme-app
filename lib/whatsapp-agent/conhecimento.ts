@@ -19,10 +19,15 @@ import { LINK_INDICACAO } from '@/lib/indicacao-link'
 import { COMISSAO_ES, DEGRAUS_AFILIADA_ES, LINK_AFILIACAO_ES, LINK_GUIA_AFILIADA_ES } from '@/lib/afiliadas'
 
 const LINK_PROTOCOLO = linkNormal('protocolo-metabolico') ?? '' // fonte única: lib/catalogo.ts
+import { FICHAS, MARCA_ACESSO, MARCA_DINHEIRO, aplicarFichas } from './ofertas'
+
 const PLAYLIST_ES = 'https://youtube.com/playlist?list=PLl-uPesvOUpY3Hf09FcVm6yW6269j_81d'
 const COMUNIDADE_ES = 'https://chat.whatsapp.com/KgL09RcnjaIFfyMuOv3w3b' // grupo 'Comunidad RiseMe World' (05/11/2026; antes era a comunidade Hno2…); mesma da mensagem de apoio
 
-export const CONHECIMENTO = `
+// FICHA POR OFERTA (Bruno 27/11/2026): o que é de UMA oferta (produto, preço, meio de pagamento, prazo de reembolso, idioma)
+// saiu daqui e mora em lib/whatsapp-agent/ofertas/<sigla>.ts. As duas marcas abaixo são trocadas, a cada resposta, pelas
+// fichas da oferta da aluna (ofertas/index.ts → fichasDaConversa). CONHECIMENTO = o texto com TODAS as fichas, igual ao de antes.
+export const CONHECIMENTO_MODELO = `
 # CONHECIMENTO
 
 ## O produto
@@ -56,51 +61,7 @@ só é assunto de dinheiro se for cobrança real.
   problema técnico (uma pergunta: o que aparece na tela? print) → depois transfira.
 - E-mail da compra errado (digitou errado, não usa aquele): regra CORRIGIR E-MAIL (ela confirma o novo; você troca).
 - Sem conta no número e ela manda o e-mail da compra: o sistema cria a conta pela compra Hotmart sozinho (CONTA CRIADA
-  AGORA no perfil) ou avisa que não há compra (E-MAIL SEM COMPRA). Compra pela Perfect Pay (polonês/turco) sem conta → transfira. POLONÊS DESDE 09/11/2026: a compra de 67 zł paga
-  com BLIK (ou cartão) é da STRIPE (link de pagamento), NÃO da Hotmart nem da Perfect Pay: nunca diga a ela que "não aparece
-  na Hotmart" nem cite Perfect Pay. Sem conta e com pagamento de 67 zł/BLIK → diga que o pagamento está confirmado do lado
-  dela, que o acesso chega aqui no WhatsApp e no e-mail, peça o e-mail da compra e o comprovante se ainda não mandou, e
-  transfira com AÇÃO "conferir a venda na Stripe e liberar o acesso" (o pagamento é real; não fale em golpe nem em erro dela).
-  UPSELL POLONÊS NA STRIPE (desde 13/11/2026): depois de pagar o desafio (67 zł, ou 97 zł no teste de preço), ela vê a
-  oferta do "Protokół Metaboliczny 28 Dni" (97 zł, com o bônus "Protokół Energii i Witalności"; se recusar, a mesma oferta
-  sai por 47 zł, sem o bônus). É um PAGAMENTO SEPARADO que ELA fez (novo BLIK ou cartão), não cobrança em dobro: no extrato
-  aparecem 2 cobranças RISEME. No cartão, compras desde 13/11/2026 aparecem como "RISEME* KALISTENIKA" (o desafio) e "RISEME* PROTOKOL" (o Protokół); antes disso, ou no BLIK (cada banco mostra do seu jeito), pode aparecer só "RISEME". Se ela estranhar 2 cobranças, explique isso com calma e diga o que cada uma liberou; no
-  cartão as compras da Stripe mostram o nome do produto ("Kalistenika (desafio)" ou "Protokół Metaboliczny 28 Dni"; ofertas CL-PL / CL-PL-UP1 / CL-PL-DS1) e o valor (97 zł pode ser o desafio no teste de preço OU o
-  Protokół: olhe o produto/oferta, não só o valor). O Protokół entra no app como produto próprio, na mesma conta, na aba "Dodatki" (não chega mensagem nova de acesso: ela entra com o mesmo login do desafio). Se ela
-  não quis o Protokół e pede de volta → regra COMPRA DA STRIPE (só aquele pagamento).
-  ÍNDIA (oferta CL-IN, número +91, atendimento em INGLÊS simples; no cartão a compra aparece como oferta CL-IN): o produto é
-  "The RiseMe Calisthenics Challenge (28 days)", ₹499, pagamento ÚNICO, sem assinatura, aulas em inglês, quem assina é a
-  trainer Anjali Mehta. A compra é da STRIPE (link de pagamento), paga por UPI (Google Pay, PhonePe, Paytm ou o app do banco)
-  ou por cartão: NUNCA cite Hotmart nem Perfect Pay, nunca diga que "não aparece". Sem conta e com pagamento de ₹499 → diga
-  que o pagamento está do lado dela, peça o e-mail da compra e o telefone usado no pagamento (e o comprovante/UPI reference,
-  se ainda não mandou) e transfira com AÇÃO "conferir a venda na Stripe e liberar o acesso" (o pagamento é real; não fale em
-  golpe nem em erro dela). No extrato do UPI pode aparecer o nome legal "RiseMe & CO LLC" além de "RISEME": se ela estranhar a
-  cobrança, explique que é a mesma compra. Aluna com conta em inglês (perfil "en") pode escrever em hinglish (hindi com
-  inglês): entenda e responda em inglês simples e caloroso, com kg e cm, sem gíria americana. Sem conta no +91: vale a regra
-  de IDIOMA do bloco ÍNDIA EM HINDI abaixo. Não ofereça convite de depoimento, Pase nem outros produtos.
-  ÍNDIA EM HINDI (oferta CL-HI; mesmo número +91; perfil com idioma "hi"; no cartão a compra aparece como oferta CL-HI): é o
-  MESMO desafio da CL-IN vendido em hindi: «RiseMe कैलिस्थेनिक्स चैलेंज (28 दिन)»; no app o desafio chama «घर पर कैलिस्थेनिक्स».
-  ₹499, pagamento ÚNICO, sem assinatura, aulas com áudio em HINDI, quem assina é a trainer अंजलि मेहता (Anjali Mehta). Stripe,
-  UPI ou cartão: valem TODAS as regras da CL-IN acima (nunca Hotmart nem Perfect Pay, nunca "não aparece"; sem conta e com
-  pagamento de ₹499 → pedir o e-mail da compra e o telefone do pagamento e transferir com AÇÃO "conferir a venda na Stripe e
-  liberar o acesso"; "RiseMe & CO LLC" no extrato é a mesma compra).
-  IDIOMA (perfil "hi" e quem está SEM conta no +91): responda NA ESCRITA EM QUE ELA ESCREVEU. Devanágari → devanágari de
-  conversa: palavras do dia a dia (ऐप, पासवर्ड, लॉग इन, वर्कआउट, डाइट, रिफ़ंड), NUNCA hindi formal/sânscrito; tratamento «आप»;
-  você fala como mulher, verbos no feminino («मैं भेज दूँगी», «मदद करूँगी»), e ela também é mulher («आप कर सकती हैं»); «ये/वो»;
-  ponto final «।»; o nome dela com «जी» («नेहा जी»); números, e-mail e links em letras latinas. Hinglish (hindi em letras
-  latinas: "mera password kaam nahi kar raha") → hinglish simples, também em letras latinas, com "aap" e "kijiye". Ela
-  escreveu em inglês → inglês simples. Nomes de botão do celular ficam em inglês ("Add to Home Screen", "Install app").
-  Página de reembolso dela: https://riseme.app/hi/refund. Não ofereça convite de depoimento, Pase nem outros produtos.
-  HOLANDA/BÉLGICA (oferta CL-NL; números +31, +32, +597, +599, +297; atendimento em HOLANDÊS, tratamento je/jij, falando com
-  uma mulher; no cartão a compra aparece como oferta CL-NL): o produto é "De RiseMe Calisthenics Challenge" (28 dagen); no
-  app o desafio chama "Calisthenics thuis". € 19, pagamento ÚNICO, sem assinatura ("eenmalige betaling, geen abonnement"),
-  btw incluído. A compra é da STRIPE (link de pagamento), paga por iDEAL, Bancontact, cartão ou Apple Pay; no extrato aparece
-  "RISEME* CALISTHENICS". NUNCA cite Hotmart nem Perfect Pay, nunca diga que a compra "não aparece". Sem conta e com
-  pagamento de € 19 → diga que o pagamento está do lado dela, peça o e-mail da compra e o telefone usado no pagamento (e o
-  comprovante, se ainda não mandou) e transfira com AÇÃO "conferir a venda na Stripe e liberar o acesso" (o pagamento é real;
-  não fale em golpe nem em erro dela). Rótulos do app em holandês, exatos: abas Home · Trainingen · Challenges · Menu ·
-  Extra's · Meer; ajuda em Meer → Helpcentrum; reembolso em Meer → Terugbetaling; na tela de login, "Wachtwoord vergeten?".
-  Não ofereça convite de depoimento, Pase nem outros produtos.
+  AGORA no perfil) ou avisa que não há compra (E-MAIL SEM COMPRA). Compra pela Perfect Pay (polonês/turco) sem conta → transfira.${MARCA_ACESSO}
 
 ## Dentro do app
 Abas, na ordem: es Inicio · Entrenamientos · Desafíos · Menú · Extras · Más (→ Ayuda) | pl Start · Treningi ·
@@ -306,23 +267,7 @@ feito pelo NOSSO sistema (API do produtor) funciona depois disso (fato de 09/11/
 - Depois de ordenado (Hotmart ou Perfect Pay), o reembolso volta SEMPRE pelo mesmo meio da compra: cartão → fatura atual ou
   seguinte (prazo do banco, em geral até 10 dias úteis); PayPal → conta PayPal; BLIK/Przelewy24/transferência → conta de
   origem. Nunca pedimos número de cartão nem dados bancários por e-mail ou WhatsApp.
-- STRIPE (CL-PL): o meio de pagamento e o reembolso de cada compra estão no CARTÃO DA ALUNA ("Pagamentos na Stripe"): use o
-  fato, nunca pergunte "BLIK ou cartão?". Prazo do reembolso concluído: BLIK = de 1 a 3 dias úteis (volta como crédito na
-  conta bancária ligada ao BLIK, não como "przelew na telefon"); cartão = 5 a 10 dias úteis. NUNCA diga "2 horas" para o
-  BLIK: nos 3 reembolsos BLIK acompanhados em novembro/2026 a Stripe concluiu na hora e o banco só creditou no 3º dia (as
-  3 alunas reclamaram depois de ouvir "2 horas" e as 3 receberam). Se ela diz que o reembolso BLIK não entrou: dê a data e
-  a REFERÊNCIA do banco que está no cartão e diga, com calma, que o banco costuma creditar até o 3º dia útil. Só depois de
-  3 dias úteis sem o crédito: peça que confira no extrato/app do banco com a referência e transfira para a equipe (ação:
-  abrir investigação na Stripe). Caso 16/11/2026 (aluna PL): o bot perguntou o meio e deu prazo de cartão a quem pagou com BLIK.
-- STRIPE (CL-IN e CL-HI, Índia): o meio está no CARTÃO DA ALUNA. Reembolso por UPI = até 7 dias úteis para aparecer na conta bancária
-  ligada ao UPI (o banco credita depois de a Stripe concluir; não dá para cancelar depois de pedido). NUNCA prometa "2 horas"
-  nem "instantly" (o UPI paga na hora, mas o reembolso não). Cartão indiano = depende do banco, normalmente 5 a 10 dias úteis.
-  Passou de 7 dias úteis sem o crédito por UPI, ou o cartão mostra o reembolso como FALHOU → transfira (ação: devolver por
-  outro meio / abrir investigação na Stripe); não peça dados bancários por conta própria.
-- STRIPE (CL-NL, Holanda/Bélgica): o meio está no CARTÃO DA ALUNA. Reembolso por iDEAL ou Bancontact = volta para a conta
-  bancária de onde saiu, em 5 a 10 dias úteis; cartão e Apple Pay = 5 a 10 dias úteis. NUNCA prometa "na hora" nem "2 horas".
-  Passou de 10 dias úteis sem o crédito → peça que confira o extrato e transfira (ação: abrir investigação na Stripe).
-- STRIPE, compra "em OUTRA conta" (aviso ATENÇÃO na linha do pagamento): é dela, paga do mesmo telefone, só que com o e-mail
+${MARCA_DINHEIRO}- STRIPE, compra "em OUTRA conta" (aviso ATENÇÃO na linha do pagamento): é dela, paga do mesmo telefone, só que com o e-mail
   digitado diferente no checkout do Protokół. NUNCA diga que "só vejo um pagamento" ou que a cobrança não é nossa: diga que
   achou as duas compras. Se ela quer o reembolso, vale a regra normal e o pi_ dessa linha. Se ela quer usar o produto,
   transfira com a ação "liberar o produto dessa compra na conta com que ela entra" e diga que fica pronto hoje.
@@ -356,3 +301,6 @@ Sem resposta no dinheiro, ela abre contestação no cartão (chargeback): respon
 Valor cobrado errado, chargeback, assinatura cobrada sem querer; reclamação séria, irritação, ameaça de denunciar;
 problema técnico que não resolveu com o contorno (ticket "TÉCNICO — …", ver PROBLEMAS TÉCNICOS); pergunta cuja resposta não está aqui nem nos MATERIAIS.
 `.trim()
+
+/** O conhecimento inteiro, com todas as ofertas (quem não sabe a oferta da aluna usa este). */
+export const CONHECIMENTO = aplicarFichas(CONHECIMENTO_MODELO, FICHAS)

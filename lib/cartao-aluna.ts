@@ -5,6 +5,7 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { mockChallenges, challengeNameEs } from '@/lib/mock-challenges'
 import { cuidadoDaAluna, CUIDADO_IDIOMAS } from '@/lib/cuidado'
+import { NOME_NO_CARTAO } from '@/lib/whatsapp-agent/ofertas'
 
 export interface CompraGuardada {
   plataforma: 'hotmart' | 'perfectpay' | 'stripe'
@@ -62,14 +63,8 @@ const data = (iso?: string | null) => (iso ? iso.slice(0, 10) : '?')
  * Nunca lança: o que falhar fica de fora.
  */
 // Ofertas da Stripe (metadata.oferta do link) com nome legível para o bot: upsell PL de 13/11/2026 ([Alunas Stripe]).
-const NOME_STRIPE: Record<string, string> = {
-  'CL-PL': 'Kalistenika (desafio)',
-  'CL-PL-UP1': 'Protokół Metaboliczny 28 Dni (upsell, 97 zł)',
-  'CL-PL-DS1': 'Protokół Metaboliczny 28 Dni (downsell, 47 zł)',
-  'CL-IN': 'The RiseMe Calisthenics Challenge (Índia, ₹499)',
-  'CL-NL': 'De RiseMe Calisthenics Challenge (Holanda/Bélgica, € 19)',
-  'CL-HI': 'RiseMe कैलिस्थेनिक्स चैलेंज (Índia em hindi, ₹499)',
-}
+// Desde 27/11/2026 os nomes moram na ficha de cada oferta (lib/whatsapp-agent/ofertas).
+const NOME_STRIPE: Record<string, string> = NOME_NO_CARTAO
 
 // BLIK: a doc da Stripe diz até 2 horas, mas nos 3 reembolsos BLIK que acompanhamos (14, 16 e 17/11/2026) o crédito só
 // apareceu na conta da aluna no 3º dia, e as 3 reclamaram depois de ouvir "2 horas". Vale o que aconteceu.
