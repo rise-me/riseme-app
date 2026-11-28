@@ -89,7 +89,7 @@ COMO ESCREVER
   "chás"→tés, "faixa"→rango, "aba"→pestaña, "atendimiento"→el soporte de RiseMe, "convite"→invitación, "la primera mensaje"→el primer mensaje).
 - Como uma atendente calorosa e direta; só *negrito* do WhatsApp. Emoji 1–2 por mensagem (😊 🥰 💛), sempre no FIM da frase,
   nunca em dinheiro ou reclamação. Blocos de 1–2 frases separados por linha em branco; passos um por linha; dúvida de
-  conteúdo pode ser mais longa, em blocos. UMA pergunta por vez (exceção, bateria de 27/11/2026: para ACHAR A COMPRA de quem está sem conta, peça NA MESMA mensagem o e-mail da compra E o telefone usado no pagamento; são os dois dados que localizam a venda, e pedir um de cada vez custa um dia a ela). Saudação ("Hola, Fulana") só na 1ª mensagem do dia.
+  conteúdo pode ser mais longa, em blocos. UMA pergunta por vez. Saudação ("Hola, Fulana") só na 1ª mensagem do dia.
 - LINKS sempre completos, com https:// (ex.: https://riseme.app), sozinhos na linha, sem pontuação colada.
 - MENSAGEM CURTA OU SOCIAL ("gracias", "ok", "listo", "si", "buen día", "hola" sozinha, emoji): UMA linha (despedida: uma
   linha ou só 💛; "hola" sozinha: "¡Hola! ¿En qué te ayudo? 😊"). Nunca reabra o assunto anterior nem explique o que ela
@@ -935,6 +935,35 @@ export async function interpretarRespostaResponsavel(p: {
 // Bruno, 26/11/2026: "é muito ruim no WhatsApp a minha comunicação com o bot… não tem inteligência de compreender o que eu
 // tô respondendo… às vezes eu explico de uma forma que não é 100% padronizada". Aqui só se ENTENDE; quem guarda a
 // decisão e responde é lib/whatsapp-agent/lancador.ts, e quem sobe os anúncios é o lançador (~/Ferramentas/lancador-ads).
+/**
+ * Reembolso PROMETIDO com MAIS DE UMA compra da Stripe (Bruno 28/11/2026: "pode fazer a trava das duas compras"). Bateria de
+ * 27/11: aluna com desafio + Protokół pede de volta só o Protokół; em metade das rodadas o bot escrevia "zwrot zostanie
+ * zrealizowany" sem devolver o código pi_, e a trava (reembolsos.ts → reembolsoPrometido) só cobria quem tinha UMA compra.
+ * Aqui um modelo lê a resposta e diz QUAIS compras ela afirma estar devolvendo. Na dúvida sobre qual: nenhuma.
+ */
+export async function comprasQueOTextoPromete(p: { textoBot: string; textosDela: string[]; compras: { pi: string; produto: string; valor: string }[] }): Promise<string[]> {
+  const res = await anthropic().beta.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 500,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    output_config: { effort: 'low', format: { type: 'json_schema', schema: { type: 'object', properties: { devolver: { type: 'array', items: { type: 'string' } }, certeza: { type: 'string', enum: ['alta', 'baixa'] } }, required: ['devolver', 'certeza'], additionalProperties: false } } },
+    system:
+      'Você confere UMA resposta do atendimento a uma aluna que pediu reembolso e tem mais de uma compra. Diga quais compras a RESPOSTA afirma que ' +
+      'estão sendo ou serão devolvidas agora. Regras: (1) compra que a resposta diz que "fica", "continua", "sem mudança" NÃO entra; ' +
+      '(2) resposta que só PERGUNTA qual compra, que só OFERECE ("se preferir, devolvemos") ou que pede o motivo: devolver = []; ' +
+      '(3) se a resposta promete o reembolso sem nomear o produto, vale o produto que a ALUNA nomeou nas últimas mensagens, se ela nomeou UM só; ' +
+      'se ela também não nomeou, devolver = [] e certeza = "baixa"; (4) "as duas", "tudo", "os dois pagamentos" = todas as compras; ' +
+      '(5) use SOMENTE os códigos da lista. certeza = "baixa" sempre que houver qualquer dúvida sobre QUAL compra.',
+    messages: [{ role: 'user', content: `COMPRAS DA ALUNA (código · produto · valor):\n${p.compras.map((c) => `${c.pi} · ${c.produto} · ${c.valor}`).join('\n')}\n\nÚLTIMAS MENSAGENS DA ALUNA:\n${p.textosDela.slice(-4).map((t) => `- ${t}`).join('\n')}\n\nRESPOSTA DO ATENDIMENTO:\n${p.textoBot}` }],
+  })
+  registrarUso('reembolso-prometido', res, { assuntos: 'trava-reembolso', fonte: 'trava', certeza: '-' }).catch(() => undefined)
+  const bloco = res.content.find((b) => b.type === 'text')
+  const r = JSON.parse(bloco && bloco.type === 'text' ? bloco.text : '{}') as { devolver?: string[]; certeza?: string }
+  const validos = new Set(p.compras.map((c) => c.pi))
+  return r.certeza === 'alta' ? [...new Set((r.devolver ?? []).filter((pi) => validos.has(pi)))] : []
+}
+
 export interface ItemLancador { n: number; oferta?: string; nome: string; conta?: string; orcamento?: string }
 export interface LeituraLancador { sobreALista: boolean; subir: number[]; fora: number[]; segurarTudo: boolean; observacoes: string; duvida: string }
 

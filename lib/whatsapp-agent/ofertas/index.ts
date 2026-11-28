@@ -20,7 +20,7 @@ export const FICHAS: FichaOferta[] = [clPl, clIn, clHi, clNl]
 // CHAVE. Desligada = o bot lê TODAS as fichas em toda resposta (prompt idêntico ao de antes da mudança, conferido letra a
 // letra em 27/11/2026). Ligada = só as fichas da conversa. Liga-se aqui, com o ok do Bruno depois da bateria no servidor;
 // BOT_FICHA_POR_OFERTA=on|off na Vercel vence este padrão sem deploy (para desligar na hora).
-const LIGADA_POR_PADRAO = false
+const LIGADA_POR_PADRAO = true // ligada em 28/11/2026 (Bruno: "pode ligar a chave"), depois de 2 baterias de 68 casos e A/B de 48 rodadas no servidor
 export function fichaPorOfertaLigada(): boolean {
   return (process.env.BOT_FICHA_POR_OFERTA ?? (LIGADA_POR_PADRAO ? 'on' : 'off')).toLowerCase() === 'on'
 }

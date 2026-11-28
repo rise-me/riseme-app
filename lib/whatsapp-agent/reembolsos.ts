@@ -260,7 +260,8 @@ export async function registrarPedidoReembolso(p: { phone: string; canal: 'whats
 // reembolso e não faz?"). Caso de origem: 21/11, e-mail em polonês; a compra estava no cartão, o bot escreveu "zgłaszam
 // teraz do realizacji" e NÃO devolveu o código pi_ ao sistema: nada aconteceu por 3 dias e a aluna mandou notificação formal.
 // O texto que vai para a aluna é a prova: se ele diz que o reembolso está sendo feito/encaminhado e ela pediu o dinheiro,
-// o sistema devolve a compra da Stripe dela (quando é UMA só sem reembolso; com duas, o bot pergunta qual).
+// o sistema devolve a compra da Stripe dela. UMA compra sem reembolso: devolve essa. MAIS DE UMA (28/11/2026): devolve só as
+// que o próprio texto do bot diz que está devolvendo (responder.ts → comprasQueOTextoPromete); se o texto não deixa claro qual, nada.
 const PEDE_DINHEIRO = /zwrot|zwr[oó][cć]|oddajcie|oddać pieni|pieni[ąa]dz|reembols|devoluci|devuelv|devolv|mi dinero|meu dinheiro|refund|money back|rimbors|vrácen|iade|terugbetal|geld terug/i
 const PROMETE: RegExp[] = [
   /(zwrot\w*[\s\S]{0,70}(zgłasz|zgłosz|zlec|realiz|przekaz|w trakcie|zajm|uruchom))|((zgłasz|zgłosz|zlec|przekaz|realizuj)\w*[\s\S]{0,70}zwrot)/i,
@@ -277,15 +278,19 @@ export function prometeReembolso(textoBot: string): boolean {
 }
 /**
  * Códigos pi_ que o sistema deve devolver AGORA porque o bot prometeu e não pediu. [] = nada a fazer.
- * Só quando: ela pediu o dinheiro 2 vezes (a última agora), o texto do bot promete, e a conta tem UMA compra da Stripe e nenhum reembolso.
+ * Só quando: ela pediu o dinheiro 2 vezes (a última agora), o texto do bot promete, e a conta não tem nenhum reembolso da Stripe.
  */
 export async function reembolsoPrometido(p: { userId: string | null; textoBot: string; textosDela: string[]; pisDoBot: string[] }): Promise<string[]> {
   if (!p.userId || p.pisDoBot.length || !prometeReembolso(p.textoBot)) return []
   // 2 pedidos dela (o 1º pedido tem a resposta que tira a dúvida: regra de 17/11, teste CL-PL T13) e o último é recente.
   if (p.textosDela.filter((t) => PEDE_DINHEIRO.test(t)).length < 2 || !p.textosDela.slice(-3).some((t) => PEDE_DINHEIRO.test(t))) return []
   const { admin } = await import('./conversa')
-  const { data } = await admin().from('stripe_vendas').select('payment_intent, reembolso_id').eq('user_id', p.userId).not('payment_intent', 'is', null).limit(6)
+  const { data } = await admin().from('stripe_vendas').select('payment_intent, reembolso_id, oferta, valor_centavos, moeda').eq('user_id', p.userId).not('payment_intent', 'is', null).limit(6)
   // Já existe reembolso de outra compra dela: o texto pode estar falando DAQUELE; não devolve mais nada sozinho.
   if (!data || data.some((v) => v.reembolso_id)) return []
-  return data.length === 1 ? [data[0].payment_intent as string] : []
+  if (data.length === 1) return [data[0].payment_intent as string]
+  if (data.length < 2) return []
+  const [{ NOME_NO_CARTAO }, { comprasQueOTextoPromete }] = await Promise.all([import('./ofertas'), import('./responder')])
+  const compras = data.map((v) => ({ pi: v.payment_intent as string, produto: NOME_NO_CARTAO[(v.oferta as string) ?? ''] ?? (v.oferta as string) ?? 'compra', valor: `${((v.valor_centavos as number) ?? 0) / 100} ${String(v.moeda ?? '').toUpperCase()}` }))
+  return comprasQueOTextoPromete({ textoBot: p.textoBot, textosDela: p.textosDela, compras }).catch((err) => { console.error('[reembolso-prometido] leitura das compras falhou:', err); return [] as string[] })
 }
